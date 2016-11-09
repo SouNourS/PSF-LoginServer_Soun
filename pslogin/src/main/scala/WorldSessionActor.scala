@@ -1,7 +1,9 @@
 // Copyright (c) 2016 PSForever.net to present
 import java.net.{InetAddress, InetSocketAddress}
 
-import akka.actor.{Actor, ActorRef, Cancellable, MDCContextAware}
+//import akka.actor.{Actor, ActorRef, Cancellable, MDCContextAware}
+import akka.actor.{Actor, ActorIdentity, ActorRef, Cancellable, Identify, MDCContextAware}
+import net.psforever.objects._
 import net.psforever.packet.{PlanetSideGamePacket, _}
 import net.psforever.packet.control._
 import net.psforever.packet.game._
@@ -9,6 +11,7 @@ import scodec.Attempt.{Failure, Successful}
 import scodec.bits._
 import org.log4s.MDC
 import MDCContextAware.Implicits._
+import ServiceManager.Lookup
 import net.psforever.types.ChatMessageType
 
 class WorldSessionActor extends Actor with MDCContextAware {
@@ -16,15 +19,22 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   private case class PokeClient()
 
+  var toto : Int = 0
   var sessionId : Long = 0
   var leftRef : ActorRef = ActorRef.noSender
   var rightRef : ActorRef = ActorRef.noSender
+
+  var serviceManager = Actor.noSender
+  var chatService = Actor.noSender
 
   var clientKeepAlive : Cancellable = null
 
   override def postStop() = {
     if(clientKeepAlive != null)
       clientKeepAlive.cancel()
+    val name : Int = PlayerMasterList.userDissociatesCharacter(sessionId)
+    // dev hack: normally, the actual player avatar persists a minute or so after the user disconnects
+    PlayerMasterList.removePlayer(name)
   }
 
   def receive = Initializing
@@ -35,13 +45,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
       leftRef = sender()
       rightRef = right.asInstanceOf[ActorRef]
 
+      ServiceManager.serviceManager ! Lookup("chat")
+
       context.become(Started)
-    case _ =>
-      log.error("Unknown message")
+    case msg =>
+      log.error(s"Unknown message ${msg}")
       context.stop(self)
   }
 
   def Started : Receive = {
+    case ServiceManager.LookupResult(endpoint) =>
+      chatService = endpoint
+      log.debug("Got chat service " + endpoint)
     case ctrl @ ControlPacket(_, _) =>
       handlePktContainer(ctrl)
     case game @ GamePacket(_, _, _) =>
@@ -49,6 +64,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // temporary hack to keep the client from disconnecting
     case PokeClient() =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
+    case ChatMessage(to, from, data) =>
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
     case default => failWithError(s"Invalid packet class received: $default")
   }
 
@@ -75,8 +92,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         PacketCoding.DecodePacket(innerPacket) match {
           case Failure(e) =>
+            println(pkt)
             log.error(s"Failed to decode inner packet of SlottedMetaPacket: $e")
           case Successful(v) =>
+            println(pkt)
             handlePkt(v)
         }
       case sync @ ControlSync(diff, unk, f1, f2, f3, f4, fa, fb) =>
@@ -88,8 +107,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         packets.foreach { pkt =>
           PacketCoding.DecodePacket(pkt) match {
             case Failure(e) =>
+              println(pkt)
               log.error(s"Failed to decode inner packet of MultiPacket: $e")
             case Successful(v) =>
+              println(pkt)
               handlePkt(v)
           }
         }
@@ -97,8 +118,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         packets.foreach { pkt =>
           PacketCoding.DecodePacket(pkt) match {
             case Failure(e) =>
+              println(pkt)
               log.error(s"Failed to decode inner packet of MultiPacketEx: $e")
             case Successful(v) =>
+              println(pkt)
               handlePkt(v)
           }
         }
@@ -108,8 +131,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   // XXX: hard coded ObjectCreateMessage
-  val objectHex = hex"18 57 0C 00 00 BC 84 B0  06 C2 D7 65 53 5C A1 60 00 01 34 40 00 09 70 49  00 6C 00 6C 00 6C 00 49 00 49 00 49 00 6C 00 6C  00 6C 00 49 00 6C 00 49 00 6C 00 6C 00 49 00 6C  00 6C 00 6C 00 49 00 6C 00 6C 00 49 00 84 52 70  76 1E 80 80 00 00 00 00 00 3F FF C0 00 00 00 20  00 00 0F F6 A7 03 FF FF FF FF FF FF FF FF FF FF  FF FF FF FF FF FD 90 00 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 00 01 90 01 90 00 64 00  00 01 00 7E C8 00 C8 00 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 00 00 01 C0 00 42 C5 46  86 C7 00 00 00 80 00 00 12 40 78 70 65 5F 73 61  6E 63 74 75 61 72 79 5F 68 65 6C 70 90 78 70 65  5F 74 68 5F 66 69 72 65 6D 6F 64 65 73 8B 75 73  65 64 5F 62 65 61 6D 65 72 85 6D 61 70 31 33 00  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 00 00 00 00 01 0A 23 02  60 04 04 40 00 00 10 00 06 02 08 14 D0 08 0C 80  00 02 00 02 6B 4E 00 82 88 00 00 02 00 00 C0 41  C0 9E 01 01 90 00 00 64 00 44 2A 00 10 91 00 00  00 40 00 18 08 38 94 40 20 32 00 00 00 80 19 05  48 02 17 20 00 00 08 00 70 29 80 43 64 00 00 32  00 0E 05 40 08 9C 80 00 06 40 01 C0 AA 01 19 90  00 00 C8 00 3A 15 80 28 72 00 00 19 00 04 0A B8  05 26 40 00 03 20 06 C2 58 00 A7 88 00 00 02 00  00 80 00 00 "
-
+  val objectHex = hex"18 57 0C 00 00 BC 84 B0  06 C2 D7 65 53 5C A1 60 00 01 34 40 00 09 70 49  00 6C 00 6C 00 6C 00 49 00 49 00 49 00 6C 00 6C  00 6C 00 49 00 6C 00 49 00 6C 00 6C 00 49 00 6C  00 6C 00 6C 00 49 00 6C 00 6C 00 49 00 34 52 70  76 1E 80 80 00 00 00 00 00 3F FF C0 00 00 00 20  00 00 0F F6 A7 03 FF FF FF FF FF FF FF FF FF FF  FF FF FF FF FF FD 90 00 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 00 01 90 01 90 00 64 00  00 01 00 7E C8 00 C8 00 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 00 00 01 C0 00 42 C5 46  86 C7 00 00 00 80 00 00 12 40 78 70 65 5F 73 61  6E 63 74 75 61 72 79 5F 68 65 6C 70 90 78 70 65  5F 74 68 5F 66 69 72 65 6D 6F 64 65 73 8B 75 73  65 64 5F 62 65 61 6D 65 72 85 6D 61 70 31 33 00  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 00 00 00 00 01 0A 23 02  60 04 04 40 00 00 10 00 06 02 08 14 D0 08 0C 80  00 02 00 02 6B 4E 00 82 88 00 00 02 00 00 C0 41  C0 9E 01 01 90 00 00 64 00 44 2A 00 10 91 00 00  00 40 00 18 08 38 94 40 20 32 00 00 00 80 19 05  48 02 17 20 00 00 08 00 70 29 80 43 64 00 00 32  00 0E 05 40 08 9C 80 00 06 40 01 C0 AA 01 19 90  00 00 C8 00 3A 15 80 28 72 00 00 19 00 04 0A B8  05 26 40 00 03 20 06 C2 58 00 A7 88 00 00 02 00  00 80 00 00 "
+  val tututtuuu = hex"18 57 0c 00 00 bc 84 b0  06 c2 d7 65 53 5c a1 60 00 01 34 40 00 09 70 49  00 6c 00 6c 00 6c 00 49 00 49 00 49 00 6c 00 6c  00 6c0049006c0049006c006c0049006c006c006c0049006c006c004900845270761e808000000"
   def handleGamePkt(pkt : PlanetSideGamePacket) = pkt match {
     case ConnectToWorldRequestMessage(server, token, majorVersion, minorVersion, revision, buildDate, unk) =>
 
@@ -137,68 +160,85 @@ class WorldSessionActor extends Actor with MDCContextAware {
               log.debug("Object: " + obj)
               // LoadMapMessage 13714 in mossy .gcap
               // XXX: hardcoded shit
-              sendResponse(PacketCoding.CreateGamePacket(0, LoadMapMessage("map13","home3",40100,25,true,3770441820L))) //VS Sanctuary
-              sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(13), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
+              //sendResponse(PacketCoding.CreateGamePacket(0, LoadMapMessage("map13","home3",40100,25,true,3770441820L))) //VS Sanctuary
+              sendResponse(PacketCoding.CreateGamePacket(0, LoadMapMessage("map08","z8",40100,25,true,3770441820L))) //VS Sanctuary
+              sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(5), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
               sendRawResponse(objectHex)
 
+              //hardcoded avatar and some pertinent equipment setup
+              val avatar : PlayerAvatar = PlayerAvatar(guid, "IlllIIIlllIlIllIlllIllI", PlanetSideEmpire.VS, false, 0, 0)
+              avatar.setExoSuitType(0); // Standard Exo-Suit
+              //init holsters
+              avatar.setEquipmentInHolster(0, Tool(0, 0) ) // Beamer in pistol slot 1
+              avatar.setEquipmentInHolster(2, Tool(1, 1) ) // Suppressor in rifle slot 1
+              avatar.setEquipmentInHolster(4, Tool(2, 2) ) // Force Blade in melee slot
+              avatar.setUsedHolster(0) // Start with Beamer drawn
+              //add avatar
+              PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
+
               // These object_guids are specfic to VS Sanc
-              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.VS))) //HART building C
-              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(29), PlanetSideEmpire.NC))) //South Villa Gun Tower
+              for(toto <- 0 to 1024)
+                sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(toto), PlanetSideEmpire.VS)))
+//              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.VS))) //HART building C
+//              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(29), PlanetSideEmpire.NC))) //South Villa Gun Tower
 
               sendResponse(PacketCoding.CreateGamePacket(0, TimeOfDayMessage(0, 4653056, 0, 0, 32, 65)))
               sendResponse(PacketCoding.CreateGamePacket(0, ContinentalLockUpdateMessage(PlanetSideGUID(13), PlanetSideEmpire.VS))) // "The VS have captured the VS Sanctuary."
               sendResponse(PacketCoding.CreateGamePacket(0, BroadcastWarpgateUpdateMessage(PlanetSideGUID(13), PlanetSideGUID(1), 32))) // VS Sanctuary: Inactive Warpgate -> Broadcast Warpgate
 
-              // Little job to load some data from gcap files
-              import scala.io.Source
-              val bufferedFile = Source.fromFile(".\\pslogin\\src\\main\\scala\\BuildingInfoUpdateMessage.txt")
-              for (line <- bufferedFile.getLines){
-                val SomeDataFromFile = line.split(',')
-                sendResponse(PacketCoding.CreateGamePacket(0,BuildingInfoUpdateMessage(
-                  PlanetSideGUID(SomeDataFromFile{0}.toInt),
-                  PlanetSideGUID(SomeDataFromFile{1}.toInt),
-                  SomeDataFromFile{2}.toInt,
-                  SomeDataFromFile{3}.toBoolean,
-                  PlanetSideEmpire(SomeDataFromFile{4}.toInt),
-                  SomeDataFromFile{5}.toInt,
-                  PlanetSideEmpire(SomeDataFromFile{6}.toInt),
-                  SomeDataFromFile{7}.toInt,
-                  PlanetSideGeneratorState(SomeDataFromFile{8}.toInt),
-                  SomeDataFromFile{9}.toBoolean,
-                  SomeDataFromFile{10}.toBoolean,
-                  SomeDataFromFile{11}.toInt,
-                  SomeDataFromFile{12}.toInt,
-                  SomeDataFromFile{13}.toInt,
-                  SomeDataFromFile{14}.toInt,
-                  SomeDataFromFile{15}.toBoolean,
-                  SomeDataFromFile{16}.toInt,
-                  SomeDataFromFile{17}.toBoolean,
-                  SomeDataFromFile{18}.toBoolean)))
-              }
-              bufferedFile.close()
+//               Little job to load some data from gcap files
+//              import scala.io.Source
+//              val bufferedFile = Source.fromFile(".\\pslogin\\src\\main\\scala\\BuildingInfoUpdateMessage.txt")
+//              for (line <- bufferedFile.getLines){
+//                val SomeDataFromFile = line.split(',')
+//                sendResponse(PacketCoding.CreateGamePacket(0,BuildingInfoUpdateMessage(
+//                  PlanetSideGUID(SomeDataFromFile{0}.toInt),
+//                  PlanetSideGUID(SomeDataFromFile{1}.toInt),
+//                  SomeDataFromFile{2}.toInt,
+//                  SomeDataFromFile{3}.toBoolean,
+//                  PlanetSideEmpire(SomeDataFromFile{4}.toInt),
+//                  SomeDataFromFile{5}.toInt,
+//                  PlanetSideEmpire(SomeDataFromFile{6}.toInt),
+//                  SomeDataFromFile{7}.toInt,
+//                  PlanetSideGeneratorState(SomeDataFromFile{8}.toInt),
+//                  SomeDataFromFile{9}.toBoolean,
+//                  SomeDataFromFile{10}.toBoolean,
+//                  SomeDataFromFile{11}.toInt,
+//                  SomeDataFromFile{12}.toInt,
+//                  SomeDataFromFile{13}.toInt,
+//                  SomeDataFromFile{14}.toInt,
+//                  SomeDataFromFile{15}.toBoolean,
+//                  SomeDataFromFile{16}.toInt,
+//                  SomeDataFromFile{17}.toBoolean,
+//                  SomeDataFromFile{18}.toBoolean)))
+//              }
+//              bufferedFile.close()
 
-//              sendResponse(PacketCoding.CreateGamePacket(0,BuildingInfoUpdateMessage(
-//                PlanetSideGUID(6),   //Ceryshen
-//                PlanetSideGUID(2),   //Anguta
-//                8,                   //80% NTU
-//                true,                //Base hacked
-//                PlanetSideEmpire.NC, //Base hacked by NC
-//                600000,              //10 minutes remaining for hack
-//                PlanetSideEmpire.VS, //Base owned by VS
-//                0,                   //!! Field != 0 will cause malformed packet. See class def.
-//                PlanetSideGeneratorState.Critical, //Generator critical
-//                true,                //Respawn tubes destroyed
-//                true,                //Force dome active
-//                16,                  //Tech plant lattice benefit
-//                0,
-//                0,                   //!! Field > 0 will cause malformed packet. See class def.
-//                0,
-//                false,
-//                8,                   //!! Field != 8 will cause malformed packet. See class def.
-//                true,                //Boosted spawn room pain field
-//                true)))              //Boosted generator room pain field
+              sendResponse(PacketCoding.CreateGamePacket(0,BuildingInfoUpdateMessage(
+                PlanetSideGUID(6),   //Ceryshen
+                PlanetSideGUID(2),   //Anguta
+                8,                   //80% NTU
+                false,                //Base hacked
+                PlanetSideEmpire.VS, //Base hacked by NC
+                600000,              //10 minutes remaining for hack
+                PlanetSideEmpire.VS, //Base owned by VS
+                0,                   //!! Field != 0 will cause malformed packet. See class def.
+                PlanetSideGeneratorState.Normal, //Generator critical
+                true,                //Respawn tubes destroyed
+                true,                //Force dome active
+                16,                  //Tech plant lattice benefit
+                0,
+                0,                   //!! Field > 0 will cause malformed packet. See class def.
+                0,
+                false,
+                8,                   //!! Field != 8 will cause malformed packet. See class def.
+                true,                //Boosted spawn room pain field
+                true)))              //Boosted generator room pain field
 
               sendResponse(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(guid),0,0)))
+              sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(guid), 1, 0, true, Shortcut.PERSONAL_SHIELD)))
+
+              chatService ! ChatService.Join("local")
 
               import scala.concurrent.duration._
               import scala.concurrent.ExecutionContext.Implicits.global
@@ -216,14 +256,23 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case KeepAliveMessage(code) =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
+      log.info("KeepAliveMessage: " + code)
 
     case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, unk4, unk5, unk6, unk7, unk8) =>
-      //log.info("PlayerState: " + msg)
+      log.info("PlayerStateMessageUpstream: " + msg)
 
     case msg @ ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       // TODO: Prevents log spam, but should be handled correctly
-      if (messagetype != ChatMessageType.CMT_TOGGLE_GM) {
+//      if (messagetype != ChatMessageType.CMT_TOGGLE_GM) {
         log.info("Chat: " + msg)
+//      }
+
+      if (messagetype == ChatMessageType.CMT_TELL) {
+//        sendResponse(PacketCoding.CreateGamePacket(0, LoadMapMessage("map04","z4",40100,25,true,3770441820L))) //VS Sanctuary
+//        sendRawResponse(objectHex)
+//        sendRawResponse(hex"2c 4b 00 6a 0c 00 00 00")
+//        sendRawResponse(hex"2c 4b 00 6a " ++ ByteVector.fromValidHex(contents) ++ hex"00 00 00")
+        sendRawResponse(hex"2c 4b 00 02 63 00 00 00")
       }
 
       // TODO: handle this appropriately
@@ -231,6 +280,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(DropCryptoSession())
         sendResponse(DropSession(sessionId, "user quit"))
       }
+
+//      chatService ! ChatService.NewMessage("myname", msg)
 
       // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
       // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
@@ -254,7 +305,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ ReloadMessage(item_guid, ammo_clip, unk1) =>
       log.info("Reload: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 123, unk1)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 200, unk1)))
 
     case msg @ ObjectHeldMessage(avatar_guid, held_holsters, unk1) =>
       log.info("ObjectHeld: " + msg)
@@ -300,7 +351,23 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("Hit: " + msg)
 
     case msg @ AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
+      toto += 1
+      val tata = toto * 10000000
+      sendResponse(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(avatar_guid,tata,0)))
       log.info("AvatarFirstTimeEvent: " + msg)
+
+    case msg @ WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
+      log.info("WarpgateRequest: " + msg)
+
+    case msg @ MountVehicleMsg(player_guid, vehicle_guid, seat) =>
+//      sendResponse(PacketCoding.CreateGamePacket(0, MountVehicleMsg(player_guid, vehicle_guid, seat)))
+      log.info("MounVehicleMsg: "+msg)
+
+    case msg @ AvatarGrenadeStateMessage(player_guid, state) =>
+      log.info("AvatarGrenadeStateMessage: " + msg)
+
+    case msg @ SplashHitMessage(bytes) =>
+      log.info("SplashHitMessage: " + bytes.toString)
 
     case default => log.debug(s"Unhandled GamePacket ${pkt}")
   }
