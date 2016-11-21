@@ -92,10 +92,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         PacketCoding.DecodePacket(innerPacket) match {
           case Failure(e) =>
-            println(pkt)
+//            println(pkt)
             log.error(s"Failed to decode inner packet of SlottedMetaPacket: $e")
           case Successful(v) =>
-            println(pkt)
+//            println(pkt)
             handlePkt(v)
         }
       case sync @ ControlSync(diff, unk, f1, f2, f3, f4, fa, fb) =>
@@ -107,10 +107,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         packets.foreach { pkt =>
           PacketCoding.DecodePacket(pkt) match {
             case Failure(e) =>
-              println(pkt)
+//              println(pkt)
               log.error(s"Failed to decode inner packet of MultiPacket: $e")
             case Successful(v) =>
-              println(pkt)
+//              println(pkt)
               handlePkt(v)
           }
         }
@@ -118,10 +118,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         packets.foreach { pkt =>
           PacketCoding.DecodePacket(pkt) match {
             case Failure(e) =>
-              println(pkt)
+//              println(pkt)
               log.error(s"Failed to decode inner packet of MultiPacketEx: $e")
             case Successful(v) =>
-              println(pkt)
+//              println(pkt)
               handlePkt(v)
           }
         }
