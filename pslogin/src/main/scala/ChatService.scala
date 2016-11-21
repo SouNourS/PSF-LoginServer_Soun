@@ -74,7 +74,7 @@ class ChatService extends Actor {
     case LeaveAll() =>
       chatEvents.unsubscribe(sender())
     case m @ NewMessage(from, msg) =>
-      log.info(s"NEW: ${m}")
+//      log.info(s"NEW: ${m}")
 
       msg.messageType match {
         case ChatMessageType.CMT_OPEN =>
