@@ -877,7 +877,8 @@ object Zone {
     "i4" -> Zone("Nexus", "map96", "i4"),
     "i3" -> Zone("Desolation", "map97", "i3"),
     "i2" -> Zone("Ascension", "map98", "i2"),
-    "i1" -> Zone("Extinction", "map99", "i1")
+    "i1" -> Zone("Extinction", "map99", "i1"),
+    "bo" -> Zone("Black_ops_hq","Black_ops_hq", "homebo")
   )
 
   /**
@@ -910,7 +911,8 @@ object Zone {
     "nexus" -> "i4",
     "desolation" -> "i3",
     "ascension" -> "i2",
-    "extinction" -> "i1"
+    "extinction" -> "i1",
+    "Black_ops_hq" -> "bo"
   )
   /**
     * A value used for selecting where to appear in a zone from the list of locations when the user has no indicated one.
