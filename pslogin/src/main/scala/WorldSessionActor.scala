@@ -878,7 +878,10 @@ object Zone {
     "i3" -> Zone("Desolation", "map97", "i3"),
     "i2" -> Zone("Ascension", "map98", "i2"),
     "i1" -> Zone("Extinction", "map99", "i1"),
-    "homebo" -> Zone("Black_ops_hq","Black_ops_hq", "homebo")
+    "homebo" -> Zone("Black_ops_hq","Black_ops_hq", "homebo"),
+    "station1" -> Zone("TR Station","Station1", "station1"),
+    "station2" -> Zone("NC Station","Station2", "station2"),
+    "station3" -> Zone("VS Station","Station3", "station3")
   )
 
   /**
@@ -912,7 +915,10 @@ object Zone {
     "desolation" -> "i3",
     "ascension" -> "i2",
     "extinction" -> "i1",
-    "Black_ops_hq" -> "homebo"
+    "Black_ops_hq" -> "homebo",
+    "TR-Station" -> "station1",
+    "NC-Station" -> "station2",
+    "VS-Station" -> "station3"
   )
   /**
     * A value used for selecting where to appear in a zone from the list of locations when the user has no indicated one.
@@ -971,7 +977,7 @@ object Zone {
     * @return all of the zonenames
     */
   def list : String = {
-    "zonenames: z1 - z10, home1 - home3, tzshtr, tzdrtr, c1 - c6, i1 - i4, homebo; zones are also aliased their continent name"
+    "zonenames: z1 - z10, home1 - home3, tzshtr, tzdrtr, c1 - c6, i1 - i4, homebo, station1 - station3; zones are also aliased their continent name"
   }
 
   /**
