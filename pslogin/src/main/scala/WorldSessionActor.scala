@@ -12,7 +12,8 @@ import scodec.bits._
 import org.log4s.MDC
 import MDCContextAware.Implicits._
 import ServiceManager.Lookup
-import net.psforever.types.ChatMessageType
+import net.psforever.newcodecs.newcodecs
+import net.psforever.types.{ChatMessageType, Vector3}
 import scodec.codecs._
 
 import scala.collection.mutable
@@ -583,7 +584,7 @@ object CSRZone {
     * @param traveler the player
     */
   private def help(traveler : Traveler) : Unit = {
-    CSRZone.reply(traveler, "usage: /zone <id> [warpgate] | [-list]")
+    CSRZone.reply(traveler, "usage: /zone <zone> [gatename] | [-list]")
   }
 
   /**
@@ -642,7 +643,7 @@ object CSRWarp {
     else {
       coords.slice(0, 3).foreach( x => {
         if(x < 0 || x > 8191) {
-          CSRWarp.error(traveler, "Number out of range - 0 < x < 8191, but x = "+x)
+          CSRWarp.error(traveler, "Out of range - 0 < n < 8191, but n = "+x)
           return false
        }
       })
@@ -650,7 +651,7 @@ object CSRWarp {
 
     val zone = Zone.get(traveler.zone).get //the traveler is already in the appropriate zone
     if(list && coords.isEmpty && destId.equals("")) {
-      CSRWarp.reply(traveler, Zone.listLocations(zone))
+      CSRWarp.reply(traveler, Zone.listLocations(zone)+"; "+Zone.listWarpgates(zone))
       return false
     }
     val dest : Option[(Int, Int, Int)] = if(coords.nonEmpty) Some(coords(0), coords(1), coords(2)) else Zone.getWarpLocation(zone, destId) //coords before destId
@@ -706,7 +707,7 @@ object CSRWarp {
     * @param traveler the player
     */
   private def help(traveler : Traveler) : Unit = {
-    CSRWarp.reply(traveler, "usage: /warp <location> | <x> <y> <z> | [-list]")
+    CSRWarp.reply(traveler, "usage: /warp <location> | <gatename> | <x> <y> <z> | [-list]")
   }
 
   /**
@@ -723,7 +724,7 @@ object CSRWarp {
   * `Transfer` is a functional class intended to generalize the movement of a `Traveler`.<br>
   * <br>
   * Although a specific process for manually forcing a player avatar into a certain position surely exists, it is not currently known.
-  * To sidestep this knowledge limitation, the player's avatar is destructed whenever it is moved.
+  * To sidestep this knowledge limitation, the player's avatar is deconstructed whenever it is moved.
   * It is then reconstructed in the place specified by the zone and the destination.
   * The process should be replaced (for warping, anyway) as soon as the formal methodology accepted by the client is understood.
   */
@@ -763,18 +764,19 @@ object Transfer {
     */
   private def disposeSelf(traveler : Traveler) : Unit = {
     //dispose inventory
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(76),4)))
-    // 77?
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(78),4)))
-    // 79?
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(80),4)))
-    // 81-82?
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(83),4)))
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(84),4)))
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(85),4)))
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(86),4)))
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(87),4)))
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(88),4)))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(76),4))) //beamer
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(77),4))) //beamer ammo
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(78),4))) //suppressor
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(79),4))) //suppressor ammo
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(80),4))) //forceblade
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(81),4))) //forceblade ammo
+    //TODO I know that an entity 82 "exists" but I do not know if it is safe to call delete on it
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(83),4))) //9mm ammo
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(84),4))) //9mm ammo
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(85),4))) //9mm ammo
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(86),4))) //9mm ap ammo
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(87),4))) //plasma cell
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(88),4))) //rek
     //dispose self
     traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(75),4)))
   }
@@ -782,7 +784,7 @@ object Transfer {
   /**
     * Send the packet that causes the client to load a new `Zone`.<br>
     * <br>
-    * The three latter parameters to `LoadMapMessage` certainly must do something; but, we do not care about them for now.
+    * The four latter parameters to `LoadMapMessage` certainly must do something; but, we do not care about them for now.
     * @param traveler the player
     * @param zone the `Zone` requested
     */
@@ -794,30 +796,20 @@ object Transfer {
     * Send the packets that create the avatar at a certain position in the current zone and assigns that avatar the status of "current."
     * The latter is necessary to be able to control and use that avatar on the given client.<br>
     * <br>
-    * The process in this function involves taking the static `ObjectCreateMessage` data that would create the player and disassembling it.
-    * The separated components of the data have been cut around the old coordinates of the avatar.
-    * From the `loc` the new coordinates for the position of the avatar are calculated and scaled to fit the format.
-    * (The format is a byte and a nibble, while the coordinates probably fit into two bytes.)
-    * The original data is then reconstructed around these new coordinates replacing the old coordinates.
+    * Disassemble the static `ObjectCreateMessage` data so that the existing coordinate data can be skipped over.
+    * From the `loc`, the new coordinates for the position of the avatar are calculated and then pushed into the skipped space.
     * The resulting packet is sent to the client.
+    * We have to convert all the way into a `BitVector` during the calculation process and the replace process.
+    * Stopping at only `ByteVector` would result in the data chunks being padded inappropriately.
     * @param traveler the player
     * @param loc where the player is being placed in three dimensional space
     */
   def loadSelf(traveler : Traveler, loc : (Int, Int, Int)) : Unit = {
     //calculate bit representation of modified coordinates
-    //TODO: note the scaling: 0x0000 -> 0x000 values
-    //TODO: why does the player always get "dropped" on spawning, even if the coordinates are accurate to /loc?
-    val x : BitVector = uintL(12).encode(loc._1/2).toOption.get
-    val y : BitVector = uintL(12).encode(loc._2/2).toOption.get
-    val z : BitVector = uintL(12).encode(loc._3/4).toOption.get
-    //dissect ObjectCreateMessage data portion
-    val firstPart : BitVector = traveler.player.toBitVector.take(76) //first part
-    var temp : BitVector = traveler.player.toBitVector.drop(88) //first part + 'x' were removed
-    val secondPart : BitVector = temp.take(8) //first spacer
-    temp = temp.drop(20) //first spacer and 'y' were removed
-    val thirdPart : BitVector = temp.take(8) //second spacer
-    //reconstitute ObjectCreateMessage data around new coordinates
-    temp = firstPart ++ x ++ secondPart ++ y ++ thirdPart ++ z ++ temp.drop(20) //second spacer and 'z' were removed
+    val pos : BitVector = Vector3.codec_pos.encode(Vector3(loc._1, loc._2, loc._3)).toOption.get.toByteVector.toBitVector
+    //edit in modified coordinates
+    var temp : BitVector = traveler.player.toBitVector
+    temp = temp.take(68) ++ pos ++ temp.drop(124)
     //send
     traveler.sendToSelf(temp.toByteVector)
     traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(75),0,0)))
@@ -866,8 +858,15 @@ object Zone {
     "home1" -> Zone("NC Sanctuary", "map11", "home1"),
     "home2" -> Zone("TR Sanctuary", "map12", "home2"),
     "home3" -> Zone("VS Sanctuary", "map13", "home3"),
-    "tzshtr" -> Zone("VR Shooting Range", "map14", "tzshtr"),
-    "tzdrtr" -> Zone("VR Driving Range","map15", "tzdrtr"),
+    "tzshtr" -> Zone("VR Shooting Range TR", "map14", "tzshtr"),
+    "tzdrtr" -> Zone("VR Driving Range TR","map15", "tzdrtr"),
+    "tzcotr" -> Zone("VR Combat Zone TR","map16", "tzcotr"),
+    "tzshvs" -> Zone("VR Shooting Range VS", "map14", "tzshvs"),
+    "tzdrvs" -> Zone("VR Driving Range VS","map15", "tzdrvs"),
+    "tzcovs" -> Zone("VR Combat Zone VS","map16", "tzcovs"),
+    "tzshnc" -> Zone("VR Shooting Range NC", "map14", "tzshnc"),
+    "tzdrnc" -> Zone("VR Driving Range NC","map15", "tzdrnc"),
+    "tzconc" -> Zone("VR Combat Zone NC","map16", "tzconc"),
     "c1" -> Zone("Supai", "ugd01", "c1"),
     "c2" -> Zone("Hunhau", "ugd02", "c2"),
     "c3" -> Zone("Adlivun", "ugd03", "c3"),
@@ -903,8 +902,15 @@ object Zone {
     "nc-sanctuary" -> "home1",
     "tr-sanctuary" -> "home2",
     "vs-sanctuary" -> "home3",
-    "shooting" -> "tzshtr",
-    "driving" -> "tzdrtr",
+    "tr-shooting" -> "tzshtr",
+    "tr-driving" -> "tzdrtr",
+    "tr-combat" -> "tzcotr",
+    "vs-shooting" -> "tzshvs",
+    "vs-driving" -> "tzdrvs",
+    "vs-combat" -> "tzcovs",
+    "nc-shooting" -> "tzshnc",
+    "nc-driving" -> "tzdrnc",
+    "nc-combat" -> "tzconc",
     "supai" -> "c1",
     "hunhau" -> "c2",
     "adlivun" -> "c3",
@@ -924,7 +930,7 @@ object Zone {
     * A value used for selecting where to appear in a zone from the list of locations when the user has no indicated one.
     */
   private val rand = Random
-  setup
+  setup()
 
   /**
     * An abbreviated constructor for creating `Zone`s without invocation of `new`.
@@ -977,7 +983,7 @@ object Zone {
     * @return all of the zonenames
     */
   def list : String = {
-    "zonenames: z1 - z10, home1 - home3, tzshtr, tzdrtr, c1 - c6, i1 - i4, homebo, station1 - station3; zones are also aliased their continent name"
+    "zonenames: z1 - z10, home1 - home3, tzshnc, tzdrnc, tzconc, tzshtr, tzdrtr, tzcotr, tzshvs, tzdrvs, tzcovs, c1 - c6, i1 - i4; zones are also aliased to their continent name"
   }
 
   /**
@@ -1001,7 +1007,7 @@ object Zone {
     * @return all of the warpgate keys
     */
   def listWarpgates(zone : Zone) : String = {
-    var out : String = "warpgates: "
+    var out : String = "gatenames: "
     if(zone.gates.isEmpty)
       out += "none"
     else
@@ -1284,7 +1290,20 @@ object Zone {
       )
     zones("home3").locations += "hart_c" -> (3675, 2727, 91)
     zones("tzshtr").locations += "roof" -> (499, 1568, 25)
+    zones("tzcotr").locations += "spawn" -> (960, 1002, 32)
     zones("tzdrtr").locations += (
+      "start" -> (2457, 1864, 23),
+      "air_pad" -> (1700, 1900, 32)
+      )
+    zones("tzshvs").locations += "roof" -> (499, 1568, 25)
+    zones("tzcovs").locations += "spawn" -> (960, 1002, 32)
+    zones("tzdrvs").locations += (
+      "start" -> (2457, 1864, 23),
+      "air_pad" -> (1700, 1900, 32)
+      )
+    zones("tzshnc").locations += "roof" -> (499, 1568, 25)
+    zones("tzconc").locations += "spawn" -> (960, 1002, 32)
+    zones("tzdrnc").locations += (
       "start" -> (2457, 1864, 23),
       "air_pad" -> (1700, 1900, 32)
       )
