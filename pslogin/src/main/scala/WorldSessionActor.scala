@@ -299,7 +299,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(DropSession(sessionId, "user quit"))
       }
 
-      chatService ! ChatService.NewMessage("myname", msg)
+      chatService ! ChatService.NewMessage("Player_ID_" + sessionId.toString, msg)
 
       // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
       // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
