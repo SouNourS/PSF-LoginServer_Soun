@@ -6,6 +6,7 @@ import net.psforever.packet._
 import scodec.bits._
 import scala.io.Source
 import java.io.FileWriter
+import java.io.File
 
 object Xtools {
   val FileToRead = "D:\\all-captures-07-13-16\\PSCap-2016-06-19_09-38-17-.txt"
