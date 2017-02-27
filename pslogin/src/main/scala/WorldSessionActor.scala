@@ -162,7 +162,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
     InventoryItem(ObjectClass.repeater, PlanetSideGUID((xGUID+1)), 0,
       WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+2)), 0, AmmoBoxData(20))) ::
     InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID((xGUID+3)), 2,
-      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
+      ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(1564), 1, AmmoBoxData(30)) :: Nil)) ::
+//      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
     InventoryItem(ObjectClass.chainblade, PlanetSideGUID((xGUID+5)), 4,
       WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID((xGUID+6)), 0, AmmoBoxData(1))) ::
     InventoryItem(ObjectClass.locker_container, PlanetSideGUID((xGUID+7)), 5, AmmoBoxData(1)) ::
@@ -567,7 +568,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ ChangeAmmoMessage(item_guid, unk1) =>
       log.info("ChangeAmmo: " + msg)
-//      sendResponse(PacketCoding.CreateGamePacket(0, ChangeAmmoMessage(item_guid, unk1)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(item_guid,PlanetSideGUID(1564),0)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChangeAmmoMessage(item_guid, 100)))
 
     case msg @ UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, unk9) =>
       log.info("UseItem: " + msg)
@@ -646,6 +648,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
       log.info("SquadDefinitionAction: " + msg)
+
+    case msg @ BugReportMessage(version_major,version_minor,version_date,bug_type,repeatable,location,zone,pos,summary,desc) =>
+      log.info("BugReportMessage: " + msg)
 
     case default =>
       log.debug(s"Unhandled GamePacket ${pkt}")

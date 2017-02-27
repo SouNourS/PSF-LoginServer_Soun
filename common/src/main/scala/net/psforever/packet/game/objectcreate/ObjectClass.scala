@@ -477,7 +477,8 @@ object ObjectClass {
       case ObjectClass.magcutter => WeaponData.genericCodec
       case ObjectClass.mediumtransport_weapon_systemA => WeaponData.genericCodec
       case ObjectClass.mediumtransport_weapon_systemB => WeaponData.genericCodec
-      case ObjectClass.mini_chaingun => WeaponData.genericCodec
+//      case ObjectClass.mini_chaingun => WeaponData.genericCodec
+      case ObjectClass.mini_chaingun => ConcurrentFeedWeaponData.genericCodec
       case ObjectClass.oicw => WeaponData.genericCodec
       case ObjectClass.particle_beam_magrider => WeaponData.genericCodec
       case ObjectClass.pellet_gun => WeaponData.genericCodec
