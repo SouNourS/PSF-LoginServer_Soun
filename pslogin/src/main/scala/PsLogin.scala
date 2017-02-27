@@ -1,6 +1,7 @@
 // Copyright (c) 2016 PSForever.net to present
 import java.net.InetAddress
 import java.io.File
+import java.util.Locale
 
 import akka.actor.{ActorSystem, Props}
 import ch.qos.logback.classic.LoggerContext
@@ -19,7 +20,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object PsLogin {
-  val toto = 1
   private val logger = org.log4s.getLogger
 
   var args : Array[String] = Array()
@@ -182,6 +182,7 @@ object PsLogin {
 
     val serviceManager = ServiceManager.boot
     serviceManager ! ServiceManager.Register(Props[ChatService], "chat")
+//    serviceManager ! ServiceManager.Register(Props[ChatService], "avatar")
 
     val loginServerPort = 51000
     val worldServerPort = 51001
@@ -213,6 +214,7 @@ object PsLogin {
   }
 
   def main(args : Array[String]) : Unit = {
+    Locale.setDefault(Locale.US);
     this.args = args
     run()
 

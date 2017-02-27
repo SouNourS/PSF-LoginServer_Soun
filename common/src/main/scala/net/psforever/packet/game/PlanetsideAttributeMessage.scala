@@ -1,17 +1,19 @@
 // Copyright (c) 2016 PSForever.net to present
 package net.psforever.packet.game
 
-import net.psforever.packet.{GamePacketOpcode, Marshallable, PacketHelpers, PlanetSideGamePacket}
+import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
 import scodec.Codec
 import scodec.codecs._
 
-final case class PlanetsideAttributeMessage(item_guid : PlanetSideGUID,
-                                            unk1 : Long,
-                                            beret  : Boolean,
-                                            earpiece : Boolean,
-                                            sunglasses : Boolean,
-                                            hat : Boolean,
-                                            helmet : Boolean)
+/**
+  * na
+  * @param player_guid the player
+  * @param unk2 na
+  * @param unk3 na
+  */
+final case class PlanetsideAttributeMessage(player_guid : PlanetSideGUID,
+                                            unk2 : Int,
+                                            unk3 : Long)
   extends PlanetSideGamePacket {
   type Packet = PlanetsideAttributeMessage
   def opcode = GamePacketOpcode.PlanetsideAttributeMessage
@@ -21,11 +23,7 @@ final case class PlanetsideAttributeMessage(item_guid : PlanetSideGUID,
 object PlanetsideAttributeMessage extends Marshallable[PlanetsideAttributeMessage] {
   implicit val codec : Codec[PlanetsideAttributeMessage] = (
     ("player_guid" | PlanetSideGUID.codec) ::
-      ("unk1" | uint32L) ::
-      ("beret" | bool) ::
-      ("earpiece" | bool) ::
-      ("sunglasses" | bool) ::
-      ("hat" | bool) ::
-      ("helmet" | bool)
+      ("unk2" | uint8L) ::
+      ("unk3" | uint32L)
     ).as[PlanetsideAttributeMessage]
 }

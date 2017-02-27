@@ -102,6 +102,41 @@ class LoginSessionActor extends Actor with MDCContextAware {
   }
 
   // TODO: move to global configuration or database lookup
+//  # Server Names
+//    #---------------------------------------------------------
+//
+//  # TEST SERVERS
+//  @development=Old Dev Test
+//  @staging=Staging
+//  @sdtpls-02=Public Test
+//  @sdtpls-03=I18n Test
+//  @sdtpls-04=Dev Test
+//
+//  # PUBLIC SERVERS
+//  @sdkpls-01=Markov
+//  @ablpls-01=Emerald
+//  @amspls-01=Werner
+//  @gemini=Gemini
+//
+//  @serverlocation0=Internal
+//  @serverlocation1=US West
+//  @serverlocation2=US East
+//  @serverlocation3=Europe
+//  @serverlocation4=North America
+//
+//  # Developer servers
+//  @bheinz=Dawg Pound
+//  @eswanson=Eric Swanson
+//  @apolomchak=Polomchak's Place
+//
+//  # Chinese servers
+//  @shapls-01=Solsar
+//  @shapls-02=Cyssor
+//  @shapls-03=Hossin
+//  @shapls-04=Forseral
+//  @shapls-05=Amerish
+//  @shapls-06=Searhus
+//  @shapls-07=Ceryshen
   val serverName = "PSForever"
   val serverAddress = new InetSocketAddress(LoginConfig.serverIpAddress.getHostAddress, 51001)
 
@@ -135,8 +170,8 @@ class LoginSessionActor extends Actor with MDCContextAware {
   def updateServerList() = {
     val msg = VNLWorldStatusMessage("Welcome to PlanetSide! ",
       Vector(
-        WorldInformation(serverName, WorldStatus.Up, ServerType.Released,
-          Vector(WorldConnectionInfo(serverAddress)), PlanetSideEmpire.VS)
+        WorldInformation(serverName, WorldStatus.Up, ServerType.Beta,
+          Vector(WorldConnectionInfo(serverAddress)), PlanetSideEmpire.NC)
       ))
 
     sendResponse(PacketCoding.CreateGamePacket(0, msg))

@@ -1,4 +1,5 @@
 // Copyright (c) 2016 PSForever.net to present
+import java.io.{FileWriter}
 import java.net.InetSocketAddress
 
 import akka.actor._
@@ -6,8 +7,8 @@ import org.log4s.MDC
 import scodec.bits._
 
 import scala.collection.mutable
-import MDCContextAware.Implicits._
-import akka.actor.MDCContextAware.MdcMsg
+//import MDCContextAware.Implicits._
+//import akka.actor.MDCContextAware.MdcMsg
 import akka.actor.SupervisorStrategy.Stop
 import net.psforever.packet.PacketCoding
 import net.psforever.packet.control.ConnectionClose
@@ -41,6 +42,10 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
 
   import scala.concurrent.ExecutionContext.Implicits.global
   val sessionReaper = context.system.scheduler.schedule(10 seconds, 5 seconds, self, SessionReaper())
+
+  var xActiveSession = 0
+  val FileToWrite = "xActiveSession"
+//  val FileToWrite = "/www/status.htm"
 
   val idBySocket = mutable.Map[InetSocketAddress, Long]()
   val sessionById = mutable.Map[Long, Session]()
@@ -152,6 +157,14 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
 
     log.info(s"New session ID=${id} from " + address.toString)
 
+    if(role == "World") {
+      xActiveSession += 1
+//      log.info("SessionRouter _ xActiveSession : " + xActiveSession)
+      val fw = new FileWriter(FileToWrite, false)
+      fw.write("<html><head></head><body><div class=\"servername\">PSForever Test Server</div><div class=\"location\">EU-France</div>" +
+        "<div class=\"playercount\">" + xActiveSession.toString + "</div><div class=\"status\">ON</div></body></html>")
+      fw.close()
+    }
     session
   }
 
@@ -172,6 +185,15 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
     // kill all session specific actors
     session.dropSession(graceful)
     log.info(s"Dropping session ID=${id} (reason: $reason)")
+
+    if(role == "World") {
+      xActiveSession -= 1
+//      log.info("SessionRouter _ xActiveSession : " + xActiveSession)
+      val fw = new FileWriter(FileToWrite, false)
+      fw.write("<html><head></head><body><div class=\"servername\">PSForever Test Server</div><div class=\"location\">EU-France</div>" +
+        "<div class=\"playercount\">" + xActiveSession.toString + "</div><div class=\"status\">ON</div></body></html>")
+      fw.close()
+    }
   }
 
   def newSessionId = {
