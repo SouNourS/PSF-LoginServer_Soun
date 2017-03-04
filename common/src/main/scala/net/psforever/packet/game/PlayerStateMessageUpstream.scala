@@ -22,10 +22,10 @@ import scodec.codecs._
   * @param unk3 na
   * @param is_crouching whether the player is crouched
   * @param is_jumping na
-  * @param unk5 na
+  * @param unk4 na
   * @param is_cloaking whether the player is cloaked by virtue of an Infiltration Suit
+  * @param unk5 na
   * @param unk6 na
-  * @param unk7 na
   */
 final case class PlayerStateMessageUpstream(avatar_guid : PlanetSideGUID,
                                             pos : Vector3,
@@ -37,10 +37,10 @@ final case class PlayerStateMessageUpstream(avatar_guid : PlanetSideGUID,
                                             unk3 : Int,
                                             is_crouching : Boolean,
                                             is_jumping : Boolean,
-                                            unk5 : Boolean,
+                                            unk4 : Boolean,
                                             is_cloaking : Boolean,
-                                            unk6 : Int,
-                                            unk7 : Int)
+                                            unk5 : Int,
+                                            unk6 : Int)
   extends PlanetSideGamePacket {
   type Packet = PlayerStateMessageUpstream
   def opcode = GamePacketOpcode.PlayerStateMessageUpstream
@@ -59,9 +59,9 @@ object PlayerStateMessageUpstream extends Marshallable[PlayerStateMessageUpstrea
       ("unk3" | uintL(3)) ::
       ("is_crouching" | bool) ::
       ("is_jumping" | bool) ::
-      ("unk5" | bool) ::
+      ("unk4" | bool) ::
       ("is_cloaking" | bool) ::
-      ("unk6" | uint8L) ::
-      ("unk7" | uint16L)
+      ("unk5" | uint8L) ::
+      ("unk6" | uint16L)
     ).as[PlayerStateMessageUpstream]
 }

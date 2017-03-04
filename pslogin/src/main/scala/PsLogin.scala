@@ -214,7 +214,7 @@ object PsLogin {
   }
 
   def main(args : Array[String]) : Unit = {
-    Locale.setDefault(Locale.US);
+    Locale.setDefault(Locale.US); // to have floats with dots, not comma...
     this.args = args
     run()
 

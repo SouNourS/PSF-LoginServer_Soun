@@ -17,7 +17,7 @@ import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Random, Try}
 import net.psforever.packet.game.objectcreate._
-import net.psforever.types.{ChatMessageType, PlanetSideEmpire, TransactionType, Vector3}
+import net.psforever.types.{ChatMessageType, TransactionType, PlanetSideEmpire, Vector3}
 
 class WorldSessionActor extends Actor with MDCContextAware {
   private[this] val log = org.log4s.getLogger
@@ -343,7 +343,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case KeepAliveMessage(code) =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
 
-    case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk5, is_cloaking, unk6, unk7) =>
+    case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
 //      log.info("PlayerState: " + msg)
       if(useProximityTerminal == true && vel == None){
         sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(avatar_guid, useProximityTerminalID, true)))
@@ -561,12 +561,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
 
     case msg @ ObjectDeleteMessage(object_guid, unk1) =>
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
       log.info("ObjectDelete: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
 
     case msg @ MoveItemMessage(item_guid, avatar_guid_1, avatar_guid_2, dest, unk1) =>
-      log.info("MoveItem: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(avatar_guid_1,item_guid,dest)))
+      log.info("MoveItem: " + msg)
 
     case msg @ ChangeAmmoMessage(item_guid, unk1) =>
       log.info("ChangeAmmo: " + msg)
@@ -591,7 +592,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ ItemTransactionMessage(terminal_guid, transaction_type, item_page, item_name, unk1, item_guid) =>
       log.info("ItemTransaction: " + msg)
       if(transaction_type == TransactionType.Sell) {
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(item_guid, 0)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(item_guid, 0)))
       }
       if(transaction_type == TransactionType.Buy) {
         val obj = AmmoBoxData(50)
