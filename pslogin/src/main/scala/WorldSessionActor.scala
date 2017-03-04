@@ -12,12 +12,12 @@ import scodec.bits._
 import org.log4s.MDC
 import MDCContextAware.Implicits._
 import ServiceManager.Lookup
-import net.psforever.types.{ChatMessageType, TransactionType, Vector3}
-
 import scala.collection.mutable
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Random, Try}
+import net.psforever.packet.game.objectcreate._
+import net.psforever.types.{ChatMessageType, PlanetSideEmpire, TransactionType, Vector3}
 
 class WorldSessionActor extends Actor with MDCContextAware {
   private[this] val log = org.log4s.getLogger
@@ -145,7 +145,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   val app = CharacterAppearanceData(
     Vector3(3674.8438f, 2726.789f, 91.15625f),
     32,
-    0,
+    PlanetSideEmpire.TR,
     false,
     4,
     "TestChar",
@@ -317,6 +317,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //              avatarService ! AvatarService.Join("home2")
 
               sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 1, 0, true, Shortcut.MEDKIT)))
+              sendResponse(PacketCoding.CreateGamePacket(0, ReplicationStreamMessage(5, Some(6), Vector(SquadListing(255))))) //clear squad list
 
               import scala.concurrent.duration._
               import scala.concurrent.ExecutionContext.Implicits.global
@@ -328,7 +329,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
       log.info("Handling " + msg)
 
-      sendResponse(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(3159,121,PlanetSideGUID(100),None,Some(CharacterData(CharacterAppearanceData(Vector3(3674.8438f,2726.789f,91.15625f),19,empire.id,false,4,name,0,gender.id,2,9,1,3,118,30,32896,65535,2,255,106,7,RibbonBars()),
+      sendResponse(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(3159,121,PlanetSideGUID(100),None,Some(CharacterData(CharacterAppearanceData(Vector3(3674.8438f,2726.789f,91.15625f),19,empire,false,4,name,0,gender.id,2,9,1,3,118,30,32896,65535,2,255,106,7,RibbonBars()),
         100,90,75,1,7,7,100,100,28,4,44,84,104,1900,
         List(),
         List(),
@@ -541,10 +542,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ AvatarJumpMessage(state) =>
       log.info("AvatarJump: " + msg)
 
-    case msg @ ZipLineMessage(player_guid,origin_side,action,id,unk3,unk4,unk5) =>
+    case msg @ ZipLineMessage(player_guid,origin_side,action,id,x,y,z) =>
       log.info("ZipLineMessage: " + msg)
       if(action == 0) {
-        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid,origin_side,action,id,unk3,unk4,unk5)))
+        //doing this lets you use the zip line, but you can't get off
+        //sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, id, x,y,z)))
       }
       else if(action == 1) {
         //disembark from zipline at destination?
@@ -622,7 +624,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ GenericActionMessage(action) =>
       log.info("GenericActionMessage: " + msg)
 
-    case msg @ MountVehicleMsg(player_guid, vehicle_guid, seat) =>
+    case msg @ MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
       log.info("MountVehicleMsg: "+msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid,player_guid,0)))
 
@@ -652,9 +654,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ BugReportMessage(version_major,version_minor,version_date,bug_type,repeatable,location,zone,pos,summary,desc) =>
       log.info("BugReportMessage: " + msg)
 
-    case default =>
-      log.debug(s"Unhandled GamePacket ${pkt}")
-      log.info(s"unk: ${pkt}")
+    case default => log.info(s"Unhandled GamePacket ${pkt}")
   }
 
   def failWithError(error : String) = {

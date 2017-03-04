@@ -9,6 +9,7 @@ import org.log4s.MDC
 import scodec.Attempt.{Failure, Successful}
 import scodec.bits._
 import MDCContextAware.Implicits._
+import net.psforever.types.PlanetSideEmpire
 
 import scala.concurrent.duration._
 import scala.util.Random
@@ -171,7 +172,7 @@ class LoginSessionActor extends Actor with MDCContextAware {
     val msg = VNLWorldStatusMessage("Welcome to PlanetSide! ",
       Vector(
         WorldInformation(serverName, WorldStatus.Up, ServerType.Beta,
-          Vector(WorldConnectionInfo(serverAddress)), PlanetSideEmpire.NC)
+          Vector(WorldConnectionInfo(serverAddress)), PlanetSideEmpire.TR)
       ))
 
     sendResponse(PacketCoding.CreateGamePacket(0, msg))

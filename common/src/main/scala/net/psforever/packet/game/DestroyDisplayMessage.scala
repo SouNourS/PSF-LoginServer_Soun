@@ -2,6 +2,7 @@
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PacketHelpers, PlanetSideGamePacket}
+import net.psforever.types.PlanetSideEmpire
 import scodec.Codec
 import scodec.codecs._
 
@@ -23,7 +24,13 @@ import scodec.codecs._
   * Blanking these values out does not change anything about the format of the event message.
   * In the case of absentee kills, for example, where there is no killer listed, this field has been zero'd.<br>
   * <br>
-  * The fields in between the killer section and the victim section are the method of homicide or suicide.
+  * The faction affiliation is different from the normal way `PlanetSideEmpire` values are recorded.
+  * The higher nibble will reflect the first part of the `PlanetSideEmpire` value.
+  * An extra `20` will be added if the player is in a vehicle or turret at the time.
+  * When marked as being in a vehicle or turret, the player's name will be enclosed within square brackets.
+  * The length of the player's name found at the start of the wide character string does not reflect whether or not there will be square brackets (fortunately).<br>
+  * <br>
+  * The two bytes in between the killer section and the victim section are the method of homicide or suicide.
   * The color of the resulting icon is borrowed from the attributed killer's faction affiliation if it can be determined.
   * An unidentified method defaults to a skull and crossbones icon.<br>
   * <br>
@@ -38,24 +45,23 @@ import scodec.codecs._
   * @param killer the name of the player who did the killing
   * @param killer_unk See above
   * @param killer_empire the empire affiliation of the killer
-  * @param killer_inVehicle `true`, if the killer was in a vehicle at the time of the kill
-  * @param unk na;
-  *            does not like being set to 0
+  * @param killer_inVehicle true, if the killer was in a vehicle at the time of the kill; false, otherwise
+  * @param unk na; but does not like being set to 0
   * @param method modifies the icon in the message, related to the way the victim was killed
   * @param victim the name of the player who was killed
   * @param victim_unk See above
   * @param victim_empire the empire affiliation of the victim
-  * @param victim_inVehicle `true`, if the victim was in a vehicle when he was killed
+  * @param victim_inVehicle true, if the victim was in a vehicle when he was killed; false, otherwise
   */
 final case class DestroyDisplayMessage(killer : String,
                                        killer_unk : Long,
-                                       killer_empire : Int,
+                                       killer_empire : PlanetSideEmpire.Value,
                                        killer_inVehicle : Boolean,
-                                       unk : PlanetSideGUID,
-                                       method : PlanetSideGUID,
+                                       unk : Int,
+                                       method : Int,
                                        victim : String,
                                        victim_unk : Long,
-                                       victim_empire : Int,
+                                       victim_empire : PlanetSideEmpire.Value,
                                        victim_inVehicle : Boolean
                                       )
   extends PlanetSideGamePacket {
@@ -67,14 +73,14 @@ final case class DestroyDisplayMessage(killer : String,
 object DestroyDisplayMessage extends Marshallable[DestroyDisplayMessage] {
   implicit val codec : Codec[DestroyDisplayMessage] = (
     ("killer" | PacketHelpers.encodedWideString) ::
-      ("killer_unk" | uint32L) ::
-      ("killer_empire" | uint2L) ::
+      ("killer_unk" | ulongL(32)) ::
+      ("killer_empire" | PlanetSideEmpire.codec) ::
       ("killer_inVehicle" | bool) ::
-      ("unk" | PlanetSideGUID.codec) ::
-      ("method" | PlanetSideGUID.codec) ::
+      ("unk" | uint16L) ::
+      ("method" | uint16L) ::
       ("victim" | PacketHelpers.encodedWideStringAligned(5)) ::
-      ("victim_unk" | uint32L) ::
-      ("victim_empire" | uint2L) ::
+      ("victim_unk" | ulongL(32)) ::
+      ("victim_empire" | PlanetSideEmpire.codec) ::
       ("victim_inVehicle" | bool)
     ).as[DestroyDisplayMessage]
 }
