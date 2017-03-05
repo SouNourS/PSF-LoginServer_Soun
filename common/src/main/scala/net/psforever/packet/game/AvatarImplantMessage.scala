@@ -1,14 +1,34 @@
 // Copyright (c) 2016 PSForever.net to present
 package net.psforever.packet.game
 
-import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
+import net.psforever.packet.{GamePacketOpcode, Marshallable, PacketHelpers, PlanetSideGamePacket}
 import scodec.Codec
 import scodec.codecs._
 
 /**
-  * na
+  * An `Enumeration` of the available implants.
+  */
+object ImplantType extends Enumeration {
+  type Type = Value
+  val AdvancedRegen,
+      Targeting,
+      AudioAmplifier,
+      DarklightVision,
+      MeleeBooster,
+      PersonalShield,
+      RangeMagnifier,
+      Unknown7,
+      SilentRun,
+      Surge = Value
+
+  implicit val codec = PacketHelpers.createEnumerationCodec(this, uint4L)
+}
+
+/**
+  * Change the state of the implant.<br>
+  * Write better comments.
   * <br>
-  * Unk3:<br>
+  * Implant:<br>
   * `
   * 00 - Regeneration (advanced_regen)<br>
   * 01 - Enhanced Targeting (targeting)<br>
@@ -17,7 +37,7 @@ import scodec.codecs._
   * 04 - Melee Booster (melee_booster)<br>
   * 05 - Personal Shield (personal_shield)<br>
   * 06 - Range Magnifier (range_magnifier)<br>
-  * 07 - None<br>
+  * 07 - `None`<br>
   * 08 - Sensor Shield (silent_run)<br>
   * 09 - Surge (surge)<br>
   * `
@@ -32,7 +52,7 @@ import scodec.codecs._
 final case class AvatarImplantMessage(player_guid : PlanetSideGUID,
                                       unk1 : Int,
                                       unk2 : Int,
-                                      implant : Int)
+                                      implant : ImplantType.Value)
   extends PlanetSideGamePacket {
   type Packet = AvatarImplantMessage
   def opcode = GamePacketOpcode.AvatarImplantMessage
@@ -44,6 +64,6 @@ object AvatarImplantMessage extends Marshallable[AvatarImplantMessage] {
     ("player_guid" | PlanetSideGUID.codec) ::
       ("unk1" | uintL(3)) ::
       ("unk2" | uint2L) ::
-      ("implant" | uint4L)
+      ("implant" | ImplantType.codec)
     ).as[AvatarImplantMessage]
 }

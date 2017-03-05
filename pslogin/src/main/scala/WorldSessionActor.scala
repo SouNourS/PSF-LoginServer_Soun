@@ -616,6 +616,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
       log.info("Hit: " + msg)
 
+    case msg @ SplashHitMessage(unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8) =>
+      log.info("SplashHitMessage: " + msg)
+
     case msg @ AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
       log.info("AvatarFirstTimeEvent: " + msg)
 
@@ -628,9 +631,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
       log.info("MountVehicleMsg: "+msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid,player_guid,0)))
-
-    case msg @ SplashHitMessage(bytes) =>
-      log.info("SplashHitMessage: " + bytes.toString)
 
     case msg @ WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
       log.info("WarpgateRequest: " + msg)
@@ -655,7 +655,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ BugReportMessage(version_major,version_minor,version_date,bug_type,repeatable,location,zone,pos,summary,desc) =>
       log.info("BugReportMessage: " + msg)
 
+    case msg @ BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
+      log.info("BindPlayerMessage: " + msg)
+
     case default => log.info(s"Unhandled GamePacket ${pkt}")
+
   }
 
   def failWithError(error : String) = {
