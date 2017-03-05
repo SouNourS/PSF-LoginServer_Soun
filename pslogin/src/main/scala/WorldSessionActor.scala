@@ -635,9 +635,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
       log.info("WarpgateRequest: " + msg)
 
-    case msg @ GenericCollisionMsg(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
-      log.info("GenericCollision: "+msg)
-
     case msg @ PlanetsideAttributeMessage(avatar_guid, unk2, unk3) =>
       log.info("PlanetsideAttributeMessage: "+msg)
       sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, unk2, unk3)))
@@ -652,6 +649,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
       log.info("SquadDefinitionAction: " + msg)
 
+    case msg @ GenericCollisionMsg(unk1, player, target, player_health, target_health, player_velocity, target_velocity, player_pos, target_pos, unk2, unk3, unk4) =>
+      log.info("Ouch! " + msg)
+
     case msg @ BugReportMessage(version_major,version_minor,version_date,bug_type,repeatable,location,zone,pos,summary,desc) =>
       log.info("BugReportMessage: " + msg)
 
@@ -659,7 +659,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("BindPlayerMessage: " + msg)
 
     case default => log.info(s"Unhandled GamePacket ${pkt}")
-
   }
 
   def failWithError(error : String) = {
