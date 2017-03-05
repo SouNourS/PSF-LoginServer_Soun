@@ -593,6 +593,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("ItemTransaction: " + msg)
       if(transaction_type == TransactionType.Sell) {
         sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(item_guid, 0)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ItemTransactionResultMessage(terminal_guid, transaction_type, true)))
       }
       if(transaction_type == TransactionType.Buy) {
         val obj = AmmoBoxData(50)

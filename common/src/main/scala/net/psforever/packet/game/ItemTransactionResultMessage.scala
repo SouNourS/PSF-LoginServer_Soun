@@ -9,7 +9,7 @@ import scodec.codecs._
 final case class ItemTransactionResultMessage(terminal_guid : PlanetSideGUID,
                                               transaction_type : TransactionType.Value,
                                               success : Boolean,
-                                              error_code : Int)
+                                              error_code : Int = 0)
   extends PlanetSideGamePacket {
   type Packet = ItemTransactionResultMessage
   def opcode = GamePacketOpcode.ItemTransactionResultMessage
