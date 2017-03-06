@@ -228,11 +228,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
               val home2 = Zone.get("home2").get
               Transfer.loadMap(traveler, home2)
               Transfer.loadSelf(traveler, Zone.selectRandom(home2))
+              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(guid,54,15))) // aura effect
 //              sendResponse(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(guid,100000000,0)))
               sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_BROADCAST,true,"", "Welcome! The commands '/zone' and '/warp' are available for use.", None)))
               sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_BROADCAST,true,"", "You can use /fly on (or off) to fly, or /speed X (x from 1 to 5) to run !", None)))
               sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_BROADCAST,true,"", "You can use local or squad chat (both are sync) !", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_BROADCAST,true,"", "Change continent will reset your inventory and unstuck you if you are on a zipline/wallturret !", None)))
+              sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_BROADCAST,true,"", "Change continent will reset your inventory and unstuck you if you are on a zipline/wallturret/implant box !", None)))
               sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_EXPANSIONS,true,"", "1 on", None)))
 
 
@@ -316,6 +317,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
               chatService ! ChatService.Join("squad")
 //              avatarService ! AvatarService.Join("home2")
 
+//              -> Successful(CreateShortcutMessage(PlanetSideGUID(6396),5,0,true,Some(Shortcut(2,targeting,,))))
+//              -> Successful(CreateShortcutMessage(PlanetSideGUID(6396),7,0,true,Some(Shortcut(1,shortcut_macro,hak,/l \#5 !!!!!!ADV HACK!!!!! \#7 COVER ME!!))))
+              sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 2, 0, true, Some(Shortcut(1,"shortcut_macro","f_1","/fly on")))))
+              sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 3, 0, true, Some(Shortcut(1,"shortcut_macro","f_0","/fly off")))))
+              sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 4, 0, true, Some(Shortcut(1,"shortcut_macro","s1","/speed 1")))))
+              sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 5, 0, true, Some(Shortcut(1,"shortcut_macro","s2","/speed 2")))))
+              sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 6, 0, true, Some(Shortcut(1,"shortcut_macro","s3","/speed 3")))))
+              sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 7, 0, true, Some(Shortcut(1,"shortcut_macro","s4","/speed 4")))))
+              sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 8, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
               sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 1, 0, true, Shortcut.MEDKIT)))
               sendResponse(PacketCoding.CreateGamePacket(0, ReplicationStreamMessage(5, Some(6), Vector(SquadListing(255))))) //clear squad list
 
@@ -347,6 +357,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      log.info("PlayerState: " + msg)
       if(useProximityTerminal == true && vel == None){
         sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(avatar_guid, useProximityTerminalID, true)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,100)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,2,100)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,4,100)))
       }
       if(useProximityTerminal == true && vel != None) {
         useProximityTerminal = false
@@ -380,6 +393,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, "TestChar", contents, note_contents)))
 
 //      if(messagetype == ChatMessageType.CMT_OPEN) {
+//        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),contents.toInt,1000)))
 //        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(4717), 0)))
 //        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(5398), 0)))
 ////        val msg = ObjectCreateMessage(0,contents.toInt,PlanetSideGUID(4717),Some(ObjectCreateMessageParent(PlanetSideGUID(15000),1)),Some(WeaponData(7,InternalSlot(540,PlanetSideGUID(5398),0,AmmoBoxData(1)))))
@@ -391,6 +405,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      }
 
 //      if(messagetype == ChatMessageType.CMT_TELL) {
+//        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),recipient.toInt,contents.toInt)))
 //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagSpawned^@amp_station~^@Pwyll~^@comm_station_dsp~^@Bel~^15~",None)))
 //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagPickedUp^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
 //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagDropped^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
@@ -580,6 +595,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // TODO: Not all incoming UseItemMessage's respond with another UseItemMessage (i.e. doors only send out GenericObjectStateMsg)
       sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, unk9)))
       if(unk1 != 0){ // TODO : medkit use ?!
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,100)))
         sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2)))
       } else {
         // TODO: This should only actually be sent to doors upon opening; may break non-door items upon use
@@ -636,9 +652,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
       log.info("WarpgateRequest: " + msg)
 
-    case msg @ PlanetsideAttributeMessage(avatar_guid, unk2, unk3) =>
+    case msg @ PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
       log.info("PlanetsideAttributeMessage: "+msg)
-      sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, unk2, unk3)))
+      sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
 
     case msg @ ProximityTerminalUseMessage(player_guid, object_guid, unk) =>
       log.info("ProximityTerminalUseMessage: "+msg)
@@ -652,6 +668,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ GenericCollisionMsg(unk1, player, target, player_health, target_health, player_velocity, target_velocity, player_pos, target_pos, unk2, unk3, unk4) =>
       log.info("Ouch! " + msg)
+      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(player,0,50)))
+      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(player,2,50)))
+      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(player,4,50)))
 
     case msg @ BugReportMessage(version_major,version_minor,version_date,bug_type,repeatable,location,zone,pos,summary,desc) =>
       log.info("BugReportMessage: " + msg)
@@ -1098,8 +1117,19 @@ object Transfer {
     //send
     traveler.sendToSelf(temp.toByteVector)
     traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(traveler.xxGUID),0,0)))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 1, 0, true, Shortcut.MEDKIT)))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 2, 0, true, Some(Shortcut(1,"shortcut_macro","f_1","/fly on")))))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 3, 0, true, Some(Shortcut(1,"shortcut_macro","f_0","/fly off")))))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 4, 0, true, Some(Shortcut(1,"shortcut_macro","s1","/speed 1")))))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 5, 0, true, Some(Shortcut(1,"shortcut_macro","s2","/speed 2")))))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 6, 0, true, Some(Shortcut(1,"shortcut_macro","s3","/speed 3")))))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 7, 0, true, Some(Shortcut(1,"shortcut_macro","s4","/speed 4")))))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 8, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
 
-    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(PlanetSideGUID(traveler.xxGUID),100000000,0)))
+//    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(PlanetSideGUID(traveler.xxGUID),100000000,0))) // br40
+//    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),18,1000000))) // cr5
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),35,40))) // cr5
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),36,5))) // cr5
 
 
 //    val app1 = CharacterAppearanceData(
