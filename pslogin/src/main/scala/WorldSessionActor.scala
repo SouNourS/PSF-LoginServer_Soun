@@ -2,7 +2,6 @@
 //import java.net.{InetAddress, InetSocketAddress}
 
 import net.psforever.packet.game.objectcreate._
-
 import akka.actor.{Actor, ActorIdentity, ActorRef, Cancellable, Identify, MDCContextAware}
 import net.psforever.packet.{PlanetSideGamePacket, _}
 import net.psforever.packet.control._
@@ -12,6 +11,7 @@ import scodec.bits._
 import org.log4s.MDC
 import MDCContextAware.Implicits._
 import ServiceManager.Lookup
+import net.psforever.objects._
 import net.psforever.types.{ChatMessageType, TransactionType, Vector3}
 
 import scala.collection.mutable
@@ -43,6 +43,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
   override def postStop() = {
     if(clientKeepAlive != null)
       clientKeepAlive.cancel()
+    val name : Int = PlayerMasterList.userDissociatesCharacter(sessionId)
+    // dev hack: normally, the actual player avatar persists a minute or so after the user disconnects
+    PlayerMasterList.removePlayer(name)
   }
 
   def receive = Initializing
@@ -225,6 +228,23 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
               sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(13), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
 
+
+
+              //hardcoded avatar and some pertinent equipment setup
+              val avatar : PlayerAvatar = PlayerAvatar(sessionId.toInt, "IlllIIIlllIlIllIlllIllI", PlanetSideEmpire.VS, false, 0, 0)
+              avatar.setExoSuitType(0); // Standard Exo-Suit
+              //init holsters
+              avatar.setEquipmentInHolster(0, Tool(0, 0) ) // Beamer in pistol slot 1
+              avatar.setEquipmentInHolster(2, Tool(1, 1) ) // Suppressor in rifle slot 1
+              avatar.setEquipmentInHolster(4, Tool(2, 2) ) // Force Blade in melee slot
+              avatar.setUsedHolster(0) // Start with Beamer drawn
+              //add avatar
+              PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
+
+
+
+
+
               val home2 = Zone.get("home2").get
               Transfer.loadMap(traveler, home2)
               Transfer.loadSelf(traveler, Zone.selectRandom(home2))
@@ -310,6 +330,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 true,                //Boosted spawn room pain field
                 true)))              //Boosted generator room pain field
 
+              PlayerMasterList.userClaimsCharacter(sessionId, sessionId.toInt) // ... we do this when sending a SetCurrentAvatarMessa
               sendResponse(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(guid,0,0)))
 
               chatService ! ChatService.Join("local")
@@ -350,6 +371,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(useProximityTerminal == true && vel != None) {
         useProximityTerminal = false
         sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(PlanetSideGUID(0), useProximityTerminalID, false)))
+      }
+      val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
+      if(playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        player.setPosition(pos)
+        player.setPitch(aim_pitch)
+        player.crouched = is_crouching
       }
 //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14000), Vector3(pos.x + 2.5f,pos.y + 2.5f,pos.z), vel,
 //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, true, is_cloaking)))
@@ -537,6 +565,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      sendResponse(PacketCoding.CreateGamePacket(0,ObjectHeldMessage(PlanetSideGUID(14020), held_holsters, unk1)))
 //      if(held_holsters != 2) sendResponse(PacketCoding.CreateGamePacket(0,ObjectHeldMessage(PlanetSideGUID(14030), held_holsters, unk1)))
 //      sendResponse(PacketCoding.CreateGamePacket(0,ObjectHeldMessage(PlanetSideGUID(14040), held_holsters, unk1)))
+      val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
+      if(playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        player.setUsedHolster(held_holsters)
+      }
+
 
     case msg @ AvatarJumpMessage(state) =>
       log.info("AvatarJump: " + msg)

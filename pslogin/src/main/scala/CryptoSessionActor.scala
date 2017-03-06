@@ -257,7 +257,7 @@ class CryptoSessionActor extends Actor with MDCContextAware {
               case default => failWithError(s"Unexpected packet type $default in state Established")
 
             }
-          case Failure(e) => log.error("Could not decode raw packet: " + e)
+          case Failure(e) => log.error("Could not decode raw packet: " + e + " " + msg)
         }
       }
     case api : CryptoSessionAPI =>
