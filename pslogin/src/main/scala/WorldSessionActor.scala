@@ -228,7 +228,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               val home2 = Zone.get("home2").get
               Transfer.loadMap(traveler, home2)
               Transfer.loadSelf(traveler, Zone.selectRandom(home2))
-              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(guid,54,15))) // aura effect
+//              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(guid,54,15))) // aura effect
 //              sendResponse(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(guid,100000000,0)))
               sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_BROADCAST,true,"", "Welcome! The commands '/zone' and '/warp' are available for use.", None)))
               sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_BROADCAST,true,"", "You can use /fly on (or off) to fly, or /speed X (x from 1 to 5) to run !", None)))
