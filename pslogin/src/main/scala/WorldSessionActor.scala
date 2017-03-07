@@ -1,5 +1,5 @@
-// Copyright (c) 2016 PSForever.net to present
-//import java.net.{InetAddress, InetSocketAddress}
+// Copyright (c) 2017 PSForever
+import java.net.{InetAddress, InetSocketAddress}
 
 import net.psforever.packet.game.objectcreate._
 
@@ -636,6 +636,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ WeaponDryFireMessage(weapon_guid) =>
       log.info("WeaponDryFireMessage: " + msg)
+
+    case msg @ WeaponLazeTargetPositionMessage(weapon, pos1, pos2) =>
+      log.info("Lazing position: " + pos2.toString)
 
     case msg @ HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
       log.info("Hit: " + msg)
