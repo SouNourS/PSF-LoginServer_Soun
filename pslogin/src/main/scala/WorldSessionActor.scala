@@ -93,8 +93,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   def handlePktContainer(pkt : PlanetSidePacketContainer) : Unit = pkt match {
     case ctrl @ ControlPacket(opcode, ctrlPkt) =>
+//      println(pkt)
       handleControlPkt(ctrlPkt)
     case game @ GamePacket(opcode, seq, gamePkt) =>
+//      println(pkt)
       handleGamePkt(gamePkt)
     case default => failWithError(s"Invalid packet container class received: $default")
   }
@@ -368,19 +370,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14000), Vector3(pos.x + 2.5f,pos.y + 2.5f,pos.z), vel,
 //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, true, is_cloaking)))
 //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14010), Vector3(pos.x - 2.5f,pos.y - 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk5, is_cloaking)))
+//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
 //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14020), Vector3(pos.x - 2.5f,pos.y + 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk5, is_cloaking)))
+//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
 //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14030), Vector3(pos.x + 2.5f,pos.y - 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk5, is_cloaking)))
+//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
 //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14040), Vector3(pos.x + 0.0f,pos.y - 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk5, is_cloaking)))
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14050), Vector3(3127.0f, 2882.0f, 35.0f), None,
-//        64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk5, is_cloaking)))
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14060), Vector3(3127.0f, 2880.0f, 35.0f), None,
-//        64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk5, is_cloaking)))
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14070), Vector3(3127.0f, 2884.0f, 35.0f), None,
-//        64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, true, is_cloaking)))
+//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
+      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14050), Vector3(3127.0f, 2882.0f, 35.21875f), None,
+        64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
+      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14060), Vector3(3127.0f, 2880.0f, 35.21875f), None,
+        64, aim_pitch, unk2, seq_time, is_crouching, false, unk4, is_cloaking)))
+      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14070), Vector3(3127.0f, 2884.0f, 35.21875f), None,
+        64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
 
 //      avatarService ! AvatarService.PlayerStateMessage(msg)
 
@@ -559,15 +561,20 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ ZipLineMessage(player_guid,origin_side,action,id,x,y,z) =>
       log.info("ZipLineMessage: " + msg)
-      if(action == 0) {
-        //doing this lets you use the zip line, but you can't get off
-        //sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, id, x,y,z)))
+      if(origin_side == false && action == 0) {
+        //doing this lets you use the zip line in one direction, cant come back
+        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, id, x,y,z)))
       }
-      else if(action == 1) {
-        //disembark from zipline at destination?
+      else if(origin_side == false && action == 1) {
+        //disembark from zipline at destination !
+        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, 0, x,y,z)))
       }
-      else if(action == 2) {
+      else if(origin_side == false && action == 2) {
         //get off by force
+        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, 0, x,y,z)))
+      }
+      else if(origin_side == true && action == 0) {
+        // for teleporters & one other zipline direction
       }
 
     case msg @ RequestDestroyMessage(object_guid) =>
@@ -647,7 +654,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
       log.info("MountVehicleMsg: "+msg)
+      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(vehicle_guid,0,1000)))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid,player_guid,0)))
+
+    case msg @ DismountVehicleMsg(player_guid,u1,u2) =>
+      log.info("DismountVehicleMsg: "+msg)
+      sendResponse(PacketCoding.CreateGamePacket(0, DismountVehicleMsg(player_guid,u1,true)))
 
     case msg @ WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
       log.info("WarpgateRequest: " + msg)
@@ -1205,38 +1217,41 @@ object Transfer {
 //    val objectHex6 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14040), obj5)
 //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex6))
 
-//    val app6 = CharacterAppearanceData(
-//      Vector3(3127.0f, 2882.0f, 35.0f), 64,1,false,4,"MAX NC",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-//    val inv6 =
-//      InventoryItem(ObjectClass.TEMP730, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-////        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-//      Nil
-//    val obj6 = CharacterData(app6, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-//      InventoryData(true, false, false, inv6)    )
-//    val objectHex7 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14050), obj6)
-//    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex7))
+    val app6 = CharacterAppearanceData(
+      Vector3(3127.0f, 2882.0f, 35.21875f), 64,PlanetSideEmpire.NC,false,4,"MAX NC",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+    val inv6 =
+      InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+//        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+      Nil
+    val obj6 = CharacterData(app6, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+      InventoryData(true, false, false, inv6)    )
+    val objectHex7 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14050), obj6)
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex7))
 
-//    val app7 = CharacterAppearanceData(
-//      Vector3(3127.0f, 2880.0f, 35.0f), 64,0,false,4,"MAX TR",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-//    val inv7 =
-//      InventoryItem(ObjectClass.TEMP730, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-//        //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-//        Nil
-//    val obj7 = CharacterData(app7, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-//      InventoryData(true, false, false, inv7)    )
-//    val objectHex8 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14060), obj7)
-//    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex8))
+    val app7 = CharacterAppearanceData(
+      Vector3(3127.0f, 2880.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+    val inv7 =
+      InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+        //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+        Nil
+    val obj7 = CharacterData(app7, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+      InventoryData(true, false, false, inv7)    )
+    val objectHex8 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14060), obj7)
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex8))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),19,1)))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),35,40)))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),36,5)))
 
-//    val app8 = CharacterAppearanceData(
-//      Vector3(3127.0f, 2884.0f, 35.0f), 64,0,false,4,"MAX TR 2",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-//    val inv8 =
-//      InventoryItem(ObjectClass.TEMP730, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-//        //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-//        Nil
-//    val obj8 = CharacterData(app8, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-//      InventoryData(true, false, false, inv8)    )
-//    val objectHex9 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14070), obj8)
-//    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex9))
+    val app8 = CharacterAppearanceData(
+      Vector3(3127.0f, 2884.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR 2",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+    val inv8 =
+      InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+        //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+        Nil
+    val obj8 = CharacterData(app8, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+      InventoryData(true, false, false, inv8)    )
+    val objectHex9 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14070), obj8)
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex9))
 
 
 //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.TEMP697,PlanetSideGUID(446),None,None))) // prowler
@@ -1279,6 +1294,11 @@ object Transfer {
     traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,41))) // Engineering
     traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,42))) // Combat Engineering
     traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,45))) // Advanced Engineering
+
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(traveler.xxGUID),0,0)))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(traveler.xxGUID),2,0,ImplantType.Targeting)))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(traveler.xxGUID),2,1,ImplantType.DarklightVision)))
+    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(traveler.xxGUID),2,2,ImplantType.Surge)))
   }
 
   /**
