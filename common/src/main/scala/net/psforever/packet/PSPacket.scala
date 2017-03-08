@@ -207,7 +207,6 @@ object PacketHelpers {
     * @see codec\package.scala, listOfN
     * @return a codec that works on a List of A
     */
-
   def listOfNAligned[A](countCodec : Codec[Long], alignment : Int, valueCodec : Codec[A]) : Codec[List[A]] = {
     countCodec.
       flatZip { count => new AlignedListCodec(countCodec, valueCodec, alignment, Some(count)) }.

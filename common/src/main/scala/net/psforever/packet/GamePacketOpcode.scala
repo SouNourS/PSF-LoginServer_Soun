@@ -7,7 +7,6 @@ import scodec.codecs._
 
 import scala.annotation.switch
 
-
 /**
   * The master list of Game packet opcodes that have been discovered in the PlanetSide client.
   *
@@ -349,7 +348,7 @@ object GamePacketOpcode extends Enumeration {
 //    case 0x17 => noDecoder(ObjectCreateMessage_Duplicate)
     case 0x17 => game.ObjectCreateMessage.decode
 
-    // 0x18
+   // 0x18
     case 0x18 => game.ObjectCreateMessage.decode
     case 0x19 => game.ObjectDeleteMessage.decode
     case 0x1a => game.PingMsg.decode
