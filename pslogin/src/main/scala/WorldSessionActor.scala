@@ -232,20 +232,31 @@ class WorldSessionActor extends Actor with MDCContextAware {
               sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(13), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
 
 
-
+              println(app.name)
               //hardcoded avatar and some pertinent equipment setup
-              val avatar : PlayerAvatar = PlayerAvatar(sessionId.toInt, "IlllIIIlllIlIllIlllIllI", PlanetSideEmpire.VS, false, 0, 0)
-              avatar.setExoSuitType(0); // Standard Exo-Suit
+              val avatar : PlayerAvatar = PlayerAvatar(xGUID, "TestChar", PlanetSideEmpire.TR, false, 0, 0)
+              avatar.setExoSuitType(1);
               //init holsters
               avatar.setEquipmentInHolster(0, Tool(0, 0) ) // Beamer in pistol slot 1
               avatar.setEquipmentInHolster(2, Tool(1, 1) ) // Suppressor in rifle slot 1
               avatar.setEquipmentInHolster(4, Tool(2, 2) ) // Force Blade in melee slot
               avatar.setUsedHolster(0) // Start with Beamer drawn
+              avatar.setPosition(app.pos)
+              avatar.setPitch(app.viewPitch)
+              avatar.redHealth = 77
+              avatar.blueArmor = 88
+              avatar.greenStamina = 22
+              avatar.setUsedHolster(0)
               //add avatar
               PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
 
-
-
+//              val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(xGUID)
+//              if(playerOpt.isDefined) {
+//                val player: PlayerAvatar = playerOpt.get
+//                player.setPosition(pos)
+//                player.setPitch(aim_pitch)
+//                player.crouched = is_crouching
+//              }
 
 
               val home2 = Zone.get("home2").get
@@ -334,7 +345,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 true,                //Boosted spawn room pain field
                 true)))              //Boosted generator room pain field
 
-              PlayerMasterList.userClaimsCharacter(sessionId, sessionId.toInt) // ... we do this when sending a SetCurrentAvatarMessa
+              PlayerMasterList.userClaimsCharacter(sessionId, xGUID) // ... we do this when sending a SetCurrentAvatarMessa
               sendResponse(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(guid,0,0)))
 
               chatService ! ChatService.Join("local")
@@ -379,22 +390,42 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
 //      log.info("PlayerState: " + msg)
-      if(useProximityTerminal == true && vel == None){
-        sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(avatar_guid, useProximityTerminalID, true)))
-        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,100)))
-        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,2,100)))
-        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,4,100)))
-      }
-      if(useProximityTerminal == true && vel != None) {
-        useProximityTerminal = false
-        sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(PlanetSideGUID(0), useProximityTerminalID, false)))
-      }
       val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if(playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         player.setPosition(pos)
         player.setPitch(aim_pitch)
         player.crouched = is_crouching
+      }
+      if(useProximityTerminal == true && vel == None){
+        sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(avatar_guid, useProximityTerminalID, true)))
+        if(playerOpt.isDefined) {
+          val player: PlayerAvatar = playerOpt.get
+          if(player.redHealth + 5 <= player.getMaxHealth) player.redHealth += 5
+          if(player.redHealth + 5 > player.getMaxHealth) player.redHealth = player.getMaxHealth
+          if(player.greenStamina + 5 <= player.getMaxStamina) player.greenStamina += 5
+          if(player.greenStamina + 5 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
+          if(player.blueArmor + 5 <= player.getMaxPersonalArmor) player.blueArmor += 5
+          if(player.blueArmor + 5 > player.getMaxPersonalArmor) player.blueArmor = player.getMaxPersonalArmor
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,player.redHealth)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,2,player.greenStamina)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,4,player.blueArmor)))
+          if(player.redHealth == player.getMaxHealth && player.greenStamina == player.getMaxStamina && player.blueArmor == player.getMaxPersonalArmor){
+            sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(PlanetSideGUID(0), useProximityTerminalID, false)))
+          }
+        }
+      }
+      if(useProximityTerminal == true && vel != None) {
+        useProximityTerminal = false
+        sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(PlanetSideGUID(0), useProximityTerminalID, false)))
+      }
+      if(useProximityTerminal == false && vel == None) {
+        if(playerOpt.isDefined) {
+          val player: PlayerAvatar = playerOpt.get
+          if(player.greenStamina + 1 <= player.getMaxStamina) player.greenStamina += 1
+          if(player.greenStamina + 1 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,2,player.greenStamina)))
+        }
       }
 //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14000), Vector3(pos.x + 2.5f,pos.y + 2.5f,pos.z), vel,
 //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, true, is_cloaking)))
@@ -590,9 +621,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
         player.setUsedHolster(held_holsters)
       }
 
-
     case msg @ AvatarJumpMessage(state) =>
       log.info("AvatarJump: " + msg)
+      val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if(playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        if(player.greenStamina - 10 <= 0) player.greenStamina = 0
+        if(player.greenStamina - 10 > 0) player.greenStamina -= 10
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),2,player.greenStamina)))
+      }
 
     case msg @ ZipLineMessage(player_guid,origin_side,action,id,x,y,z) =>
       log.info("ZipLineMessage: " + msg)
@@ -635,7 +672,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // TODO: Not all incoming UseItemMessage's respond with another UseItemMessage (i.e. doors only send out GenericObjectStateMsg)
       sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, unk9)))
       if(unk1 != 0){ // TODO : medkit use ?!
-        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,100)))
+        val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
+        if(playerOpt.isDefined) {
+          val player: PlayerAvatar = playerOpt.get
+          if(player.getMaxHealth - player.redHealth <=25 ){
+            player.redHealth = player.getMaxHealth
+            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,player.getMaxHealth)))
+          }
+          else{
+            player.redHealth += 25
+            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,player.redHealth)))
+          }
+        }
+//        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,100)))
         sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2)))
       } else {
         // TODO: This should only actually be sent to doors upon opening; may break non-door items upon use
@@ -716,9 +765,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
       log.info("Ouch! " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,0,50)))
-      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,2,50)))
-      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,4,50)))
+      val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(p)
+      if(playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        if(player.redHealth - 10 <= 0) player.redHealth = 1
+        if(player.redHealth - 10 > 0) player.redHealth -= 10
+        if(player.greenStamina - 10 <= 0) player.greenStamina = 0
+        if(player.greenStamina - 10 > 0) player.greenStamina -= 10
+        if(player.blueArmor - 10 <= 0) player.blueArmor = 0
+        if(player.blueArmor - 10 > 0) player.blueArmor -= 10
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,0,player.redHealth)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,2,player.greenStamina)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,4,player.blueArmor)))
+      }
 
     case msg @ BugReportMessage(version_major,version_minor,version_date,bug_type,repeatable,location,zone,pos,summary,desc) =>
       log.info("BugReportMessage: " + msg)
