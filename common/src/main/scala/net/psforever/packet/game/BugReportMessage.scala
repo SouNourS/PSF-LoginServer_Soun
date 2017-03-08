@@ -1,4 +1,4 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PacketHelpers, PlanetSideGamePacket}
@@ -36,7 +36,7 @@ object BugType extends Enumeration {
   * @param repeatable whether the bug is repeatable
   * @param location 0 when "other location", 2 when "current location"
   * @param zone which zone the bug took place
-  * @param pos the location where ther bug took place
+  * @param pos the x y z location where the bug took place
   * @param summary a short explanation of the bug
   * @param desc a detailed explanation of the bug
   */

@@ -1,4 +1,4 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 package net.psforever.packet
 
 import scodec.{Attempt, Codec, DecodeResult, Err}
@@ -348,6 +348,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x16 => game.BindPlayerMessage.decode
 //    case 0x17 => noDecoder(ObjectCreateMessage_Duplicate)
     case 0x17 => game.ObjectCreateMessage.decode
+
     // 0x18
     case 0x18 => game.ObjectCreateMessage.decode
     case 0x19 => game.ObjectDeleteMessage.decode
@@ -558,7 +559,7 @@ object GamePacketOpcode extends Enumeration {
     case 0xc6 => game.ZoneInfoMessage.decode
     case 0xc7 => noDecoder(LongRangeProjectileInfoMessage)
     // 0xc8
-    case 0xc8 => noDecoder(WeaponLazeTargetPositionMessage)
+    case 0xc8 => game.WeaponLazeTargetPositionMessage.decode
     case 0xc9 => noDecoder(ModuleLimitsMessage)
     case 0xca => noDecoder(OutfitBenefitMessage)
     case 0xcb => noDecoder(EmpireChangeTimeMessage)

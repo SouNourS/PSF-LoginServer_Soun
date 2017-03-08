@@ -1,4 +1,4 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 
 import org.specs2.mutable._
 import net.psforever.crypto.CryptoInterface
@@ -109,13 +109,11 @@ class CryptoInterfaceTest extends Specification { args(stopOnFail = true)
 
     "safely handle multiple starts" in {
       val dontCare = ByteVector.fill(16)(0x42)
-      var dh = new CryptoDHState()
+      val dh = new CryptoDHState()
 
       dh.start()
       dh.start() must throwA[IllegalStateException]
       dh.close
-
-      dh = new CryptoDHState()
 
       ok
     }

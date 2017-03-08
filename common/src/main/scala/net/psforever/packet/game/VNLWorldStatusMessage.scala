@@ -1,9 +1,10 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 package net.psforever.packet.game
 
 import java.net.{InetAddress, InetSocketAddress}
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PacketHelpers, PlanetSideGamePacket}
+import net.psforever.types.PlanetSideEmpire
 import scodec._
 import scodec.bits._
 import scodec.codecs._
@@ -20,13 +21,6 @@ object ServerType extends Enumeration(1) {
   val Development, Beta, Released, Released2 = Value
 
   implicit val codec = PacketHelpers.createEnumerationCodec(this, uint8L)
-}
-
-object PlanetSideEmpire extends Enumeration {
-  type Type = Value
-  val TR, NC, VS, NEUTRAL = Value
-
-  implicit val codec = PacketHelpers.createEnumerationCodec(this, uint2L)
 }
 
 final case class WorldConnectionInfo(address : InetSocketAddress)

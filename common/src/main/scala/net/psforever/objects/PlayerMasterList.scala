@@ -1,7 +1,8 @@
 // Copyright (c) 2016 PSForever.net to present
 package net.psforever.objects
 
-import net.psforever.packet.game.{PlanetSideEmpire, PlanetSideGUID}
+import net.psforever.packet.game.PlanetSideGUID
+import net.psforever.types.PlanetSideEmpire
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer

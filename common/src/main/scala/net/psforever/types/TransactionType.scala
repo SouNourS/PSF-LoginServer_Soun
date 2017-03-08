@@ -1,4 +1,4 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 package net.psforever.types
 
 import net.psforever.packet.PacketHelpers
@@ -7,9 +7,9 @@ import scodec.codecs._
 object TransactionType extends Enumeration {
   type Type = Value
   val Unk0,
-      Learn, // certif term
+      Learn, // certif term or Buy (v-term)
       Buy,
-      Sell, // forget on certif term
+      Sell, // or forget on certif term
       Unk4,
       Unk5,
       Infantry_Loadout,

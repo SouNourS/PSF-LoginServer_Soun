@@ -10,6 +10,7 @@ import scala.collection.mutable
 object ToolCatalog {
   private val catalog : mutable.HashMap[Int, ToolDefinition] = new mutable.HashMap[Int, ToolDefinition]
 
+  var tool : ToolDefinition = _
   tool = ToolDefinition(0, "beamer")
   tool.size = EquipmentSize.PISTOL
   tool.fireModes += new FireModeDefinition
@@ -22,7 +23,6 @@ object ToolCatalog {
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool
 
-  var tool : ToolDefinition = _
   tool = ToolDefinition(1, "suppressor")
   tool.size = EquipmentSize.RIFLE
   tool.fireModes += new FireModeDefinition

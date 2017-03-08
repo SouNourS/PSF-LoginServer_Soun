@@ -1,4 +1,4 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 import java.net.InetAddress
 import java.io.File
 import java.util.Locale
@@ -18,6 +18,7 @@ import org.fusesource.jansi.Ansi.Color._
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
+
 
 object PsLogin {
   private val logger = org.log4s.getLogger
@@ -214,7 +215,7 @@ object PsLogin {
   }
 
   def main(args : Array[String]) : Unit = {
-    Locale.setDefault(Locale.US);
+    Locale.setDefault(Locale.US); // to have floats with dots, not comma...
     this.args = args
     run()
 

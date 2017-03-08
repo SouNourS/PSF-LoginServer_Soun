@@ -1,5 +1,5 @@
-// Copyright (c) 2016 PSForever.net to present
-//import java.net.{InetAddress, InetSocketAddress}
+// Copyright (c) 2017 PSForever
+import java.net.{InetAddress, InetSocketAddress}
 
 import net.psforever.packet.game.objectcreate._
 import akka.actor.{Actor, ActorIdentity, ActorRef, Cancellable, Identify, MDCContextAware}
@@ -12,12 +12,13 @@ import org.log4s.MDC
 import MDCContextAware.Implicits._
 import ServiceManager.Lookup
 import net.psforever.objects._
-import net.psforever.types.{ChatMessageType, TransactionType, Vector3}
 
 import scala.collection.mutable
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Random, Try}
+import net.psforever.packet.game.objectcreate._
+import net.psforever.types.{ChatMessageType, TransactionType, PlanetSideEmpire, Vector3}
 
 class WorldSessionActor extends Actor with MDCContextAware {
   private[this] val log = org.log4s.getLogger
@@ -148,7 +149,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   val app = CharacterAppearanceData(
     Vector3(3674.8438f, 2726.789f, 91.15625f),
     32,
-    0,
+    PlanetSideEmpire.TR,
     false,
     4,
     "TestChar",
@@ -338,6 +339,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //              avatarService ! AvatarService.Join("home2")
 
               sendResponse(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(guid, 1, 0, true, Shortcut.MEDKIT)))
+              sendResponse(PacketCoding.CreateGamePacket(0, ReplicationStreamMessage(5, Some(6), Vector(SquadListing(255))))) //clear squad list
 
               import scala.concurrent.duration._
               import scala.concurrent.ExecutionContext.Implicits.global
@@ -349,7 +351,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
       log.info("Handling " + msg)
 
-      sendResponse(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(3159,121,PlanetSideGUID(100),None,Some(CharacterData(CharacterAppearanceData(Vector3(3674.8438f,2726.789f,91.15625f),19,empire.id,false,4,name,0,gender.id,2,9,1,3,118,30,32896,65535,2,255,106,7,RibbonBars()),
+      sendResponse(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(3159,121,PlanetSideGUID(100),None,Some(CharacterData(CharacterAppearanceData(Vector3(3674.8438f,2726.789f,91.15625f),19,empire,false,4,name,0,gender.id,2,9,1,3,118,30,32896,65535,2,255,106,7,RibbonBars()),
         100,90,75,1,7,7,100,100,28,4,44,84,104,1900,
         List(),
         List(),
@@ -363,7 +365,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case KeepAliveMessage(code) =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
 
-    case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk5, is_cloaking, unk6, unk7) =>
+    case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
 //      log.info("PlayerState: " + msg)
       if(useProximityTerminal == true && vel == None){
         sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(avatar_guid, useProximityTerminalID, true)))
@@ -575,10 +577,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ AvatarJumpMessage(state) =>
       log.info("AvatarJump: " + msg)
 
-    case msg @ ZipLineMessage(player_guid,origin_side,action,id,unk3,unk4,unk5) =>
+    case msg @ ZipLineMessage(player_guid,origin_side,action,id,x,y,z) =>
       log.info("ZipLineMessage: " + msg)
       if(action == 0) {
-        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid,origin_side,action,id,unk3,unk4,unk5)))
+        //doing this lets you use the zip line, but you can't get off
+        //sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, id, x,y,z)))
       }
       else if(action == 1) {
         //disembark from zipline at destination?
@@ -623,7 +626,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ ItemTransactionMessage(terminal_guid, transaction_type, item_page, item_name, unk1, item_guid) =>
       log.info("ItemTransaction: " + msg)
       if(transaction_type == TransactionType.Sell) {
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(item_guid, 0)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(item_guid, 0)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ItemTransactionResultMessage(terminal_guid, transaction_type, true)))
       }
       if(transaction_type == TransactionType.Buy) {
         val obj = AmmoBoxData(50)
@@ -644,8 +648,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ WeaponDryFireMessage(weapon_guid) =>
       log.info("WeaponDryFireMessage: " + msg)
 
+    case msg @ WeaponLazeTargetPositionMessage(weapon, pos1, pos2) =>
+      log.info("Lazing position: " + pos2.toString)
+
     case msg @ HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
       log.info("Hit: " + msg)
+
+    case msg @ SplashHitMessage(unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8) =>
+      log.info("SplashHitMessage: " + msg)
 
     case msg @ AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
       log.info("AvatarFirstTimeEvent: " + msg)
@@ -660,14 +670,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("MountVehicleMsg: "+msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid,player_guid,0)))
 
-    case msg @ SplashHitMessage(bytes) =>
-      log.info("SplashHitMessage: " + bytes.toString)
-
     case msg @ WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
       log.info("WarpgateRequest: " + msg)
-
-    case msg @ GenericCollisionMsg(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
-      log.info("GenericCollision: "+msg)
 
     case msg @ PlanetsideAttributeMessage(avatar_guid, unk2, unk3) =>
       log.info("PlanetsideAttributeMessage: "+msg)
@@ -683,12 +687,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
       log.info("SquadDefinitionAction: " + msg)
 
+    case msg @ GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
+      log.info("Ouch! " + msg)
+
     case msg @ BugReportMessage(version_major,version_minor,version_date,bug_type,repeatable,location,zone,pos,summary,desc) =>
       log.info("BugReportMessage: " + msg)
 
-    case default =>
-      log.debug(s"Unhandled GamePacket ${pkt}")
-      log.info(s"unk: ${pkt}")
+    case msg @ BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
+      log.info("BindPlayerMessage: " + msg)
+
+    case default => log.info(s"Unhandled GamePacket ${pkt}")
   }
 
   def failWithError(error : String) = {

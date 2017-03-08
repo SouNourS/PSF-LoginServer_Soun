@@ -1,4 +1,4 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 package net.psforever.packet.game
 
 import net.psforever.newcodecs.newcodecs
@@ -8,33 +8,29 @@ import scodec.codecs._
 import shapeless.{::, HNil}
 
 /**
-  * The player is interacting with a zipline.<br>
+  * Dispatched by the client when the player is interacting with a zip line.
+  * Dispatched by the server to instruct the client to use the zip line.
+  * Cavern teleportation rings also count as "zip lines" as far as the game is concerned, in that they use this packet.<br>
   * <br>
   * Action:<br>
-  * `0 - Attach to zipline`<br>
+  * `0 - Attach to a node`<br>
   * `1 - Arrived at destination`<br>
-  * `2 - Forcibly detach from zipline in mid-transit`
+  * `2 - Forcibly detach from zip line in mid-transit`
   * @param player_guid the player
-  * @param origin_side whether this corresponds with the "entry" or the "exit" of the zipline, as per the direction of the light pulse visuals
-  * @param action how the player interacts with the zipline
-  * @param guid a number that is consistent to a zipline terminus
-  * @param unk3 na;
-  *             changes as the user moves;
-  *             related to x or y coordinate of contact
-  * @param unk4 na;
-  *             changes as the user moves;
-  *             related to y or x coordinate of contact
-  * @param unk5 na;
-  *             changes as the user moves;
-  *             related to z (vertical) coordinate of contact
+  * @param origin_side whether this corresponds with the "entry" or the "exit" of the zip line, as per the direction of the light pulse visuals
+  * @param action how the player interacts with the zip line
+  * @param guid a number that is consistent to a terminus
+  * @param x the x-coordinate of the point where the player is interacting with the zip line
+  * @param y the y-coordinate of the point where the player is interacting with the zip line
+  * @param z the z-coordinate of the point where the player is interacting with the zip line
   */
 final case class ZipLineMessage(player_guid : PlanetSideGUID,
                                 origin_side : Boolean,
                                 action : Int,
                                 guid : Long,
-                                unk3 : Long,
-                                unk4 : Long,
-                                unk5 : Long)
+                                x : Float,
+                                y : Float,
+                                z : Float)
   extends PlanetSideGamePacket {
   type Packet = ZipLineMessage
   def opcode = GamePacketOpcode.ZipLineMessage
@@ -42,24 +38,24 @@ final case class ZipLineMessage(player_guid : PlanetSideGUID,
 }
 
 object ZipLineMessage extends Marshallable[ZipLineMessage] {
-  type threeLongsPattern = Long :: Long :: Long :: HNil
+  type threeFloatsPattern = Float :: Float :: Float :: HNil
 
   /**
-    * A `Codec` for when three `Long` values are to be read or written.
+    * A `Codec` for when three `Float` values are to be read or written.
     */
-  val threeLongValues : Codec[threeLongsPattern] = (
-    ("unk3" | uint32L) ::
-      ("unk4" | uint32L) ::
-      ("unk5" | uint32L)
-    ).as[threeLongsPattern]
+  val threeFloatValues : Codec[threeFloatsPattern] = (
+    ("x" | floatL) ::
+      ("y" | floatL) ::
+      ("z" | floatL)
+    ).as[threeFloatsPattern]
 
   /**
-    * A `Codec` for when there are no extra `Long` values are present.
+    * A `Codec` for when there are no extra `Float` values present.
     */
-  val noLongValues : Codec[threeLongsPattern] = ignore(0).xmap[threeLongsPattern] (
+  val noFloatValues : Codec[threeFloatsPattern] = ignore(0).xmap[threeFloatsPattern] (
     {
-      case _ =>
-        0L :: 0L :: 0L :: HNil
+      case () =>
+        0f :: 0f :: 0f :: HNil
     },
     {
       case _ =>
@@ -72,7 +68,7 @@ object ZipLineMessage extends Marshallable[ZipLineMessage] {
       ("origin_side" | bool) ::
         ("action" | uint2) ::
         ("id" | uint32L) ::
-        newcodecs.binary_choice(player.guid > 0, threeLongValues, noLongValues) // !(player.guid == 0)
+        newcodecs.binary_choice(player.guid > 0, threeFloatValues, noFloatValues) // !(player.guid == 0)
     }
     ).as[ZipLineMessage]
 }
