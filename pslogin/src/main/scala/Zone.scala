@@ -1,4 +1,5 @@
 // Copyright (c) 2017 PSForever
+import net.psforever.objects.{PlayerAvatar, PlayerMasterList}
 import net.psforever.packet.{PacketCoding, PlanetSidePacketContainer}
 import net.psforever.packet.game._
 import net.psforever.packet.game.objectcreate._
@@ -28,7 +29,6 @@ import scala.util.{Random, Try}
       * The byte-code form a a CreateObjectMessage that would construct the player's avatar
       */
     val player : ByteVector = session.objectHex2
-    val xxGUID : Int = session.xGUID
 
     /**
       * The name of the zone the player currently occupies
@@ -84,7 +84,7 @@ import scala.util.{Random, Try}
       * @param msg the message the player received
       * @return true, if the player is being transported to another zone; false, otherwise
       */
-    def read(traveler : Traveler, msg : ChatMsg) : Boolean = {
+    def read(traveler : Traveler, sessionID : Long, msg : ChatMsg) : Boolean = {
       if(!isProperRequest(msg))
         return false  //we do not handle this message
 
@@ -132,7 +132,7 @@ import scala.util.{Random, Try}
         CSRZone.reply(traveler, Zone.listWarpgates(zone))
         return false
       }
-      Transfer.zone(traveler, zone, destination)
+      Transfer.zone(traveler, sessionID, zone, destination)
       true
     }
 
@@ -330,10 +330,10 @@ import scala.util.{Random, Try}
       * @param zone the `Zone` requested
       * @param destination a three-coordinate location in the zone
       */
-    def zone(traveler : Traveler, zone : Zone, destination : (Int, Int, Int)) : Unit = {
-      disposeSelf(traveler)
+    def zone(traveler : Traveler, sessionID : Long, zone : Zone, destination : (Int, Int, Int)) : Unit = {
+      disposeSelf(traveler, sessionID)
       loadMap(traveler, zone)
-      loadSelf(traveler, destination)
+      loadSelf(traveler, sessionID, destination)
     }
 
     /**
@@ -347,32 +347,39 @@ import scala.util.{Random, Try}
       * Sequential GUIDs that appear to be missing from the player's inventory have been noted.
       * @param traveler the player
       */
-    private def disposeSelf(traveler : Traveler) : Unit = {
-      //dispose inventory
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+1)),4)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+2)),4)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+3)),4)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+4)),4)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+5)),4)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+6)),4)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+7)),4)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+8)),4)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID((traveler.xxGUID+9)),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(85),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(86),4)))
-      ////    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(87),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(88),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(89),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(90),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(91),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(92),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(93),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(94),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(95),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(96),4)))
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(97),4)))
-      //dispose self
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(traveler.xxGUID),4)))
+    private def disposeSelf(traveler : Traveler, sessionID : Long) : Unit = {
+
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionID)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+
+        println(player.guid)
+        //dispose inventory
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+1),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+2),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+3),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+4),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+5),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+6),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+7),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+8),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+9),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(85),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(86),4)))
+        ////    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(87),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(88),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(89),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(90),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(91),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(92),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(93),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(94),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(95),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(96),4)))
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(97),4)))
+        //dispose self
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid),4)))
+      }
     }
 
     /**
@@ -398,190 +405,196 @@ import scala.util.{Random, Try}
       * @param traveler the player
       * @param loc where the player is being placed in three dimensional space
       */
-    def loadSelf(traveler : Traveler, loc : (Int, Int, Int)) : Unit = {
-      //calculate bit representation of modified coordinates
-      val pos : BitVector = Vector3.codec_pos.encode(Vector3(loc._1, loc._2, loc._3)).toOption.get.toByteVector.toBitVector
-      //edit in modified coordinates
-      val pkt = PlayerStateShiftMessage(ShiftState(0,Vector3(loc._1.toFloat, loc._2.toFloat, loc._3.toFloat), 0))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, pkt))
-
-      var temp : BitVector = traveler.player.toBitVector
-      temp = temp.take(68) ++ pos ++ temp.drop(124)
-      //send
-      traveler.sendToSelf(temp.toByteVector)
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(traveler.xxGUID),0,0)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 1, 0, true, Shortcut.MEDKIT)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 2, 0, true, Some(Shortcut(1,"shortcut_macro","fon","/fly on")))))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 3, 0, true, Some(Shortcut(1,"shortcut_macro","fof","/fly off")))))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 4, 0, true, Some(Shortcut(1,"shortcut_macro","s1","/speed 1")))))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 5, 0, true, Some(Shortcut(1,"shortcut_macro","s2","/speed 2")))))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 6, 0, true, Some(Shortcut(1,"shortcut_macro","s3","/speed 3")))))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 7, 0, true, Some(Shortcut(1,"shortcut_macro","s4","/speed 4")))))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 8, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(traveler.xxGUID), 9, 0, true, Some(Shortcut(1,"shortcut_macro","col",
-        "/l Chat Colors (\\ + # + `number`) :\\#0 0 \\#1 1 \\#2 2 \\#3 3 \\#4 4 \\#5 5 \\#6 6 \\#7 7 \\#8 8 \\#9 9")))))
-
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(PlanetSideGUID(traveler.xxGUID),100000000,0))) // br40
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),18,1000000))) // cr5
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),35,40))) // cr5
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),36,5))) // cr5
+    def loadSelf(traveler : Traveler, sessionID : Long, loc : (Int, Int, Int)) : Unit = {
 
 
-      //    val app1 = CharacterAppearanceData(
-      //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,0,false,4,"Follower",0,2,2,9,1,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      //    val inv1 = InventoryItem(ObjectClass.TEMP730, PlanetSideGUID(101), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(102), 0, AmmoBoxData(20))) ::
-      //      InventoryItem(ObjectClass.TEMP556, PlanetSideGUID(103), 2, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(104), 0, AmmoBoxData(100))) ::
-      //      InventoryItem(ObjectClass.CHAIN_BLADE, PlanetSideGUID(105), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(106), 0, AmmoBoxData(1))) ::
-      //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(107), 5, AmmoBoxData(1)) ::
-      //      Nil
-      //    val obj1 = CharacterData(app1, 100, 77, 88, 1, 7, 7, 100, 22, 28, 4, 44, 84, 104, 1900, "xpe_sanctuary_help" :: "xpe_th_firemodes" :: "used_suppressor" :: "map12" :: Nil, List.empty,
-      //      InventoryData(true, false, false, inv1)
-      //    )
-      //    val objectHex1 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(100), obj1)
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex1))
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionID)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+
+        println(player.guid)
+
+        //calculate bit representation of modified coordinates
+        val pos : BitVector = Vector3.codec_pos.encode(Vector3(loc._1, loc._2, loc._3)).toOption.get.toByteVector.toBitVector
+        //edit in modified coordinates
+        val pkt = PlayerStateShiftMessage(ShiftState(0,Vector3(loc._1.toFloat, loc._2.toFloat, loc._3.toFloat), 0))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, pkt))
+
+        var temp : BitVector = traveler.player.toBitVector
+        temp = temp.take(68) ++ pos ++ temp.drop(124)
+        //send
+        traveler.sendToSelf(temp.toByteVector)
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 1, 0, true, Shortcut.MEDKIT)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 2, 0, true, Some(Shortcut(1,"shortcut_macro","fon","/fly on")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 3, 0, true, Some(Shortcut(1,"shortcut_macro","fof","/fly off")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 4, 0, true, Some(Shortcut(1,"shortcut_macro","s1","/speed 1")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 5, 0, true, Some(Shortcut(1,"shortcut_macro","s2","/speed 2")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 6, 0, true, Some(Shortcut(1,"shortcut_macro","s3","/speed 3")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 7, 0, true, Some(Shortcut(1,"shortcut_macro","s4","/speed 4")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 8, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 9, 0, true, Some(Shortcut(1,"shortcut_macro","col",
+          "/l Chat Colors (\\ + # + `number`) :\\#0 0 \\#1 1 \\#2 2 \\#3 3 \\#4 4 \\#5 5 \\#6 6 \\#7 7 \\#8 8 \\#9 9")))))
+
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),35,40))) // cr5
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),36,5))) // cr5
 
 
-      //    val app1 = CharacterAppearanceData(
-      //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,0,false,4,"TR",0,2,2,9,1,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      //    val inv1 = InventoryItem(ObjectClass.TEMP730, PlanetSideGUID(14001), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14002), 0, AmmoBoxData(20))) ::
-      //      InventoryItem(ObjectClass.SUPPRESSOR, PlanetSideGUID(14003), 2, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14004), 0, AmmoBoxData(100))) ::
-      //      InventoryItem(ObjectClass.CHAIN_BLADE, PlanetSideGUID(14005), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14006), 0, AmmoBoxData(1))) ::
-      //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14007), 5, AmmoBoxData(1)) ::
-      //      Nil
-      //    val obj1 = CharacterData(app1, 100, 77, 88, 1, 7, 7, 100, 22, 28, 4, 44, 84, 104, 1900, "xpe_sanctuary_help" :: "xpe_th_firemodes" :: "used_suppressor" :: "map12" :: Nil, List.empty,
-      //      InventoryData(true, false, false, inv1)    )
-      //    val objectHex1 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14000), obj1)
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex1))
-
-      //    val app2 = CharacterAppearanceData(
-      //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,1,true,4,"NC - BO",1,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      //    val inv2 = InventoryItem(ObjectClass.TEMP407, PlanetSideGUID(14011), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14012), 0, AmmoBoxData(20))) ::
-      //      InventoryItem(ObjectClass.SUPPRESSOR, PlanetSideGUID(14013), 2, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14014), 0, AmmoBoxData(100))) ::
-      //      InventoryItem(ObjectClass.TEMP421, PlanetSideGUID(14015), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14016), 0, AmmoBoxData(1))) ::
-      //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14017), 5, AmmoBoxData(1)) ::
-      //      Nil
-      //    val obj2 = CharacterData(app2, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-      //      InventoryData(true, false, false, inv2)    )
-      //    val objectHex3 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14010), obj2)
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex3))
-
-      //    val app3 = CharacterAppearanceData(
-      //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,1,false,4,"NC",4,1,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      //    val inv3 = InventoryItem(ObjectClass.SCATTER_PISTOL, PlanetSideGUID(14021), 0, WeaponData(8, ObjectClass.BUCKSHOT, PlanetSideGUID(14022), 0, AmmoBoxData(20))) ::
-      //      InventoryItem(ObjectClass.TEMP714, PlanetSideGUID(14023), 2, WeaponData(8, ObjectClass.BUCKSHOT, PlanetSideGUID(14024), 0, AmmoBoxData(100))) ::
-      //      InventoryItem(ObjectClass.CHAIN_BLADE, PlanetSideGUID(14025), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14026), 0, AmmoBoxData(1))) ::
-      //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14027), 5, AmmoBoxData(1)) ::
-      //      Nil
-      //    val obj3 = CharacterData(app3, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-      //      InventoryData(true, false, false, inv3)    )
-      //    val objectHex4 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14020), obj3)
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex4))
-
-      //    val app4 = CharacterAppearanceData(
-      //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,2,false,4,"VS",3,1,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      //    val inv4 = InventoryItem(ObjectClass.BEAMER, PlanetSideGUID(14031), 0, WeaponData(8, ObjectClass.ENERGY_CELL, PlanetSideGUID(14032), 0, AmmoBoxData(20))) ::
-      //      InventoryItem(ObjectClass.FORCE_BLADE, PlanetSideGUID(14035), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14036), 0, AmmoBoxData(1))) ::
-      //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14037), 5, AmmoBoxData(1)) ::
-      //      Nil
-      //    val obj4 = CharacterData(app4, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-      //      InventoryData(true, false, false, inv4)    )
-      //    val objectHex5 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14030), obj4)
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex5))
-
-      //    val app5 = CharacterAppearanceData(
-      //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,2,false,4,"VS 2",1,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      //    val inv5 = InventoryItem(ObjectClass.SPEAR, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.MULTI_PHASE_10mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-      //      InventoryItem(ObjectClass.TEMP429, PlanetSideGUID(14043), 2, WeaponData(8, ObjectClass.ENERGY_CELL, PlanetSideGUID(14044), 0, AmmoBoxData(100))) ::
-      //      InventoryItem(ObjectClass.FORCE_BLADE, PlanetSideGUID(14045), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14046), 0, AmmoBoxData(1))) ::
-      //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14047), 5, AmmoBoxData(1)) ::
-      //      Nil
-      //    val obj5 = CharacterData(app5, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-      //      InventoryData(true, false, false, inv5)    )
-      //    val objectHex6 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14040), obj5)
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex6))
-
-      val app6 = CharacterAppearanceData(
-        Vector3(3127.0f, 2882.0f, 35.21875f), 64,PlanetSideEmpire.NC,false,4,"MAX NC",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      val inv6 =
-        InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-          //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-          Nil
-      val obj6 = CharacterData(app6, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-        InventoryData(true, false, false, inv6)    )
-      val objectHex7 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14050), obj6)
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex7))
-
-      val app7 = CharacterAppearanceData(
-        Vector3(3127.0f, 2880.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      val inv7 =
-        InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-          //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-          Nil
-      val obj7 = CharacterData(app7, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-        InventoryData(true, false, false, inv7)    )
-      val objectHex8 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14060), obj7)
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex8))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),19,1)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),35,40)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),36,5)))
-
-      val app8 = CharacterAppearanceData(
-        Vector3(3127.0f, 2884.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR 2",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-      val inv8 =
-        InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-          //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-          Nil
-      val obj8 = CharacterData(app8, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-        InventoryData(true, false, false, inv8)    )
-      val objectHex9 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14070), obj8)
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex9))
+        //    val app1 = CharacterAppearanceData(
+        //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,0,false,4,"Follower",0,2,2,9,1,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        //    val inv1 = InventoryItem(ObjectClass.TEMP730, PlanetSideGUID(101), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(102), 0, AmmoBoxData(20))) ::
+        //      InventoryItem(ObjectClass.TEMP556, PlanetSideGUID(103), 2, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(104), 0, AmmoBoxData(100))) ::
+        //      InventoryItem(ObjectClass.CHAIN_BLADE, PlanetSideGUID(105), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(106), 0, AmmoBoxData(1))) ::
+        //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(107), 5, AmmoBoxData(1)) ::
+        //      Nil
+        //    val obj1 = CharacterData(app1, 100, 77, 88, 1, 7, 7, 100, 22, 28, 4, 44, 84, 104, 1900, "xpe_sanctuary_help" :: "xpe_th_firemodes" :: "used_suppressor" :: "map12" :: Nil, List.empty,
+        //      InventoryData(true, false, false, inv1)
+        //    )
+        //    val objectHex1 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(100), obj1)
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex1))
 
 
-      //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.TEMP697,PlanetSideGUID(446),None,None))) // prowler
+        //    val app1 = CharacterAppearanceData(
+        //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,0,false,4,"TR",0,2,2,9,1,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        //    val inv1 = InventoryItem(ObjectClass.TEMP730, PlanetSideGUID(14001), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14002), 0, AmmoBoxData(20))) ::
+        //      InventoryItem(ObjectClass.SUPPRESSOR, PlanetSideGUID(14003), 2, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14004), 0, AmmoBoxData(100))) ::
+        //      InventoryItem(ObjectClass.CHAIN_BLADE, PlanetSideGUID(14005), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14006), 0, AmmoBoxData(1))) ::
+        //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14007), 5, AmmoBoxData(1)) ::
+        //      Nil
+        //    val obj1 = CharacterData(app1, 100, 77, 88, 1, 7, 7, 100, 22, 28, 4, 44, 84, 104, 1900, "xpe_sanctuary_help" :: "xpe_th_firemodes" :: "used_suppressor" :: "map12" :: Nil, List.empty,
+        //      InventoryData(true, false, false, inv1)    )
+        //    val objectHex1 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14000), obj1)
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex1))
 
+        //    val app2 = CharacterAppearanceData(
+        //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,1,true,4,"NC - BO",1,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        //    val inv2 = InventoryItem(ObjectClass.TEMP407, PlanetSideGUID(14011), 0, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14012), 0, AmmoBoxData(20))) ::
+        //      InventoryItem(ObjectClass.SUPPRESSOR, PlanetSideGUID(14013), 2, WeaponData(8, ObjectClass.BULLETS_9MM, PlanetSideGUID(14014), 0, AmmoBoxData(100))) ::
+        //      InventoryItem(ObjectClass.TEMP421, PlanetSideGUID(14015), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14016), 0, AmmoBoxData(1))) ::
+        //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14017), 5, AmmoBoxData(1)) ::
+        //      Nil
+        //    val obj2 = CharacterData(app2, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+        //      InventoryData(true, false, false, inv2)    )
+        //    val objectHex3 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14010), obj2)
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex3))
 
-      //(traveler.xxGUID+15000+(traveler.xxGUID*10-(10+traveler.xxGUID)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,1))) // Medium Assault
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,2))) // Heavy Assault
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,3))) // Special Assault
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,4))) // Anti-Vehicular
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,5))) // Sniping
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,6))) // Elite Assault
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,7))) // Air Cavalry, Scout
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,8))) // Air Cavalry, Interceptor
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,9))) // Air Cavalry, Assault
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,10))) // Air Support
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,11))) // ATV
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,12))) // Light Scout
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,13))) // Assault Buggy
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,14))) // Armored Assault 1
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,15))) // Armored Assault 2
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,16))) // Ground Transport
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,17))) // Ground Support
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,18))) // BattleFrame Robotics
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,19))) // Flail
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,20))) // Switchblade
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,21))) // Harasser
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,22))) // Phantasm
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,23))) // Galaxy Gunship
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,24))) // BFR Anti Aircraft
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,25))) // BFR Anti Infantry
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,28))) // Reinforced ExoSuit
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,29))) // Infiltration Suit
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,33))) // Uni-MAX
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,34))) // Medical
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,35))) // Advanced Medical
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,36))) // Hacking
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,37))) // Advanced Hacking
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,40))) // Electronics Expert
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,41))) // Engineering
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,42))) // Combat Engineering
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(traveler.xxGUID),24,45))) // Advanced Engineering
+        //    val app3 = CharacterAppearanceData(
+        //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,1,false,4,"NC",4,1,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        //    val inv3 = InventoryItem(ObjectClass.SCATTER_PISTOL, PlanetSideGUID(14021), 0, WeaponData(8, ObjectClass.BUCKSHOT, PlanetSideGUID(14022), 0, AmmoBoxData(20))) ::
+        //      InventoryItem(ObjectClass.TEMP714, PlanetSideGUID(14023), 2, WeaponData(8, ObjectClass.BUCKSHOT, PlanetSideGUID(14024), 0, AmmoBoxData(100))) ::
+        //      InventoryItem(ObjectClass.CHAIN_BLADE, PlanetSideGUID(14025), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14026), 0, AmmoBoxData(1))) ::
+        //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14027), 5, AmmoBoxData(1)) ::
+        //      Nil
+        //    val obj3 = CharacterData(app3, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+        //      InventoryData(true, false, false, inv3)    )
+        //    val objectHex4 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14020), obj3)
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex4))
 
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(traveler.xxGUID),0,0)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(traveler.xxGUID),2,0,ImplantType.Targeting)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(traveler.xxGUID),2,1,ImplantType.DarklightVision)))
-      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(traveler.xxGUID),2,2,ImplantType.Surge)))
+        //    val app4 = CharacterAppearanceData(
+        //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,2,false,4,"VS",3,1,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        //    val inv4 = InventoryItem(ObjectClass.BEAMER, PlanetSideGUID(14031), 0, WeaponData(8, ObjectClass.ENERGY_CELL, PlanetSideGUID(14032), 0, AmmoBoxData(20))) ::
+        //      InventoryItem(ObjectClass.FORCE_BLADE, PlanetSideGUID(14035), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14036), 0, AmmoBoxData(1))) ::
+        //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14037), 5, AmmoBoxData(1)) ::
+        //      Nil
+        //    val obj4 = CharacterData(app4, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+        //      InventoryData(true, false, false, inv4)    )
+        //    val objectHex5 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14030), obj4)
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex5))
+
+        //    val app5 = CharacterAppearanceData(
+        //      Vector3(3675.8438f, 2727.789f, 91.15625f), 32,2,false,4,"VS 2",1,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        //    val inv5 = InventoryItem(ObjectClass.SPEAR, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.MULTI_PHASE_10mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+        //      InventoryItem(ObjectClass.TEMP429, PlanetSideGUID(14043), 2, WeaponData(8, ObjectClass.ENERGY_CELL, PlanetSideGUID(14044), 0, AmmoBoxData(100))) ::
+        //      InventoryItem(ObjectClass.FORCE_BLADE, PlanetSideGUID(14045), 4, WeaponData(8, ObjectClass.FORCE_BLADE_AMMO, PlanetSideGUID(14046), 0, AmmoBoxData(1))) ::
+        //      InventoryItem(ObjectClass.SLOT_BLOCKER, PlanetSideGUID(14047), 5, AmmoBoxData(1)) ::
+        //      Nil
+        //    val obj5 = CharacterData(app5, 1000, 11, 22, 1, 7, 7, 1000, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+        //      InventoryData(true, false, false, inv5)    )
+        //    val objectHex6 = ObjectCreateMessage(0, ObjectClass.AVATAR, PlanetSideGUID(14040), obj5)
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex6))
+
+        val app6 = CharacterAppearanceData(
+          Vector3(3127.0f, 2882.0f, 35.21875f), 64,PlanetSideEmpire.NC,false,4,"MAX NC",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        val inv6 =
+          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+            Nil
+        val obj6 = CharacterData(app6, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+          InventoryData(true, false, false, inv6)    )
+        val objectHex7 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14050), obj6)
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex7))
+
+        val app7 = CharacterAppearanceData(
+          Vector3(3127.0f, 2880.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        val inv7 =
+          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+            Nil
+        val obj7 = CharacterData(app7, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+          InventoryData(true, false, false, inv7)    )
+        val objectHex8 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14060), obj7)
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex8))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),19,1)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),35,40)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),36,5)))
+
+        val app8 = CharacterAppearanceData(
+          Vector3(3127.0f, 2884.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR 2",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+        val inv8 =
+          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+            Nil
+        val obj8 = CharacterData(app8, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+          InventoryData(true, false, false, inv8)    )
+        val objectHex9 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14070), obj8)
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex9))
+
+        //    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.TEMP697,PlanetSideGUID(446),None,None))) // prowler
+
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,1))) // Medium Assault
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,2))) // Heavy Assault
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,3))) // Special Assault
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,4))) // Anti-Vehicular
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,5))) // Sniping
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,6))) // Elite Assault
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,7))) // Air Cavalry, Scout
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,8))) // Air Cavalry, Interceptor
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,9))) // Air Cavalry, Assault
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,10))) // Air Support
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,11))) // ATV
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,12))) // Light Scout
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,13))) // Assault Buggy
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,14))) // Armored Assault 1
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,15))) // Armored Assault 2
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,16))) // Ground Transport
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,17))) // Ground Support
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,18))) // BattleFrame Robotics
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,19))) // Flail
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,20))) // Switchblade
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,21))) // Harasser
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,22))) // Phantasm
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,23))) // Galaxy Gunship
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,24))) // BFR Anti Aircraft
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,25))) // BFR Anti Infantry
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,28))) // Reinforced ExoSuit
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,29))) // Infiltration Suit
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,33))) // Uni-MAX
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,34))) // Medical
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,35))) // Advanced Medical
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,36))) // Hacking
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,37))) // Advanced Hacking
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,40))) // Electronics Expert
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,41))) // Engineering
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,42))) // Combat Engineering
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,45))) // Advanced Engineering
+
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),2,0,ImplantType.Targeting)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),2,1,ImplantType.DarklightVision)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),2,2,ImplantType.Surge)))
+
+      }
+
     }
 
     /**

@@ -56,7 +56,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       context.become(Started)
     case msg =>
-      log.error(s"Unknown message ${msg}")
+      log.error(s"Unknown message $msg")
       context.stop(self)
   }
 
@@ -192,7 +192,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       true, false, false, inv
     )
   )
-  var objectHex = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID((xGUID)), obj)
+  var objectHex = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(xGUID), obj)
   var objectHex2 = PacketCoding.EncodePacket(objectHex).require.toByteVector
 
   var traveler = Traveler(this)
@@ -206,7 +206,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
 
       sendResponse(PacketCoding.CreateGamePacket(0, objectHex))
-      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605313, PlanetSideGUID((xGUID)), false, 6404428)))
+      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605313, PlanetSideGUID(xGUID), false, 6404428)))
 
       // NOTE: PlanetSideZoneID just chooses the background
       sendResponse(PacketCoding.CreateGamePacket(0,
@@ -224,8 +224,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
               sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(13), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
 
-
-              println(app.name)
               //hardcoded avatar and some pertinent equipment setup
               val avatar: PlayerAvatar = PlayerAvatar(xGUID, "TestChar", PlanetSideEmpire.TR, false, 0, 0)
               avatar.setExoSuitType(1);
@@ -246,7 +244,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
               val home2 = Zone.get("home2").get
               Transfer.loadMap(traveler, home2)
-              Transfer.loadSelf(traveler, Zone.selectRandom(home2))
+              Transfer.loadSelf(traveler, sessionId, Zone.selectRandom(home2))
               //              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(guid,54,15))) // aura effect
               //              sendResponse(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(guid,100000000,0)))
               sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -447,7 +445,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now", None)))
       }
 
-      CSRZone.read(traveler, msg)
+      CSRZone.read(traveler, this.sessionId, msg)
       CSRWarp.read(traveler, msg)
 
       // TODO: handle this appropriately
@@ -636,7 +634,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@ProximityTerminalUseMessage(player_guid, object_guid, unk) =>
       log.info("ProximityTerminalUseMessage: " + msg)
-      if (unk == false) {
+      if (!unk) {
         useProximityTerminal = true
         useProximityTerminalID = object_guid
       }
