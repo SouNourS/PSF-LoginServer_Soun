@@ -19,13 +19,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   private case class PokeClient()
 
-  var sessionId : Long = 0
-  var leftRef : ActorRef = ActorRef.noSender
-  var rightRef : ActorRef = ActorRef.noSender
+  var sessionId: Long = 0
+  var leftRef: ActorRef = ActorRef.noSender
+  var rightRef: ActorRef = ActorRef.noSender
 
   var serviceManager = Actor.noSender
   var chatService = Actor.noSender
-//  var avatarService = Actor.noSender
+  //  var avatarService = Actor.noSender
   var xGUID = 15000
 
   var useProximityTerminal = false
@@ -33,26 +33,26 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   var xheld_holsters = 0
 
-  var clientKeepAlive : Cancellable = null
+  var clientKeepAlive: Cancellable = null
 
   override def postStop() = {
-    if(clientKeepAlive != null)
+    if (clientKeepAlive != null)
       clientKeepAlive.cancel()
-    val name : Int = PlayerMasterList.userDissociatesCharacter(sessionId)
+    val name: Int = PlayerMasterList.userDissociatesCharacter(sessionId)
     // dev hack: normally, the actual player avatar persists a minute or so after the user disconnects
     PlayerMasterList.removePlayer(name)
   }
 
   def receive = Initializing
 
-  def Initializing : Receive = {
+  def Initializing: Receive = {
     case HelloFriend(sessionId, right) =>
       this.sessionId = sessionId
       leftRef = sender()
       rightRef = right.asInstanceOf[ActorRef]
 
       ServiceManager.serviceManager ! Lookup("chat")
-//      ServiceManager.serviceManager ! Lookup("avatar")
+      //      ServiceManager.serviceManager ! Lookup("avatar")
 
       context.become(Started)
     case msg =>
@@ -60,47 +60,47 @@ class WorldSessionActor extends Actor with MDCContextAware {
       context.stop(self)
   }
 
-  def Started : Receive = {
+  def Started: Receive = {
     case ServiceManager.LookupResult(endpoint) =>
       chatService = endpoint
-//      avatarService = endpoint
+      //      avatarService = endpoint
       log.debug("Got chat service " + endpoint)
-    case ctrl @ ControlPacket(_, _) =>
+    case ctrl@ControlPacket(_, _) =>
       handlePktContainer(ctrl)
-    case game @ GamePacket(_, _, _) =>
+    case game@GamePacket(_, _, _) =>
       handlePktContainer(game)
-      // temporary hack to keep the client from disconnecting
+    // temporary hack to keep the client from disconnecting
     case PokeClient() =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
     case ChatMessage(to, from, data) =>
-      if(to.drop(6) == "local") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
-      if(to.drop(6) == "squad") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SQUAD, true, from, data, None)))
-//    case AvatarMessage(to, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
-//    case AvatarMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, 0, is_crouching, unk4, false, is_cloaking)))
+      if (to.drop(6) == "local") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
+      if (to.drop(6) == "squad") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SQUAD, true, from, data, None)))
+    //    case AvatarMessage(to, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
+    //    case AvatarMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
+    //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, 0, is_crouching, unk4, false, is_cloaking)))
     case default => failWithError(s"Invalid packet class received: $default")
   }
 
-  def handlePkt(pkt : PlanetSidePacket) : Unit = pkt match {
-    case ctrl : PlanetSideControlPacket =>
+  def handlePkt(pkt: PlanetSidePacket): Unit = pkt match {
+    case ctrl: PlanetSideControlPacket =>
       handleControlPkt(ctrl)
-    case game : PlanetSideGamePacket =>
+    case game: PlanetSideGamePacket =>
       handleGamePkt(game)
     case default => failWithError(s"Invalid packet class received: $default")
   }
 
-  def handlePktContainer(pkt : PlanetSidePacketContainer) : Unit = pkt match {
-    case ctrl @ ControlPacket(opcode, ctrlPkt) =>
-//      println(pkt)
+  def handlePktContainer(pkt: PlanetSidePacketContainer): Unit = pkt match {
+    case ctrl@ControlPacket(opcode, ctrlPkt) =>
+      //      println(pkt)
       handleControlPkt(ctrlPkt)
-    case game @ GamePacket(opcode, seq, gamePkt) =>
-//      println(pkt)
+    case game@GamePacket(opcode, seq, gamePkt) =>
+      //      println(pkt)
       handleGamePkt(gamePkt)
     case default => failWithError(s"Invalid packet container class received: $default")
   }
 
-  def handleControlPkt(pkt : PlanetSideControlPacket) = {
-//    println(pkt)
+  def handleControlPkt(pkt: PlanetSideControlPacket) = {
+    //    println(pkt)
     pkt match {
       case SlottedMetaPacket(slot, subslot, innerPacket) =>
         sendResponse(PacketCoding.CreateControlPacket(SlottedMetaAck(slot, subslot)))
@@ -112,7 +112,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case Successful(v) =>
             handlePkt(v)
         }
-      case sync @ ControlSync(diff, unk, f1, f2, f3, f4, fa, fb) =>
+      case sync@ControlSync(diff, unk, f1, f2, f3, f4, fa, fb) =>
         log.debug(s"SYNC: ${sync}")
         val serverTick = Math.abs(System.nanoTime().toInt) // limit the size to prevent encoding error
         sendResponse(PacketCoding.CreateControlPacket(ControlSyncResp(diff, serverTick,
@@ -155,30 +155,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
     1,
     3, 118, 30, 0x8080, 0xFFFF, 2,
     0, 0, 7,
-    RibbonBars(6,7,8,220)
+    RibbonBars(6, 7, 8, 220)
   )
   //xGUID+15000+(xGUID*10-(10+xGUID))+
   val inv =
-    InventoryItem(ObjectClass.repeater, PlanetSideGUID(xGUID+1), 0,
-      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(xGUID+2), 0, AmmoBoxData(20))) ::
-    InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(xGUID+3), 2,
-      ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(1564), 1, AmmoBoxData(30)) :: Nil)) ::
-//      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
-    InventoryItem(ObjectClass.chainblade, PlanetSideGUID(xGUID+5), 4,
-      WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(xGUID+6), 0, AmmoBoxData(1))) ::
-    InventoryItem(ObjectClass.locker_container, PlanetSideGUID(xGUID+7), 5, AmmoBoxData(1)) ::
-    InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(xGUID+8), 6, AmmoBoxData(25)) ::
-    InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(xGUID+9), 9, AmmoBoxData(50)) ::
-    InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID+10), 12, AmmoBoxData(50)) ::
-    InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID+11), 33, AmmoBoxData(1)) ::
-    InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(xGUID+12), 37, REKData(8)) ::
-    InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID+13), 51, AmmoBoxData(1)) ::
-    InventoryItem(ObjectClass.super_medkit, PlanetSideGUID(xGUID+14), 69, AmmoBoxData(1)) ::
-    InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID+15), 64, AmmoBoxData(50)) ::
-    InventoryItem(ObjectClass.plasma_grenade, PlanetSideGUID(xGUID+16), 40, WeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(xGUID+17), 0, AmmoBoxData(3))) ::
-    InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(xGUID+18), 58, WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(xGUID+19), 0, AmmoBoxData(3))) ::
-    InventoryItem(ObjectClass.frag_grenade, PlanetSideGUID(xGUID+20), 76, WeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(xGUID+21), 0, AmmoBoxData(3))) ::
-    Nil
+    InventoryItem(ObjectClass.repeater, PlanetSideGUID(xGUID + 1), 0,
+      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 2), 0, AmmoBoxData(20))) ::
+      InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(xGUID + 3), 2,
+        ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(1564), 1, AmmoBoxData(30)) :: Nil)) ::
+      //      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
+      InventoryItem(ObjectClass.chainblade, PlanetSideGUID(xGUID + 5), 4,
+        WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(xGUID + 6), 0, AmmoBoxData(1))) ::
+      InventoryItem(ObjectClass.locker_container, PlanetSideGUID(xGUID + 7), 5, AmmoBoxData(1)) ::
+      InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 8), 6, AmmoBoxData(25)) ::
+      InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 9), 9, AmmoBoxData(50)) ::
+      InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID + 10), 12, AmmoBoxData(50)) ::
+      InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 11), 33, AmmoBoxData(1)) ::
+      InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(xGUID + 12), 37, REKData(8)) ::
+      InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 13), 51, AmmoBoxData(1)) ::
+      InventoryItem(ObjectClass.super_medkit, PlanetSideGUID(xGUID + 14), 69, AmmoBoxData(1)) ::
+      InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID + 15), 64, AmmoBoxData(50)) ::
+      InventoryItem(ObjectClass.plasma_grenade, PlanetSideGUID(xGUID + 16), 40, WeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(xGUID + 17), 0, AmmoBoxData(3))) ::
+      InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(xGUID + 18), 58, WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(xGUID + 19), 0, AmmoBoxData(3))) ::
+      InventoryItem(ObjectClass.frag_grenade, PlanetSideGUID(xGUID + 20), 76, WeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(xGUID + 21), 0, AmmoBoxData(3))) ::
+      Nil
   val obj = CharacterData(
     app,
     100, 77,
@@ -197,7 +197,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   var traveler = Traveler(this)
 
-  def handleGamePkt(pkt : PlanetSideGamePacket) = pkt match {
+  def handleGamePkt(pkt: PlanetSideGamePacket) = pkt match {
     case ConnectToWorldRequestMessage(server, token, majorVersion, minorVersion, revision, buildDate, unk) =>
 
       val clientVersion = s"Client Version: ${majorVersion}.${minorVersion}.${revision}, ${buildDate}"
@@ -205,14 +205,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info(s"New world login to ${server} with Token:${token}. ${clientVersion}")
 
 
-
       sendResponse(PacketCoding.CreateGamePacket(0, objectHex))
-      sendResponse(PacketCoding.CreateGamePacket(0,CharacterInfoMessage(PlanetSideZoneID(10000),41605313,PlanetSideGUID((xGUID)),false,6404428)))
+      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605313, PlanetSideGUID((xGUID)), false, 6404428)))
 
       // NOTE: PlanetSideZoneID just chooses the background
       sendResponse(PacketCoding.CreateGamePacket(0,
         CharacterInfoMessage(PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
-    case msg @ CharacterRequestMessage(charId, action) =>
+    case msg@CharacterRequestMessage(charId, action) =>
       log.info("Handling " + msg)
 
       action match {
@@ -220,7 +219,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(false, Some(1))))
         case CharacterRequestAction.Select =>
           objectHex match {
-            case obj @ ObjectCreateMessage(len, cls, guid, _, _) =>
+            case obj@ObjectCreateMessage(len, cls, guid, _, _) =>
               log.debug("Object: " + obj)
 
               sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(13), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
@@ -228,12 +227,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
               println(app.name)
               //hardcoded avatar and some pertinent equipment setup
-              val avatar : PlayerAvatar = PlayerAvatar(xGUID, "TestChar", PlanetSideEmpire.TR, false, 0, 0)
+              val avatar: PlayerAvatar = PlayerAvatar(xGUID, "TestChar", PlanetSideEmpire.TR, false, 0, 0)
               avatar.setExoSuitType(1);
               //init holsters
-              avatar.setEquipmentInHolster(0, Tool(0, 0) ) // Beamer in pistol slot 1
-              avatar.setEquipmentInHolster(2, Tool(1, 1) ) // Suppressor in rifle slot 1
-              avatar.setEquipmentInHolster(4, Tool(2, 2) ) // Force Blade in melee slot
+              avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
+              avatar.setEquipmentInHolster(2, Tool(1, 1)) // Suppressor in rifle slot 1
+              avatar.setEquipmentInHolster(4, Tool(2, 2)) // Force Blade in melee slot
               avatar.setUsedHolster(0) // Start with Beamer drawn
               avatar.setPosition(app.pos)
               avatar.setPitch(app.viewPitch)
@@ -248,72 +247,71 @@ class WorldSessionActor extends Actor with MDCContextAware {
               val home2 = Zone.get("home2").get
               Transfer.loadMap(traveler, home2)
               Transfer.loadSelf(traveler, Zone.selectRandom(home2))
-//              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(guid,54,15))) // aura effect
-//              sendResponse(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(guid,100000000,0)))
-              sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_GMBROADCAST,true,"",
+              //              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(guid,54,15))) // aura effect
+              //              sendResponse(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(guid,100000000,0)))
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
                 "  \\#6Welcome! The commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_GMBROADCAST,true,"",
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
                 "  \\#6You can use \\#3/fly on\\#6 (or off) to fly, or \\#3/speed X\\#6 (x from 1 to 5) to run !", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_GMBROADCAST,true,"",
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
                 "  \\#6You can use local chat !", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_GMBROADCAST,true,"",
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
                 "  \\#6Change continent will reset your inventory !", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0,ChatMsg(ChatMessageType.CMT_EXPANSIONS,true,"", "1 on", None)))
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)))
 
 
               // test AvatarStatisticsMessage
-//              sendRawResponse(hex"000901f80019067f4000000000247f013c400000000000000000000000000000000000000000200000000000000000000000247f013d600000000020000000000000000000000000000000000000000000000000000000067f4000000000247f024d600000000020000000000000000000000000000000200000000000000000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000")
-//              sendResponse(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(75),0,"@fav_light_infantry",Some(1))))
+              //              sendRawResponse(hex"000901f80019067f4000000000247f013c400000000000000000000000000000000000000000200000000000000000000000247f013d600000000020000000000000000000000000000000000000000000000000000000067f4000000000247f024d600000000020000000000000000000000000000000200000000000000000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000")
+              //              sendResponse(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(75),0,"@fav_light_infantry",Some(1))))
               // test OrbitalShuttleTimeMsg
               sendRawResponse(hex"5b75c4020180200f8000583a80000a80e041142903820450a00e0c1140")
-//              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(PlanetSideGUID(75),2,61)))
-//              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(PlanetSideGUID(75),2,60)))
-
+              //              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(PlanetSideGUID(75),2,61)))
+              //              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(PlanetSideGUID(75),2,60)))
 
 
               //              sendResponse(PacketCoding.CreateGamePacket(0, objectHex))
 
               // These object_guids are specfic to VS Sanc
-//              for(nanototo <- 0 to 1024)
-//                sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(nanototo), PlanetSideEmpire.TR)))
+              //              for(nanototo <- 0 to 1024)
+              //                sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(nanototo), PlanetSideEmpire.TR)))
               sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.TR))) //HART building C
               sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(29), PlanetSideEmpire.TR))) //South Villa Gun Tower
-//              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(1397), PlanetSideEmpire.TR)))
+              //              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(1397), PlanetSideEmpire.TR)))
 
               sendResponse(PacketCoding.CreateGamePacket(0, TimeOfDayMessage(1191182336)))
               sendResponse(PacketCoding.CreateGamePacket(0, ContinentalLockUpdateMessage(PlanetSideGUID(13), PlanetSideEmpire.VS))) // "The VS have captured the VS Sanctuary."
               sendResponse(PacketCoding.CreateGamePacket(0, BroadcastWarpgateUpdateMessage(PlanetSideGUID(13), PlanetSideGUID(1), false, false, true))) // VS Sanctuary: Inactive Warpgate -> Broadcast Warpgate
 
 
-              sendResponse(PacketCoding.CreateGamePacket(0,BuildingInfoUpdateMessage(
-                PlanetSideGUID(6),   //Ceryshen
-                PlanetSideGUID(2),   //Anguta
-                8,                   //80% NTU
-                true,                //Base hacked
+              sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(
+                PlanetSideGUID(6), //Ceryshen
+                PlanetSideGUID(2), //Anguta
+                8, //80% NTU
+                true, //Base hacked
                 PlanetSideEmpire.NC, //Base hacked by NC
-                600000,              //10 minutes remaining for hack
+                600000, //10 minutes remaining for hack
                 PlanetSideEmpire.VS, //Base owned by VS
-                0,                   //!! Field != 0 will cause malformed packet. See class def.
+                0, //!! Field != 0 will cause malformed packet. See class def.
                 None,
                 PlanetSideGeneratorState.Critical, //Generator critical
-                true,                //Respawn tubes destroyed
-                true,                //Force dome active
-                16,                  //Tech plant lattice benefit
+                true, //Respawn tubes destroyed
+                true, //Force dome active
+                16, //Tech plant lattice benefit
                 0,
-                Nil,                   //!! Field > 0 will cause malformed packet. See class def.
+                Nil, //!! Field > 0 will cause malformed packet. See class def.
                 0,
                 false,
-                8,                   //!! Field != 8 will cause malformed packet. See class def.
+                8, //!! Field != 8 will cause malformed packet. See class def.
                 None,
-                true,                //Boosted spawn room pain field
-                true)))              //Boosted generator room pain field
+                true, //Boosted spawn room pain field
+                true))) //Boosted generator room pain field
 
               PlayerMasterList.userClaimsCharacter(sessionId, xGUID) // ... we do this when sending a SetCurrentAvatarMessa
-              sendResponse(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(guid,0,0)))
+              sendResponse(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(guid, 0, 0)))
 
               chatService ! ChatService.Join("local")
               chatService ! ChatService.Join("squad")
-//              avatarService ! AvatarService.Join("home2")
+              //              avatarService ! AvatarService.Join("home2")
 
               sendResponse(PacketCoding.CreateGamePacket(0, ReplicationStreamMessage(5, Some(6), Vector(SquadListing(255))))) //clear squad list
 
@@ -324,75 +322,75 @@ class WorldSessionActor extends Actor with MDCContextAware {
         case default =>
           log.error("Unsupported " + default + " in " + msg)
       }
-    case msg @ CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
+    case msg@CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
       log.info("Handling " + msg)
 
-      sendResponse(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(3159,121,PlanetSideGUID(100),None,Some(CharacterData(CharacterAppearanceData(Vector3(3674.8438f,2726.789f,91.15625f),19,empire,false,4,name,0,gender.id,2,9,1,3,118,30,32896,65535,2,255,106,7,RibbonBars()),
-        100,90,75,1,7,7,100,100,28,4,44,84,104,1900,
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(3159, 121, PlanetSideGUID(100), None, Some(CharacterData(CharacterAppearanceData(Vector3(3674.8438f, 2726.789f, 91.15625f), 19, empire, false, 4, name, 0, gender.id, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+        100, 90, 75, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900,
         List(),
         List(),
-        InventoryData(true,false,false,List()))))))
+        InventoryData(true, false, false, List()))))))
 
       sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(true, None)))
 
-      sendResponse(PacketCoding.CreateGamePacket(0,CharacterInfoMessage(PlanetSideZoneID(10000),41605313,PlanetSideGUID(xGUID),false,6404428)))
-      sendResponse(PacketCoding.CreateGamePacket(0,CharacterInfoMessage(PlanetSideZoneID(10000),41605314, PlanetSideGUID(100), true, 0)))
+      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605313, PlanetSideGUID(xGUID), false, 6404428)))
+      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605314, PlanetSideGUID(100), true, 0)))
 
     case KeepAliveMessage(code) =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
 
-    case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
-//      log.info("PlayerState: " + msg)
-      val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
-      if(playerOpt.isDefined) {
+    case msg@PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
+      //      log.info("PlayerState: " + msg)
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
+      if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         player.setPosition(pos)
         player.setPitch(aim_pitch)
         player.crouched = is_crouching
       }
-      if(useProximityTerminal && vel.isEmpty){
-        sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(avatar_guid, useProximityTerminalID, true)))
-        if(playerOpt.isDefined) {
+      if (useProximityTerminal && vel.isEmpty) {
+        sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(avatar_guid, useProximityTerminalID, true)))
+        if (playerOpt.isDefined) {
           val player: PlayerAvatar = playerOpt.get
-          if(player.redHealth + 5 > player.getMaxHealth) player.redHealth = player.getMaxHealth
-          if(player.redHealth + 5 <= player.getMaxHealth) player.redHealth += 5
-          if(player.blueArmor + 5 > player.getMaxPersonalArmor) player.blueArmor = player.getMaxPersonalArmor
-          if(player.blueArmor + 5 <= player.getMaxPersonalArmor) player.blueArmor += 5
+          if (player.redHealth + 5 > player.getMaxHealth) player.redHealth = player.getMaxHealth
+          if (player.redHealth + 5 <= player.getMaxHealth) player.redHealth += 5
+          if (player.blueArmor + 5 > player.getMaxPersonalArmor) player.blueArmor = player.getMaxPersonalArmor
+          if (player.blueArmor + 5 <= player.getMaxPersonalArmor) player.blueArmor += 5
           println(player.redHealth)
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,player.redHealth)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,4,player.blueArmor)))
-          if(player.redHealth == player.getMaxHealth && player.blueArmor == player.getMaxPersonalArmor){
-            println(player.redHealth,player.blueArmor)
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
+          if (player.redHealth == player.getMaxHealth && player.blueArmor == player.getMaxPersonalArmor) {
+            println(player.redHealth, player.blueArmor)
             useProximityTerminal = false
-            sendResponse(PacketCoding.CreateGamePacket(0,ProximityTerminalUseMessage(PlanetSideGUID(0), useProximityTerminalID, false)))
+            sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(PlanetSideGUID(0), useProximityTerminalID, false)))
           }
         }
       }
-      if(playerOpt.isDefined) {
+      if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        if(vel.isEmpty){
-          if(!is_crouching) {
-            if(player.greenStamina + 1 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
-            if(player.greenStamina + 1 <= player.getMaxStamina) player.greenStamina += 1
+        if (vel.isEmpty) {
+          if (!is_crouching) {
+            if (player.greenStamina + 1 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
+            if (player.greenStamina + 1 <= player.getMaxStamina) player.greenStamina += 1
           }
-          else if(is_crouching) {
-            if(player.greenStamina + 2 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
-            if(player.greenStamina + 2 <= player.getMaxStamina) player.greenStamina += 2
+          else if (is_crouching) {
+            if (player.greenStamina + 2 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
+            if (player.greenStamina + 2 <= player.getMaxStamina) player.greenStamina += 2
           }
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,2,player.greenStamina)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 2, player.greenStamina)))
         }
       }
 
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14000), Vector3(pos.x + 2.5f,pos.y + 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, true, is_cloaking)))
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14010), Vector3(pos.x - 2.5f,pos.y - 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14020), Vector3(pos.x - 2.5f,pos.y + 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14030), Vector3(pos.x + 2.5f,pos.y - 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
-//      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14040), Vector3(pos.x + 0.0f,pos.y - 2.5f,pos.z), vel,
-//        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
+      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14000), Vector3(pos.x + 2.5f,pos.y + 2.5f,pos.z), vel,
+      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, true, is_cloaking)))
+      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14010), Vector3(pos.x - 2.5f,pos.y - 2.5f,pos.z), vel,
+      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
+      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14020), Vector3(pos.x - 2.5f,pos.y + 2.5f,pos.z), vel,
+      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
+      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14030), Vector3(pos.x + 2.5f,pos.y - 2.5f,pos.z), vel,
+      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
+      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14040), Vector3(pos.x + 0.0f,pos.y - 2.5f,pos.z), vel,
+      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
       sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14050), Vector3(3127.0f, 2882.0f, 35.21875f), None,
         64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
       sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14060), Vector3(3127.0f, 2880.0f, 35.21875f), None,
@@ -400,60 +398,60 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14070), Vector3(3127.0f, 2884.0f, 35.21875f), None,
         64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
 
-//      avatarService ! AvatarService.PlayerStateMessage(msg)
+    //      avatarService ! AvatarService.PlayerStateMessage(msg)
 
-    case msg @ ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
+    case msg@ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       // TODO: Prevents log spam, but should be handled correctly
       if (messagetype != ChatMessageType.CMT_TOGGLE_GM) {
         log.info("Chat: " + msg)
       }
 
-      if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, "TestChar", contents, note_contents)))
+      if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, "TestChar", contents, note_contents)))
 
-//      if(messagetype == ChatMessageType.CMT_OPEN) {
-//        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),contents.toInt,1000)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(4717), 0)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(5398), 0)))
-////        val msg = ObjectCreateMessage(0,contents.toInt,PlanetSideGUID(4717),Some(ObjectCreateMessageParent(PlanetSideGUID(15000),1)),Some(WeaponData(7,InternalSlot(540,PlanetSideGUID(5398),0,AmmoBoxData(1)))))
-//        val msg = ObjectCreateMessage(0,ObjectClass.KATANA,PlanetSideGUID(4717),Some(ObjectCreateMessageParent(PlanetSideGUID(15000),1)),Some(WeaponData(contents.toInt,InternalSlot(540,PlanetSideGUID(5398),0,AmmoBoxData(1)))))
-//        val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
-//        sendRawResponse(pkt)
-////        InventoryItem(ObjectClass.KATANA, PlanetSideGUID((xGUID+5)), 4,
-////          WeaponData(8, ObjectClass.MELEE_AMMO, PlanetSideGUID((xGUID+6)), 0, AmmoBoxData(1))) ::
-//      }
+      //      if(messagetype == ChatMessageType.CMT_OPEN) {
+      //        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),contents.toInt,1000)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(4717), 0)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(5398), 0)))
+      ////        val msg = ObjectCreateMessage(0,contents.toInt,PlanetSideGUID(4717),Some(ObjectCreateMessageParent(PlanetSideGUID(15000),1)),Some(WeaponData(7,InternalSlot(540,PlanetSideGUID(5398),0,AmmoBoxData(1)))))
+      //        val msg = ObjectCreateMessage(0,ObjectClass.KATANA,PlanetSideGUID(4717),Some(ObjectCreateMessageParent(PlanetSideGUID(15000),1)),Some(WeaponData(contents.toInt,InternalSlot(540,PlanetSideGUID(5398),0,AmmoBoxData(1)))))
+      //        val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
+      //        sendRawResponse(pkt)
+      ////        InventoryItem(ObjectClass.KATANA, PlanetSideGUID((xGUID+5)), 4,
+      ////          WeaponData(8, ObjectClass.MELEE_AMMO, PlanetSideGUID((xGUID+6)), 0, AmmoBoxData(1))) ::
+      //      }
 
-//      if(messagetype == ChatMessageType.CMT_TELL) {
-//        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),recipient.toInt,contents.toInt)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagSpawned^@amp_station~^@Pwyll~^@comm_station_dsp~^@Bel~^15~",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagPickedUp^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagDropped^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_223,true,"","@CTF_Failed_SourceResecured^@NewConglomerate~^@Pwyll~",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_INFO,true,"","switchboard",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@OptionsCullWatermarkUsage",None)))
+      //      if(messagetype == ChatMessageType.CMT_TELL) {
+      //        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),recipient.toInt,contents.toInt)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagSpawned^@amp_station~^@Pwyll~^@comm_station_dsp~^@Bel~^15~",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagPickedUp^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagDropped^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_223,true,"","@CTF_Failed_SourceResecured^@NewConglomerate~^@Pwyll~",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_INFO,true,"","switchboard",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@OptionsCullWatermarkUsage",None)))
 
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_223,true,"","@CTF_Failed_SourceResecured^@TerranRepublic~^@Hanish~",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_224,false,"","@TooFastToDismount",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225,false,"","@DoorWillOpenWhenShuttleReturns",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOverride",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@charsaved",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@SVCP_PositionInQueue^1~^1~",None)))
-//        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOff",None)))
-//      }
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_223,true,"","@CTF_Failed_SourceResecured^@TerranRepublic~^@Hanish~",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_224,false,"","@TooFastToDismount",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225,false,"","@DoorWillOpenWhenShuttleReturns",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOverride",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@charsaved",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@SVCP_PositionInQueue^1~^1~",None)))
+      //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOff",None)))
+      //      }
 
       if (messagetype == ChatMessageType.CMT_VOICE) {
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, false, "TestChar", contents,None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, false, "TestChar", contents, None)))
       }
       if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
         messagetype == ChatMessageType.CMT_WHO_PLATOONLEADERS || messagetype == ChatMessageType.CMT_WHO_SQUADLEADERS || messagetype == ChatMessageType.CMT_WHO_TEAMS) {
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true,"", "That command doesn't work for now",None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now", None)))
       }
 
       CSRZone.read(traveler, msg)
       CSRWarp.read(traveler, msg)
 
       // TODO: handle this appropriately
-      if(messagetype == ChatMessageType.CMT_QUIT) {
+      if (messagetype == ChatMessageType.CMT_QUIT) {
         sendResponse(DropCryptoSession())
         sendResponse(DropSession(sessionId, "user quit"))
       }
@@ -464,107 +462,108 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
-      if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, "TestChar", contents, note_contents)))
+      if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, "TestChar", contents, note_contents)))
 
-    case msg @ VoiceHostRequest(unk, PlanetSideGUID(player_guid), data) =>
-      log.info("Player "+player_guid+" requested in-game voice chat.")
+    case msg@VoiceHostRequest(unk, PlanetSideGUID(player_guid), data) =>
+      log.info("Player " + player_guid + " requested in-game voice chat.")
       sendResponse(PacketCoding.CreateGamePacket(0, VoiceHostKill()))
 
-    case msg @ VoiceHostInfo(player_guid, data) =>
+    case msg@VoiceHostInfo(player_guid, data) =>
       sendResponse(PacketCoding.CreateGamePacket(0, VoiceHostKill()))
 
-    case msg @ ChangeFireModeMessage(item_guid, fire_mode) =>
+    case msg@ChangeFireModeMessage(item_guid, fire_mode) =>
       log.info("ChangeFireMode: " + msg)
 
-    case msg @ ChangeFireStateMessage_Start(item_guid) =>
+    case msg@ChangeFireStateMessage_Start(item_guid) =>
       log.info("ChangeFireState_Start: " + msg)
 
-    case msg @ ChangeFireStateMessage_Stop(item_guid) =>
+    case msg@ChangeFireStateMessage_Stop(item_guid) =>
       log.info("ChangeFireState_Stop: " + msg)
 
-    case msg @ EmoteMsg(avatar_guid, emote) =>
+    case msg@EmoteMsg(avatar_guid, emote) =>
       log.info("Emote: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, EmoteMsg(avatar_guid, emote)))
 
-    case msg @ DropItemMessage(item_guid) =>
+    case msg@DropItemMessage(item_guid) =>
       log.info("DropItem: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, DropItemMessage(item_guid)))
 
-    case msg @ ReloadMessage(item_guid, ammo_clip, unk1) =>
-//      log.info("Reload: " + msg)
+    case msg@ReloadMessage(item_guid, ammo_clip, unk1) =>
+      //      log.info("Reload: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 100, unk1)))
 
-    case msg @ ObjectHeldMessage(avatar_guid, held_holsters, unk1) =>
+    case msg@ObjectHeldMessage(avatar_guid, held_holsters, unk1) =>
       log.info("ObjectHeld: " + msg)
-      val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
-      if(playerOpt.isDefined) {
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
+      if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         player.setUsedHolster(held_holsters)
       }
 
-    case msg @ AvatarJumpMessage(state) =>
+    case msg@AvatarJumpMessage(state) =>
       log.info("AvatarJump: " + msg)
-      val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
-      if(playerOpt.isDefined) {
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        if(player.greenStamina - 10 <= 0) player.greenStamina = 0
-        if(player.greenStamina - 10 > 0) player.greenStamina -= 10
-        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),2,player.greenStamina)))
+        if (player.greenStamina - 10 <= 0) player.greenStamina = 0
+        if (player.greenStamina - 10 > 0) player.greenStamina -= 10
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid), 2, player.greenStamina)))
       }
 
-    case msg @ ZipLineMessage(player_guid,origin_side,action,id,x,y,z) =>
+    case msg@ZipLineMessage(player_guid, origin_side, action, id, pos) =>
       log.info("ZipLineMessage: " + msg)
-      if(origin_side == false && action == 0) {
+      if (!origin_side && action == 0) {
         //doing this lets you use the zip line in one direction, cant come back
-        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, id, x,y,z)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ZipLineMessage(player_guid, origin_side, action, id, pos)))
       }
-      else if(origin_side == false && action == 1) {
+      else if (!origin_side && action == 1) {
         //disembark from zipline at destination !
-        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, 0, x,y,z)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ZipLineMessage(player_guid, origin_side, action, 0, pos)))
       }
-      else if(origin_side == false && action == 2) {
+      else if (!origin_side && action == 2) {
         //get off by force
-        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, 0, x,y,z)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ZipLineMessage(player_guid, origin_side, action, 0, pos)))
       }
-      else if(origin_side == true && action == 0) {
-        // for teleporters & one other zipline direction
+      else if (origin_side && action == 0) {
+        // for teleporters & the other zipline direction
       }
 
-    case msg @ RequestDestroyMessage(object_guid) =>
+    case msg@RequestDestroyMessage(object_guid) =>
       log.info("RequestDestroy: " + msg)
       // TODO: Make sure this is the correct response in all cases
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
 
-    case msg @ ObjectDeleteMessage(object_guid, unk1) =>
+    case msg@ObjectDeleteMessage(object_guid, unk1) =>
       log.info("ObjectDelete: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
 
-    case msg @ MoveItemMessage(item_guid, avatar_guid_1, avatar_guid_2, dest, unk1) =>
+    case msg@MoveItemMessage(item_guid, avatar_guid_1, avatar_guid_2, dest, unk1) =>
       log.info("MoveItem: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(avatar_guid_1,item_guid,dest)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(avatar_guid_1, item_guid, dest)))
 
-    case msg @ ChangeAmmoMessage(item_guid, unk1) =>
+    case msg@ChangeAmmoMessage(item_guid, unk1) =>
       log.info("ChangeAmmo: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(item_guid,PlanetSideGUID(1564),0)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(item_guid, PlanetSideGUID(1564), 0)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChangeAmmoMessage(item_guid, 100)))
 
-    case msg @ UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, unk9) =>
+    case msg@UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, unk9) =>
       log.info("UseItem: " + msg)
       // TODO: Not all fields in the response are identical to source in real packet logs (but seems to be ok)
       // TODO: Not all incoming UseItemMessage's respond with another UseItemMessage (i.e. doors only send out GenericObjectStateMsg)
       sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, unk9)))
-      if(unk1 != 0){ // TODO : medkit use ?!
-        val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
-        if(playerOpt.isDefined) {
+      if (unk1 != 0) {
+        // TODO : medkit use ?!
+        val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
+        if (playerOpt.isDefined) {
           val player: PlayerAvatar = playerOpt.get
-          if(player.getMaxHealth - player.redHealth <= 25 && player.getMaxHealth - player.redHealth != 0){
+          if (player.getMaxHealth - player.redHealth <= 25 && player.getMaxHealth - player.redHealth != 0) {
             player.redHealth = player.getMaxHealth
-            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,player.getMaxHealth)))
+            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.getMaxHealth)))
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2)))
           }
-          else if(player.getMaxHealth - player.redHealth > 25 ){
+          else if (player.getMaxHealth - player.redHealth > 25) {
             player.redHealth += 25
-            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid,0,player.redHealth)))
+            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2)))
           }
         }
@@ -573,119 +572,120 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(object_guid, 16)))
       }
 
-    case msg @ GenericObjectStateMsg(object_guid, unk1) =>
+    case msg@GenericObjectStateMsg(object_guid, unk1) =>
       log.info("GenericObjectState: " + msg)
 
-    case msg @ ItemTransactionMessage(terminal_guid, transaction_type, item_page, item_name, unk1, item_guid) =>
+    case msg@ItemTransactionMessage(terminal_guid, transaction_type, item_page, item_name, unk1, item_guid) =>
       log.info("ItemTransaction: " + msg)
-      if(transaction_type == TransactionType.Sell) {
+      if (transaction_type == TransactionType.Sell) {
         sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(item_guid, 0)))
         sendResponse(PacketCoding.CreateGamePacket(0, ItemTransactionResultMessage(terminal_guid, transaction_type, true)))
       }
-      if(transaction_type == TransactionType.Buy) {
+      if (transaction_type == TransactionType.Buy) {
         val obj = AmmoBoxData(50)
         val msg = ObjectCreateMessage(0, 28, PlanetSideGUID(1280), ObjectCreateMessageParent(PlanetSideGUID((xGUID)), 250), obj)
         val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
         sendRawResponse(pkt)
       }
-//      if(transaction_type == TransactionType.Learn && item_name == "anti_vehicular") {
-//        sendRawResponse(hex"45e4003000")
-//      }
+    //      if(transaction_type == TransactionType.Learn && item_name == "anti_vehicular") {
+    //        sendRawResponse(hex"45e4003000")
+    //      }
 
-    case msg @ WeaponDelayFireMessage(seq_time, weapon_guid) =>
+    case msg@WeaponDelayFireMessage(seq_time, weapon_guid) =>
       log.info("WeaponDelayFire: " + msg)
 
-    case msg @ WeaponFireMessage(seq_time, weapon_guid, projectile_guid, shot_origin, unk1, unk2, unk3, unk4, unk5, unk6, unk7) =>
+    case msg@WeaponFireMessage(seq_time, weapon_guid, projectile_guid, shot_origin, unk1, unk2, unk3, unk4, unk5, unk6, unk7) =>
       log.info("WeaponFire: " + msg)
 
-    case msg @ WeaponDryFireMessage(weapon_guid) =>
+    case msg@WeaponDryFireMessage(weapon_guid) =>
       log.info("WeaponDryFireMessage: " + msg)
 
-    case msg @ WeaponLazeTargetPositionMessage(weapon, pos1, pos2) =>
+    case msg@WeaponLazeTargetPositionMessage(weapon, pos1, pos2) =>
       log.info("Lazing position: " + pos2.toString)
 
-    case msg @ HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
+    case msg@HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
       log.info("Hit: " + msg)
 
-    case msg @ SplashHitMessage(unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8) =>
+    case msg@SplashHitMessage(unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8) =>
       log.info("SplashHitMessage: " + msg)
 
-    case msg @ AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
+    case msg@AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
       log.info("AvatarFirstTimeEvent: " + msg)
 
-    case msg @ AvatarGrenadeStateMessage(player_guid, state) =>
+    case msg@AvatarGrenadeStateMessage(player_guid, state) =>
       log.info("AvatarGrenadeStateMessage: " + msg)
-	  
-    case msg @ GenericActionMessage(action) =>
+
+    case msg@GenericActionMessage(action) =>
       log.info("GenericActionMessage: " + msg)
 
-    case msg @ MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
-      log.info("MountVehicleMsg: "+msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(vehicle_guid,0,1000)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid,player_guid,0)))
+    case msg@MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
+      log.info("MountVehicleMsg: " + msg)
+      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(vehicle_guid, 0, 1000)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid, player_guid, 0)))
 
-    case msg @ DismountVehicleMsg(player_guid,u1,u2) =>
-      log.info("DismountVehicleMsg: "+msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, DismountVehicleMsg(player_guid,u1,true)))
+    case msg@DismountVehicleMsg(player_guid, u1, u2) =>
+      log.info("DismountVehicleMsg: " + msg)
+      sendResponse(PacketCoding.CreateGamePacket(0, DismountVehicleMsg(player_guid, u1, true)))
 
-    case msg @ WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
+    case msg@WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
       log.info("WarpgateRequest: " + msg)
 
-    case msg @ PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
-      log.info("PlanetsideAttributeMessage: "+msg)
-      sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
+    case msg@PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
+      log.info("PlanetsideAttributeMessage: " + msg)
+      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
 
-    case msg @ ProximityTerminalUseMessage(player_guid, object_guid, unk) =>
-      log.info("ProximityTerminalUseMessage: "+msg)
-      if(unk == false){
+    case msg@ProximityTerminalUseMessage(player_guid, object_guid, unk) =>
+      log.info("ProximityTerminalUseMessage: " + msg)
+      if (unk == false) {
         useProximityTerminal = true
         useProximityTerminalID = object_guid
       }
 
-    case msg @ SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
+    case msg@SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
       log.info("SquadDefinitionAction: " + msg)
 
-    case msg @ GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
+    case msg@GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
       log.info("Ouch! " + msg)
-      val playerOpt : Option[PlayerAvatar] = PlayerMasterList.getPlayer(p)
-      if(playerOpt.isDefined) {
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(p)
+      if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        if(player.redHealth - 10 <= 0) player.redHealth = 1
-        if(player.redHealth - 10 > 0) player.redHealth -= 10
-        if(player.greenStamina - 10 <= 0) player.greenStamina = 0
-        if(player.greenStamina - 10 > 0) player.greenStamina -= 10
-        if(player.blueArmor - 10 <= 0) player.blueArmor = 0
-        if(player.blueArmor - 10 > 0) player.blueArmor -= 10
-        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,0,player.redHealth)))
-        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,2,player.greenStamina)))
-        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p,4,player.blueArmor)))
+        if (player.redHealth - 10 <= 0) player.redHealth = 1
+        if (player.redHealth - 10 > 0) player.redHealth -= 10
+        if (player.greenStamina - 10 <= 0) player.greenStamina = 0
+        if (player.greenStamina - 10 > 0) player.greenStamina -= 10
+        if (player.blueArmor - 10 <= 0) player.blueArmor = 0
+        if (player.blueArmor - 10 > 0) player.blueArmor -= 10
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p, 0, player.redHealth)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p, 2, player.greenStamina)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p, 4, player.blueArmor)))
       }
 
-    case msg @ BugReportMessage(version_major,version_minor,version_date,bug_type,repeatable,location,zone,pos,summary,desc) =>
+    case msg@BugReportMessage(version_major, version_minor, version_date, bug_type, repeatable, location, zone, pos, summary, desc) =>
       log.info("BugReportMessage: " + msg)
 
-    case msg @ BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
+    case msg@BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
       log.info("BindPlayerMessage: " + msg)
 
     case default => log.info(s"Unhandled GamePacket ${pkt}")
   }
 
-  def failWithError(error : String) = {
+  def failWithError(error: String) = {
     log.error(error)
     sendResponse(PacketCoding.CreateControlPacket(ConnectionClose()))
   }
 
-  def sendResponse(cont : PlanetSidePacketContainer) : Unit = {
+  def sendResponse(cont: PlanetSidePacketContainer): Unit = {
     log.trace("WORLD SEND: " + cont)
     sendResponse(cont.asInstanceOf[Any])
   }
 
-  def sendResponse(msg : Any) : Unit = {
+  def sendResponse(msg: Any): Unit = {
     MDC("sessionId") = sessionId.toString
     rightRef !> msg
   }
 
-  def sendRawResponse(pkt : ByteVector) = {
+  def sendRawResponse(pkt: ByteVector) = {
     log.trace("WORLD SEND RAW: " + pkt)
     sendResponse(RawPacket(pkt))
   }
+}
