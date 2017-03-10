@@ -250,22 +250,24 @@ class WorldSessionActor extends Actor with MDCContextAware {
               if (playerOpt.isDefined) {
                 val player: PlayerAvatar = playerOpt.get
 
-
                 sendResponse(PacketCoding.CreateGamePacket(0,
                   ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(player.getPosition, 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
                   player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
                   List(),
                   List(),
                   InventoryData(true, false, false, userInv)))))
-                player.continent = "home2"
 
+
+                var home = Zone.get("z1").get
+                if(player.faction == PlanetSideEmpire.NC) {home = Zone.get("home1").get}
+                if(player.faction == PlanetSideEmpire.TR) {home = Zone.get("home2").get}
+                if(player.faction == PlanetSideEmpire.VS) {home = Zone.get("home3").get}
+                Transfer.loadMap(traveler, home)
+                Transfer.loadSelf(traveler, sessionId, Zone.selectRandom(home))
+                player.continent = home.zonename
               }
 
 
-
-              val home2 = Zone.get("home2").get
-              Transfer.loadMap(traveler, home2)
-              Transfer.loadSelf(traveler, sessionId, Zone.selectRandom(home2))
               //              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(guid,54,15))) // aura effect
               //              sendResponse(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(guid,100000000,0)))
               sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
