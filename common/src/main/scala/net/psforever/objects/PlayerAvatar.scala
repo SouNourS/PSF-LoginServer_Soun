@@ -1,7 +1,7 @@
 // Copyright (c) 2016 PSForever.net to present
 package net.psforever.objects
 
-import net.psforever.packet.game.PlanetSideGUID
+//import net.psforever.packet.game.{CharacterCreateRequestMessage, PlanetSideGUID}
 import net.psforever.types.PlanetSideEmpire
 
 import scala.collection.mutable.ListBuffer
@@ -16,12 +16,14 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   var name : String = "player"
   /** The faction to which the character belongs. Defaults to tradition. */
   var faction : PlanetSideEmpire.Value = PlanetSideEmpire.TR
-  /** The player's gender, which also affects their voice. Boolean, since there are only two options, and defaults to true (male). */
-  var sex : Boolean = true
+  /** The player's gender, which also affects their voice. Defaults to 1 (male). */
+  var sex : Int = 1
   /** The player's voice. Affected by sex. */
   var voice : Int = 0
   /** The player's style of face. Affected by sex. */
   var face : Int = 0
+  /** The continent where the character is.*/
+  var continent : String = "home2"
 
   /** The player's battle rank. Always a positive non-zero integer. */
   var br : Int = 1
@@ -62,13 +64,29 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
     * @param aFace the player's voice
     * @param aVoice the player's style of face
     */
-  def this(guid : Int, aName : String, aFaction : PlanetSideEmpire.Value, aSex : Boolean, aFace : Int, aVoice : Int) {
+  def this(guid : Int, aName : String, aFaction : PlanetSideEmpire.Value, aSex : Int, aFace : Int, aVoice : Int) {
     this(guid)
     name = aName
     faction = aFaction
     sex = aSex
     face = aFace
     voice = aVoice
+  }
+
+  /**
+    * Get the current zone of the player.
+    * @return the continent name
+    */
+  def getContinent : String = {
+    continent
+  }
+
+  /**
+    * Set the player's zone.
+    * @param newContinent na
+    */
+  def setContinent(newContinent : String) : Unit = {
+    continent = newContinent
   }
 
   /**
@@ -334,7 +352,7 @@ object PlayerAvatar {
     * @param aVoice the player's style of face
     * @return the PlayerAvatar
     */
-  def apply(guid : Int, aName : String, aFaction : PlanetSideEmpire.Value, aSex : Boolean, aFace : Int, aVoice : Int) : PlayerAvatar = {
+  def apply(guid : Int, aName : String, aFaction : PlanetSideEmpire.Value, aSex : Int, aFace : Int, aVoice : Int) : PlayerAvatar = {
     new PlayerAvatar(guid, aName, aFaction, aSex, aFace, aVoice)
   }
 

@@ -15,11 +15,6 @@ object AvatarService {
 /*
    /avatar/
      - /home2/id
-     - /platoon/id
-     - /squad/id
-     - /player/id
-     - /broadcast/soi
-     - /local/area
      -
  */
 

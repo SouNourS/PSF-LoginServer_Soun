@@ -22,16 +22,6 @@ object ExoSuitCatalog {
   catalog += armor.guid -> armor
 
   armor = ExoSuit(0)
-  armor.name = "standard exo-suit"
-  armor.maxArmor = 50
-  armor.inventoryWidth = 9
-  armor.inventoryHeight = 6
-  armor.holsterTypes(0) = EquipmentSize.PISTOL
-  armor.holsterTypes(2) = EquipmentSize.RIFLE
-  armor.holsterTypes(4) = EquipmentSize.MELEE
-  catalog += armor.guid -> armor
-
-  armor = ExoSuit(1)
   armor.name = "agile exo-suit"
   armor.maxArmor = 100
   armor.inventoryWidth = 9
@@ -42,7 +32,7 @@ object ExoSuitCatalog {
   armor.holsterTypes(4) = EquipmentSize.MELEE
   catalog += armor.guid -> armor
 
-  armor = ExoSuit(2)
+  armor = ExoSuit(1)
   armor.name = "reinforced exo-suit"
   armor.permission = 1 //TODO "reinforced exo-suit" certification needed
   armor.maxArmor = 200
@@ -53,6 +43,15 @@ object ExoSuitCatalog {
   armor.holsterTypes(2) = EquipmentSize.RIFLE
   armor.holsterTypes(3) = EquipmentSize.RIFLE
   armor.holsterTypes(4) = EquipmentSize.MELEE
+  catalog += armor.guid -> armor
+
+  armor = ExoSuit(2)
+  armor.name = "mechanized assault exo-suit"
+  armor.permission = 1 //TODO a "max" certification needed for suit, max weapons are permitted by other certification specifics
+  armor.maxArmor = 650
+  armor.inventoryWidth = 16
+  armor.inventoryHeight = 16
+  armor.holsterTypes(0) = EquipmentSize.MAX // TODO how to handle this?
   catalog += armor.guid -> armor
 
   armor = ExoSuit(3)
@@ -66,12 +65,13 @@ object ExoSuitCatalog {
   catalog += armor.guid -> armor
 
   armor = ExoSuit(4)
-  armor.name = "mechanized assault exo-suit"
-  armor.permission = 1 //TODO a "max" certification needed for suit, max weapons are permitted by other certification specifics
-  armor.maxArmor = 650
-  armor.inventoryWidth = 16
-  armor.inventoryHeight = 16
-  armor.holsterTypes(0) = EquipmentSize.MAX // TODO how to handle this?
+  armor.name = "standard exo-suit"
+  armor.maxArmor = 50
+  armor.inventoryWidth = 9
+  armor.inventoryHeight = 6
+  armor.holsterTypes(0) = EquipmentSize.PISTOL
+  armor.holsterTypes(2) = EquipmentSize.RIFLE
+  armor.holsterTypes(4) = EquipmentSize.MELEE
   catalog += armor.guid -> armor
 
   /**
