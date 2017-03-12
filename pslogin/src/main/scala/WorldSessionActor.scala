@@ -559,19 +559,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ AvatarJumpMessage(state) =>
       log.info("AvatarJump: " + msg)
 
-    case msg @ ZipLineMessage(player_guid,origin_side,action,id,x,y,z) =>
+    case msg @ ZipLineMessage(player_guid,origin_side,action,id,pos) =>
       log.info("ZipLineMessage: " + msg)
       if(origin_side == false && action == 0) {
         //doing this lets you use the zip line in one direction, cant come back
-        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, id, x,y,z)))
+        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, id, pos)))
       }
       else if(origin_side == false && action == 1) {
         //disembark from zipline at destination !
-        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, 0, x,y,z)))
+        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, 0, pos)))
       }
       else if(origin_side == false && action == 2) {
         //get off by force
-        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, 0, x,y,z)))
+        sendResponse(PacketCoding.CreateGamePacket(0,ZipLineMessage(player_guid, origin_side, action, 0, pos)))
       }
       else if(origin_side == true && action == 0) {
         // for teleporters & one other zipline direction
