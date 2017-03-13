@@ -2,7 +2,7 @@
 import akka.actor.Actor
 import akka.event.{ActorEventBus, SubchannelClassification}
 import akka.util.Subclassification
-import net.psforever.packet.game.{PlanetSideGUID, PlayerStateMessageUpstream}
+import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID, PlayerStateMessageUpstream}
 import net.psforever.types.Vector3
 
 object AvatarService {
@@ -10,6 +10,7 @@ object AvatarService {
   case class Leave()
   case class LeaveAll()
   case class PlayerStateMessage(msg : PlayerStateMessageUpstream)
+  case class AvatarFirstTimeEventMessage(msg : PlanetSideGUID)
 }
 
 /*
@@ -18,13 +19,9 @@ object AvatarService {
      -
  */
 
-//msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.unk4, msg.is_cloaking
-final case class AvatarMessage(to : String, avatar_guid : PlanetSideGUID, pos : Vector3, vel : Option[Vector3],
-                               unk1 : Int, aim_pitch : Int, unk2 : Int,
-                               is_crouching : Boolean, unk4 : Boolean, is_cloaking : Boolean)
-//final case class AvatarMessage(avatar_guid : PlanetSideGUID, pos : Vector3, vel : Option[Vector3],
-//                               unk1 : Int, aim_pitch : Int, unk2 : Int,
-//                               is_crouching : Boolean, unk4 : Boolean, is_cloaking : Boolean)
+final case class AvatarMessage(to : String = "", avatar_guid : PlanetSideGUID, pos : Vector3 = Vector3(0f,0f,0f), vel : Option[Vector3] = None,
+                               unk1 : Int = 0, aim_pitch : Int = 0, unk2 : Int = 0,
+                               is_crouching : Boolean = false, unk4 : Boolean = false, is_cloaking : Boolean = false)
 
 class AvatarEventBus extends ActorEventBus with SubchannelClassification {
   type Event = AvatarMessage
@@ -41,14 +38,6 @@ class AvatarEventBus extends ActorEventBus with SubchannelClassification {
     subscriber ! event
   }
 }
-
-/*object AvatarPath {
-  def apply(path : String) = new AvatarPath(path)
-}
-
-class AvatarPath(path: String) {
-  def /(other : AvatarPath) = this.path + "/" + other.path
-}*/
 
 class AvatarService extends Actor {
   import AvatarService._
@@ -78,17 +67,9 @@ class AvatarService extends Actor {
       AvatarEvents.unsubscribe(sender())
     case m @ PlayerStateMessage(msg) =>
 //      log.info(s"NEW: ${m}")
-
-      //PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, unk4, unk5, is_cloaking, unk6, unk7)
-      //PlayerStateMessage(guid, pos, vel, facingYaw, facingPitch, facingYawUpper, unk1, is_crouching, is_jumping, unk2, is_cloaked)
-//      msg.avatar_guid match {
-//        case ChatMessageType.CMT_OPEN =>
-          AvatarEvents.publish(AvatarMessage("/Avatar/home2", msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.is_jumping, msg.is_cloaking))
-//      AvatarEvents.publish(AvatarMessage(msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.unk4, msg.is_cloaking))
-//        case ChatMessageType.CMT_SQUAD =>
-//          AvatarEvents.publish(ChatMessage("/Avatar/squad", from, msg.contents))
-//        case _ =>
-//      }
+      AvatarEvents.publish(AvatarMessage("/Avatar/home2", msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.is_jumping, msg.is_cloaking))
+    case m @ AvatarFirstTimeEventMessage(msg) =>
+      AvatarEvents.publish(AvatarMessage("/Avatar/home2", PlanetSideGUID(msg.guid)))
     case _ =>
   }
 }

@@ -80,8 +80,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (to.drop(6) == "squad") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SQUAD, true, from, data, None)))
     case AvatarMessage(to, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        val onlineplayer: PlayerAvatar = OnlinePlayer.get
+        if(pos == Vector3(0f,0f,0f) && PlanetSideGUID(player.guid) != avatar_guid) sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+          onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
+          List(),
+          List(),
+          InventoryData(true, false, false, List())))))
         if(PlanetSideGUID(player.guid) != avatar_guid) sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, 0, is_crouching, unk4, false, is_cloaking)))
       }
     case default => failWithError(s"Invalid packet class received: $default")
@@ -344,7 +351,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       //hardcoded avatar and some pertinent equipment setup
 //      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, 0, 0)
-      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, PlanetSideEmpire.TR, gender.id, 0, 0)
+      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, 0, 0)
       avatar.setExoSuitType(0)
       //init holsters
       avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
@@ -662,6 +669,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
       log.info("AvatarFirstTimeEvent: " + msg)
+      avatarService ! AvatarService.AvatarFirstTimeEventMessage(avatar_guid)
 
     case msg@AvatarGrenadeStateMessage(player_guid, state) =>
       log.info("AvatarGrenadeStateMessage: " + msg)
