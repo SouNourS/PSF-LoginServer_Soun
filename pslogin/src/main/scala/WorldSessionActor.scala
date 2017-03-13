@@ -274,30 +274,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 player.continent = home.zonename
               }
 
-
-              //              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(guid,54,15))) // aura effect
-              //              sendResponse(PacketCoding.CreateGamePacket(0, BattleExperienceMessage(guid,100000000,0)))
-              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-                "  \\#6Welcome! The commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-                "  \\#6You can use \\#3/fly on\\#6 (or off) to fly, or \\#3/speed X\\#6 (x from 1 to 5) to run !", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-                "  \\#6You can use local chat !", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-                "  \\#6Change continent will reset your inventory !", None)))
-              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)))
-
-
-              // test AvatarStatisticsMessage
-              //              sendRawResponse(hex"000901f80019067f4000000000247f013c400000000000000000000000000000000000000000200000000000000000000000247f013d600000000020000000000000000000000000000000000000000000000000000000067f4000000000247f024d600000000020000000000000000000000000000000200000000000000000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000067f4000000000")
               //              sendResponse(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(75),0,"@fav_light_infantry",Some(1))))
               // test OrbitalShuttleTimeMsg
               sendRawResponse(hex"5b75c4020180200f8000583a80000a80e041142903820450a00e0c1140")
-              //              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(PlanetSideGUID(75),2,61)))
-              //              sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(PlanetSideGUID(75),2,60)))
 
-
-              //              sendResponse(PacketCoding.CreateGamePacket(0, objectHex))
 
               // These object_guids are specfic to VS Sanc
               //              for(nanototo <- 0 to 1024)
@@ -345,6 +325,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
               chatService ! ChatService.Join("local")
               chatService ! ChatService.Join("squad")
+
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+                "  \\#6Welcome! The commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+                "  \\#6You can use \\#3/fly on\\#6 (or off) to fly, or \\#3/speed X\\#6 (x from 1 to 5) to run !", None)))
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+                "  \\#6You can use local chat !", None)))
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+                "  \\#6Change continent will reset your inventory !", None)))
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)))
           }
         case default =>
           log.error("Unsupported " + default + " in " + msg)
@@ -689,18 +679,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
         useProximityTerminalID = object_guid
       }
 
-    case msg @ MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
+    case msg@MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
       log.info("MounVehicleMsg: "+msg)
       sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(vehicle_guid, 0, 1000)))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid, player_guid, 0)))
 
-    case msg @ DismountVehicleMsg(player_guid, u1, u2) =>
+    case msg@DismountVehicleMsg(player_guid, u1, u2) =>
       log.info("DismountVehicleMsg: " + msg)
 //      sendResponse(PacketCoding.CreateGamePacket(0, msg)) //should be safe; replace with ObjectDetachMessage later
       sendResponse(PacketCoding.CreateGamePacket(0, DismountVehicleMsg(player_guid, u1, true)))
 
-    case msg @ AvatarGrenadeStateMessage(player_guid, state) =>
-      log.info("AvatarGrenadeStateMessage: " + msg)
+    case msg@AvatarGrenadeStateMessage(player_guid, state) =>
+      log.info("AvatarGrenadeStateMsg: " + msg)
 
     case msg@SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
       log.info("SquadDefinitionAction: " + msg)

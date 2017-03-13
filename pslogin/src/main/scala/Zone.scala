@@ -1,4 +1,5 @@
 // Copyright (c) 2017 PSForever
+import akka.actor.ActorRef
 import net.psforever.objects.{PlayerAvatar, PlayerMasterList}
 import net.psforever.packet.{PacketCoding, PlanetSidePacketContainer}
 import net.psforever.packet.game._
@@ -25,11 +26,7 @@ import scala.util.{Random, Try}
     * @param session the player's session
     */
   class Traveler(private val session : WorldSessionActor) {
-    /**
-      * The byte-code form a a CreateObjectMessage that would construct the player's avatar
-      */
-    val player : ByteVector = session.objectHex2
-
+    var avatarService : ActorRef = session.avatarService
     /**
       * The name of the zone the player currently occupies
       */
@@ -352,6 +349,8 @@ import scala.util.{Random, Try}
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionID)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        traveler.avatarService ! AvatarService.LeaveAll
+
 
         //dispose inventory
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+1),4)))
@@ -388,6 +387,11 @@ import scala.util.{Random, Try}
       * @param zone the `Zone` requested
       */
     def loadMap(traveler : Traveler, zone : Zone) : Unit = {
+//      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(traveler.session.sessionId)
+//      if (playerOpt.isDefined) {
+//        val player: PlayerAvatar = playerOpt.get
+//        traveler.avatarService ! AvatarService.LeaveAll
+//      }
       traveler.sendToSelf(PacketCoding.CreateGamePacket(0, LoadMapMessage(zone.map, zone.zonename, 40100,25,true,3770441820L)))
     }
 
