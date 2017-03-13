@@ -411,7 +411,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x4a => noDecoder(SpawnRequestMessage)
     case 0x4b => noDecoder(DeployRequestMessage)
     case 0x4c => noDecoder(UnknownMessage76)
-    case 0x4d => noDecoder(RepairMessage)
+    case 0x4d => game.RepairMessage.decode
     case 0x4e => noDecoder(ServerVehicleOverrideMsg)
     case 0x4f => noDecoder(LashMessage)
 
@@ -497,7 +497,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x92 => noDecoder(PlanetsideStringAttributeMessage)
     case 0x93 => noDecoder(DataChallengeMessage)
     case 0x94 => noDecoder(DataChallengeMessageResp)
-    case 0x95 => noDecoder(WeatherMessage)
+    case 0x95 => game.WeatherMessage.decode
     case 0x96 => noDecoder(SimDataChallenge)
     case 0x97 => noDecoder(SimDataChallengeResp)
     // 0x98

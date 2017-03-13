@@ -535,12 +535,22 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("Emote: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, EmoteMsg(avatar_guid, emote)))
 
-    case msg@DropItemMessage(item_guid) =>
+    case msg @ DropItemMessage(item_guid) =>
       log.info("DropItem: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, DropItemMessage(item_guid)))
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.guid), item_guid, player.getPosition, 0, 0, 0)))
+        sendResponse(PacketCoding.CreateGamePacket(0, DropItemMessage(item_guid)))
+      }
 
-    case msg@ReloadMessage(item_guid, ammo_clip, unk1) =>
-      //      log.info("Reload: " + msg)
+    case msg @ PickupItemMessage(item_guid, player_guid, unk1, unk2) =>
+      log.info("PickupItem: " + msg)
+      sendResponse(PacketCoding.CreateGamePacket(0, PickupItemMessage(item_guid, player_guid, unk1, unk2)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(player_guid, item_guid, 250)))
+
+    case msg @ ReloadMessage(item_guid, ammo_clip, unk1) =>
+      log.info("Reload: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 100, unk1)))
 
     case msg@ObjectHeldMessage(avatar_guid, held_holsters, unk1) =>
@@ -669,21 +679,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg@GenericActionMessage(action) =>
       log.info("GenericActionMessage: " + msg)
 
-    case msg@MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
-      log.info("MountVehicleMsg: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(vehicle_guid, 0, 1000)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid, player_guid, 0)))
-
-    case msg@DismountVehicleMsg(player_guid, u1, u2) =>
-      log.info("DismountVehicleMsg: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, DismountVehicleMsg(player_guid, u1, true)))
-
     case msg@WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
       log.info("WarpgateRequest: " + msg)
-
-    case msg@PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
-      log.info("PlanetsideAttributeMessage: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
 
     case msg@ProximityTerminalUseMessage(player_guid, object_guid, unk) =>
       log.info("ProximityTerminalUseMessage: " + msg)
@@ -691,6 +688,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
         useProximityTerminal = true
         useProximityTerminalID = object_guid
       }
+
+    case msg @ MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
+      log.info("MounVehicleMsg: "+msg)
+      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(vehicle_guid, 0, 1000)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid, player_guid, 0)))
+
+    case msg @ DismountVehicleMsg(player_guid, u1, u2) =>
+      log.info("DismountVehicleMsg: " + msg)
+//      sendResponse(PacketCoding.CreateGamePacket(0, msg)) //should be safe; replace with ObjectDetachMessage later
+      sendResponse(PacketCoding.CreateGamePacket(0, DismountVehicleMsg(player_guid, u1, true)))
+
+    case msg @ AvatarGrenadeStateMessage(player_guid, state) =>
+      log.info("AvatarGrenadeStateMessage: " + msg)
 
     case msg@SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
       log.info("SquadDefinitionAction: " + msg)
@@ -719,6 +729,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@CreateShortcutMessage(player_guid, slot, unk, addShortcut, shortcut) =>
 //      log.info("CreateShortcutMessage: " + msg)
+
+    case msg @ PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
+      log.info("PlanetsideAttributeMessage: "+msg)
+      sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
 
     case default => log.info(s"Unhandled GamePacket ${pkt}")
   }

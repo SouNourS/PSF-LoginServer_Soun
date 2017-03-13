@@ -549,8 +549,10 @@ import scala.util.{Random, Try}
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),2,2,ImplantType.Surge)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),3,2,ImplantType.Surge)))
 
+        for (i <- 1 to 300 by 2){
           val x = i+15000+(i*100-(100+i))
           if(player.guid != x) traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
+            ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(x), CharacterData(CharacterAppearanceData(Vector3(loc._1-2, loc._2+i, loc._3+300), 19, PlanetSideEmpire.TR, false, 4, "random" + x.toString, player.getExoSuitType, player.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
               player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
               List(),
               List(),

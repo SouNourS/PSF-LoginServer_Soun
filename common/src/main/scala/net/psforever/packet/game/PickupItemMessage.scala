@@ -1,4 +1,4 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
@@ -6,16 +6,23 @@ import scodec.Codec
 import scodec.codecs._
 
 /**
-  * Nothing about this packet is definite right now except the field sizes.
+  * Dispatched by the client when the player's intent is to collect an item from the ground.<br>
+  * <br>
+  * When a player faces a freed item on the ground in the game world, a prompt appears that invites him to pick it up.
+  * Doing so generates this packet.
+  * The server determines the exact inventory position where the item will get placed.
+  * If the inventory has insufficient space to accommodate the item, it gets put into the player's hand (on the cursor).<br>
+  * <br>
+  * This packet is complemented by an `ObjectAttachMessage` packet from the server that performs the actual "picking up."
+  * @param item_guid na
+  * @param player_guid na
   * @param unk1 na
   * @param unk2 na
-  * @param unk3 na
-  * @param unk4 na
   */
-final case class PickupItemMessage(unk1 : Int,
-                                   unk2 : Int,
-                                   unk3 : Int,
-                                   unk4 : Int)
+final case class PickupItemMessage(item_guid : PlanetSideGUID,
+                                   player_guid : PlanetSideGUID,
+                                   unk1 : Int,
+                                   unk2 : Int)
   extends PlanetSideGamePacket {
   type Packet = PickupItemMessage
   def opcode = GamePacketOpcode.PickupItemMessage
@@ -24,10 +31,9 @@ final case class PickupItemMessage(unk1 : Int,
 
 object PickupItemMessage extends Marshallable[PickupItemMessage] {
   implicit val codec : Codec[PickupItemMessage] = (
-    ("unk1" | uint16L) ::
-      ("unk2" | uint16L) ::
-      ("unk3" | uint8L) ::
-      ("unk4" | uint16L)
+    ("item_guid" | PlanetSideGUID.codec) ::
+      ("player_guid" | PlanetSideGUID.codec) ::
+      ("unk1" | uint8L) ::
+      ("unk2" | uint16L)
     ).as[PickupItemMessage]
 }
-
