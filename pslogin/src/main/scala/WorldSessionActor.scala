@@ -9,6 +9,7 @@ import scodec.bits._
 import org.log4s.MDC
 import MDCContextAware.Implicits._
 import ServiceManager.Lookup
+import ServiceManager2.Lookup2
 import net.psforever.objects._
 
 import net.psforever.packet.game.objectcreate._
@@ -24,8 +25,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var rightRef: ActorRef = ActorRef.noSender
 
   var serviceManager = Actor.noSender
+  var serviceManager2 = Actor.noSender
   var chatService = Actor.noSender
-//    var avatarService = Actor.noSender
+  var avatarService = Actor.noSender
 
   var useProximityTerminal = false
   var useProximityTerminalID = PlanetSideGUID(0)
@@ -51,7 +53,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       rightRef = right.asInstanceOf[ActorRef]
 
       ServiceManager.serviceManager ! Lookup("chat")
-//      ServiceManager.serviceManager ! Lookup("avatar")
+      ServiceManager2.serviceManager2 ! Lookup2("avatar")
 
       context.become(Started)
     case msg =>
@@ -62,8 +64,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def Started: Receive = {
     case ServiceManager.LookupResult(endpoint) =>
       chatService = endpoint
-//      avatarService = endpoint
-      log.debug("Got chat service " + endpoint)
+      log.info("Got service " + endpoint)
+    case ServiceManager2.LookupResult(endpoint) =>
+      avatarService = endpoint
+      log.info("Got service " + endpoint)
     case ctrl@ControlPacket(_, _) =>
       handlePktContainer(ctrl)
     case game@GamePacket(_, _, _) =>
@@ -74,9 +78,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ChatMessage(to, from, data) =>
       if (to.drop(6) == "local") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
       if (to.drop(6) == "squad") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SQUAD, true, from, data, None)))
-//      case AvatarMessage(to, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
-        //case AvatarMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
-//        sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, 0, is_crouching, unk4, false, is_cloaking)))
+    case AvatarMessage(to, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        if(PlanetSideGUID(player.guid) != avatar_guid) sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, 0, is_crouching, unk4, false, is_cloaking)))
+      }
     case default => failWithError(s"Invalid packet class received: $default")
   }
 
@@ -257,12 +264,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   List(),
                   InventoryData(true, false, false, userInv)))))
 
-
                 var home = Zone.get("z1").get
                 if(player.faction == PlanetSideEmpire.NC) {home = Zone.get("home1").get}
                 if(player.faction == PlanetSideEmpire.TR) {home = Zone.get("home2").get}
                 if(player.faction == PlanetSideEmpire.VS) {home = Zone.get("home3").get}
                 Transfer.loadMap(traveler, home)
+                avatarService ! AvatarService.Join(home.zonename)
                 Transfer.loadSelf(traveler, sessionId, Zone.selectRandom(home))
                 player.continent = home.zonename
               }
@@ -330,15 +337,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
               PlayerMasterList.userClaimsCharacter(sessionId, xGUID) // ... we do this when sending a SetCurrentAvatarMessa
               sendResponse(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(guid, 0, 0)))
 
-              chatService ! ChatService.Join("local")
-              chatService ! ChatService.Join("squad")
-//              avatarService ! AvatarService.Join("home2")
-
               sendResponse(PacketCoding.CreateGamePacket(0, ReplicationStreamMessage(5, Some(6), Vector(SquadListing(255))))) //clear squad list
 
               import scala.concurrent.duration._
               import scala.concurrent.ExecutionContext.Implicits.global
               clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
+
+              chatService ! ChatService.Join("local")
+              chatService ! ChatService.Join("squad")
           }
         case default =>
           log.error("Unsupported " + default + " in " + msg)
@@ -347,7 +353,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("Handling " + msg)
 
       //hardcoded avatar and some pertinent equipment setup
-      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, 0, 0)
+//      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, 0, 0)
+      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, PlanetSideEmpire.TR, gender.id, 0, 0)
       avatar.setExoSuitType(0)
       //init holsters
       avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
@@ -435,7 +442,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14070), Vector3(3127.0f, 2884.0f, 35.21875f), None,
         64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
 
-//      avatarService ! AvatarService.PlayerStateMessage(msg)
+      avatarService ! AvatarService.PlayerStateMessage(msg)
 
     case msg@ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       // TODO: Prevents log spam, but should be handled correctly
@@ -492,6 +499,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         // TODO: handle this appropriately
         if (messagetype == ChatMessageType.CMT_QUIT) {
+          avatarService ! AvatarService.LeaveAll
+          chatService ! ChatService.LeaveAll
           sendResponse(DropCryptoSession())
           sendResponse(DropSession(sessionId, "user quit"))
         }
@@ -707,6 +716,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
       log.info("BindPlayerMessage: " + msg)
+
+    case msg@CreateShortcutMessage(player_guid, slot, unk, addShortcut, shortcut) =>
+//      log.info("CreateShortcutMessage: " + msg)
 
     case default => log.info(s"Unhandled GamePacket ${pkt}")
   }

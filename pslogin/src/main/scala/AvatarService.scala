@@ -3,7 +3,7 @@ import akka.actor.Actor
 import akka.event.{ActorEventBus, SubchannelClassification}
 import akka.util.Subclassification
 import net.psforever.packet.game.{PlanetSideGUID, PlayerStateMessageUpstream}
-import net.psforever.types.{ChatMessageType, Vector3}
+import net.psforever.types.Vector3
 
 object AvatarService {
   case class Join(channel : String)
