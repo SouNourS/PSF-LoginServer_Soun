@@ -349,7 +349,7 @@ import scala.util.{Random, Try}
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionID)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        traveler.avatarService ! AvatarService.LeaveAll
+//        traveler.avatarService ! AvatarService.LeaveAll
 
 
         //dispose inventory
