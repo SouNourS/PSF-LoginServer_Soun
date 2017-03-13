@@ -2,6 +2,7 @@
 import akka.actor.Actor
 import akka.event.{ActorEventBus, SubchannelClassification}
 import akka.util.Subclassification
+import net.psforever.objects.{PlayerAvatar, PlayerMasterList}
 import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID, PlayerStateMessageUpstream}
 import net.psforever.types.Vector3
 
@@ -10,13 +11,11 @@ object AvatarService {
   case class Leave()
   case class LeaveAll()
   case class PlayerStateMessage(msg : PlayerStateMessageUpstream)
-  case class AvatarFirstTimeEventMessage(msg : PlanetSideGUID)
+  case class LoadMap(msg : PlanetSideGUID)
 }
 
 /*
    /avatar/
-     - /home2/id
-     -
  */
 
 final case class AvatarMessage(to : String = "", avatar_guid : PlanetSideGUID, pos : Vector3 = Vector3(0f,0f,0f), vel : Option[Vector3] = None,
@@ -67,9 +66,17 @@ class AvatarService extends Actor {
       AvatarEvents.unsubscribe(sender())
     case m @ PlayerStateMessage(msg) =>
 //      log.info(s"NEW: ${m}")
-      AvatarEvents.publish(AvatarMessage("/Avatar/home2", msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.is_jumping, msg.is_cloaking))
-    case m @ AvatarFirstTimeEventMessage(msg) =>
-      AvatarEvents.publish(AvatarMessage("/Avatar/home2", PlanetSideGUID(msg.guid)))
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.avatar_guid)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/"+player.continent, msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.is_jumping, msg.is_cloaking))
+      }
+    case m @ LoadMap(msg) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.guid)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, PlanetSideGUID(msg.guid)))
+      }
     case _ =>
   }
 }

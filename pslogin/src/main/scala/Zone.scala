@@ -332,9 +332,8 @@ import scala.util.{Random, Try}
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         disposeSelf(traveler, sessionID)
-//        traveler.avatarService ! AvatarService.LeaveAll
         loadMap(traveler, zone)
-//        traveler.avatarService ! AvatarService.Join(player.continent)
+        player.continent = zone.zonename
         loadSelf(traveler, sessionID, destination)
       }
     }
@@ -567,7 +566,14 @@ import scala.util.{Random, Try}
                 onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
                 List(),
                 List(),
-                InventoryData(true, false, false, List())))))
+                InventoryData(true, false, false, InventoryItem(ObjectClass.repeater, PlanetSideGUID(onlineplayer.guid + 1), 0,
+                  WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(20))) ::
+                  InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 3), 2,
+                    ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 9), 1, AmmoBoxData(30)) :: Nil)) ::
+                  //      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
+                  InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 5), 4,
+                    WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(1))) ::
+                  InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 7), 5, AmmoBoxData(1)) :: Nil)))))
           }
         }
       }

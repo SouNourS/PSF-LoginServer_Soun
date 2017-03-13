@@ -78,6 +78,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ChatMessage(to, from, data) =>
       if (to.drop(6) == "local") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
       if (to.drop(6) == "squad") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SQUAD, true, from, data, None)))
+      if (to.drop(6) == "voice") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, true, from, data, None)))
     case AvatarMessage(to, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
@@ -88,7 +89,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
           onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
           List(),
           List(),
-          InventoryData(true, false, false, List())))))
+          InventoryData(true, false, false, InventoryItem(ObjectClass.repeater, PlanetSideGUID(onlineplayer.guid + 1), 0,
+            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(20))) ::
+            InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 3), 2,
+              ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 9), 1, AmmoBoxData(30)) :: Nil)) ::
+            //      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
+            InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 5), 4,
+              WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(1))) ::
+            InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 7), 5, AmmoBoxData(1)) :: Nil)))))
         if(PlanetSideGUID(player.guid) != avatar_guid) sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, unk1, aim_pitch, unk2, 0, is_crouching, unk4, false, is_cloaking)))
       }
     case default => failWithError(s"Invalid packet class received: $default")
@@ -332,6 +340,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
               chatService ! ChatService.Join("local")
               chatService ! ChatService.Join("squad")
+              chatService ! ChatService.Join("voice")
 
               sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
                 "  \\#6Welcome! The commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
@@ -483,15 +492,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
         //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOff",None)))
         //      }
 
-        if (messagetype == ChatMessageType.CMT_VOICE) {
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, false, player.name, contents, None)))
-        }
+//        if (messagetype == ChatMessageType.CMT_VOICE) {
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, false, player.name, contents, None)))
+//        }
         if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
           messagetype == ChatMessageType.CMT_WHO_PLATOONLEADERS || messagetype == ChatMessageType.CMT_WHO_SQUADLEADERS || messagetype == ChatMessageType.CMT_WHO_TEAMS) {
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now", None)))
         }
 
-        CSRZone.read(traveler, this.sessionId, msg)
+        if(CSRZone.read(traveler, this.sessionId, msg)) {
+          avatarService ! AvatarService.LeaveAll()
+          avatarService ! AvatarService.Join(player.continent)
+          avatarService ! AvatarService.LoadMap(PlanetSideGUID(player.guid))
+        }
         CSRWarp.read(traveler, msg)
 
         // TODO: handle this appropriately
@@ -506,7 +519,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
         // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
-        if (messagetype != ChatMessageType.CMT_OPEN) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
+        if (messagetype != ChatMessageType.CMT_OPEN && messagetype != ChatMessageType.CMT_VOICE && messagetype != ChatMessageType.CMT_SQUAD) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
 
@@ -669,7 +682,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
       log.info("AvatarFirstTimeEvent: " + msg)
-      avatarService ! AvatarService.AvatarFirstTimeEventMessage(avatar_guid)
 
     case msg@AvatarGrenadeStateMessage(player_guid, state) =>
       log.info("AvatarGrenadeStateMessage: " + msg)
