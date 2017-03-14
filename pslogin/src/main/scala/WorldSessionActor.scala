@@ -112,6 +112,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 7), 5, AmmoBoxData(1)) :: Nil)))))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),35,40))) // br40
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
         }
 
         if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent) {
@@ -302,6 +303,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             Transfer.loadSelf(traveler, sessionId, Zone.selectRandom(home))
             avatarService ! AvatarService.LoadMap(PlanetSideGUID(player.guid))
             player.continent = home.zonename
+            player.setUsedHolster(0)
           }
 
           // test OrbitalShuttleTimeMsg
