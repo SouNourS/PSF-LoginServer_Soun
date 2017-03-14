@@ -283,6 +283,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 if(player.faction == PlanetSideEmpire.NC) {home = Zone.get("home1").get}
                 if(player.faction == PlanetSideEmpire.TR) {home = Zone.get("home2").get}
                 if(player.faction == PlanetSideEmpire.VS) {home = Zone.get("home3").get}
+                traveler.zone = home.zonename
                 Transfer.loadMap(traveler, home)
                 avatarService ! AvatarService.Join(home.zonename)
                 Transfer.loadSelf(traveler, sessionId, Zone.selectRandom(home))

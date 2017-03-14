@@ -26,7 +26,6 @@ import scala.util.{Random, Try}
     * @param session the player's session
     */
   class Traveler(private val session : WorldSessionActor) {
-    var avatarService : ActorRef = session.avatarService
     /**
       * The name of the zone the player currently occupies
       */
@@ -231,7 +230,6 @@ import scala.util.{Random, Try}
           }
         })
       }
-
       val zone = Zone.get(traveler.zone).get //the traveler is already in the appropriate zone
       if(list && coords.isEmpty && destId.equals("")) {
         CSRWarp.reply(traveler, Zone.listLocations(zone)+"; "+Zone.listWarpgates(zone))
@@ -393,7 +391,6 @@ import scala.util.{Random, Try}
 //      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(traveler.session.sessionId)
 //      if (playerOpt.isDefined) {
 //        val player: PlayerAvatar = playerOpt.get
-//        traveler.avatarService ! AvatarService.LeaveAll
 //      }
       traveler.sendToSelf(PacketCoding.CreateGamePacket(0, LoadMapMessage(zone.map, zone.zonename, 40100,25,true,3770441820L)))
     }
