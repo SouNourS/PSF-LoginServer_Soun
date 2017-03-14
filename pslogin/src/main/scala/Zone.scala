@@ -80,14 +80,14 @@ import scala.util.{Random, Try}
       * @param msg the message the player received
       * @return true, if the player is being transported to another zone; false, otherwise
       */
-    def read(traveler : Traveler, sessionID : Long, msg : ChatMsg) : Boolean = {
+    def read(traveler : Traveler, sessionID : Long, msg : ChatMsg) : (Boolean, String , (Int, Int, Int) ) = {
       if(!isProperRequest(msg))
-        return false  //we do not handle this message
+        return (false,"",(0,0,0))  //we do not handle this message
 
       val buffer = decomposeMessage(msg.contents)
       if(buffer.length == 0 || buffer(0).equals("-help")) {
         CSRZone.help(traveler) //print usage information to chat
-        return false
+        return (false,"",(0,0,0))
       }
 
       var zoneId = ""
@@ -111,7 +111,7 @@ import scala.util.{Random, Try}
           CSRZone.reply(traveler, Zone.list)
         else
           CSRZone.error(traveler, "Give a valid zonename (use '/zone -list')")
-        return false
+        return (false,"",(0,0,0))
       }
       val zone = zoneOpt.get
       traveler.zone = zoneId
@@ -126,10 +126,10 @@ import scala.util.{Random, Try}
       }
       else if(list) {
         CSRZone.reply(traveler, Zone.listWarpgates(zone))
-        return false
+        return (false,"",(0,0,0))
       }
-      Transfer.zone(traveler, sessionID, zone, destination)
-      true
+//      Transfer.zone(traveler, sessionID, zone, destination)
+      (true,zoneId,destination)
     }
 
     /**
@@ -471,41 +471,41 @@ import scala.util.{Random, Try}
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),36,5))) // cr5
 
 
-        val app6 = CharacterAppearanceData(
-          Vector3(3127.0f, 2882.0f, 35.21875f), 64,PlanetSideEmpire.NC,false,4,"MAX NC",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-        val inv6 =
-          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-            Nil
-        val obj6 = CharacterData(app6, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-          InventoryData(true, false, false, inv6)    )
-        val objectHex7 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14050), obj6)
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex7))
-
-        val app7 = CharacterAppearanceData(
-          Vector3(3127.0f, 2880.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-        val inv7 =
-          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-            Nil
-        val obj7 = CharacterData(app7, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-          InventoryData(true, false, false, inv7)    )
-        val objectHex8 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14060), obj7)
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex8))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),19,1)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),35,40)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),36,5)))
-
-        val app8 = CharacterAppearanceData(
-          Vector3(3127.0f, 2884.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR 2",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
-        val inv8 =
-          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
-            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
-            Nil
-        val obj8 = CharacterData(app8, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
-          InventoryData(true, false, false, inv8)    )
-        val objectHex9 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14070), obj8)
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex9))
+//        val app6 = CharacterAppearanceData(
+//          Vector3(3127.0f, 2882.0f, 35.21875f), 64,PlanetSideEmpire.NC,false,4,"MAX NC",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+//        val inv6 =
+//          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+//            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+//            Nil
+//        val obj6 = CharacterData(app6, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+//          InventoryData(true, false, false, inv6)    )
+//        val objectHex7 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14050), obj6)
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex7))
+//
+//        val app7 = CharacterAppearanceData(
+//          Vector3(3127.0f, 2880.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+//        val inv7 =
+//          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+//            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+//            Nil
+//        val obj7 = CharacterData(app7, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+//          InventoryData(true, false, false, inv7)    )
+//        val objectHex8 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14060), obj7)
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex8))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),19,1)))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),35,40)))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(14060),36,5)))
+//
+//        val app8 = CharacterAppearanceData(
+//          Vector3(3127.0f, 2884.0f, 35.21875f), 64,PlanetSideEmpire.TR,false,4,"MAX TR 2",2,2,1,1,2,3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6,7,8,220))
+//        val inv8 =
+//          InventoryItem(ObjectClass.repeater, PlanetSideGUID(14041), 0, WeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(14042), 0, AmmoBoxData(20))) ::
+//            //        InventoryItem(ObjectClass.TEMP588, PlanetSideGUID(14051), 0, WeaponData(8, ObjectClass.TEMP745, PlanetSideGUID(14052), 0, AmmoBoxData(20))) ::
+//            Nil
+//        val obj8 = CharacterData(app8, 1000, 500, 200, 1, 7, 7, 100, 100, 28, 4, 44, 84, 104, 1900, Nil, List.empty,
+//          InventoryData(true, false, false, inv8)    )
+//        val objectHex9 = ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(14070), obj8)
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, objectHex9))
 
 
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,1))) // Medium Assault
@@ -558,19 +558,23 @@ import scala.util.{Random, Try}
           if (OnlinePlayer.isDefined) {
             val onlineplayer: PlayerAvatar = OnlinePlayer.get
             val x = i + 15000 + (i * 100 - (100 + i))
-            if (player.guid != x) traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
-              ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(onlineplayer.guid), CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, player.getExoSuitType, onlineplayer.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
-                onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
-                List(),
-                List(),
-                InventoryData(true, false, false, InventoryItem(ObjectClass.repeater, PlanetSideGUID(onlineplayer.guid + 1), 0,
-                  WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(20))) ::
-                  InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 3), 2,
-                    ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 9), 1, AmmoBoxData(30)) :: Nil)) ::
-                  //      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
-                  InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 5), 4,
-                    WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(1))) ::
-                  InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 7), 5, AmmoBoxData(1)) :: Nil)))))
+            if (player.guid != x && player.continent == onlineplayer.continent) {
+              traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
+                ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(onlineplayer.guid), CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, player.getExoSuitType, onlineplayer.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+                  onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
+                  List(),
+                  List(),
+                  InventoryData(true, false, false, InventoryItem(ObjectClass.repeater, PlanetSideGUID(onlineplayer.guid + 1), 0,
+                    WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(20))) ::
+                    InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 3), 2,
+                      ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 9), 1, AmmoBoxData(30)) :: Nil)) ::
+                    //      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
+                    InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 5), 4,
+                      WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(1))) ::
+                    InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 7), 5, AmmoBoxData(1)) :: Nil)))))
+              traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),35,40))) // br40
+              traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
+            }
           }
         }
       }

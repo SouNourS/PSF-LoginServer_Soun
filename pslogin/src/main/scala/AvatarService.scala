@@ -12,13 +12,16 @@ object AvatarService {
   case class LeaveAll()
   case class PlayerStateMessage(msg : PlayerStateMessageUpstream)
   case class LoadMap(msg : PlanetSideGUID)
+  case class unLoadMap(msg : PlanetSideGUID)
+  case class ObjectHeld(msg : PlanetSideGUID)
+  case class ChangeFireState(itemID : PlanetSideGUID, sessionId : Long)
 }
 
 /*
    /avatar/
  */
 
-final case class AvatarMessage(to : String = "", avatar_guid : PlanetSideGUID, pos : Vector3 = Vector3(0f,0f,0f), vel : Option[Vector3] = None,
+final case class AvatarMessage(to : String = "", function : String = "", itemID : PlanetSideGUID = PlanetSideGUID(0), avatar_guid : PlanetSideGUID, pos : Vector3 = Vector3(0f,0f,0f), vel : Option[Vector3] = None,
                                unk1 : Int = 0, aim_pitch : Int = 0, unk2 : Int = 0,
                                is_crouching : Boolean = false, unk4 : Boolean = false, is_cloaking : Boolean = false)
 
@@ -69,13 +72,31 @@ class AvatarService extends Actor {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        AvatarEvents.publish(AvatarMessage("/Avatar/"+player.continent, msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.is_jumping, msg.is_cloaking))
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlayerStateMessage", PlanetSideGUID(0), msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.is_jumping, msg.is_cloaking))
       }
     case m @ LoadMap(msg) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, PlanetSideGUID(msg.guid)))
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "LoadMap",PlanetSideGUID(0), PlanetSideGUID(msg.guid)))
+      }
+    case m @ unLoadMap(msg) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.guid)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "unLoadMap",PlanetSideGUID(0), PlanetSideGUID(msg.guid)))
+      }
+    case m @ ObjectHeld(msg) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.guid)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "ObjectHeld",PlanetSideGUID(0), PlanetSideGUID(msg.guid)))
+      }
+    case m @ ChangeFireState(itemID, sessionId) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "ChangeFireState", PlanetSideGUID(itemID.guid), PlanetSideGUID(player.guid)))
       }
     case _ =>
   }
