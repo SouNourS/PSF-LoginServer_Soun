@@ -310,11 +310,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
           // test OrbitalShuttleTimeMsg
           sendRawResponse(hex"5b75c4020180200f8000583a80000a80e041142903820450a00e0c1140")
 
-          // These object_guids are specfic to VS Sanc
 //                        for(nanototo <- 0 to 1024)
 //                          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(nanototo), PlanetSideEmpire.TR)))
-          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.VS))) //HART building C
-          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(29), PlanetSideEmpire.VS))) //South Villa Gun Tower
+          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.TR)))
+          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(29), PlanetSideEmpire.TR)))
           //              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(1397), PlanetSideEmpire.TR)))
 
           sendResponse(PacketCoding.CreateGamePacket(0, TimeOfDayMessage(1191182336)))
