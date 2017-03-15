@@ -87,7 +87,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case AvatarMessage(to, function, itemID, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
-      if (playerOpt.isDefined) {
+      if (playerOpt.isDefined && OnlinePlayer.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         val onlineplayer: PlayerAvatar = OnlinePlayer.get
 
