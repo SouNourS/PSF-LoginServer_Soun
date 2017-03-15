@@ -393,7 +393,7 @@ import scala.util.{Random, Try}
 //        val player: PlayerAvatar = playerOpt.get
 //      }
       traveler.sendToSelf(PacketCoding.CreateGamePacket(0, LoadMapMessage(zone.map, zone.zonename, 40100,25,true,3770441820L)))
-      for(nanototo <- 0 to 1024)
+      for(nanototo <- 0 to 50)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(nanototo), PlanetSideEmpire.TR)))
     }
 
