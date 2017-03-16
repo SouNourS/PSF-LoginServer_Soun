@@ -15,6 +15,7 @@ object AvatarService {
   case class unLoadMap(msg : PlanetSideGUID)
   case class ObjectHeld(msg : PlanetSideGUID)
   case class ChangeFireState(itemID : PlanetSideGUID, sessionId : Long)
+  case class PlanetsideAttribute(guid : PlanetSideGUID, attribute_type : Int, attribute_value : Long)
 }
 
 /*
@@ -23,7 +24,7 @@ object AvatarService {
 
 final case class AvatarMessage(to : String = "", function : String = "", itemID : PlanetSideGUID = PlanetSideGUID(0), avatar_guid : PlanetSideGUID, pos : Vector3 = Vector3(0f,0f,0f), vel : Option[Vector3] = None,
                                unk1 : Int = 0, aim_pitch : Int = 0, unk2 : Int = 0,
-                               is_crouching : Boolean = false, unk4 : Boolean = false, is_cloaking : Boolean = false)
+                               is_crouching : Boolean = false, unk4 : Boolean = false, is_cloaking : Boolean = false, Long : Long = 0)
 
 class AvatarEventBus extends ActorEventBus with SubchannelClassification {
   type Event = AvatarMessage
@@ -97,6 +98,12 @@ class AvatarService extends Actor {
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "ChangeFireState", PlanetSideGUID(itemID.guid), PlanetSideGUID(player.guid)))
+      }
+    case m @ PlanetsideAttribute(guid, attribute_type, attribute_value) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlanetsideAttribute", PlanetSideGUID(0), guid, Vector3(0f,0f,0f), None, 0, 0, attribute_type, false, false, false, attribute_value))
       }
     case _ =>
   }

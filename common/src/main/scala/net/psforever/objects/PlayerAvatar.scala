@@ -55,6 +55,9 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   /** Whether the player is in a squatting position. */
   var crouched : Boolean = false
 
+  /** From PlanetsideAttributeMessage */
+  var PlanetsideAttribute:Array[Long] = Array.ofDim(120)
+
   /**
     * A constructor for player avatars that defines all of the character-creation properties.
     * Exo-suit type is defaulted to Standard Exo-suit for expedience, as that will trigger a setup process.

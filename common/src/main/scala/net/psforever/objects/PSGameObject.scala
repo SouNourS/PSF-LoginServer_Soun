@@ -13,6 +13,8 @@ class PSGameObject {
   var posY : Float = 0f
   /** z-coordinate; typically between 0-4000 and is a NS distinction */
   var posZ : Float = 0f
+  /** VEL ! */
+  var vel : Option[Vector3] = None
   /** Angle of rotation about a vector perpendicular to the ground (ZX-plane). */
   var aimYaw : Float = 0f //TODO should we store this value in radians?
   /** Angle of rotation about a vector coplanar with the ground (ZX-plane). */
@@ -66,6 +68,15 @@ class PSGameObject {
     posY = vec.y
     posZ = vec.z
   }
+  // TODO : comments
+  def getVelocity : Option[Vector3] = {
+    vel
+  }
+  // TODO : comments
+  def setVelocity(vec : Option[Vector3])  = {
+    vel = vec
+  }
+
 
   /**
     * Get the orientation of the object respective to the perpendicular of the ground (ZX-plane).

@@ -29,10 +29,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var chatService = Actor.noSender
   var avatarService = Actor.noSender
 
-  var useProximityTerminal = false
-  var useProximityTerminalID = PlanetSideGUID(0)
-
-  var xheld_holsters = 0
+  var useProximityTerminalID : Option[PlanetSideGUID] = None
 
   var clientKeepAlive: Cancellable = null
 
@@ -84,7 +81,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (to.drop(6) == "local") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
       if (to.drop(6) == "squad") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SQUAD, true, from, data, None)))
       if (to.drop(6) == "voice") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, true, from, data, None)))
-    case AvatarMessage(to, function, itemID, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking) =>
+    case AvatarMessage(to, function, itemID, avatar_guid, pos, vel, unk1, aim_pitch, unk2, is_crouching, unk4, is_cloaking, long) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined && OnlinePlayer.isDefined) {
@@ -92,8 +89,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val onlineplayer: PlayerAvatar = OnlinePlayer.get
 
         if(function == "unLoadMap" && PlanetSideGUID(player.guid) != avatar_guid) {
-          println(onlineplayer.continent,player.continent)
-          println(onlineplayer.name,player.name)
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(onlineplayer.guid), 0)))
         }
 
@@ -123,12 +118,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(avatar_guid, onlineplayer.getUsedHolster, false)))
         }
 
-        if(function == "ChangeFireState" && onlineplayer.continent == player.continent && player.shooting) {
-          println(player.shooting, itemID)
+        if(function == "ChangeFireState" && onlineplayer.continent == player.continent && onlineplayer.shooting) {
           sendResponse(PacketCoding.CreateGamePacket(0, ChangeFireStateMessage_Start(itemID)))
           }
-        if(function == "ChangeFireState" && onlineplayer.continent == player.continent && !player.shooting) {
+        if(function == "ChangeFireState" && onlineplayer.continent == player.continent && !onlineplayer.shooting) {
           sendResponse(PacketCoding.CreateGamePacket(0, ChangeFireStateMessage_Stop(itemID)))
+        }
+        if(function == "PlanetsideAttribute" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent) {
+          println(avatar_guid,player.guid,"toto ",unk2,long)
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, unk2, long)))
         }
       }
     case default => failWithError(s"Invalid packet class received: $default")
@@ -548,27 +546,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         player.setPosition(pos)
+        player.setVelocity(vel)
         player.setPitch(aim_pitch)
         player.crouched = is_crouching
-      }
-      if (useProximityTerminal && vel.isEmpty) {
-        sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(avatar_guid, useProximityTerminalID, true)))
-        if (playerOpt.isDefined) {
-          val player: PlayerAvatar = playerOpt.get
-          if (player.redHealth + 5 > player.getMaxHealth) player.redHealth = player.getMaxHealth
-          if (player.redHealth + 5 <= player.getMaxHealth) player.redHealth += 5
-          if (player.blueArmor + 5 > player.getMaxPersonalArmor) player.blueArmor = player.getMaxPersonalArmor
-          if (player.blueArmor + 5 <= player.getMaxPersonalArmor) player.blueArmor += 5
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
-          if (player.redHealth == player.getMaxHealth && player.blueArmor == player.getMaxPersonalArmor) {
-            useProximityTerminal = false
-            sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(PlanetSideGUID(0), useProximityTerminalID, false)))
-          }
-        }
-      }
-      if (playerOpt.isDefined) {
-        val player: PlayerAvatar = playerOpt.get
+
         if (vel.isEmpty) {
           if (!is_crouching) {
             if (player.greenStamina + 1 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
@@ -580,24 +561,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 2, player.greenStamina)))
         }
-      }
 
-      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14000), Vector3(pos.x + 2.5f,pos.y + 2.5f,pos.z), vel,
-      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, true, is_cloaking)))
-      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14010), Vector3(pos.x - 2.5f,pos.y - 2.5f,pos.z), vel,
-      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
-      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14020), Vector3(pos.x - 2.5f,pos.y + 2.5f,pos.z), vel,
-      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
-      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14030), Vector3(pos.x + 2.5f,pos.y - 2.5f,pos.z), vel,
-      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
-      //      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14040), Vector3(pos.x + 0.0f,pos.y - 2.5f,pos.z), vel,
-      //        unk1, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
-      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14050), Vector3(3127.0f, 2882.0f, 35.21875f), None,
-        64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
-      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14060), Vector3(3127.0f, 2880.0f, 35.21875f), None,
-        64, aim_pitch, unk2, seq_time, is_crouching, false, unk4, is_cloaking)))
-      sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(PlanetSideGUID(14070), Vector3(3127.0f, 2884.0f, 35.21875f), None,
-        64, aim_pitch, unk2, seq_time, is_crouching, is_jumping, unk4, is_cloaking)))
+        if (useProximityTerminalID.isDefined && player.getVelocity.isDefined){
+          sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(PlanetSideGUID(0), useProximityTerminalID.get, false)))
+          useProximityTerminalID = None
+        }
+      }
 
       avatarService ! AvatarService.PlayerStateMessage(msg)
 
@@ -643,9 +612,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOff",None)))
         //      }
 
-//        if (messagetype == ChatMessageType.CMT_VOICE) {
-//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, false, player.name, contents, None)))
-//        }
         if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
           messagetype == ChatMessageType.CMT_WHO_PLATOONLEADERS || messagetype == ChatMessageType.CMT_WHO_SQUADLEADERS || messagetype == ChatMessageType.CMT_WHO_TEAMS) {
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now, but : ", None)))
@@ -657,7 +623,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
             "VS online : " + PlayerMasterList.getWorldPopulation._3, None)))
         }
 
-
         val (isTransfert, zone, destination) = CSRZone.read(traveler, this.sessionId, msg)
         if(isTransfert){
           avatarService ! AvatarService.unLoadMap(PlanetSideGUID(player.guid))
@@ -666,7 +631,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
             val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(i.toLong)
             if (OnlinePlayer.isDefined) {
               val onlineplayer: PlayerAvatar = OnlinePlayer.get
-              println(player.guid, onlineplayer.guid)
               if(onlineplayer.guid != player.guid) sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(onlineplayer.guid), 0)))
             }
           }
@@ -821,12 +785,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
           if (player.getMaxHealth - player.redHealth <= 25 && player.getMaxHealth - player.redHealth != 0) {
             player.redHealth = player.getMaxHealth
-            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.getMaxHealth)))
+            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),0,player.redHealth)
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2)))
           }
           else if (player.getMaxHealth - player.redHealth > 25) {
             player.redHealth += 25
             sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),0,player.redHealth)
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2)))
           }
         }
@@ -886,9 +852,24 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@ProximityTerminalUseMessage(player_guid, object_guid, unk) =>
       log.info("ProximityTerminalUseMessage: " + msg)
-      if (!unk) {
-        useProximityTerminal = true
-        useProximityTerminalID = object_guid
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        if(!unk && player.getVelocity.isEmpty){
+          useProximityTerminalID = Option.apply(object_guid)
+          sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(PlanetSideGUID(player.guid), object_guid, true)))
+          if (player.redHealth + 10 > player.getMaxHealth) player.redHealth = player.getMaxHealth
+          if (player.redHealth + 10 <= player.getMaxHealth) player.redHealth += 10
+          if (player.blueArmor + 10 > player.getMaxPersonalArmor) player.blueArmor = player.getMaxPersonalArmor
+          if (player.blueArmor + 10 <= player.getMaxPersonalArmor) player.blueArmor += 10
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid), 0, player.redHealth)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid), 4, player.blueArmor)))
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),0,player.redHealth)
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),4,player.blueArmor)
+          if (player.redHealth == player.getMaxHealth && player.blueArmor == player.getMaxPersonalArmor) {
+            sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(PlanetSideGUID(0), object_guid, false)))
+          }
+        }
       }
 
     case msg@MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
@@ -921,6 +902,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p, 0, player.redHealth)))
         sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p, 2, player.greenStamina)))
         sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(p, 4, player.blueArmor)))
+        avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),0,player.redHealth)
+        avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),4,player.blueArmor)
       }
 
     case msg@BugReportMessage(version_major, version_minor, version_date, bug_type, repeatable, location, zone, pos, summary, desc) =>
@@ -935,6 +918,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
       log.info("PlanetsideAttributeMessage: "+msg)
       sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
+      avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,attribute_type,attribute_value)
 
     case default => log.info(s"Unhandled GamePacket ${pkt}")
   }
