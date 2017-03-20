@@ -375,6 +375,8 @@ import scala.util.{Random, Try}
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+19),4)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+20),4)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+21),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+22),4)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid+23),4)))
         //dispose self
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid),4)))
       }
@@ -415,6 +417,8 @@ import scala.util.{Random, Try}
       val userInv =
         InventoryItem(ObjectClass.repeater, PlanetSideGUID(xGUID + 1), 0,
           WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 2), 0, AmmoBoxData(20))) ::
+          InventoryItem(ObjectClass.bank, PlanetSideGUID(xGUID + 22), 1,
+            WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(xGUID + 23), 0, AmmoBoxData(100))) ::
           InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(xGUID + 3), 2,
             ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(1564), 1, AmmoBoxData(100)) :: Nil)) ::
           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(xGUID + 5), 4,

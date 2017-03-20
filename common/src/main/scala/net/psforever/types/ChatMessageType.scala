@@ -65,7 +65,7 @@ object ChatMessageType extends Enumeration {
       CMT_GMBROADCASTPOPUP,         // /gmpopup
       U_CMT_GMTELLFROM,             // ??? Recipient of /gmtell?
       U_CMT_TELLFROM,               // ??? Recipient of /t?
-      UNK_45,                       // ??? empty
+      UNK_45,                       // from server to client to write in chat log some messages like : @NoTell_Target
       CMT_CULLWATERMARK,            // ??? This actually causes the client to ping back to the server with some stringified numbers "80 120" (with the same 46 chatmsg causing infinite loop?) - may be incorrect decoding
       CMT_INSTANTACTION,            // /instantaction OR /ia
       CMT_RECALL,                   // /recall
@@ -242,16 +242,16 @@ object ChatMessageType extends Enumeration {
       CMT_REMOVE_VANUMODULE,        // /moduleremove OR /modulerm
       CMT_DEBUG_MASSIVE,            // /debugmassive
       CMT_WARP_TO_NEXT_BILLBOARD,   // ???
-      UNK_222,                      // ??? "CTF Flag stolen"
-      UNK_223,                      // ??? "CTF Flag lost"
-      UNK_224,                      // ??? "Vehicle Dismount"
-      UNK_225,                      // ??? empty
-      UNK_226,                      // ??? empty
-      UNK_227,                      // ??? empty
-      UNK_228,                      // ??? empty
-      UNK_229,                      // ??? empty
+      UNK_222,                      // ??? "CTF Flag stolen" -- screen long + info log
+      UNK_223,                      // ??? "CTF Flag lost" -- screen long + info log
+      UNK_224,                      // ??? "Vehicle Dismount" -- info log
+      UNK_225,                      // ??? empty -- screen fast
+      UNK_226,                      // ??? empty -- screen fast + info log
+      UNK_227,                      // ??? empty -- info log
+      UNK_228,                      // ??? empty -- message box + chat log
+      UNK_229,                      // ??? empty -- screen long + info log
       UNK_230,                      // ??? "Vehicle Mount"
-      UNK_231,                      // ??? empty
+      UNK_231,                      // ??? empty -- info log in green
       UNK_232,                      // ??? empty
       CMT_ALARM,                    // /alarm
       CMT_APPEAL,                   // /appeal
