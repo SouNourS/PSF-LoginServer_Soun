@@ -417,24 +417,29 @@ import scala.util.{Random, Try}
       val userInv =
         InventoryItem(ObjectClass.repeater, PlanetSideGUID(xGUID + 1), 0,
           WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 2), 0, AmmoBoxData(20))) ::
-          InventoryItem(ObjectClass.bank, PlanetSideGUID(xGUID + 22), 1,
-            WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(xGUID + 23), 0, AmmoBoxData(100))) ::
-          InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(xGUID + 3), 2,
+          InventoryItem(ObjectClass.bank, PlanetSideGUID(xGUID + 3), 1,
+            WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(xGUID + 4), 0, AmmoBoxData(10))) ::
+          InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(xGUID + 5), 2,
             ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(1564), 1, AmmoBoxData(100)) :: Nil)) ::
-          InventoryItem(ObjectClass.chainblade, PlanetSideGUID(xGUID + 5), 4,
-            WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(xGUID + 6), 0, AmmoBoxData(1))) ::
-          InventoryItem(ObjectClass.locker_container, PlanetSideGUID(xGUID + 7), 5, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 8), 6, AmmoBoxData(25)) ::
-          InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 9), 9, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID + 10), 12, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 11), 33, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(xGUID + 12), 37, REKData(8)) ::
-          InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 13), 51, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.super_medkit, PlanetSideGUID(xGUID + 14), 69, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID + 15), 64, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.plasma_grenade, PlanetSideGUID(xGUID + 16), 40, WeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(xGUID + 17), 0, AmmoBoxData(3))) ::
-          InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(xGUID + 18), 58, WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(xGUID + 19), 0, AmmoBoxData(3))) ::
-          InventoryItem(ObjectClass.frag_grenade, PlanetSideGUID(xGUID + 20), 76, WeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(xGUID + 21), 0, AmmoBoxData(3))) ::
+          InventoryItem(ObjectClass.lasher, PlanetSideGUID(xGUID + 6), 3,
+            WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(xGUID + 7), 0, AmmoBoxData(20))) ::
+          InventoryItem(ObjectClass.chainblade, PlanetSideGUID(xGUID + 8), 4,
+            WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(xGUID + 9), 0, AmmoBoxData(1))) ::
+          InventoryItem(ObjectClass.locker_container, PlanetSideGUID(xGUID + 10), 5, AmmoBoxData(1)) ::
+          InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 11), 6, AmmoBoxData(25)) ::
+          InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 12), 9, AmmoBoxData(50)) ::
+          InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(xGUID + 13), 51, REKData(8)) ::
+          InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(xGUID + 14), 87, AmmoBoxData(25)) ::
+          InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(xGUID + 15),42,
+            WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 16), 0, AmmoBoxData(20))) ::
+          InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 17), 12, AmmoBoxData(1)) ::
+          InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(xGUID + 18), 16, WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(xGUID + 19), 0, AmmoBoxData(3))) ::
+          InventoryItem(ObjectClass.phoenix, PlanetSideGUID(xGUID + 20), 78, WeaponData(8, ObjectClass.phoenix_missile, PlanetSideGUID(xGUID + 21), 0, AmmoBoxData(3))) ::
+          //          InventoryItem(ObjectClass.super_medkit, PlanetSideGUID(xGUID + 14), 69, AmmoBoxData(1)) ::
+          //          InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID + 15), 64, AmmoBoxData(50)) ::
+          //          InventoryItem(ObjectClass.plasma_grenade, PlanetSideGUID(xGUID + 16), 40, WeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(xGUID + 17), 0, AmmoBoxData(3))) ::
+          //
+          //          InventoryItem(ObjectClass.frag_grenade, PlanetSideGUID(xGUID + 20), 76, WeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(xGUID + 21), 0, AmmoBoxData(3))) ::
           Nil
 
 
@@ -467,11 +472,9 @@ import scala.util.{Random, Try}
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 2, 0, true, Some(Shortcut(1,"shortcut_macro","fon","/fly on")))))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 3, 0, true, Some(Shortcut(1,"shortcut_macro","fof","/fly off")))))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 4, 0, true, Some(Shortcut(1,"shortcut_macro","s1","/speed 1")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 5, 0, true, Some(Shortcut(1,"shortcut_macro","s2","/speed 2")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 6, 0, true, Some(Shortcut(1,"shortcut_macro","s3","/speed 3")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 7, 0, true, Some(Shortcut(1,"shortcut_macro","s4","/speed 4")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 8, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 9, 0, true, Some(Shortcut(1,"shortcut_macro","col",
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 5, 0, true, Some(Shortcut(1,"shortcut_macro","s3","/speed 3")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 6, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 8, 0, true, Some(Shortcut(1,"shortcut_macro","col",
           "/l Chat Colors (\\ + # + `number`) :\\#0 0 \\#1 1 \\#2 2 \\#3 3 \\#4 4 \\#5 5 \\#6 6 \\#7 7 \\#8 8 \\#9 9")))))
 
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),35,40))) // br40
@@ -516,12 +519,6 @@ import scala.util.{Random, Try}
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,45))) // Advanced Engineering
 
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),2,0,ImplantType.Targeting)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),3,0,ImplantType.Targeting)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),2,1,ImplantType.DarklightVision)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),3,1,ImplantType.DarklightVision)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),2,2,ImplantType.Surge)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, AvatarImplantMessage(PlanetSideGUID(player.guid),3,2,ImplantType.Surge)))
 
         for (i <- 1 to 500) {
           val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(i.toLong)
@@ -536,12 +533,20 @@ import scala.util.{Random, Try}
                   List(),
                   InventoryData(true, false, false, InventoryItem(ObjectClass.repeater, PlanetSideGUID(onlineplayer.guid + 1), 0,
                     WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(20))) ::
-                    InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 3), 2,
-                      ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 9), 1, AmmoBoxData(30)) :: Nil)) ::
-                    //      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
-                    InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 5), 4,
-                      WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(1))) ::
-                    InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 7), 5, AmmoBoxData(1)) :: Nil)))))
+                    InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 3), 1,
+                      WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(10))) ::
+                    InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
+                      ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(1564), 1, AmmoBoxData(100)) :: Nil)) ::
+                    InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 3,
+                      WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(20))) ::
+                    InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
+                      WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
+                    InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) ::
+                    InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(onlineplayer.guid + 13), 51, REKData(8)) ::
+                    InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 15),42,
+                      WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 16), 0, AmmoBoxData(20))) ::
+                    InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(onlineplayer.guid + 18), 16, WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 19), 0, AmmoBoxData(3))) ::
+                    InventoryItem(ObjectClass.phoenix, PlanetSideGUID(onlineplayer.guid + 20), 78, WeaponData(8, ObjectClass.phoenix_missile, PlanetSideGUID(onlineplayer.guid + 21), 0, AmmoBoxData(3))) :: Nil)))))
               traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),35,40))) // br40
               traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
               traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))

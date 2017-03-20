@@ -99,12 +99,20 @@ class WorldSessionActor extends Actor with MDCContextAware {
             List(),
             InventoryData(true, false, false, InventoryItem(ObjectClass.repeater, PlanetSideGUID(onlineplayer.guid + 1), 0,
               WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(20))) ::
-              InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 3), 2,
-                ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 9), 1, AmmoBoxData(30)) :: Nil)) ::
-              //      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
-              InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 5), 4,
-                WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(1))) ::
-              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 7), 5, AmmoBoxData(1)) :: Nil)))))
+              InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 3), 1,
+                WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(10))) ::
+              InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
+                ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(1564), 1, AmmoBoxData(100)) :: Nil)) ::
+              InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 3,
+                WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(20))) ::
+              InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
+                WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
+              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) ::
+              InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(onlineplayer.guid + 13), 51, REKData(8)) ::
+              InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 15),42,
+                WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 16), 0, AmmoBoxData(20))) ::
+              InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(onlineplayer.guid + 18), 16, WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 19), 0, AmmoBoxData(3))) ::
+              InventoryItem(ObjectClass.phoenix, PlanetSideGUID(onlineplayer.guid + 20), 78, WeaponData(8, ObjectClass.phoenix_missile, PlanetSideGUID(onlineplayer.guid + 21), 0, AmmoBoxData(3))) :: Nil)))))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),35,40))) // br40
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
@@ -144,16 +152,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   def handlePktContainer(pkt: PlanetSidePacketContainer): Unit = pkt match {
     case ctrl@ControlPacket(opcode, ctrlPkt) =>
-            println(pkt)
+//            println(pkt)
       handleControlPkt(ctrlPkt)
     case game@GamePacket(opcode, seq, gamePkt) =>
-            println(pkt)
+//            println(pkt)
       handleGamePkt(gamePkt)
     case default => failWithError(s"Invalid packet container class received: $default")
   }
 
   def handleControlPkt(pkt: PlanetSideControlPacket) = {
-        println(pkt)
+//        println(pkt)
     pkt match {
       case SlottedMetaPacket(slot, subslot, innerPacket) =>
         sendResponse(PacketCoding.CreateControlPacket(SlottedMetaAck(slot, subslot)))
@@ -480,7 +488,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //hardcoded avatar and some pertinent equipment setup
 //      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, 0, 0)
       val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, 0, 0)
-      avatar.setExoSuitType(0)
+      avatar.setExoSuitType(1)
       //init holsters
       avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
       avatar.setEquipmentInHolster(2, Tool(1, 1)) // Suppressor in rifle slot 1
@@ -754,7 +762,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(object_guid)
           if (OnlinePlayer.isDefined) {
             val onlineplayer: PlayerAvatar = OnlinePlayer.get
-            if(player.guid != onlineplayer.guid) {
+            if(player.guid != onlineplayer.guid && player.vel.isEmpty) {
               if (onlineplayer.getMaxPersonalArmor - onlineplayer.blueArmor <= 5 ) {
                 onlineplayer.blueArmor = onlineplayer.getMaxPersonalArmor
 //                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.blueArmor)))
@@ -769,7 +777,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
             }
           }
-          if(PlanetSideGUID(player.guid) == object_guid) {
+          if(PlanetSideGUID(player.guid) == object_guid && player.vel.isEmpty) {
             if (player.getMaxPersonalArmor - player.blueArmor <= 5) {
               player.blueArmor = player.getMaxPersonalArmor
 //              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
@@ -832,7 +840,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("WeaponDelayFire: " + msg)
 
     case msg@WeaponFireMessage(seq_time, weapon_guid, projectile_guid, shot_origin, unk1, unk2, unk3, unk4, unk5, unk6, unk7) =>
-      log.info("WeaponFire: " + msg)
+//      log.info("WeaponFire: " + msg)
 
     case msg@WeaponDryFireMessage(weapon_guid) =>
       log.info("WeaponDryFireMessage: " + msg)
@@ -841,7 +849,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("Lazing position: " + pos2.toString)
 
     case msg@HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
-      log.info("Hit: " + msg)
+//      log.info("Hit: " + msg)
 
     case msg@SplashHitMessage(unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8) =>
       log.info("SplashHitMessage: " + msg)
