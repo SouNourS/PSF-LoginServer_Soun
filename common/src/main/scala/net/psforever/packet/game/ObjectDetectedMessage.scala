@@ -1,4 +1,4 @@
-// Copyright (c) 2016 PSForever.net to present
+// Copyright (c) 2017 PSForever
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
@@ -9,9 +9,11 @@ import shapeless.{::, HNil}
 /**
   * na
   * @param guid1 na
-  * @param guid2 na
+  * @param guid2 na;
+  *              often matches with `guid1`
   * @param unk1 na
-  * @param unk2 na
+  * @param unk2 na;
+  *             normally contains at least one element
   */
 final case class ObjectDetectedMessage(guid1 : PlanetSideGUID,
                                        guid2 : PlanetSideGUID,
@@ -37,7 +39,7 @@ object ObjectDetectedMessage extends Marshallable[ObjectDetectedMessage] {
     {
       case ObjectDetectedMessage(g1, g2, u1, u2) =>
         if(u2.size > 63) {
-          Attempt.failure(Err("too many list elements (max: 63, actual: %d)".format(u2.size)))
+          Attempt.failure(Err(s"too many list elements (max: 63, actual: ${u2.size})"))
         }
         else {
           Attempt.successful(g1 :: g2 :: u1 :: u2 :: HNil)

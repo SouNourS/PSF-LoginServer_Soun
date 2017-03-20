@@ -22,9 +22,11 @@ object AvatarService {
    /avatar/
  */
 
-final case class AvatarMessage(to : String = "", function : String = "", itemID : PlanetSideGUID = PlanetSideGUID(0), avatar_guid : PlanetSideGUID, pos : Vector3 = Vector3(0f,0f,0f), vel : Option[Vector3] = None,
-                               unk1 : Int = 0, aim_pitch : Int = 0, unk2 : Int = 0,
-                               is_crouching : Boolean = false, unk4 : Boolean = false, is_cloaking : Boolean = false, Long : Long = 0)
+final case class AvatarMessage(to : String = "", function : String = "", itemID : PlanetSideGUID = PlanetSideGUID(0),
+                               avatar_guid : PlanetSideGUID, pos : Vector3 = Vector3(0f,0f,0f), vel : Option[Vector3] = None,
+                               facingYaw : Int = 0, facingPitch : Int = 0, facingYawUpper : Int = 0,
+                               is_crouching : Boolean = false, is_jumping : Boolean = false, jump_thrust : Boolean = false, is_cloaked : Boolean = false,
+                               Long : Long = 0)
 
 class AvatarEventBus extends ActorEventBus with SubchannelClassification {
   type Event = AvatarMessage
@@ -73,7 +75,8 @@ class AvatarService extends Actor {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlayerStateMessage", PlanetSideGUID(0), msg.avatar_guid, msg.pos, msg.vel, msg.unk1, msg.aim_pitch, msg.unk2, msg.is_crouching, msg.is_jumping, msg.is_cloaking))
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlayerStateMessage", PlanetSideGUID(0),
+          msg.avatar_guid, msg.pos, msg.vel, msg.facingYaw, msg.facingPitch, msg.facingYawUpper, msg.is_crouching, msg.is_jumping, msg.jump_thrust, msg.is_cloaked))
       }
     case m @ LoadMap(msg) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.guid)
@@ -103,7 +106,8 @@ class AvatarService extends Actor {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlanetsideAttribute", PlanetSideGUID(0), guid, Vector3(0f,0f,0f), None, 0, 0, attribute_type, false, false, false, attribute_value))
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlanetsideAttribute", PlanetSideGUID(0),
+          guid, Vector3(0f,0f,0f), None, 0, 0, attribute_type, false, false, false, false, attribute_value))
       }
     case _ =>
   }
