@@ -1,15 +1,15 @@
 // Copyright (c) 2017 PSForever
-import akka.actor.ActorRef
 import net.psforever.objects.{PlayerAvatar, PlayerMasterList}
 import net.psforever.packet.{PacketCoding, PlanetSidePacketContainer}
 import net.psforever.packet.game._
 import net.psforever.packet.game.objectcreate._
 import net.psforever.types.{ChatMessageType, PlanetSideEmpire, Vector3}
-import scodec.bits.{BitVector, ByteVector}
+import scodec.bits.ByteVector
 
 import scala.collection.{immutable, mutable}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Random, Try}
+import scodec.bits._
 
 
   //----------------------------------------------------------------------------------------------------------------------
@@ -332,6 +332,7 @@ import scala.util.{Random, Try}
         disposeSelf(traveler, sessionID)
         loadMap(traveler, zone)
         player.continent = zone.zonename
+        player.setUsedHolster(0)
         loadSelf(traveler, sessionID, destination)
       }
     }
@@ -395,6 +396,10 @@ import scala.util.{Random, Try}
 //        val player: PlayerAvatar = playerOpt.get
 //      }
       traveler.sendToSelf(PacketCoding.CreateGamePacket(0, LoadMapMessage(zone.map, zone.zonename, 40100,25,true,3770441820L)))
+
+      // lasher on ground near 4719 5545 77
+      traveler.sendToSelf(hex"17 F4000000 D69020C 99299 85D0A 5F10 000020400000004041038819018000000")
+
       for(nanototo <- 0 to 50)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(nanototo), PlanetSideEmpire.TR)))
     }
@@ -459,7 +464,7 @@ import scala.util.{Random, Try}
 //        traveler.sendToSelf(temp.toByteVector)
 
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
-          ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+          ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
             player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
             List(),
             List(),
@@ -527,7 +532,7 @@ import scala.util.{Random, Try}
             val x = i + 15000 + (i * 100 - (100 + i))
             if (player.guid != x && player.continent == onlineplayer.continent) {
               traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
-                ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(onlineplayer.guid), CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, player.getExoSuitType, onlineplayer.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+                ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(onlineplayer.guid), CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, player.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
                   onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
                   List(),
                   List(),

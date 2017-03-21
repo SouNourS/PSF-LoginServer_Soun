@@ -1,6 +1,6 @@
 // Copyright (c) 2017 PSForever
 
-import akka.actor.{Actor, ActorIdentity, ActorRef, Cancellable, Identify, MDCContextAware}
+import akka.actor.{Actor, ActorRef, Cancellable, MDCContextAware}
 import net.psforever.packet.{PlanetSideGamePacket, _}
 import net.psforever.packet.control._
 import net.psforever.packet.game._
@@ -93,7 +93,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         if(function == "LoadMap" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent) {
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
             onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
             List(),
             List(),
@@ -217,9 +217,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info(s"New world login to ${server} with Token:${token}. ${clientVersion}")
 
 
-//      sendResponse(PacketCoding.CreateGamePacket(0, objectHex))
-//      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605313, PlanetSideGUID(xGUID), false, 6404428)))
-
       // NOTE: PlanetSideZoneID just chooses the background
       sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
     case msg@CharacterRequestMessage(charId, action) =>
@@ -233,40 +230,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
           sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(13), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
 
-//          val userInv =
-////            InventoryItem(ObjectClass.repeater, PlanetSideGUID(xGUID + 1), 0,
-////              WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 2), 0, AmmoBoxData(20))) ::
-//              InventoryItem(ObjectClass.bank, PlanetSideGUID(xGUID + 22), 0,
-//                WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(xGUID + 23), 0, AmmoBoxData(100))) ::
-//              InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(xGUID + 3), 2,
-//                ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, AmmoBoxData(30)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(1564), 1, AmmoBoxData(30)) :: Nil)) ::
-//              //      WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID((xGUID+4)), 0, AmmoBoxData(100))) ::
-//              InventoryItem(ObjectClass.chainblade, PlanetSideGUID(xGUID + 5), 4,
-//                WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(xGUID + 6), 0, AmmoBoxData(1))) ::
-//              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(xGUID + 7), 5, AmmoBoxData(1)) ::
-//              InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 8), 6, AmmoBoxData(25)) ::
-//              InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 9), 9, AmmoBoxData(50)) ::
-//              InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID + 10), 12, AmmoBoxData(50)) ::
-//              InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 11), 33, AmmoBoxData(1)) ::
-//              InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(xGUID + 12), 37, REKData(8)) ::
-//              InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 13), 51, AmmoBoxData(1)) ::
-//              InventoryItem(ObjectClass.super_medkit, PlanetSideGUID(xGUID + 14), 69, AmmoBoxData(1)) ::
-//              InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID + 15), 64, AmmoBoxData(50)) ::
-//              InventoryItem(ObjectClass.plasma_grenade, PlanetSideGUID(xGUID + 16), 40, WeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(xGUID + 17), 0, AmmoBoxData(3))) ::
-//              InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(xGUID + 18), 58, WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(xGUID + 19), 0, AmmoBoxData(3))) ::
-//              InventoryItem(ObjectClass.frag_grenade, PlanetSideGUID(xGUID + 20), 76, WeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(xGUID + 21), 0, AmmoBoxData(3))) ::
-//              Nil
 
           val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(xGUID)
           if (playerOpt.isDefined) {
             val player: PlayerAvatar = playerOpt.get
 
-//            sendResponse(PacketCoding.CreateGamePacket(0,
-//              ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(player.getPosition, 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
-//                player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
-//                List(),
-//                List(),
-//                InventoryData(true, false, false, userInv)))))
 
             player.setEquipmentInHolster(0,Tool(1,1))
             player.setUsedHolster(0)
@@ -282,23 +250,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
             Transfer.loadSelf(traveler, sessionId, Zone.selectRandom(home))
             avatarService ! AvatarService.LoadMap(PlanetSideGUID(player.guid))
           }
-          sendRawResponse(hex"17 F4000000 D69020C 99299 85D0A 5F10 000020400000004041038819018000000")
 
           // test OrbitalShuttleTimeMsg
           sendRawResponse(hex"5b75c4020180200f8000583a80000a80e041142903820450a00e0c1140")
 
-//                        for(nanototo <- 0 to 1024)
-//                          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(nanototo), PlanetSideEmpire.TR)))
           sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.TR)))
           sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(29), PlanetSideEmpire.TR)))
-          //              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(1397), PlanetSideEmpire.TR)))
 
           sendResponse(PacketCoding.CreateGamePacket(0, TimeOfDayMessage(1191182336)))
           sendResponse(PacketCoding.CreateGamePacket(0, ContinentalLockUpdateMessage(PlanetSideGUID(11), PlanetSideEmpire.NC))) // "The NC have captured the NC Sanctuary."
           sendResponse(PacketCoding.CreateGamePacket(0, ContinentalLockUpdateMessage(PlanetSideGUID(12), PlanetSideEmpire.TR))) // "The TR have captured the TR Sanctuary."
           sendResponse(PacketCoding.CreateGamePacket(0, ContinentalLockUpdateMessage(PlanetSideGUID(13), PlanetSideEmpire.VS))) // "The VS have captured the VS Sanctuary."
           sendResponse(PacketCoding.CreateGamePacket(0, BroadcastWarpgateUpdateMessage(PlanetSideGUID(13), PlanetSideGUID(1), false, false, true))) // VS Sanctuary: Inactive Warpgate -> Broadcast Warpgate
-
 
           sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(1),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
           sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(2),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
@@ -489,7 +452,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       //hardcoded avatar and some pertinent equipment setup
 //      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, 0, 0)
-      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, 0, 0)
+      val avatar: PlayerAvatar = PlayerAvatar(sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt)), name, empire, gender.id, head, voice)
       avatar.setExoSuitType(1)
       //init holsters
       avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
@@ -508,7 +471,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //add avatar
       PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
 
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(avatar.guid), None, Some(CharacterData(CharacterAppearanceData(avatar.getPosition, 19, avatar.faction, false, 4, avatar.name, avatar.getExoSuitType, avatar.sex, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(avatar.guid), None, Some(CharacterData(CharacterAppearanceData(avatar.getPosition, 19, avatar.faction, false, 4, avatar.name, avatar.getExoSuitType, avatar.sex, 2, 9, avatar.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
         avatar.getMaxHealth, avatar.getHealth, avatar.getPersonalArmor, 1, 7, 7, avatar.getMaxStamina, avatar.getStamina, 28, 4, 44, 84, 104, 1900,
         List(),
         List(),
@@ -770,13 +733,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
               if (onlineplayer.getMaxPersonalArmor - onlineplayer.blueArmor <= 5 ) {
                 onlineplayer.blueArmor = onlineplayer.getMaxPersonalArmor
 //                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.blueArmor)))
-                sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, onlineplayer.blueArmor)))
+//                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                val RepairPercent : Int = onlineplayer.blueArmor*100/onlineplayer.getMaxPersonalArmor
+                sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
                 avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
               }
               if (onlineplayer.getMaxPersonalArmor - onlineplayer.blueArmor > 5 ) {
                 onlineplayer.blueArmor += 5
 //                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.blueArmor)))
-                sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, onlineplayer.blueArmor)))
+//                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                val RepairPercent : Int = onlineplayer.blueArmor*100/onlineplayer.getMaxPersonalArmor
+                sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
                 avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
               }
             }
@@ -785,12 +752,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
             if (player.getMaxPersonalArmor - player.blueArmor <= 5) {
               player.blueArmor = player.getMaxPersonalArmor
 //              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
+//              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
               sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.blueArmor)))
               avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
             }
             if (player.getMaxPersonalArmor - player.blueArmor > 5) {
               player.blueArmor += 5
 //              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
+//              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
               sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.blueArmor)))
               avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
             }
