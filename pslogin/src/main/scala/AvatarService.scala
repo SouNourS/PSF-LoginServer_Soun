@@ -16,7 +16,8 @@ object AvatarService {
   case class ObjectHeld(msg : PlanetSideGUID)
   case class ChangeFireState(itemID : PlanetSideGUID, sessionId : Long)
   case class PlanetsideAttribute(guid : PlanetSideGUID, attribute_type : Int, attribute_value : Long)
-  case class PlayerStateShift(msg : PlanetSideGUID)
+  case class PlayerStateShift(killer : PlanetSideGUID, death : PlanetSideGUID)
+  case class DestroyDisplay(killer : PlanetSideGUID, death : PlanetSideGUID)
 }
 
 /*
@@ -110,11 +111,17 @@ class AvatarService extends Actor {
         AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlanetsideAttribute", PlanetSideGUID(0),
           guid, Vector3(0f,0f,0f), None, 0, 0, attribute_type, false, false, false, false, attribute_value))
       }
-    case m @ PlayerStateShift(guid) =>
+    case m @ PlayerStateShift(killer,guid) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlayerStateShift", PlanetSideGUID(0), guid))
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "PlayerStateShift", killer, guid))
+      }
+    case m @ DestroyDisplay(killer, death) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(death)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "DestroyDisplay", killer, death))
       }
 
     case _ =>

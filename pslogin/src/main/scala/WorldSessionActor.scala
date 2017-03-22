@@ -92,7 +92,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(onlineplayer.guid), 0)))
         }
 
-        if(function == "LoadMap" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent) {
+        if(function == "LoadMap" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && player.continent != "i4") {
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
             onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
             List(),
@@ -119,6 +119,25 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
         }
+        if(function == "LoadMap" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && player.continent == "i4") {
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+            onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
+            List(),
+            List(),
+            InventoryData(true, false, false,
+              InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(onlineplayer.guid + 1), 0,
+                WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(300))) ::
+              InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 3), 1,
+                WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
+              InventoryItem(ObjectClass.suppressor, PlanetSideGUID(onlineplayer.guid + 5), 2,
+                WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(100))) ::
+              InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
+                WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
+              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),35,40))) // br40
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
+        }
 
         if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent) {
           sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
@@ -141,15 +160,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, facingUpper, long)))
         }
         if(function == "PlayerStateShift" && PlanetSideGUID(player.guid) == avatar_guid && player.continent == "i4") {
-          println(onlineplayer.continent,player.continent,avatar_guid)
-          sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1918, 1933, 49),0))))
+          if(player.faction == PlanetSideEmpire.NC) {
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1998, 1918, 19),0))))
+          }
+          if(player.faction == PlanetSideEmpire.TR) {
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1966, 1959, 26),0))))
+          }
+          if(player.faction == PlanetSideEmpire.VS) {
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(2038, 1993, 31),0))))
+          }
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 15, 50)))
           player.redHealth = player.getMaxHealth
           player.greenStamina = player.getMaxStamina
           player.blueArmor = player.getMaxPersonalArmor
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 2, player.greenStamina)))
           avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,0,player.redHealth)
           avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,4,player.blueArmor)
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 15, 150)))
+          avatarService ! AvatarService.DestroyDisplay(itemID,PlanetSideGUID(player.guid))
+        }
+        if(function == "DestroyDisplay") {
+          val Killer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(itemID)
+          if (Killer.isDefined) {
+            val killer: PlayerAvatar = Killer.get
+            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 297, onlineplayer.name, 31035057, onlineplayer.faction, false)))
+          }
         }
       }
     case default => failWithError(s"Invalid packet class received: $default")
@@ -608,7 +642,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if (messagetype != ChatMessageType.CMT_OPEN &&
           messagetype != ChatMessageType.CMT_VOICE &&
           messagetype != ChatMessageType.CMT_SQUAD &&
-          messagetype != ChatMessageType.CMT_TOGGLE_GM) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
+          messagetype != ChatMessageType.CMT_TOGGLE_GM &&
+          messagetype != ChatMessageType.CMT_FLY &&
+          messagetype != ChatMessageType.CMT_SPEED) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
+
+        if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent != "i4" ) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
       }
@@ -930,7 +968,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid),0,onlineplayer.redHealth)
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid),4,onlineplayer.blueArmor)
         if(onlineplayer.redHealth == 1){
-          avatarService ! AvatarService.PlayerStateShift(PlanetSideGUID(onlineplayer.guid))
+          avatarService ! AvatarService.PlayerStateShift(source_guid,PlanetSideGUID(onlineplayer.guid))
         }
       }
 
