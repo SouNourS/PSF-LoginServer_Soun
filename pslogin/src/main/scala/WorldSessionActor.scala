@@ -129,8 +129,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(300))) ::
               InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 3), 1,
                 WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-              InventoryItem(ObjectClass.suppressor, PlanetSideGUID(onlineplayer.guid + 5), 2,
-                WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(100))) ::
+                InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
+                  ConcurrentFeedWeaponData(0,
+                    AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
+                      AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
               InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
                 WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
               InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
@@ -182,7 +184,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           val Killer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(itemID)
           if (Killer.isDefined) {
             val killer: PlayerAvatar = Killer.get
-            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 297, onlineplayer.name, 31035057, onlineplayer.faction, false)))
+            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 556, onlineplayer.name, 31035057, onlineplayer.faction, false)))
           }
         }
       }
