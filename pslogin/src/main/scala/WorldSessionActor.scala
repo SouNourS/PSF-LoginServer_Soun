@@ -140,6 +140,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if(function == "PlanetsideAttribute" && PlanetSideGUID(player.guid) == avatar_guid) {
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, facingUpper, long)))
         }
+        if(function == "PlayerStateShift" && PlanetSideGUID(player.guid) == avatar_guid && player.continent == "i4") {
+          println(onlineplayer.continent,player.continent,avatar_guid)
+          sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1918, 1933, 49),0))))
+          player.redHealth = player.getMaxHealth
+          player.greenStamina = player.getMaxStamina
+          player.blueArmor = player.getMaxPersonalArmor
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 2, player.greenStamina)))
+          avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,0,player.redHealth)
+          avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,4,player.blueArmor)
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 15, 150)))
+        }
       }
     case default => failWithError(s"Invalid packet class received: $default")
   }
@@ -494,7 +505,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         player.setPitch(aim_pitch)
         player.crouched = is_crouching
 
-        if (vel.isEmpty) {
+        if (vel.isEmpty && player.greenStamina != 100) {
           if (!is_crouching) {
             if (player.greenStamina + 1 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
             if (player.greenStamina + 1 <= player.getMaxStamina) player.greenStamina += 1
@@ -525,38 +536,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, player.name, contents, note_contents)))
 
-//              if(messagetype == ChatMessageType.CMT_OPEN) {
-//                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoTell_Target",None)))
-//                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoChat_NoCommand",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),contents.toInt,1000)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(4717), 0)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(5398), 0)))
-        ////        val msg = ObjectCreateMessage(0,contents.toInt,PlanetSideGUID(4717),Some(ObjectCreateMessageParent(PlanetSideGUID(15000),1)),Some(WeaponData(7,InternalSlot(540,PlanetSideGUID(5398),0,AmmoBoxData(1)))))
-        //        val msg = ObjectCreateMessage(0,ObjectClass.KATANA,PlanetSideGUID(4717),Some(ObjectCreateMessageParent(PlanetSideGUID(15000),1)),Some(WeaponData(contents.toInt,InternalSlot(540,PlanetSideGUID(5398),0,AmmoBoxData(1)))))
-        //        val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
-        //        sendRawResponse(pkt)
-        ////        InventoryItem(ObjectClass.KATANA, PlanetSideGUID((xGUID+5)), 4,
-        ////          WeaponData(8, ObjectClass.MELEE_AMMO, PlanetSideGUID((xGUID+6)), 0, AmmoBoxData(1))) ::
-//              }
-
-        //      if(messagetype == ChatMessageType.CMT_TELL) {
-        //        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),recipient.toInt,contents.toInt)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagSpawned^@amp_station~^@Pwyll~^@comm_station_dsp~^@Bel~^15~",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagPickedUp^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagDropped^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_223,true,"","@CTF_Failed_SourceResecured^@NewConglomerate~^@Pwyll~",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_INFO,true,"","switchboard",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@OptionsCullWatermarkUsage",None)))
-
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_223,true,"","@CTF_Failed_SourceResecured^@TerranRepublic~^@Hanish~",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_224,false,"","@TooFastToDismount",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225,false,"","@DoorWillOpenWhenShuttleReturns",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOverride",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@charsaved",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@SVCP_PositionInQueue^1~^1~",None)))
-        //        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOff",None)))
-        //      }
+        //              if(messagetype == ChatMessageType.CMT_OPEN) {
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoTell_Target",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoChat_NoCommand",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),contents.toInt,1000)))
+        //              }
+        //
+        //              if(messagetype == ChatMessageType.CMT_TELL) {
+        //                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),recipient.toInt,contents.toInt)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagSpawned^@amp_station~^@Pwyll~^@comm_station_dsp~^@Bel~^15~",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagPickedUp^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagDropped^HenrysCat~^@TerranRepublic~^@Pwyll~",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_223,true,"","@CTF_Failed_SourceResecured^@NewConglomerate~^@Pwyll~",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_INFO,true,"","switchboard",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@OptionsCullWatermarkUsage",None)))
+        //
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_223,true,"","@CTF_Failed_SourceResecured^@TerranRepublic~^@Hanish~",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_224,false,"","@TooFastToDismount",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225,false,"","@DoorWillOpenWhenShuttleReturns",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOverride",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@charsaved",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@SVCP_PositionInQueue^1~^1~",None)))
+        //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227,false,"","@ArmorShieldOff",None)))
+        //              }
 
         if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
           messagetype == ChatMessageType.CMT_WHO_PLATOONLEADERS || messagetype == ChatMessageType.CMT_WHO_SQUADLEADERS || messagetype == ChatMessageType.CMT_WHO_TEAMS) {
@@ -589,8 +592,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         // TODO: handle this appropriately
         if (messagetype == ChatMessageType.CMT_QUIT) {
-//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_QUIT,false,"","@quit_friendly",None)))
-//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_QUIT,false,"","@quit_5",None)))
+          //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_QUIT,false,"","@quit_friendly",None)))
+          //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_QUIT,false,"","@quit_5",None)))
           avatarService ! AvatarService.unLoadMap(PlanetSideGUID(player.guid))
           avatarService ! AvatarService.LeaveAll
           chatService ! ChatService.LeaveAll
@@ -602,7 +605,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
         // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
-        if (messagetype != ChatMessageType.CMT_OPEN && messagetype != ChatMessageType.CMT_VOICE && messagetype != ChatMessageType.CMT_SQUAD) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
+        if (messagetype != ChatMessageType.CMT_OPEN &&
+          messagetype != ChatMessageType.CMT_VOICE &&
+          messagetype != ChatMessageType.CMT_SQUAD &&
+          messagetype != ChatMessageType.CMT_TOGGLE_GM) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
       }
@@ -908,6 +914,25 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("PlanetsideAttributeMessage: "+msg)
 //      sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
       avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,attribute_type,attribute_value)
+
+    case msg@HitHint(source_guid,player_guid) =>
+//      log.info("HitHint: "+msg)
+      val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
+      if (OnlinePlayer.isDefined) {
+        val onlineplayer: PlayerAvatar = OnlinePlayer.get
+        if (onlineplayer.redHealth - 5 <= 0) onlineplayer.redHealth = 1
+        if (onlineplayer.redHealth - 5 > 0) onlineplayer.redHealth -= 5
+        if (onlineplayer.greenStamina - 2 <= 0) onlineplayer.greenStamina = 0
+        if (onlineplayer.greenStamina - 2 > 0) onlineplayer.greenStamina -= 2
+        if (onlineplayer.blueArmor - 3 <= 0) onlineplayer.blueArmor = 0
+        if (onlineplayer.blueArmor - 3 > 0) onlineplayer.blueArmor -= 3
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(player_guid, 2, onlineplayer.greenStamina)))
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid),0,onlineplayer.redHealth)
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid),4,onlineplayer.blueArmor)
+        if(onlineplayer.redHealth == 1){
+          avatarService ! AvatarService.PlayerStateShift(PlanetSideGUID(onlineplayer.guid))
+        }
+      }
 
     case default => log.info(s"Unhandled GamePacket ${pkt}")
   }
