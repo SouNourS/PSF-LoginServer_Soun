@@ -459,7 +459,7 @@ import scodec.bits._
           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(xGUID + 8), 4,
             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(xGUID + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(xGUID + 10), 5, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 11), 6, AmmoBoxData(50)) ::
+          InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(xGUID + 11), 6, AmmoBoxData(50)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 12), 33, AmmoBoxData(1)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 13), 51, AmmoBoxData(1)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 14), 69, AmmoBoxData(1)) ::
