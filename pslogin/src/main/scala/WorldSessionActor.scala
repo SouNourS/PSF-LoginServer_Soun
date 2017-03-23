@@ -186,7 +186,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           val Killer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(itemID)
           if (Killer.isDefined) {
             val killer: PlayerAvatar = Killer.get
-            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 556, onlineplayer.name, 31035057, onlineplayer.faction, false)))
+            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 429, onlineplayer.name, 31035057, onlineplayer.faction, false)))
           }
         }
       }
