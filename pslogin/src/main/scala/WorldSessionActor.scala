@@ -1014,8 +1014,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
       if (OnlinePlayer.isDefined) {
         val onlineplayer: PlayerAvatar = OnlinePlayer.get
-        if (onlineplayer.redHealth - 15 <= 0) onlineplayer.redHealth = 1
-        if (onlineplayer.redHealth - 15 > 0) onlineplayer.redHealth -= 15
+        if (onlineplayer.redHealth - 5 <= 0) onlineplayer.redHealth = 1
+        if (onlineplayer.redHealth - 5 > 0) onlineplayer.redHealth -= 5
         if (onlineplayer.greenStamina - 2 <= 0) onlineplayer.greenStamina = 0
         if (onlineplayer.greenStamina - 2 > 0) onlineplayer.greenStamina -= 2
         if (onlineplayer.blueArmor - 3 <= 0) onlineplayer.blueArmor = 0
