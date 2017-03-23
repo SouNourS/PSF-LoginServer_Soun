@@ -41,6 +41,9 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   /** Exo-suit-dependent resistance points for mitigating damage. */
   var blueArmor : Int = 0
 
+  /** Last medkituse. */
+  var lastMedkit : Long = 0
+
   /** An index reference to the type of exo-suit the player is wearing. */
   private var suit : Int = -1
   /** Where equipment is stored for easy access on a player's person.  Permissions dependent on exo-suit type. */
