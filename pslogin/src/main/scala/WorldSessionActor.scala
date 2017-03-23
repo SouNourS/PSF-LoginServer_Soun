@@ -99,8 +99,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
             List(),
             InventoryData(true, false, false, InventoryItem(ObjectClass.repeater, PlanetSideGUID(onlineplayer.guid + 1), 0,
               WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(20))) ::
-              InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 3), 1,
-                WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(10))) ::
+              InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
+                WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(10))) ::
               InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
                 ConcurrentFeedWeaponData(0,
                   AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
@@ -126,9 +126,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
             List(),
             InventoryData(true, false, false,
               InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(onlineplayer.guid + 1), 0,
-                WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(300))) ::
-              InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 3), 1,
-                WeaponData(0, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
+                WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(600))) ::
+              InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
+                WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
                 InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
                   ConcurrentFeedWeaponData(0,
                     AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
@@ -769,45 +769,88 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // TODO: Not all incoming UseItemMessage's respond with another UseItemMessage (i.e. doors only send out GenericObjectStateMsg)
       sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
-      if (itemType == 121 && unk3) { // TODO : bank ?
+//      if (itemType == 121 && unk3) { // TODO : bank ? med app ?
+//        if (playerOpt.isDefined) {
+//          val player: PlayerAvatar = playerOpt.get
+//          val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(object_guid)
+//          if (OnlinePlayer.isDefined) {
+//            val onlineplayer: PlayerAvatar = OnlinePlayer.get
+//            if(player.guid != onlineplayer.guid && player.vel.isEmpty) {
+//              if (onlineplayer.getMaxPersonalArmor - onlineplayer.blueArmor <= 5 ) {
+//                onlineplayer.blueArmor = onlineplayer.getMaxPersonalArmor
+////                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.blueArmor)))
+////                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+//                val RepairPercent : Int = onlineplayer.blueArmor*100/onlineplayer.getMaxPersonalArmor
+//                sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+//                avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
+//              }
+//              if (onlineplayer.getMaxPersonalArmor - onlineplayer.blueArmor > 5 ) {
+//                onlineplayer.blueArmor += 5
+////                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.blueArmor)))
+////                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+//                val RepairPercent : Int = onlineplayer.blueArmor*100/onlineplayer.getMaxPersonalArmor
+//                sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+//                avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
+//              }
+//            }
+//          }
+//          if(PlanetSideGUID(player.guid) == object_guid && player.vel.isEmpty) {
+//            if (player.getMaxPersonalArmor - player.blueArmor <= 5) {
+//              player.blueArmor = player.getMaxPersonalArmor
+////              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
+////              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+//              sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.blueArmor)))
+//              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
+//            }
+//            if (player.getMaxPersonalArmor - player.blueArmor > 5) {
+//              player.blueArmor += 5
+////              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
+////              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+//              sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.blueArmor)))
+//              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
+//            }
+//          }
+//        }
+//      }
+      if (itemType == 121 && unk3) { // TODO : bank ? med app ?
         if (playerOpt.isDefined) {
           val player: PlayerAvatar = playerOpt.get
           val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(object_guid)
           if (OnlinePlayer.isDefined) {
             val onlineplayer: PlayerAvatar = OnlinePlayer.get
             if(player.guid != onlineplayer.guid && player.vel.isEmpty) {
-              if (onlineplayer.getMaxPersonalArmor - onlineplayer.blueArmor <= 5 ) {
-                onlineplayer.blueArmor = onlineplayer.getMaxPersonalArmor
-//                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.blueArmor)))
-//                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                val RepairPercent : Int = onlineplayer.blueArmor*100/onlineplayer.getMaxPersonalArmor
+              if (onlineplayer.getMaxHealth - onlineplayer.redHealth <= 5 ) {
+                onlineplayer.redHealth = onlineplayer.getMaxHealth
+                //                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.redHealth)))
+                //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                val RepairPercent : Int = onlineplayer.redHealth*100/onlineplayer.getMaxHealth
                 sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
-                avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
+                avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 0, onlineplayer.redHealth)
               }
-              if (onlineplayer.getMaxPersonalArmor - onlineplayer.blueArmor > 5 ) {
-                onlineplayer.blueArmor += 5
-//                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.blueArmor)))
-//                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                val RepairPercent : Int = onlineplayer.blueArmor*100/onlineplayer.getMaxPersonalArmor
+              if (onlineplayer.getMaxHealth - onlineplayer.redHealth > 5 ) {
+                onlineplayer.redHealth += 5
+                //                sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(object_guid, 4, onlineplayer.redHealth)))
+                //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                val RepairPercent : Int = onlineplayer.redHealth*100/onlineplayer.getMaxHealth
                 sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
-                avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
+                avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 0, onlineplayer.redHealth)
               }
             }
           }
           if(PlanetSideGUID(player.guid) == object_guid && player.vel.isEmpty) {
-            if (player.getMaxPersonalArmor - player.blueArmor <= 5) {
-              player.blueArmor = player.getMaxPersonalArmor
-//              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
-//              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-              sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.blueArmor)))
-              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
+            if (player.getMaxHealth - player.redHealth <= 5) {
+              player.redHealth = player.getMaxHealth
+              //              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.redHealth)))
+              //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+              sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.redHealth)))
+              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.redHealth)
             }
-            if (player.getMaxPersonalArmor - player.blueArmor > 5) {
-              player.blueArmor += 5
-//              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.blueArmor)))
-//              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-              sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.blueArmor)))
-              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
+            if (player.getMaxHealth - player.redHealth > 5) {
+              player.redHealth += 5
+              //              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 4, player.redHealth)))
+              //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+              sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.redHealth)))
+              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.redHealth)
             }
           }
         }
