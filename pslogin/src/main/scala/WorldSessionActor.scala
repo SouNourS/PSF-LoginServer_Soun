@@ -129,8 +129,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(600))) ::
               InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
                 WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-              InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                  WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35))) ::
+//              InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 2,
+//                  WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35))) ::
+                InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), 2,
+                  WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16))) ::
 //              InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
 //                  ConcurrentFeedWeaponData(0,
 //                    AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
@@ -186,7 +188,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           val Killer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(itemID)
           if (Killer.isDefined) {
             val killer: PlayerAvatar = Killer.get
-            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 429, onlineplayer.name, 31035057, onlineplayer.faction, false)))
+            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 714, onlineplayer.name, 31035057, onlineplayer.faction, false)))
           }
         }
       }
@@ -708,7 +710,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ ReloadMessage(item_guid, ammo_clip, unk1) =>
       log.info("Reload: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 35, unk1)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 16, unk1)))
 
     case msg@ObjectHeldMessage(avatar_guid, held_holsters, unk1) =>
       log.info("ObjectHeld: " + msg)
