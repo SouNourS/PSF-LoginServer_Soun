@@ -129,10 +129,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(600))) ::
               InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
                 WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
-                  ConcurrentFeedWeaponData(0,
-                    AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
-                      AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
+              InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 3,
+                  WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(20))) ::
+//              InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
+//                  ConcurrentFeedWeaponData(0,
+//                    AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
+//                      AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
               InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
                 WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
               InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
@@ -1003,8 +1005,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
       if (OnlinePlayer.isDefined) {
         val onlineplayer: PlayerAvatar = OnlinePlayer.get
-        if (onlineplayer.redHealth - 5 <= 0) onlineplayer.redHealth = 1
-        if (onlineplayer.redHealth - 5 > 0) onlineplayer.redHealth -= 5
+        if (onlineplayer.redHealth - 15 <= 0) onlineplayer.redHealth = 1
+        if (onlineplayer.redHealth - 15 > 0) onlineplayer.redHealth -= 15
         if (onlineplayer.greenStamina - 2 <= 0) onlineplayer.greenStamina = 0
         if (onlineplayer.greenStamina - 2 > 0) onlineplayer.greenStamina -= 2
         if (onlineplayer.blueArmor - 3 <= 0) onlineplayer.blueArmor = 0
