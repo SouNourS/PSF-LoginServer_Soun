@@ -54,6 +54,8 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   private val inventory : Backpack = Backpack(guid, 1,1)
   /** The player is shooting. */
   var shooting : Boolean = false
+  /** The player is spectator. */
+  var spectator : Boolean = false
 
   /** Whether the player is in a squatting position. */
   var crouched : Boolean = false

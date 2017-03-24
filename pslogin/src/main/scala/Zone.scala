@@ -454,21 +454,24 @@ import scodec.bits._
             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(xGUID + 4), 0, AmmoBoxData(50))) ::
 //          InventoryItem(ObjectClass.lasher, PlanetSideGUID(xGUID + 6), 2,
 //            WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(xGUID + 7), 0, AmmoBoxData(35))) ::
-          InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(xGUID + 6), 2,
-            WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 7), 0, AmmoBoxData(16))) ::
+//          InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(xGUID + 6), 2,
+//            WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 7), 0, AmmoBoxData(16))) ::
+          InventoryItem(ObjectClass.gauss, PlanetSideGUID(xGUID + 6), 2,
+            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 7), 0, AmmoBoxData(30))) ::
 //          InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(xGUID + 5), 2,
 //            ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 22 ), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(xGUID + 23), 1, AmmoBoxData(100)) :: Nil)) ::
           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(xGUID + 8), 4,
             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(xGUID + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(xGUID + 10), 5, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 11), 6, AmmoBoxData(50)) ::
+          InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(xGUID + 11), 6, AmmoBoxData(50)) ::
+          InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(xGUID + 18), 9, AmmoBoxData(50)) ::
+          InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(xGUID + 19), 12, AmmoBoxData(50)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 12), 33, AmmoBoxData(1)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 13), 51, AmmoBoxData(1)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 14), 69, AmmoBoxData(1)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 15), 37, AmmoBoxData(1)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 16), 55, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 17), 73, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 18), 10, AmmoBoxData(1)) :: Nil
+          InventoryItem(ObjectClass.medkit, PlanetSideGUID(xGUID + 17), 73, AmmoBoxData(1)) :: Nil
 
 
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionID)
@@ -604,8 +607,10 @@ import scodec.bits._
                     WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
 //                  InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 2,
 //                        WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35))) ::
-                      InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                        WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16))) ::
+//                      InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), 2,
+//                        WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16))) ::
+                      InventoryItem(ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 6), 2,
+                        WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(30))) ::
 //                      InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
 //                        ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
                   InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,

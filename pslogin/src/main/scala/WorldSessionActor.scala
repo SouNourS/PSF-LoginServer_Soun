@@ -131,8 +131,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
 //              InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 2,
 //                  WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35))) ::
-                InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                  WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16))) ::
+//                InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), 2,
+//                  WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16))) ::
+                InventoryItem(ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 6), 2,
+                  WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(30))) ::
 //              InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
 //                  ConcurrentFeedWeaponData(0,
 //                    AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
@@ -167,13 +169,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
         if(function == "PlayerStateShift" && PlanetSideGUID(player.guid) == avatar_guid && player.continent == "i4") {
           if(player.faction == PlanetSideEmpire.NC) {
-            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1998, 1918, 19),0))))
+//            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1998, 1918, 19),0))))
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1921, 2066, 40),0))))
           }
           if(player.faction == PlanetSideEmpire.TR) {
-            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1966, 1959, 26),0))))
+//            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1966, 1959, 26),0))))
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1888, 1872, 40),0))))
           }
           if(player.faction == PlanetSideEmpire.VS) {
-            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(2038, 1993, 31),0))))
+//            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(2038, 1993, 31),0))))
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(2029, 2012, 40),0))))
           }
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 15, 50)))
           player.redHealth = player.getMaxHealth
@@ -188,7 +193,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           val Killer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(itemID)
           if (Killer.isDefined) {
             val killer: PlayerAvatar = Killer.get
-            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 714, onlineplayer.name, 31035057, onlineplayer.faction, false)))
+            sendResponse(PacketCoding.CreateGamePacket(0, DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, 345, onlineplayer.name, 31035057, onlineplayer.faction, false)))
           }
         }
       }
@@ -305,6 +310,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           // test OrbitalShuttleTimeMsg
           sendRawResponse(hex"5b75c4020180200f8000583a80000a80e041142903820450a00e0c1140")
 
+//          MultiPacketEx(Vector(PacketCoding.CreateGamePacket(0,SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.TR)),PacketCoding.CreateGamePacket(0,SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.TR))))
+//          PacketCoding.
+
           sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(2), PlanetSideEmpire.TR)))
           sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(29), PlanetSideEmpire.TR)))
 
@@ -322,13 +330,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(6),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
           sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(7),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
           sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(8),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(9),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(10),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(11),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(12),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(13),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(14),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(15),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(9),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(10),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(11),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(12),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(13),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(14),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(15),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(16),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(17),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(12),PlanetSideGUID(18),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,false,false,0,0,List(),0,false,8,None,false,false)))
@@ -471,10 +479,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
             true, //Boosted spawn room pain field
             true))) //Boosted generator room pain field
 
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(32),PlanetSideGUID(1),10,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.NEUTRAL,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,true,true)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(32),PlanetSideGUID(2),10,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,true,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(32),PlanetSideGUID(3),10,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.VS,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,true,false)))
-          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(32),PlanetSideGUID(4),10,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.NC,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,true,false)))
+          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(32),PlanetSideGUID(1),10,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.NEUTRAL,0,None,PlanetSideGeneratorState.Normal,true,false,2,0,List(),0,false,8,None,false,false)))
+          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(32),PlanetSideGUID(2),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.TR,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
+          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(32),PlanetSideGUID(3),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.VS,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
+          sendResponse(PacketCoding.CreateGamePacket(0, BuildingInfoUpdateMessage(PlanetSideGUID(32),PlanetSideGUID(4),0,false,PlanetSideEmpire.NEUTRAL,0,PlanetSideEmpire.NC,0,None,PlanetSideGeneratorState.Normal,true,false,0,0,List(),0,false,8,None,false,false)))
 
           PlayerMasterList.userClaimsCharacter(sessionId, xGUID) // ... we do this when sending a SetCurrentAvatarMessa
           sendResponse(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(xGUID), 0, 0)))
@@ -617,7 +625,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             "VS online : " + PlayerMasterList.getWorldPopulation._3, None)))
         }
 
-        val (isTransfert, zone, destination) = CSRZone.read(traveler, this.sessionId, msg)
+        var (isTransfert, zone, destination) = CSRZone.read(traveler, this.sessionId, msg)
         if(isTransfert){
           avatarService ! AvatarService.unLoadMap(PlanetSideGUID(player.guid))
           avatarService ! AvatarService.LeaveAll()
@@ -628,6 +636,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
               if(onlineplayer.guid != player.guid) sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(onlineplayer.guid), 0)))
             }
           }
+          if (player.faction == PlanetSideEmpire.NC) destination = (1921, 2066, 40)
+          if (player.faction == PlanetSideEmpire.TR) destination = (1888, 1872, 40)
+          if (player.faction == PlanetSideEmpire.VS) destination = (2029, 2012, 40)
           Transfer.zone(traveler, this.sessionId, Zone.get(zone).get, destination)
           avatarService ! AvatarService.Join(player.continent)
           avatarService ! AvatarService.LoadMap(PlanetSideGUID(player.guid))
@@ -658,8 +669,21 @@ class WorldSessionActor extends Actor with MDCContextAware {
           messagetype != ChatMessageType.CMT_SPEED) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent != "i4" ) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
+        if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent == "i4" && player.spectator) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
-        if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
+        if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
+          if(contents == "on"){
+            player.spectator = true
+            // TODO send objectdelete to others & stop sync upstream
+          }
+          if(contents == "off") {
+            player.spectator = false
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, true, "", "off", None)))
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SPEED, true, "", "1", None)))
+            // TODO send objectcreate to others & start sync upstream
+          }
+        }
       }
 
     case msg@VoiceHostRequest(unk, PlanetSideGUID(player_guid), data) =>
@@ -710,7 +734,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ ReloadMessage(item_guid, ammo_clip, unk1) =>
       log.info("Reload: " + msg)
-      sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 16, unk1)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 30, unk1)))
 
     case msg@ObjectHeldMessage(avatar_guid, held_holsters, unk1) =>
       log.info("ObjectHeld: " + msg)
@@ -1011,20 +1035,26 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@HitHint(source_guid,player_guid) =>
 //      log.info("HitHint: "+msg)
-      val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
-      if (OnlinePlayer.isDefined) {
-        val onlineplayer: PlayerAvatar = OnlinePlayer.get
-        if (onlineplayer.redHealth - 5 <= 0) onlineplayer.redHealth = 1
-        if (onlineplayer.redHealth - 5 > 0) onlineplayer.redHealth -= 5
-        if (onlineplayer.greenStamina - 2 <= 0) onlineplayer.greenStamina = 0
-        if (onlineplayer.greenStamina - 2 > 0) onlineplayer.greenStamina -= 2
-        if (onlineplayer.blueArmor - 3 <= 0) onlineplayer.blueArmor = 0
-        if (onlineplayer.blueArmor - 3 > 0) onlineplayer.blueArmor -= 3
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(player_guid, 2, onlineplayer.greenStamina)))
-          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid),0,onlineplayer.redHealth)
-          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid),4,onlineplayer.blueArmor)
-        if(onlineplayer.redHealth == 1){
-          avatarService ! AvatarService.PlayerStateShift(source_guid,PlanetSideGUID(onlineplayer.guid))
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(source_guid)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
+        if (OnlinePlayer.isDefined && !player.spectator) {
+          val onlineplayer: PlayerAvatar = OnlinePlayer.get
+          if ( !onlineplayer.spectator ){
+            if (onlineplayer.redHealth - 12 <= 0) onlineplayer.redHealth = 1
+            if (onlineplayer.redHealth - 12 > 0) onlineplayer.redHealth -= 12
+            if (onlineplayer.greenStamina - 4 <= 0) onlineplayer.greenStamina = 0
+            if (onlineplayer.greenStamina - 4 > 0) onlineplayer.greenStamina -= 4
+            if (onlineplayer.blueArmor - 1 <= 0) onlineplayer.blueArmor = 0
+            if (onlineplayer.blueArmor - 1 > 0) onlineplayer.blueArmor -= 1
+            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(player_guid, 2, onlineplayer.greenStamina)))
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 0, onlineplayer.redHealth)
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
+            if (onlineplayer.redHealth == 1) {
+              avatarService ! AvatarService.PlayerStateShift(source_guid, PlanetSideGUID(onlineplayer.guid))
+            }
+          }
         }
       }
 
