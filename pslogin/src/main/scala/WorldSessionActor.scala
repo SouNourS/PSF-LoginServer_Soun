@@ -712,32 +712,47 @@ class WorldSessionActor extends Actor with MDCContextAware {
           messagetype != ChatMessageType.CMT_SQUAD &&
           messagetype != ChatMessageType.CMT_TOGGLE_GM &&
           messagetype != ChatMessageType.CMT_FLY &&
-          messagetype != ChatMessageType.CMT_SPEED) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
+          messagetype != ChatMessageType.CMT_SPEED &&
+          messagetype != ChatMessageType.CMT_TELL) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent != "i4" ) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
         if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent == "i4" && player.spectator) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, "off", note_contents)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "Please use /t spectator on (or off)", note_contents)))
+        }
+
+        if (messagetype == ChatMessageType.CMT_TELL) {
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.U_CMT_TELLFROM, has_wide_contents, recipient, contents, note_contents)))
+        }
+
+        if (messagetype == ChatMessageType.CMT_TELL && recipient == "spectator") {
+//        if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
           if(contents == "on"){
             player.spectator = true
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "spectator", "Activated", note_contents)))
             // TODO send objectdelete to others & stop sync upstream
           }
           if(contents == "off") {
             player.spectator = false
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "spectator", "Deactivated", note_contents)))
             sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, true, "", "off", None)))
             sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SPEED, true, "", "1", None)))
-            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.getMaxHealth)
-            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.getMaxPersonalArmor)
-            if(player.faction == PlanetSideEmpire.NC) {
+            player.redHealth = player.getMaxHealth
+            player.blueArmor = player.getMaxPersonalArmor
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.redHealth)
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
+            if(player.faction == PlanetSideEmpire.NC && player.continent == "i4") {
               sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1944, 1940, 36),0))))
               //            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1921, 2066, 40),0))))
             }
-            if(player.faction == PlanetSideEmpire.TR) {
+            if(player.faction == PlanetSideEmpire.TR && player.continent == "i4") {
               sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1966, 1959, 26),0))))
               //            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1888, 1872, 40),0))))
             }
-            if(player.faction == PlanetSideEmpire.VS) {
+            if(player.faction == PlanetSideEmpire.VS && player.continent == "i4") {
               sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(2038, 1993, 31),0))))
               //            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(2029, 2012, 40),0))))
             }
@@ -751,6 +766,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, VoiceHostKill()))
 
     case msg@VoiceHostInfo(player_guid, data) =>
+      log.info("VoiceHostInfo: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, VoiceHostKill()))
 
     case msg@ChangeFireModeMessage(item_guid, fire_mode) =>
@@ -1006,7 +1022,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("WeaponDelayFire: " + msg)
 
     case msg@WeaponFireMessage(seq_time, weapon_guid, projectile_guid, shot_origin, unk1, unk2, unk3, unk4, unk5, unk6, unk7) =>
-//      log.info("WeaponFire: " + msg)
+      log.info("WeaponFire: " + msg)
 
     case msg@WeaponDryFireMessage(weapon_guid) =>
       log.info("WeaponDryFireMessage: " + msg)
@@ -1015,7 +1031,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("Lazing position: " + pos2.toString)
 
     case msg@HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
-//      log.info("Hit: " + msg)
+      log.info("Hit: " + msg)
 
     case msg@SplashHitMessage(unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8) =>
       log.info("SplashHitMessage: " + msg)
@@ -1095,7 +1111,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("BindPlayerMessage: " + msg)
 
     case msg@CreateShortcutMessage(player_guid, slot, unk, addShortcut, shortcut) =>
-//      log.info("CreateShortcutMessage: " + msg)
+      log.info("CreateShortcutMessage: " + msg)
 
     case msg @ PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
       log.info("PlanetsideAttributeMessage: "+msg)
@@ -1103,7 +1119,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,attribute_type,attribute_value)
 
     case msg@HitHint(source_guid,player_guid) =>
-//      log.info("HitHint: "+msg)
+      log.info("HitHint: "+msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(source_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
