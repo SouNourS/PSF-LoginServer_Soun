@@ -148,10 +148,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(600))) ::
                   InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
                     WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                                InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
-                                    ConcurrentFeedWeaponData(0,
-                                      AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
-                                        AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
+                  InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
+                    ConcurrentFeedWeaponData(0,
+                      AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) ::
+                        AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
 //                  InventoryItem(ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 6), 2,
 //                    WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(50))) ::
                   InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
@@ -168,8 +168,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(600))) ::
                   InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
                     WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                                InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                                    WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35))) ::
+                  InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 2,
+                    WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35))) ::
 //                  InventoryItem(ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 6), 2,
 //                    WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(40))) ::
                   InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
@@ -181,10 +181,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
         }
 
-        if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && !player.spectator) {
+        if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && !onlineplayer.spectator) {
           sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
         }
-        if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && player.spectator) {
+        if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && onlineplayer.spectator) {
           sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, Vector3(2,2,2), vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
         }
 
@@ -632,8 +632,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
 
-        if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, player.name, contents, note_contents)))
-
         //              if(messagetype == ChatMessageType.CMT_OPEN) {
         //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoTell_Target",None)))
         //                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoChat_NoCommand",None)))
@@ -729,6 +727,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
             player.spectator = false
             sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, true, "", "off", None)))
             sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SPEED, true, "", "1", None)))
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.getMaxHealth)
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.getMaxPersonalArmor)
             if(player.faction == PlanetSideEmpire.NC) {
               sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1944, 1940, 36),0))))
               //            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1921, 2066, 40),0))))
