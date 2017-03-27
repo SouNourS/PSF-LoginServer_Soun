@@ -397,6 +397,10 @@ import scodec.bits._
 //      }
       traveler.sendToSelf(PacketCoding.CreateGamePacket(0, LoadMapMessage(zone.map, zone.zonename, 40100,25,true,3770441820L)))
       if (zone.zonename == "i4") {
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(1),PlanetSideEmpire.TR)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(5),PlanetSideEmpire.TR)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(6),PlanetSideEmpire.VS)))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(7),PlanetSideEmpire.NC)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(85), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(92), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(71), 16)))
@@ -410,6 +414,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(42), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(44), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(46), 16)))
+        Thread.sleep(200)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(49), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(23), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(47), 16)))
@@ -423,6 +428,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(73), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(75), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(45), 16)))
+        Thread.sleep(200)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(74), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(76), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(77), 16)))
@@ -436,6 +442,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(78), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(80), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(84), 16)))
+        Thread.sleep(200)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(79), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(87), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(88), 16)))
@@ -449,6 +456,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(309), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(308), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(62), 16)))
+        Thread.sleep(200)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(64), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(65), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(66), 16)))
@@ -462,6 +470,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(30), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(29), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(31), 16)))
+        Thread.sleep(200)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(299), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(300), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(35), 16)))
@@ -475,6 +484,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(60), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(57), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(56), 16)))
+        Thread.sleep(200)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(55), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(306), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(307), 16)))
@@ -539,10 +549,10 @@ import scodec.bits._
           WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(600))) ::
           InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
-          InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(player.guid + 6), 2,
-            WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(16))) ::
-//          InventoryItem(ObjectClass.gauss, PlanetSideGUID(player.guid + 6), 2,
-//            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(30))) ::
+//          InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(player.guid + 6), 2,
+//            WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(16))) ::
+          InventoryItem(ObjectClass.gauss, PlanetSideGUID(player.guid + 6), 2,
+            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(30))) ::
           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 8), 4,
             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
@@ -560,10 +570,10 @@ import scodec.bits._
           WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(600))) ::
           InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
-                InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(player.guid + 5), 2,
-                  ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 22 ), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
-//          InventoryItem(ObjectClass.cycler, PlanetSideGUID(player.guid + 6), 2,
-//            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(50))) ::
+//                InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(player.guid + 5), 2,
+//                  ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 22 ), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
+          InventoryItem(ObjectClass.cycler, PlanetSideGUID(player.guid + 6), 2,
+            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(50))) ::
           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 8), 4,
             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
@@ -581,10 +591,10 @@ import scodec.bits._
           WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(600))) ::
           InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
-                    InventoryItem(ObjectClass.lasher, PlanetSideGUID(player.guid + 6), 2,
-                      WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(35))) ::
-//          InventoryItem(ObjectClass.pulsar, PlanetSideGUID(player.guid + 6), 2,
-//            WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(40))) ::
+//                    InventoryItem(ObjectClass.lasher, PlanetSideGUID(player.guid + 6), 2,
+//                      WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(35))) ::
+          InventoryItem(ObjectClass.pulsar, PlanetSideGUID(player.guid + 6), 2,
+            WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(40))) ::
           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 8), 4,
             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
@@ -710,18 +720,18 @@ import scodec.bits._
         val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
         var guid : Int = 15000
         var j : Int = 1
+        var OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+        var onlineplayer: PlayerAvatar = OnlinePlayer.get
 //        for (i : Int <- 1 to nbOnlinePlayer) {
           while (j != nbOnlinePlayer) {
-            val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+            OnlinePlayer = PlayerMasterList.getPlayer(guid)
             if (OnlinePlayer.isDefined) {
-              val onlineplayer: PlayerAvatar = OnlinePlayer.get
+              onlineplayer = OnlinePlayer.get
               if (player.continent != onlineplayer.continent) {
-                println("different cont",player.guid,onlineplayer.guid,guid,j)
                 j += 1
                 guid += 100
               }
-              if (player.guid != onlineplayer.guid && player.continent == onlineplayer.continent) {
-                println("same cont",player.guid,onlineplayer.guid,guid,j)
+              else if (player.guid != onlineplayer.guid && player.continent == onlineplayer.continent) {
                 j += 1
                 guid += 100
                 if (player.continent != "i4") {
@@ -761,10 +771,10 @@ import scodec.bits._
                           WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(600))) ::
                           InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
                             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                          InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                            WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16))) ::
-                          //                      InventoryItem(ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                          //                        WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(30))) ::
+//                          InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), 2,
+//                            WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16))) ::
+                                                InventoryItem(ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 6), 2,
+                                                  WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(30))) ::
                           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
                             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
                           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
@@ -782,10 +792,10 @@ import scodec.bits._
                           WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(600))) ::
                           InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
                             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                          InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
-                            ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
-                          //                        InventoryItem(ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                          //                          WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(50))) ::
+//                          InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), 2,
+//                            ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
+                                                  InventoryItem(ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 6), 2,
+                                                    WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(50))) ::
                           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
                             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
                           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
@@ -803,10 +813,10 @@ import scodec.bits._
                           WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(600))) ::
                           InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
                             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                          InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                            WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35))) ::
-                          //                        InventoryItem(ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                          //                          WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(40))) ::
+//                          InventoryItem(ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), 2,
+//                            WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35))) ::
+                                                  InventoryItem(ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 6), 2,
+                                                    WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(40))) ::
                           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
                             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
                           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
@@ -816,14 +826,12 @@ import scodec.bits._
                   }
                 }
               }
-              else {
-                println("autre cas",player.guid,onlineplayer.guid,guid,j)
+              else if (player.guid == onlineplayer.guid) {
                 guid += 100
               }
 
             }
             else {
-              println("guid inconnu",player.guid,guid,j)
               guid += 100
             }
           }
