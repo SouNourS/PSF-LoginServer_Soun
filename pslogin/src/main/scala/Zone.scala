@@ -514,8 +514,6 @@ import scodec.bits._
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
 
-//      val xGUID = sessionID.toInt+15000+(sessionID.toInt*100-(100+sessionID.toInt))
-
       val userInv =
         InventoryItem(ObjectClass.repeater, PlanetSideGUID(player.guid + 1), 0,
           WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(20))) ::

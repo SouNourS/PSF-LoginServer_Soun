@@ -330,7 +330,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         case CharacterRequestAction.Delete =>
           sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(false, Some(1))))
         case CharacterRequestAction.Select =>
-//          val xGUID = sessionId.toInt+15000+(sessionId.toInt*100-(100+sessionId.toInt))
 
           sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(13), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
 
@@ -944,7 +943,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("UseItem: " + msg)
       // TODO: Not all fields in the response are identical to source in real packet logs (but seems to be ok)
       // TODO: Not all incoming UseItemMessage's respond with another UseItemMessage (i.e. doors only send out GenericObjectStateMsg)
-      sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
+      if (itemType != 121) sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
 //      if (itemType == 121 && unk3) { // TODO : bank ? med app ?
 //        if (playerOpt.isDefined) {
@@ -1033,6 +1032,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       if (itemType == 121 && !unk3) { // TODO : medkit use ?!
+        sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
         if (playerOpt.isDefined) {
           val player: PlayerAvatar = playerOpt.get
           if (player.getMaxHealth - player.redHealth == 0) {
@@ -1042,14 +1042,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
             player.redHealth = player.getMaxHealth
 //            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
             avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),0,player.redHealth)
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2)))
+//            sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2))) // for nexus fight
             player.lastMedkit = System.currentTimeMillis()
           }
           else if (player.getMaxHealth - player.redHealth > 25 && System.currentTimeMillis() - player.lastMedkit > 5000) {
             player.redHealth += 25
 //            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
             avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),0,player.redHealth)
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2)))
+//            sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2))) // for nexus fight
             player.lastMedkit = System.currentTimeMillis()
           }
         }
