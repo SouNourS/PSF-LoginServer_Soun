@@ -325,7 +325,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
 
       // NOTE: PlanetSideZoneID just chooses the background
-      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
+//      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
+
+
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(1), None,
+        Some(CharacterData(CharacterAppearanceData(Vector3(1,1,1), 19, PlanetSideEmpire.TR, false, 4, "YouCanCreateYourCharacter", 1, 1, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+        100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
+        List(),
+        List(),
+        InventoryData(true, false, false, List()))))))
+      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 41605314, PlanetSideGUID(1), true, 0)))
+
+
+
     case msg@CharacterRequestMessage(charId, action) =>
       log.info("Handling " + msg)
 
@@ -336,8 +348,41 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
           sendResponse(PacketCoding.CreateGamePacket(0, ZonePopulationUpdateMessage(PlanetSideGUID(13), 414, 138, 0, 138, 0, 138, 0, 138, 0)))
 
-
-          val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+          var playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+          if (playerOpt.isEmpty) {
+            // define a new Player GUID
+            var nbOnlineTF : Boolean = false
+            var guid : Int = 15000
+            while (!nbOnlineTF) {
+              val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+              if (playerOpt.isDefined || guid == 40100) {
+                guid += 100
+              }
+              else {
+                nbOnlineTF = true
+              }
+            }
+            //hardcoded avatar and some pertinent equipment setup
+            val avatar: PlayerAvatar = PlayerAvatar(guid, "DefaultChar_"+sessionId, PlanetSideEmpire.TR, 1, 1, 1)
+            avatar.setExoSuitType(1)
+            //init holsters
+            avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
+            avatar.setEquipmentInHolster(1, Tool(0, 0)) // Beamer in pistol slot 1
+            avatar.setEquipmentInHolster(2, Tool(1, 1)) // Suppressor in rifle slot 1
+            avatar.setEquipmentInHolster(3, Tool(1, 1)) // Suppressor in rifle slot 1
+            avatar.setEquipmentInHolster(4, Tool(2, 2)) // Force Blade in melee slot
+            avatar.setUsedHolster(0) // Start with Beamer drawn
+            avatar.setPosition(defaultApp.pos)
+            avatar.setPitch(defaultApp.viewPitch)
+            avatar.setYaw(defaultApp.viewYaw)
+            avatar.redHealth = avatar.getMaxHealth
+            avatar.blueArmor = avatar.getMaxPersonalArmor
+            avatar.greenStamina = avatar.getMaxStamina
+            avatar.setUsedHolster(0)
+            //add avatar
+            PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
+          }
+          playerOpt = PlayerMasterList.getPlayer(sessionId)
           if (playerOpt.isDefined) {
             val player: PlayerAvatar = playerOpt.get
 
@@ -562,7 +607,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
             "  \\#6You can use local chat !", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6Change continent will reset your inventory !", None)))
+            "  \\#6Fight is on \\#3Oshur\\#6 ! \\#3/zone oshur\\#6 to have some fun.", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
             "  \\#6The \\#3/who\\#6 command dont works but give some nice info !", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)))
@@ -889,9 +934,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //        if(player.faction == PlanetSideEmpire.NC) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 30, unk1)))
 //        if(player.faction == PlanetSideEmpire.TR) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 50, unk1)))
 //        if(player.faction == PlanetSideEmpire.VS) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 40, unk1)))
-        if(player.faction == PlanetSideEmpire.NC) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 16, unk1)))
-        if(player.faction == PlanetSideEmpire.TR) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 100, unk1)))
-        if(player.faction == PlanetSideEmpire.VS) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 35, unk1)))
+        if(player.continent == "z8") {
+          if(player.faction == PlanetSideEmpire.NC) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 16, unk1)))
+          if(player.faction == PlanetSideEmpire.TR) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 100, unk1)))
+          if(player.faction == PlanetSideEmpire.VS) sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 35, unk1)))
+        }
+        if(player.continent != "z8") {
+          sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, 100, unk1)))
+        }
       }
 
     case msg@ObjectHeldMessage(avatar_guid, held_holsters, unk1) =>
