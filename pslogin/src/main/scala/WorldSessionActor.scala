@@ -335,16 +335,27 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // NOTE: PlanetSideZoneID just chooses the background
 //      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
 
-
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(1), None,
-        Some(CharacterData(CharacterAppearanceData(Vector3(1,1,1), 19, PlanetSideEmpire.TR, false, 4, "YouCanCreateYourCharacter", 1, 1, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+        Some(CharacterData(CharacterAppearanceData(Vector3(1,1,1), 19, PlanetSideEmpire.TR, false, 4, "You can create your", 1, 1, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
         100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
         List(),
         List(),
         InventoryData(true, false, false, List()))))))
-      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 41605314, PlanetSideGUID(1), true, 0)))
-
-
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(2), None,
+        Some(CharacterData(CharacterAppearanceData(Vector3(1,1,1), 19, PlanetSideEmpire.NC, false, 4, "Character with your name or use", 1, 1, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+          100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
+          List(),
+          List(),
+          InventoryData(true, false, false, List()))))))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(3), None,
+        Some(CharacterData(CharacterAppearanceData(Vector3(1,1,1), 19, PlanetSideEmpire.VS, false, 4, "one of these default char", 1, 1, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+          100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
+          List(),
+          List(),
+          InventoryData(true, false, false, List()))))))
+      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 1, PlanetSideGUID(1), false, 0)))
+      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(2), 2, PlanetSideGUID(2), false, 0)))
+      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(3), 3, PlanetSideGUID(3), true, 0)))
 
     case msg@CharacterRequestMessage(charId, action) =>
       log.info("Handling " + msg)
@@ -371,7 +382,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
             }
             //hardcoded avatar and some pertinent equipment setup
-            val avatar: PlayerAvatar = PlayerAvatar(guid, "DefaultChar_"+sessionId, PlanetSideEmpire.TR, 1, 1, 1)
+            var avatar: PlayerAvatar = PlayerAvatar(guid, "Default Character "+sessionId, PlanetSideEmpire.TR, 1, 1, 1)
+            if (charId == 2) avatar = PlayerAvatar(guid, "Default Character "+sessionId, PlanetSideEmpire.NC, 1, 1, 1)
+            if (charId == 3) avatar = PlayerAvatar(guid, "Default Character "+sessionId, PlanetSideEmpire.VS, 1, 1, 1)
             avatar.setExoSuitType(1)
             //init holsters
             avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
