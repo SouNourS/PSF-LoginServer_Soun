@@ -9,7 +9,7 @@ import net.psforever.types.ChatMessageType
 object ChatService {
   case class Join(channel : String)
   case class LeaveAll()
-  case class NewMessage(from : String, msg : ChatMsg)
+  case class NewMessage(from : String, fromGUID : Int, msg : ChatMsg)
 }
 
 /*
@@ -23,7 +23,7 @@ object ChatService {
      -
  */
 
-final case class ChatMessage(to : String, from : String, data : String)
+final case class ChatMessage(to : String, from : String, fromGUID : Int, data : String)
 
 class ChatEventBus extends ActorEventBus with SubchannelClassification {
   type Event = ChatMessage
@@ -73,16 +73,16 @@ class ChatService extends Actor {
       chatEvents.subscribe(who, path)
     case LeaveAll() =>
       chatEvents.unsubscribe(sender())
-    case m @ NewMessage(from, msg) =>
+    case m @ NewMessage(from,fromGUID, msg) =>
 //      log.info(s"NEW: ${m}")
 
       msg.messageType match {
         case ChatMessageType.CMT_OPEN =>
-          chatEvents.publish(ChatMessage("/chat/local", from, msg.contents))
+          chatEvents.publish(ChatMessage("/chat/local", from, fromGUID, msg.contents))
         case ChatMessageType.CMT_SQUAD =>
-          chatEvents.publish(ChatMessage("/chat/squad", from, msg.contents))
+          chatEvents.publish(ChatMessage("/chat/squad", from, fromGUID, msg.contents))
         case ChatMessageType.CMT_VOICE =>
-          chatEvents.publish(ChatMessage("/chat/voice", from, msg.contents))
+          chatEvents.publish(ChatMessage("/chat/voice", from, fromGUID, msg.contents))
         case _ =>
       }
     case _ =>

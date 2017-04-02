@@ -77,9 +77,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
     // temporary hack to keep the client from disconnecting
     case PokeClient() =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
-    case ChatMessage(to, from, data) =>
+    case ChatMessage(to, from, fromGUID, data) =>
       if (to.drop(6) == "local") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
-      if (to.drop(6) == "squad") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SQUAD, true, from, data, None)))
+      if (to.drop(6) == "squad") {
+        val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+        val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(fromGUID)
+        if (playerOpt.isDefined && OnlinePlayer.isDefined) {
+          val player: PlayerAvatar = playerOpt.get
+          val onlineplayer: PlayerAvatar = OnlinePlayer.get
+          if (player.faction == onlineplayer.faction) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SQUAD, true, from, data, None)))
+        }
+      }
       if (to.drop(6) == "voice") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, true, from, data, None)))
     case AvatarMessage(to, function, itemID, avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, is_crouching, jumping, jthrust, is_cloaked, long) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
@@ -600,16 +608,39 @@ class WorldSessionActor extends Actor with MDCContextAware {
           chatService ! ChatService.Join("squad")
           chatService ! ChatService.Join("voice")
 
+          Thread.sleep(200)
+
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6Welcome! The commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6You can use \\#3/fly on\\#6 (or off) to fly, or \\#3/speed X\\#6 (x from 1 to 5) to run !", None)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6You can use local chat !", None)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6Fight is on \\#3Oshur\\#6 ! \\#3/zone oshur\\#6 to have some fun.", None)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6The \\#3/who\\#6 command dont works but give some nice info !", None)))
+
+          // Welcome messages by Nick
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6Welcome! The commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
+            "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6You can use \\#3/fly on\\#6 (or off) to fly, or \\#3/speed X\\#6 (x from 1 to 5) to run !", None)))
+            "  \\#6The designated combat test area has been moved from Nexus to Oshur. Type \\#3/zone Oshur\\#6 to join the fight!", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6You can use local chat !", None)))
+            "  \\#6You can use \\#3/fly on\\#6 (or off) to fly, and \\#3/speed X\\#6 (X being 1 through 5) to run faster on the ground.", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6Fight is on \\#3Oshur\\#6 ! \\#3/zone oshur\\#6 to have some fun.", None)))
+            "  \\#6Local chat is global to all characters, and squad chat is global to everyone on your faction.", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6The \\#3/who\\#6 command dont works but give some nice info !", None)))
+            "  \\#6To explore the game world, the commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+            "  \\#6The /zone command will take you to any map in the game. Type /zone -list for a list of zones.", None)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+            "  \\#6The /warp command will teleport you to a location on the current map. Type \\#3/warp -list\\#6 for a list of warps, or \\#3/warp x y z\\#6 to teleport to a \\#3/loc\\#6 or location.", None)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+            "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
+
+          Thread.sleep(200)
+
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)))
         case default =>
           log.error("Unsupported " + default + " in " + msg)
@@ -811,7 +842,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(DropSession(sessionId, "user quit"))
         }
 
-        chatService ! ChatService.NewMessage(player.name, msg)
+        chatService ! ChatService.NewMessage(player.name,player.guid, msg)
 
         // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
         // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
