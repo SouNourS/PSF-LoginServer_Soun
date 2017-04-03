@@ -255,6 +255,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
             }
           }
         }
+        if(function == "HitHintReturn") {
+          if (player.guid == onlineplayer.guid) {
+            val Killer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(itemID)
+            if (Killer.isDefined) {
+              val killer: PlayerAvatar = Killer.get
+              println(killer.guid,player.guid)
+              sendResponse(PacketCoding.CreateGamePacket(0, HitHint(PlanetSideGUID(killer.guid), PlanetSideGUID(player.guid))))
+            }
+          }
+        }
       }
     case default => failWithError(s"Invalid packet class received: $default")
   }
@@ -646,9 +656,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
             "  \\#6To explore the game world, the commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6The /zone command will take you to any map in the game. Type /zone -list for a list of zones.", None)))
+            "  \\#6The \\#3/zone\\#6 command will take you to any map in the game. Type \\#3/zone -list\\#6 for a list of zones.", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6The /warp command will teleport you to a location on the current map. Type \\#3/warp -list\\#6 for a list of warps, or \\#3/warp x y z\\#6 to teleport to a \\#3/loc\\#6 or location.", None)))
+            "  \\#6The \\#3/warp\\#6 command will teleport you to a location on the current map. Type \\#3/warp -list\\#6 for a list of warps, or \\#3/warp x y z\\#6 to teleport to a \\#3/loc\\#6 or location.", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
             "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
 
@@ -1300,23 +1310,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if (OnlinePlayer.isDefined && !player.spectator) {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
           if ( !onlineplayer.spectator ){
+            avatarService ! AvatarService.HitHintReturn(source_guid, player_guid)
             if ( player.faction == PlanetSideEmpire.NC) {
-              // 5 for JH / 13 for gauss
-              if (onlineplayer.redHealth - 5 <= 0) onlineplayer.redHealth = 1
-              if (onlineplayer.redHealth - 5 > 0) onlineplayer.redHealth -= 5
-              if (onlineplayer.greenStamina - 4 <= 0) onlineplayer.greenStamina = 0
-              if (onlineplayer.greenStamina - 4 > 0) onlineplayer.greenStamina -= 4
-              if (onlineplayer.blueArmor - 1 <= 0) onlineplayer.blueArmor = 0
-              if (onlineplayer.blueArmor - 1 > 0) onlineplayer.blueArmor -= 1
-              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(player_guid, 2, onlineplayer.greenStamina)))
-              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 0, onlineplayer.redHealth)
-              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
-              if (onlineplayer.redHealth == 1) {
-                avatarService ! AvatarService.PlayerStateShift(source_guid, PlanetSideGUID(onlineplayer.guid))
-              }
-            }
-            if ( player.faction == PlanetSideEmpire.TR) {
-              // 7 for MCG / 12 for cycler
+              // 7 for JH / 13 for gauss
               if (onlineplayer.redHealth - 7 <= 0) onlineplayer.redHealth = 1
               if (onlineplayer.redHealth - 7 > 0) onlineplayer.redHealth -= 7
               if (onlineplayer.greenStamina - 4 <= 0) onlineplayer.greenStamina = 0
@@ -1330,10 +1326,25 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 avatarService ! AvatarService.PlayerStateShift(source_guid, PlanetSideGUID(onlineplayer.guid))
               }
             }
+            if ( player.faction == PlanetSideEmpire.TR) {
+              // 12 for MCG / 12 for cycler
+              if (onlineplayer.redHealth - 12 <= 0) onlineplayer.redHealth = 1
+              if (onlineplayer.redHealth - 12 > 0) onlineplayer.redHealth -= 12
+              if (onlineplayer.greenStamina - 4 <= 0) onlineplayer.greenStamina = 0
+              if (onlineplayer.greenStamina - 4 > 0) onlineplayer.greenStamina -= 4
+              if (onlineplayer.blueArmor - 1 <= 0) onlineplayer.blueArmor = 0
+              if (onlineplayer.blueArmor - 1 > 0) onlineplayer.blueArmor -= 1
+              sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(player_guid, 2, onlineplayer.greenStamina)))
+              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 0, onlineplayer.redHealth)
+              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
+              if (onlineplayer.redHealth == 1) {
+                avatarService ! AvatarService.PlayerStateShift(source_guid, PlanetSideGUID(onlineplayer.guid))
+              }
+            }
             if ( player.faction == PlanetSideEmpire.VS) {
-              // 15 for lasher / 13 for pulsar
-              if (onlineplayer.redHealth - 15 <= 0) onlineplayer.redHealth = 1
-              if (onlineplayer.redHealth - 15 > 0) onlineplayer.redHealth -= 15
+              // 20 for lasher / 13 for pulsar
+              if (onlineplayer.redHealth - 20 <= 0) onlineplayer.redHealth = 1
+              if (onlineplayer.redHealth - 20 > 0) onlineplayer.redHealth -= 20
               if (onlineplayer.greenStamina - 4 <= 0) onlineplayer.greenStamina = 0
               if (onlineplayer.greenStamina - 4 > 0) onlineplayer.greenStamina -= 4
               if (onlineplayer.blueArmor - 1 <= 0) onlineplayer.blueArmor = 0
