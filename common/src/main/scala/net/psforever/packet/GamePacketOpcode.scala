@@ -352,7 +352,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x18 => game.ObjectCreateMessage.decode
     case 0x19 => game.ObjectDeleteMessage.decode
     case 0x1a => game.PingMsg.decode
-    case 0x1b => noDecoder(VehicleStateMessage)
+    case 0x1b => game.VehicleStateMessage.decode
     case 0x1c => noDecoder(FrameVehicleStateMessage)
     case 0x1d => game.GenericObjectStateMsg.decode
     case 0x1e => game.ChildObjectStateMessage.decode
@@ -408,12 +408,12 @@ object GamePacketOpcode extends Enumeration {
     // 0x48
     case 0x48 => game.TimeOfDayMessage.decode
     case 0x49 => noDecoder(UnknownMessage73)
-    case 0x4a => noDecoder(SpawnRequestMessage)
+    case 0x4a => game.SpawnRequestMessage.decode
     case 0x4b => noDecoder(DeployRequestMessage)
     case 0x4c => noDecoder(UnknownMessage76)
     case 0x4d => game.RepairMessage.decode
     case 0x4e => noDecoder(ServerVehicleOverrideMsg)
-    case 0x4f => noDecoder(LashMessage)
+    case 0x4f => game.LashMessage.decode
 
     // OPCODES 0x50-5f
     case 0x50 => noDecoder(TargetingInfoMessage)
@@ -524,8 +524,9 @@ object GamePacketOpcode extends Enumeration {
     case 0xa9 => game.AvatarGrenadeStateMessage.decode
     case 0xaa => noDecoder(UnknownMessage170)
     case 0xab => noDecoder(UnknownMessage171)
-    case 0xac => noDecoder(ReleaseAvatarRequestMessage)
-    case 0xad => noDecoder(AvatarDeadStateMessage)
+    case 0xac => game.ReleaseAvatarRequestMessage.decode
+//    case 0xac => noDecoder(ReleaseAvatarRequestMessage)
+    case 0xad => game.AvatarDeadStateMessage.decode
     case 0xae => noDecoder(CSAssistMessage)
     case 0xaf => noDecoder(CSAssistCommentMessage)
 

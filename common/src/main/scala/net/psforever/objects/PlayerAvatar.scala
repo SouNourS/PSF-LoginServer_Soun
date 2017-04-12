@@ -44,6 +44,12 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   /** Last medkituse. */
   var lastMedkit : Long = 0
 
+  /** Last fav loaded */
+  var fav_Infantry_Loadout : Int = 0
+
+  var weapon_ammo_mode : Int = 1
+  var weapon_fire_mode : Int = 0
+
   /** An index reference to the type of exo-suit the player is wearing. */
   private var suit : Int = -1
   /** Where equipment is stored for easy access on a player's person.  Permissions dependent on exo-suit type. */

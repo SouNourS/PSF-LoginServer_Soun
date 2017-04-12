@@ -19,6 +19,8 @@ object AvatarService {
   case class PlayerStateShift(killer : PlanetSideGUID, victim : PlanetSideGUID)
   case class DestroyDisplay(killer : PlanetSideGUID, victim : PlanetSideGUID)
   case class HitHintReturn(killer : PlanetSideGUID, victim : PlanetSideGUID)
+  case class ChangeFireMode(item_GUID : PlanetSideGUID, fire_mode : Int, sessionId : Long)
+  case class ReloadMsg(item_GUID : PlanetSideGUID, ammo_clip2 : Int, sessionId : Long)
 }
 
 /*
@@ -130,7 +132,18 @@ class AvatarService extends Actor {
         val player: PlayerAvatar = playerOpt.get
         AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "HitHintReturn", source_guid, victim_guid))
       }
-
+    case m @ ChangeFireMode(item_guid, fire_mode, sessionId) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "ChangeFireMode", item_guid, PlanetSideGUID(player.guid),Vector3(0f,0f,0f),None,fire_mode))
+      }
+    case m @ ReloadMsg(item_guid, ammo_clip2, sessionId) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "ReloadMsg", item_guid, PlanetSideGUID(player.guid),Vector3(0f,0f,0f),None,ammo_clip2))
+      }
     case _ =>
   }
 }

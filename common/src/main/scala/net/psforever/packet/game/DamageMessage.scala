@@ -7,14 +7,14 @@ import scodec.codecs._
 
 /**
   * na
-  * @param player_guid the player
+  * @param player_guid the player (victim ?)
   * @param unk2 na
-  * @param unk3 na
+  * @param weapon_guid na
   * @param unk4 na
   */
 final case class DamageMessage(player_guid : PlanetSideGUID,
                                unk2 : Int,
-                               unk3 : Int, //probably also a PlanetSideGUID, for another player?
+                               weapon_guid : Int, //probably also a PlanetSideGUID, for another player?
                                unk4 : Boolean)
   extends PlanetSideGamePacket {
   type Packet = DamageMessage
@@ -26,7 +26,7 @@ object DamageMessage extends Marshallable[DamageMessage] {
   implicit val codec : Codec[DamageMessage] = (
     ("player_guid" | PlanetSideGUID.codec) ::
       ("unk2" | uint8L) ::
-      ("unk3" | uint16L) ::
+      ("weapon_guid" | uint16L) ::
       ("unk4" | bool)
     ).as[DamageMessage]
 }

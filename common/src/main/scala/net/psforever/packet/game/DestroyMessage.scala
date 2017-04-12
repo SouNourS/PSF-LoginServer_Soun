@@ -8,14 +8,14 @@ import scodec.codecs._
 
 /**
   * na
-  * @param unk1 na
-  * @param unk2 na
-  * @param unk3 na
-  * @param pos na
+  * @param victim_GUID the victim's GUID
+  * @param killer_GUID the killer's GUID
+  * @param killer_weapon_GUID the GUID of killer's weapon
+  * @param pos last victim position
   */
-final case class DestroyMessage(unk1 : Int,
-                                unk2 : Int,
-                                unk3 : Int,
+final case class DestroyMessage(victim_GUID : Int,
+                                killer_GUID : Int,
+                                killer_weapon_GUID : Int,
                                 pos : Vector3)
   extends PlanetSideGamePacket {
   type Packet = DestroyMessage
@@ -25,9 +25,9 @@ final case class DestroyMessage(unk1 : Int,
 
 object DestroyMessage extends Marshallable[DestroyMessage] {
   implicit val codec : Codec[DestroyMessage] = (
-    ("unk1" | uint16L) ::
-      ("unk2" | uint16L) ::
-      ("unk3" | uint16L) ::
+    ("victim_GUID" | uint16L) ::
+      ("killer_GUID" | uint16L) ::
+      ("killer_weapon_GUID" | uint16L) ::
       ("pos" | Vector3.codec_pos)
     ).as[DestroyMessage]
 }

@@ -16,6 +16,15 @@ import scala.annotation.switch
 object ObjectClass {
   //character
   final val avatar = 0x79 // 121
+  final val avatar_bot = 122
+  final val avatar_bot_agile = 123
+  final val avatar_bot_agile_no_weapon = 124
+  final val avatar_bot_max = 125
+  final val avatar_bot_max_no_weapon = 126
+  final val avatar_bot_reinforced = 127
+  final val avatar_bot_reinforced_no_weapon = 128
+  final val avatar_bot_standard = 129
+  final val avatar_bot_standard_no_weapon = 130
   //ammunition
   final val bullet_105mm = 0
   final val bullet_12mm = 3
@@ -507,7 +516,8 @@ object ObjectClass {
       case ObjectClass.r_shotgun => WeaponData.genericCodec
       case ObjectClass.radiator => WeaponData.genericCodec
       case ObjectClass.repeater => WeaponData.genericCodec
-      case ObjectClass.rocklet => WeaponData.genericCodec
+//      case ObjectClass.rocklet => WeaponData.genericCodec
+      case ObjectClass.rocklet => ConcurrentFeedWeaponData.genericCodec
       case ObjectClass.rotarychaingun_mosquito => WeaponData.genericCodec
       case ObjectClass.router_telepad => WeaponData.genericCodec
       case ObjectClass.scythe => WeaponData.genericCodec
@@ -536,6 +546,15 @@ object ObjectClass {
       case ObjectClass.plasma_grenade => WeaponData.genericCodec
       //tools - medkits
       case ObjectClass.avatar => CharacterData.genericCodec
+      case ObjectClass.avatar_bot => CharacterData.genericCodec
+      case ObjectClass.avatar_bot_agile => CharacterData.genericCodec
+      case ObjectClass.avatar_bot_agile_no_weapon => CharacterData.genericCodec
+      case ObjectClass.avatar_bot_max => CharacterData.genericCodec
+      case ObjectClass.avatar_bot_max_no_weapon => CharacterData.genericCodec
+      case ObjectClass.avatar_bot_reinforced => CharacterData.genericCodec
+      case ObjectClass.avatar_bot_reinforced_no_weapon => CharacterData.genericCodec
+      case ObjectClass.avatar_bot_standard => CharacterData.genericCodec
+      case ObjectClass.avatar_bot_standard_no_weapon => CharacterData.genericCodec
       case ObjectClass.locker_container => AmmoBoxData.genericCodec
 
       case ObjectClass.remote_electronics_kit => REKData.genericCodec

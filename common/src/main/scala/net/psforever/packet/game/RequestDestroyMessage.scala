@@ -14,6 +14,6 @@ final case class RequestDestroyMessage(object_guid : PlanetSideGUID)
 
 object RequestDestroyMessage extends Marshallable[RequestDestroyMessage] {
   implicit val codec : Codec[RequestDestroyMessage] = (
-      ("object_guid" | PlanetSideGUID.codec)
+      "object_guid" | PlanetSideGUID.codec
     ).as[RequestDestroyMessage]
 }

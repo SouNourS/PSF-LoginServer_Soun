@@ -31,7 +31,7 @@ final case class ControlPacket(opcode : ControlPacketOpcode.Value,
 
 object PacketCoding {
   /// A lower bound on the packet size
-  final val PLANETSIDE_MIN_PACKET_SIZE = 2
+  final val PLANETSIDE_MIN_PACKET_SIZE = 1
 
   /**
     * Given a full and complete planetside packet as it would be sent on the wire, attempt to
@@ -82,7 +82,6 @@ object PacketCoding {
       return Attempt.failure(Err(s"Packet does not meet the minimum length of $PLANETSIDE_MIN_PACKET_SIZE bytes"))
 
     val firstByte = msg{0}
-
     firstByte match {
       // drop the first byte as control packets dont need it
       case 0x00 => DecodeControlPacket(msg.drop(1))
