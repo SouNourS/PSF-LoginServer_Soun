@@ -33,6 +33,37 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   var clientKeepAlive: Cancellable = null
 
+
+  // Info
+  val lite_armor_resistance_direct : Int = 6
+  val lite_armor_resistance_splash : Int = 25
+  val med_armor_resistance_direct : Int = 10
+  val med_armor_resistance_splash : Int = 35
+  val bullet_9mm_velocity : Int = 500
+  val bullet_9mm_lifespan : Float = 0.4f
+  val bullet_9mm_degrade_delay : Float = 0.15f
+  val bullet_9mm_degrade_multiplier : Float = 0.25f
+  val bullet_9mm_damage0 : Int = 18
+  val bullet_9mm_AP_damage0 : Int = 10
+  val shotgun_shell_velocity : Int = 400
+  val shotgun_shell_lifespan : Float = 0.25f
+  val shotgun_shell_damage0 : Int = 12
+  val energy_cell_velocity : Int = 500
+  val energy_cell_lifespan : Float = 0.4f
+  val energy_cell_degrade_delay : Float = 0.05f
+  val energy_cell_degrade_multiplier : Float = 0.4f
+  val energy_cell_damage0 : Int = 18
+  val lasher_projectile_velocity : Int = 120
+  val lasher_projectile_lifespan : Float = 0.75f
+  val lasher_projectile_degrade_delay : Float = 0.012f
+  val lasher_projectile_degrade_multiplier : Float = 0.3f
+  val lasher_projectile_damage0 : Int = 30
+  //            add_property lasher_projectile lash_damage 0.2
+  //            add_property lasher_projectile lash_delay 0.05
+  //            add_property lasher_projectile lash_effect lasher_lash
+  //            add_property lasher_projectile lash_interval 0.04
+  //            add_property lasher_projectile lash_radius 2.5
+
   override def postStop() = {
     if (clientKeepAlive != null)
       clientKeepAlive.cancel()
@@ -1519,20 +1550,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
           if ( !onlineplayer.spectator ){
             avatarService ! AvatarService.HitHintReturn(source_guid, player_guid)
-            // Info
-            val lite_armor_resistance_direct : Int = 6
-            val lite_armor_resistance_splash : Int = 25
-            val med_armor_resistance_direct : Int = 10
-            val med_armor_resistance_splash : Int = 35
-            val bullet_9mm_velocity : Int = 500
-            val bullet_9mm_lifespan : Float = 0.4f
-            val bullet_9mm_degrade_delay : Float = 0.15f
-            val bullet_9mm_degrade_multiplier : Float = 0.25f
-            val bullet_9mm_damage0 : Int = 18
-            val bullet_9mm_AP_damage0 : Int = 10
-            val shotgun_shell_velocity : Int = 400
-            val shotgun_shell_lifespan : Float = 0.25f
-            val shotgun_shell_damage0 : Int = 12
             val distanceBetweenPlayers : Float = distance(player.getPosition, onlineplayer.getPosition)
             var currentDamage : Int = 0
             var currentResistance : Int = 0
@@ -1551,10 +1568,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
               if (player.fav_Infantry_Loadout == 0) { // MCG
                 currentDamage = damages(bullet_9mm_velocity, bullet_9mm_lifespan, bullet_9mm_degrade_delay, bullet_9mm_degrade_multiplier, bullet_9mm_damage0, distanceBetweenPlayers)
               }
+              if (player.fav_Infantry_Loadout == 1) { // Cycler
+                currentDamage = damages(bullet_9mm_velocity, bullet_9mm_lifespan, bullet_9mm_degrade_delay, bullet_9mm_degrade_multiplier, bullet_9mm_damage0, distanceBetweenPlayers)
+              }
             }
             else if ( player.faction == PlanetSideEmpire.VS) {
               if (player.fav_Infantry_Loadout == 0) { // Lasher
-                currentDamage = damages(bullet_9mm_velocity, bullet_9mm_lifespan, bullet_9mm_degrade_delay, bullet_9mm_degrade_multiplier, bullet_9mm_damage0, distanceBetweenPlayers)
+                currentDamage = damages(lasher_projectile_velocity, lasher_projectile_lifespan, lasher_projectile_degrade_delay, lasher_projectile_degrade_multiplier, lasher_projectile_damage0, distanceBetweenPlayers)
               }
             }
 
@@ -1593,6 +1613,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val player: PlayerAvatar = playerOpt.get
         sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(2,5000,5000,player.getPosition,0,true)))
       }
+
+    case msg@LashMessage(seq_time, player, victim, bullet, pos, unk1) =>
+      log.info("LashMessage: " + msg)
 
     case default => log.info(s"Unhandled GamePacket ${pkt}")
   }

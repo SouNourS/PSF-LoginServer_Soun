@@ -420,7 +420,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x51 => noDecoder(TriggerEffectMessage)
     case 0x52 => game.WeaponDryFireMessage.decode
     case 0x53 => noDecoder(DroppodLaunchRequestMessage)
-    case 0x54 => noDecoder(HackMessage)
+    case 0x54 => game.HackMessage.decode
     case 0x55 => noDecoder(DroppodLaunchResponseMessage)
     case 0x56 => noDecoder(GenericObjectActionMessage)
     case 0x57 => noDecoder(AvatarVehicleTimerMessage)
@@ -565,7 +565,7 @@ object GamePacketOpcode extends Enumeration {
     case 0xcb => noDecoder(EmpireChangeTimeMessage)
     case 0xcc => noDecoder(ClockCalibrationMessage)
     case 0xcd => noDecoder(DensityLevelUpdateMessage)
-    case 0xce => noDecoder(ActOfGodMessage)
+    case 0xce => game.ActOfGodMessage.decode
     case 0xcf => noDecoder(AvatarAwardMessage)
 
     // OPCODES 0xd0-df
