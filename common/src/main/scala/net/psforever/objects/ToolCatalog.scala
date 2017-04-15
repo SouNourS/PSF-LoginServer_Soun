@@ -14,10 +14,11 @@ object ToolCatalog {
   tool = ToolDefinition(0, "beamer")
   tool.size = EquipmentSize.PISTOL
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(0).ammoTypes += Ammo.CELL_ENERGY
+  tool.fireModes(0).ammoTypes += Ammo.energy_cell
   tool.fireModes(0).magazineSize = 16
+  tool.fireModes(0).damage = 0
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(1).ammoTypes += Ammo.CELL_ENERGY
+  tool.fireModes(1).ammoTypes += Ammo.energy_cell
   tool.fireModes(1).magazineSize = 16
   tool.inventoryTileWidth = 3
   tool.inventoryTileHeight = 3
@@ -26,8 +27,8 @@ object ToolCatalog {
   tool = ToolDefinition(1, "suppressor")
   tool.size = EquipmentSize.RIFLE
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(0).ammoTypes += Ammo.BULLET_9MM
-  tool.fireModes(0).ammoTypes += Ammo.BULLET_9MM_AP
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
   tool.fireModes(0).magazineSize = 25
   tool.inventoryTileWidth = 6
   tool.inventoryTileHeight = 3
@@ -47,10 +48,20 @@ object ToolCatalog {
   tool = ToolDefinition(3, "amp")
   tool.size = EquipmentSize.PISTOL
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(0).ammoTypes += Ammo.BULLET_9MM
-  tool.fireModes(0).ammoTypes += Ammo.BULLET_9MM_AP
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
   tool.fireModes(0).magazineSize = 30
   tool.inventoryTileWidth = 3
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(556, "mini-chaingun")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
+  tool.fireModes(0).magazineSize = 100
+  tool.inventoryTileWidth = 6
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool
 

@@ -21,6 +21,9 @@ object AvatarService {
   case class HitHintReturn(killer : PlanetSideGUID, victim : PlanetSideGUID)
   case class ChangeFireMode(item_GUID : PlanetSideGUID, fire_mode : Int, sessionId : Long)
   case class ReloadMsg(item_GUID : PlanetSideGUID, ammo_clip2 : Int, sessionId : Long)
+  case class ChangeAmmoMode(item_GUID : PlanetSideGUID, sessionId : Long)
+  case class ChangeWeapon(term_GUID : PlanetSideGUID, unk1 : Int, sessionId : Long)
+  case class Doors(guid : PlanetSideGUID, doors : Int)
 }
 
 /*
@@ -143,6 +146,25 @@ class AvatarService extends Actor {
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "ReloadMsg", item_guid, PlanetSideGUID(player.guid),Vector3(0f,0f,0f),None,ammo_clip2))
+      }
+    case m @ ChangeAmmoMode(item_guid, sessionId) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "ChangeAmmoMode", item_guid, PlanetSideGUID(player.guid)))
+      }
+    case m @ ChangeWeapon(term_guid, unk1, sessionId) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "ChangeWeapon", term_guid, PlanetSideGUID(player.guid),Vector3(0f,0f,0f),None,unk1))
+      }
+    case m @ Doors(guid, doorsID) =>
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "Doors", PlanetSideGUID(0),
+          guid, Vector3(0f,0f,0f), None, 0, 0, doorsID))
       }
     case _ =>
   }

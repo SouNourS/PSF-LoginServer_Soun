@@ -1,7 +1,7 @@
 // Copyright (c) 2016 PSForever.net to present
 package net.psforever.objects
 
-//import net.psforever.packet.game.{CharacterCreateRequestMessage, PlanetSideGUID}
+import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.types.PlanetSideEmpire
 
 import scala.collection.mutable.ListBuffer
@@ -47,8 +47,13 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   /** Last fav loaded */
   var fav_Infantry_Loadout : Int = 0
 
-  var weapon_ammo_mode : Int = 1
+  var weapon_ammo_mode : Int = 0
   var weapon_fire_mode : Int = 0
+
+  var death_by : Int = 0
+
+  var doors :Array[Int] = Array.ofDim(120)
+  var doorsTime :Array[Long] = Array.ofDim(120)
 
   /** An index reference to the type of exo-suit the player is wearing. */
   private var suit : Int = -1

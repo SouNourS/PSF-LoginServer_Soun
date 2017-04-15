@@ -6,15 +6,7 @@ import net.psforever.types.Vector3
 import scodec.Codec
 import scodec.codecs._
 
-///**
-//  * na
-//  * @param unk1 0 = nothing, 1 = waiting for a rez, 2 = auto map to select spawn, 3 = respawn time
-//  * @param unk2 na
-//  * @param unk3 spawn penality
-//  * @param pos last victim's position
-//  * @param unk4 na
-//  * @param unk5 na
-//  */
+
 final case class SpawnRequestMessage(unk1 : Int,
                                         unk2 : Long,
                                         unk3 : Int,

@@ -40,21 +40,20 @@ final case class SplashedTarget(uid : PlanetSideGUID,
   * The radius of influence is typically a bit larger than the visual indication.<br>
   * <br>
   * All sources of splash damage herein will be called "grenades" for simplicity.
-  * @param unk1 na
+  * @param seq_time na
   * @param projectile_uid the grenade's object
   * @param projectile_pos the position where the grenade landed (where it is)
-  * @param unk2 na;
-  *             frequently 42
+  * @param direct_victim_uid
   * @param unk3 na;
   *             frequently 0
   * @param projectile_vel the velocity of the grenade when it landed
   * @param unk4 na
   * @param targets a `List` of all targets influenced by the splash
   */
-final case class SplashHitMessage(unk1 : Int,
+final case class SplashHitMessage(seq_time : Int,
                                   projectile_uid : PlanetSideGUID,
                                   projectile_pos : Vector3,
-                                  unk2 : Int,
+                                  direct_victim_uid : PlanetSideGUID,
                                   unk3 : Int,
                                   projectile_vel : Option[Vector3],
                                   unk4 : Option[Int],
@@ -76,10 +75,10 @@ object SplashedTarget extends Marshallable[SplashedTarget] {
 
 object SplashHitMessage extends Marshallable[SplashHitMessage] {
   implicit val codec : Codec[SplashHitMessage] = (
-    ("unk1" | uintL(10)) ::
+    ("seq_time" | uintL(10)) ::
       ("projectile_uid" | PlanetSideGUID.codec) ::
       ("projectile_pos" | Vector3.codec_pos) ::
-      ("unk2" | uint16L) ::
+      ("direct_victim_uid" | PlanetSideGUID.codec) ::
       ("unk3" | uintL(3)) ::
       optional(bool, "projectile_vel" | Vector3.codec_vel) ::
       optional(bool, "unk4" | uint16L) ::

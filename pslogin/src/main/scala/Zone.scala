@@ -1,5 +1,5 @@
 // Copyright (c) 2017 PSForever
-import net.psforever.objects.{PlayerAvatar, PlayerMasterList}
+import net.psforever.objects.{PlayerAvatar, PlayerMasterList, Tool}
 import net.psforever.packet.{PacketCoding, PlanetSidePacketContainer}
 import net.psforever.packet.game._
 import net.psforever.packet.game.objectcreate._
@@ -348,7 +348,7 @@ import scodec.bits._
       * Sequential GUIDs that appear to be missing from the player's inventory have been noted.
       * @param traveler the player
       */
-    private def disposeSelf(traveler : Traveler, sessionID : Long) : Unit = {
+    def disposeSelf(traveler : Traveler, sessionID : Long) : Unit = {
 
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionID)
       if (playerOpt.isDefined) {
@@ -494,6 +494,46 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(306), 16)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(307), 16)))
       }
+      if (zone.zonename == "i2") {
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(1), PlanetSideEmpire.NC))) // Sraosha
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(4), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(5), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(6), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(7), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(8), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(9), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(10), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(11), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(12), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(13), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(14), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(15), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(16), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(18), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(19), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(20), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(21), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(22), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(23), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(24), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(25), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(26), PlanetSideEmpire.TR))) // bunker
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(27), PlanetSideEmpire.TR))) // bunker
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(28), PlanetSideEmpire.TR))) // Zal
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(31), PlanetSideEmpire.VS))) // Rashnu
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(34), PlanetSideEmpire.TR))) // Rashnu Top GT
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(35), PlanetSideEmpire.TR))) // Zal Top GT
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(36), PlanetSideEmpire.TR))) // Sraosha Top GT
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(37), PlanetSideEmpire.TR))) // Zal gate WT
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(38), PlanetSideEmpire.TR))) // Sraosha gate WT
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(39), PlanetSideEmpire.TR))) // Rashnu gate WT
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(40), PlanetSideEmpire.TR))) // Forseral AT
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(41), PlanetSideEmpire.VS))) // SW AT
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(42), PlanetSideEmpire.TR))) // N AT
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(43), PlanetSideEmpire.TR))) // Nexus AT
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(44), PlanetSideEmpire.NC))) // E AT
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(45), PlanetSideEmpire.TR))) // Desolation AT
+      }
       if (zone.zonename == "z8") {
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(1),PlanetSideEmpire.VS))) // Mithra
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(4),PlanetSideEmpire.VS))) // bunker
@@ -513,7 +553,7 @@ import scodec.bits._
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(25),PlanetSideEmpire.VS))) // zal
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(28),PlanetSideEmpire.VS))) // yazata
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(31),PlanetSideEmpire.VS))) // jamshid
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(37),PlanetSideEmpire.VS))) // dahaka
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(37),PlanetSideEmpire.TR))) // dahaka
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(40),PlanetSideEmpire.VS))) // izha
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(43),PlanetSideEmpire.VS))) // N jamshid GT
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(44),PlanetSideEmpire.VS))) // SE rashnu GT
@@ -635,8 +675,6 @@ import scodec.bits._
             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
           InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(player.guid + 6), 2,
             WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(16))) ::
-//          InventoryItem(ObjectClass.gauss, PlanetSideGUID(player.guid + 6), 2,
-//            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(30))) ::
           InventoryItem(ObjectClass.magcutter, PlanetSideGUID(player.guid + 8), 4,
             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
@@ -655,8 +693,6 @@ import scodec.bits._
             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
                 InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(player.guid + 6), 2,
                   ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 22 ), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
-//          InventoryItem(ObjectClass.cycler, PlanetSideGUID(player.guid + 6), 2,
-//            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(50))) ::
           InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 8), 4,
             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
@@ -675,8 +711,6 @@ import scodec.bits._
             WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
                     InventoryItem(ObjectClass.lasher, PlanetSideGUID(player.guid + 6), 2,
                       WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(35))) ::
-//          InventoryItem(ObjectClass.pulsar, PlanetSideGUID(player.guid + 6), 2,
-//            WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(40))) ::
           InventoryItem(ObjectClass.forceblade, PlanetSideGUID(player.guid + 8), 4,
             WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
@@ -689,23 +723,13 @@ import scodec.bits._
           InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15), 60, AmmoBoxData(50)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, AmmoBoxData(1)) :: Nil
 
-
-
-
-        //calculate bit representation of modified coordinates
-//        val pos : BitVector = Vector3.codec_pos.encode(Vector3(loc._1, loc._2, loc._3)).toOption.get.toByteVector.toBitVector
         //edit in modified coordinates
         val pkt = PlayerStateShiftMessage(ShiftState(0,Vector3(loc._1.toFloat, loc._2.toFloat, loc._3.toFloat), 0))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, pkt))
 
-//        var temp : BitVector = traveler.player.toBitVector
-//        temp = temp.take(68) ++ pos ++ temp.drop(124)
-        //send
-//        traveler.sendToSelf(temp.toByteVector)
-
         player.setUsedHolster(0)
 
-        if(player.continent != "z8") {
+        if(player.continent != "i2") {
           player.setExoSuitType(4)
           traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
             ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
@@ -714,7 +738,7 @@ import scodec.bits._
               List(),
               InventoryData(true, false, false, userInv)))))
         }
-        if(player.continent == "z8") {
+        if(player.continent == "i2") {
           if(player.faction == PlanetSideEmpire.NC) {
             player.setExoSuitType(0)
             traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
@@ -724,7 +748,7 @@ import scodec.bits._
                 List(),
                 InventoryData(true, false, false, userInvFightNC)))))
           }
-          if(player.faction == PlanetSideEmpire.TR) {
+          else if(player.faction == PlanetSideEmpire.TR) {
             player.setExoSuitType(0)
             traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
               ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
@@ -733,7 +757,7 @@ import scodec.bits._
                 List(),
                 InventoryData(true, false, false, userInvFightTR)))))
           }
-          if(player.faction == PlanetSideEmpire.VS) {
+          else if(player.faction == PlanetSideEmpire.VS) {
             player.setExoSuitType(0)
             traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
               ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
@@ -742,16 +766,25 @@ import scodec.bits._
                 List(),
                 InventoryData(true, false, false, userInvFightVS)))))
           }
+          //init holsters
+          player.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
+          player.setEquipmentInHolster(1, Tool(3, 0)) // Beamer in pistol slot 1
+          player.setEquipmentInHolster(2, Tool(1, ObjectClass.mini_chaingun)) // Suppressor in rifle slot 1
+          //            player.setEquipmentInHolster(3, Tool(1, 1)) // Suppressor in rifle slot 1
+          player.setEquipmentInHolster(4, Tool(2, 2)) // knife in melee slot
+          player.fav_Infantry_Loadout = 0
+          player.weapon_ammo_mode = 0
+          player.weapon_fire_mode = 0
         }
 
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 1, 0, true, Shortcut.MEDKIT)))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 2, 0, true, Some(Shortcut(1,"shortcut_macro","fon","/fly on")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 3, 0, true, Some(Shortcut(1,"shortcut_macro","fof","/fly off")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 4, 0, true, Some(Shortcut(1,"shortcut_macro","s1","/speed 1")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 5, 0, true, Some(Shortcut(1,"shortcut_macro","s3","/speed 3")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 6, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 7, 0, true, Some(Shortcut(1,"shortcut_macro","zon","/zone oshur")))))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 2, 0, true, Some(Shortcut(1,"shortcut_macro","fon","/fly on")))))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 3, 0, true, Some(Shortcut(1,"shortcut_macro","fof","/fly off")))))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 4, 0, true, Some(Shortcut(1,"shortcut_macro","s1","/speed 1")))))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 5, 0, true, Some(Shortcut(1,"shortcut_macro","s3","/speed 3")))))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 6, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 7, 0, true, Some(Shortcut(1,"shortcut_macro","zon","/zone i2")))))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 8, 0, true, Some(Shortcut(1,"shortcut_macro","col",
           "/l Chat Colors (\\ + # + `number`) :\\#0 0 \\#1 1 \\#2 2 \\#3 3 \\#4 4 \\#5 5 \\#6 6 \\#7 7 \\#8 8 \\#9 9")))))
 
@@ -807,9 +840,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,42))) // Combat Engineering
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,45))) // Advanced Engineering
 
-
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
-
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
 
         val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
         var guid : Int = 15000
@@ -829,7 +860,7 @@ import scodec.bits._
                 j += 1
                 guid += 100
                 Thread.sleep(200)
-                if (player.continent != "z8") {
+                if (player.continent != "i2") {
                   traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
                     ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(onlineplayer.guid), CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, player.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
                       onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
@@ -856,7 +887,7 @@ import scodec.bits._
                   traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid), 36, 5))) // cr5
                   traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
                 }
-                if (player.continent == "z8") {
+                if (player.continent == "i2") {
                   if ( onlineplayer.faction == PlanetSideEmpire.NC ) {
                     traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
                       ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(onlineplayer.guid), CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, player.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
