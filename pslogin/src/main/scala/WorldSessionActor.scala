@@ -1849,7 +1849,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def sendResponse(cont: PlanetSidePacketContainer): Unit = {
-    log.trace("WORLD SEND: " + cont)
+    log.info("WORLD SEND_" + sessionId + " : " + cont)
     sendResponse(cont.asInstanceOf[Any])
   }
 
