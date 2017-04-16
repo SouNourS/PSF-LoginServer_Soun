@@ -401,6 +401,12 @@ import scodec.bits._
       else {
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, LoadMapMessage(zone.map, zone.zonename, 40100, 25, true, 3770441820L)))
       }
+      if (zone.zonename == "z1") {
+        for (ind <- 1 to 200) {
+          if (ind == 50 && ind == 100 && ind == 150) Thread.sleep(500)
+          traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(ind),PlanetSideEmpire.TR)))
+        }
+      }
       if (zone.zonename == "i4") {
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(1),PlanetSideEmpire.TR)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(5),PlanetSideEmpire.TR)))
