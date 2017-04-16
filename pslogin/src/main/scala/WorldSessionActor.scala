@@ -1011,7 +1011,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         for (ind <- 1 to 50) {
-            if (player.doors(ind) != null) {
+            if (player.doors(ind) != 0) {
               if (System.currentTimeMillis() - player.doorsTime(ind) > 5000) {
                 sendResponse(PacketCoding.CreateGamePacket(0, GenericObjectStateMsg(PlanetSideGUID(player.doors(ind)), 17)))
                 player.doors(ind) = 0
