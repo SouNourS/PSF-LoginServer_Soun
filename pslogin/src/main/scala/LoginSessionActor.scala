@@ -13,6 +13,7 @@ import com.github.mauricio.async.db.{Connection, QueryResult, RowData}
 import com.github.mauricio.async.db.mysql.MySQLConnection
 import com.github.mauricio.async.db.mysql.exceptions.MySQLException
 import com.github.mauricio.async.db.mysql.util.URLParser
+import net.psforever.objects.PlayerMasterList
 import net.psforever.types.PlanetSideEmpire
 
 import scala.concurrent.{Await, Future}
@@ -238,7 +239,7 @@ class LoginSessionActor extends Actor with MDCContextAware {
     val msg = VNLWorldStatusMessage("Welcome to PlanetSide! ",
       Vector(
         WorldInformation(serverName, WorldStatus.Up, ServerType.Beta,
-          Vector(WorldConnectionInfo(serverAddress)), PlanetSideEmpire.VS)
+          Vector(WorldConnectionInfo(serverAddress)), PlayerMasterList.getEmpireNeed)
       ))
 
     sendResponse(PacketCoding.CreateGamePacket(0, msg))

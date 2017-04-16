@@ -791,7 +791,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),0,"Agile HA",Some(1))))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),1,"Agile MA",Some(1))))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),2,"Agile Sweeper",Some(1))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),3,"Agile Rocklet",Some(1))))
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),3,"Agile Rocklet",Some(1))))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),4,"Agile Bolt Driver",Some(1))))
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),5,"Agile Sweeper",Some(1))))
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),6,"Agile Sweeper",Some(1))))

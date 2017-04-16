@@ -44,6 +44,17 @@ final class PlayerMasterList {
       nameToCharacter.count(x => { x._2.faction == PlanetSideEmpire.VS}) )
   }
 
+  def getEmpireNeed : (PlanetSideEmpire.Type) = {
+    var EmpireNeed : PlanetSideEmpire.Type = PlanetSideEmpire.NC
+    if (getWorldPopulation._2 <= getWorldPopulation._1) {
+      EmpireNeed = PlanetSideEmpire.TR
+      if (getWorldPopulation._3 < getWorldPopulation._2) {
+        EmpireNeed = PlanetSideEmpire.VS
+      }
+    }
+    EmpireNeed
+  }
+
   /**
     * Get a PlayerAvatar representation.
     * @param guid the transformed GUID of the PlayerAvatar
@@ -315,6 +326,10 @@ object PlayerMasterList {
     */
   def getWorldPopulation : (Int, Int, Int) = {
     getInstance.getWorldPopulation
+  }
+
+  def getEmpireNeed : (PlanetSideEmpire.Type) = {
+    getInstance.getEmpireNeed
   }
 
   /**
