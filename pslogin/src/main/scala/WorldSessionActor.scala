@@ -993,6 +993,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
           player.death_by = 0
         }
 
+        if (player.continent == "i2") {
+          if (distance(player.getPosition,Vector3(2029f,2331f,110f)) < 3) sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1806, 1671, 83),0))))
+          if (distance(player.getPosition,Vector3(2257f,2140f,106f)) < 3) sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1714, 1749, 91),0))))
+          if (distance(player.getPosition,Vector3(1894f,2057f,106f)) < 3) sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1732, 1746, 81),0))))
+        }
+
         if (vel.isEmpty && player.greenStamina != 100) {
           if (!is_crouching) {
             if (player.greenStamina + 1 > player.getMaxStamina) player.greenStamina = player.getMaxStamina
@@ -1128,7 +1134,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
           avatarService ! AvatarService.Join(player.continent)
           avatarService ! AvatarService.LoadMap(PlanetSideGUID(player.guid))
         }
-        CSRWarp.read(traveler, msg)
+        if (player.continent != "i2") CSRWarp.read(traveler, msg)
+        println(player.continent)
 
 
         // TODO: handle this appropriately
@@ -1787,7 +1794,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           player.setPosition(Vector3(1882.4766f,2040.6406f,101.484375f))
         }
         else if (player.faction == PlanetSideEmpire.VS && u2 == 7) {
-          player.setPosition(Vector3(1728.1484f,1739.6484f,81.671875f))
+          player.setPosition(Vector3(1728f,1740f,82f))
         }
         player.redHealth = player.getMaxHealth
         player.blueArmor = player.getMaxPersonalArmor
