@@ -911,16 +911,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
             "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
             "  \\#6The designated combat test area has been moved from Oshur to Ascension. Type \\#3/zone ascension\\#6 to join the fight!", None)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6You can use \\#3/fly on\\#6 (or off) to fly, and \\#3/speed X\\#6 (X being 1 through 5) to run faster on the ground.", None)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6You can use \\#3/fly on\\#6 (or off) to fly, and \\#3/speed X\\#6 (X being 1 through 5) to run faster on the ground.", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
             "  \\#6Local chat is global to all characters, and squad chat is global to everyone on your faction.", None)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6To explore the game world, the commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6The \\#3/zone\\#6 command will take you to any map in the game. Type \\#3/zone -list\\#6 for a list of zones.", None)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-            "  \\#6The \\#3/warp\\#6 command will teleport you to a location on the current map. Type \\#3/warp -list\\#6 for a list of warps, or \\#3/warp x y z\\#6 to teleport to a \\#3/loc\\#6 or location.", None)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6To explore the game world, the commands \\#3/zone\\#6 and \\#3/warp\\#6 are available for use.", None)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6The \\#3/zone\\#6 command will take you to any map in the game. Type \\#3/zone -list\\#6 for a list of zones.", None)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//            "  \\#6The \\#3/warp\\#6 command will teleport you to a location on the current map. Type \\#3/warp -list\\#6 for a list of warps, or \\#3/warp x y z\\#6 to teleport to a \\#3/loc\\#6 or location.", None)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
             "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
 

@@ -740,7 +740,7 @@ import scodec.bits._
           traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
             ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
               player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
-              List(),
+              "xpe_command_rank_5" :: "used_grenade_jammer" :: Nil,
               List(),
               InventoryData(true, false, false, userInv)))))
         }
@@ -846,6 +846,17 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,41))) // Engineering
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,42))) // Combat Engineering
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,45))) // Advanced Engineering
+        for (ind <- 1 to 255) {
+//          traveler.sendToSelf(hex"cf" ++ ByteVector.fromInt(ind,1) ++ hex"000000e7db56240000")
+          println(ByteVector.fromInt(ind,1))
+        }
+        traveler.sendToSelf(hex"cf06000000e7db56240000")
+//        traveler.sendToSelf(hex"cfde000000e7db56240000")
+//        traveler.sendToSelf(hex"cfdf000000e7db56240000")
+//        traveler.sendToSelf(hex"cff3000000e7db56240000")
+//        traveler.sendToSelf(hex"cf29000000e7db56240000")
+//        traveler.sendToSelf(hex"cf68000000e7db56240000")
+//        traveler.sendToSelf(hex"cf1501000006c000003d0040000000")
 
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
 

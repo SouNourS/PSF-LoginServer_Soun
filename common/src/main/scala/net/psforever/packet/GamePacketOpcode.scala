@@ -566,7 +566,7 @@ object GamePacketOpcode extends Enumeration {
     case 0xcc => noDecoder(ClockCalibrationMessage)
     case 0xcd => noDecoder(DensityLevelUpdateMessage)
     case 0xce => game.ActOfGodMessage.decode
-    case 0xcf => noDecoder(AvatarAwardMessage)
+    case 0xcf => game.AvatarAwardMessage.decode
 
     // OPCODES 0xd0-df
     case 0xd0 => noDecoder(UnknownMessage208)
