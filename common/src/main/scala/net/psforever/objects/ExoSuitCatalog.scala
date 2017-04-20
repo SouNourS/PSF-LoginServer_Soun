@@ -1,6 +1,8 @@
 // Copyright (c) 2016 PSForever.net to present
 package net.psforever.objects
 
+import net.psforever.types.ExoSuitType
+
 import scala.collection.mutable
 
 /**
@@ -11,17 +13,11 @@ object ExoSuitCatalog {
   /**
     * A mapping of all of the hard defined exo-suits.
     */
-  private val catalog : mutable.HashMap[Int, ExoSuit] = mutable.HashMap[Int, ExoSuit]()
+  private val catalog : mutable.HashMap[ExoSuitType.Value, ExoSuit] = mutable.HashMap[ExoSuitType.Value, ExoSuit]()
 
   var armor : ExoSuit = _
-  armor = ExoSuit(-1)
-  armor.name = "no suit"
-  armor.maxArmor = 0
-  armor.inventoryWidth = 0
-  armor.inventoryHeight = 0
-  catalog += armor.guid -> armor
 
-  armor = ExoSuit(0)
+  armor = ExoSuit(ExoSuitType.Agile)
   armor.name = "agile exo-suit"
   armor.maxArmor = 100
   armor.inventoryWidth = 9
@@ -32,7 +28,7 @@ object ExoSuitCatalog {
   armor.holsterTypes(4) = EquipmentSize.MELEE
   catalog += armor.guid -> armor
 
-  armor = ExoSuit(1)
+  armor = ExoSuit(ExoSuitType.Reinforced)
   armor.name = "reinforced exo-suit"
   armor.permission = 1 //TODO "reinforced exo-suit" certification needed
   armor.maxArmor = 200
@@ -45,7 +41,7 @@ object ExoSuitCatalog {
   armor.holsterTypes(4) = EquipmentSize.MELEE
   catalog += armor.guid -> armor
 
-  armor = ExoSuit(2)
+  armor = ExoSuit(ExoSuitType.MAX)
   armor.name = "mechanized assault exo-suit"
   armor.permission = 1 //TODO a "max" certification needed for suit, max weapons are permitted by other certification specifics
   armor.maxArmor = 650
@@ -54,7 +50,7 @@ object ExoSuitCatalog {
   armor.holsterTypes(0) = EquipmentSize.MAX // TODO how to handle this?
   catalog += armor.guid -> armor
 
-  armor = ExoSuit(3)
+  armor = ExoSuit(ExoSuitType.Infiltration)
   armor.name = "infiltration suit"
   armor.permission = 1 //TODO "infiltration suit" certification needed
   armor.maxArmor = 0
@@ -64,7 +60,7 @@ object ExoSuitCatalog {
   armor.holsterTypes(4) = EquipmentSize.MELEE
   catalog += armor.guid -> armor
 
-  armor = ExoSuit(4)
+  armor = ExoSuit(ExoSuitType.Standard)
   armor.name = "standard exo-suit"
   armor.maxArmor = 50
   armor.inventoryWidth = 9
@@ -79,7 +75,7 @@ object ExoSuitCatalog {
     * @param guid the globally unique identifier
     * @return the exo-suit
     */
-  def get(guid : Int) : Option[ExoSuit] = {
+  def get(guid : ExoSuitType.Value) : Option[ExoSuit] = {
     catalog.get(guid)
   }
 }

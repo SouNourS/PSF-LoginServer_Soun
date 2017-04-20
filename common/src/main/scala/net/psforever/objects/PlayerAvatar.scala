@@ -2,7 +2,7 @@
 package net.psforever.objects
 
 import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.PlanetSideEmpire
+import net.psforever.types.{CharacterGender, ExoSuitType, PlanetSideEmpire}
 
 import scala.collection.mutable.ListBuffer
 
@@ -17,7 +17,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   /** The faction to which the character belongs. Defaults to tradition. */
   var faction : PlanetSideEmpire.Value = PlanetSideEmpire.TR
   /** The player's gender, which also affects their voice. Defaults to 1 (male). */
-  var sex : Int = 1
+  var sex : CharacterGender.Value = CharacterGender.Male
   /** The player's voice. Affected by sex. */
   var voice : Int = 0
   /** The player's style of face. Affected by sex. */
@@ -56,7 +56,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   var doorsTime :Array[Long] = Array.ofDim(120)
 
   /** An index reference to the type of exo-suit the player is wearing. */
-  private var suit : Int = -1
+  private var suit : ExoSuitType.Value = ExoSuitType.Standard
   /** Where equipment is stored for easy access on a player's person.  Permissions dependent on exo-suit type. */
   private val holsters : Array[EquipmentSlot] = Array.fill[EquipmentSlot](5)(new EquipmentSlot)
   /** Which holster is depicted as having its equipment drawn. Valid numbers are 0-4 and 255 (no holster drawn). */
@@ -85,7 +85,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
     * @param aFace the player's voice
     * @param aVoice the player's style of face
     */
-  def this(guid : Int, aName : String, aFaction : PlanetSideEmpire.Value, aSex : Int, aFace : Int, aVoice : Int) {
+  def this(guid : Int, aName : String, aFaction : PlanetSideEmpire.Value, aSex : CharacterGender.Value, aFace : Int, aVoice : Int) {
     this(guid)
     name = aName
     faction = aFaction
@@ -210,7 +210,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
     * Get the exo-suit type by its catalog ID
     * @return the type of exo-suit the player is wearing
     */
-  def getExoSuitType : Int = {
+  def getExoSuitType : ExoSuitType.Value = {
     suit
   }
 
@@ -219,7 +219,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
     * @param esuit the catalog lookup of the exo-suit the player is changing into
     * @return a tuple containing (1) if the suit was changed and (2) a List of all the equipment that was dropped
     */
-  def setExoSuitType(esuit : Int) : (Boolean, List[Equipment]) = {
+  def setExoSuitType(esuit : ExoSuitType.Value) : (Boolean, List[Equipment]) = {
     var swapped = suit != esuit
     var equipmentDropped: ListBuffer[Equipment] = ListBuffer()
 
@@ -373,7 +373,7 @@ object PlayerAvatar {
     * @param aVoice the player's style of face
     * @return the PlayerAvatar
     */
-  def apply(guid : Int, aName : String, aFaction : PlanetSideEmpire.Value, aSex : Int, aFace : Int, aVoice : Int) : PlayerAvatar = {
+  def apply(guid : Int, aName : String, aFaction : PlanetSideEmpire.Value, aSex : CharacterGender.Value, aFace : Int, aVoice : Int) : PlayerAvatar = {
     new PlayerAvatar(guid, aName, aFaction, aSex, aFace, aVoice)
   }
 

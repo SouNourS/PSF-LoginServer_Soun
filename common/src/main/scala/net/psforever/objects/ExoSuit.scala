@@ -1,13 +1,16 @@
 // Copyright (c) 2016 PSForever.net to present
 package net.psforever.objects
 
+import net.psforever.types.ExoSuitType
+
 /**
   * A constructed example of the personal armor the player wears.
   * Players are influenced by the exo-suit they wear in a variety of ways, with speed and available equipment slots being major differences.
   * No data should (need to) be modified after a suit object is created and initialized with values.
+  *
   * @param guid the globally unique id
   */
-class ExoSuit(val guid : Int) {
+class ExoSuit(val guid : ExoSuitType.Value) {
   /** Cosmetic name of the exo-suit */
   var name : String = "exo-suit"
   /** Any certification requirements to obtain this suit. */
@@ -46,7 +49,7 @@ object ExoSuit {
     * @param guid the globally unique id
     * @return the ExoSuit
     */
-  def apply(guid : Int) = {
+  def apply(guid : ExoSuitType.Value) = {
     new ExoSuit(guid)
   }
 

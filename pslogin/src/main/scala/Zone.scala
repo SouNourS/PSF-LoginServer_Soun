@@ -3,7 +3,7 @@ import net.psforever.objects.{PlayerAvatar, PlayerMasterList, Tool}
 import net.psforever.packet.{PacketCoding, PlanetSidePacketContainer}
 import net.psforever.packet.game._
 import net.psforever.packet.game.objectcreate._
-import net.psforever.types.{ChatMessageType, PlanetSideEmpire, Vector3}
+import net.psforever.types._
 import scodec.bits.ByteVector
 
 import scala.collection.{immutable, mutable}
@@ -657,77 +657,85 @@ import scodec.bits._
 
       val userInv =
         InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(player.guid + 18), 0,
-          WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(player.guid + 19), 0, AmmoBoxData(600))) ::
+          DetailedWeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(player.guid + 19), 0, AmmoBoxData(600))) ::
           InventoryItem(ObjectClass.suppressor, PlanetSideGUID(player.guid + 6), 2,
-            WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(25))) ::
+            DetailedWeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(25))) ::
           InventoryItem(ObjectClass.katana, PlanetSideGUID(player.guid + 8), 4,
-            WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
+            DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
           InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
           InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, AmmoBoxData(50)) ::
           InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(player.guid + 12), 33, REKData(8)) ::
           InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 13), 47, AmmoBoxData(1)) ::
           InventoryItem(ObjectClass.frag_grenade, PlanetSideGUID(player.guid + 14), 9,
-            WeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(player.guid + 15), 0, AmmoBoxData(600))) ::
+            DetailedWeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(player.guid + 15), 0, AmmoBoxData(600))) ::
           InventoryItem(ObjectClass.plasma_grenade, PlanetSideGUID(player.guid + 16), 27,
-            WeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(player.guid + 17), 0, AmmoBoxData(600))) ::
+            DetailedWeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(player.guid + 17), 0, AmmoBoxData(600))) ::
           InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 12,
-            WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(85))) ::
+            DetailedWeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(85))) ::
           Nil
 
-      val userInvFightNC =
-        InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
-          WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(50))) ::
-          InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
-            WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
-          InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(player.guid + 6), 2,
-            WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(16))) ::
-          InventoryItem(ObjectClass.magcutter, PlanetSideGUID(player.guid + 8), 4,
-            WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
-          InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.rocket, PlanetSideGUID(player.guid + 12), 33, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.frag_cartridge, PlanetSideGUID(player.guid + 13), 36, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.bolt, PlanetSideGUID(player.guid + 14), 39, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15), 60, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, AmmoBoxData(1)) :: Nil
-      val userInvFightTR =
-        InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
-          WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(50))) ::
-          InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
-            WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
+        if(player.continent == "i2") {
+          if (player.faction == PlanetSideEmpire.NC) {
+            val userInv =
+              InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
+                WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(50))) ::
+                InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
+                  WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
+                InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(player.guid + 6), 2,
+                  WeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(16))) ::
+                InventoryItem(ObjectClass.magcutter, PlanetSideGUID(player.guid + 8), 4,
+                  WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
+                InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
+                InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.rocket, PlanetSideGUID(player.guid + 12), 33, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.frag_cartridge, PlanetSideGUID(player.guid + 13), 36, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.bolt, PlanetSideGUID(player.guid + 14), 39, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15), 60, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, AmmoBoxData(1)) :: Nil
+          }
+          else if (player.faction == PlanetSideEmpire.TR) {
+            val userInv =
+              InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
+                WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(50))) ::
+                InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
+                  WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
                 InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(player.guid + 6), 2,
-                  ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 22 ), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
-          InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 8), 4,
-            WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
-          InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.rocket, PlanetSideGUID(player.guid + 12), 33, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.frag_cartridge, PlanetSideGUID(player.guid + 13), 36, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.bolt, PlanetSideGUID(player.guid + 14), 39, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15), 60, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, AmmoBoxData(1)) :: Nil
-      val userInvFightVS =
-        InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
-          WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(50))) ::
-          InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
-            WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
-                    InventoryItem(ObjectClass.lasher, PlanetSideGUID(player.guid + 6), 2,
-                      WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(35))) ::
-          InventoryItem(ObjectClass.forceblade, PlanetSideGUID(player.guid + 8), 4,
-            WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
-          InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
-          InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.rocket, PlanetSideGUID(player.guid + 12), 33, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.frag_cartridge, PlanetSideGUID(player.guid + 13), 36, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.bolt, PlanetSideGUID(player.guid + 14), 39, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15), 60, AmmoBoxData(50)) ::
-          InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, AmmoBoxData(1)) :: Nil
+                  ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 22), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 23), 1, AmmoBoxData(100)) :: Nil)) ::
+                InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 8), 4,
+                  WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
+                InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
+                InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.rocket, PlanetSideGUID(player.guid + 12), 33, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.frag_cartridge, PlanetSideGUID(player.guid + 13), 36, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.bolt, PlanetSideGUID(player.guid + 14), 39, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15), 60, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, AmmoBoxData(1)) :: Nil
+          }
+          else if (player.faction == PlanetSideEmpire.VS) {
+            val userInv =
+              InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
+                WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, AmmoBoxData(50))) ::
+                InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
+                  WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, AmmoBoxData(50))) ::
+                InventoryItem(ObjectClass.lasher, PlanetSideGUID(player.guid + 6), 2,
+                  WeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, AmmoBoxData(35))) ::
+                InventoryItem(ObjectClass.forceblade, PlanetSideGUID(player.guid + 8), 4,
+                  WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, AmmoBoxData(1))) ::
+                InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, AmmoBoxData(1)) ::
+                InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.rocket, PlanetSideGUID(player.guid + 12), 33, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.frag_cartridge, PlanetSideGUID(player.guid + 13), 36, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.bolt, PlanetSideGUID(player.guid + 14), 39, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15), 60, AmmoBoxData(50)) ::
+                InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, AmmoBoxData(1)) :: Nil
+          }
+        }
 
         //edit in modified coordinates
         val pkt = PlayerStateShiftMessage(ShiftState(0,Vector3(loc._1.toFloat, loc._2.toFloat, loc._3.toFloat), 0))
@@ -735,43 +743,59 @@ import scodec.bits._
 
         player.setUsedHolster(0)
 
+          val app = CharacterAppearanceData(
+            PlacementData(Vector3(3674.8438f, 2726.789f, 91.15625f), 0, 0, 19),
+            BasicCharacterData("IlllIIIlllIlIllIlllIllI", PlanetSideEmpire.VS, CharacterGender.Female, 41, 1),
+            3, false, false, ExoSuitType.Standard, "", 0, false, 0, 181, true, GrenadeState.None,
+            false, false, false, RibbonBars()
+          )
+          val inv = InventoryItem(ObjectClass.beamer, PlanetSideGUID(76), 0, DetailedWeaponData(8, ObjectClass.energy_cell, PlanetSideGUID(77), 0, DetailedAmmoBoxData(8, 16))) ::
+            InventoryItem(ObjectClass.suppressor, PlanetSideGUID(78), 2, DetailedWeaponData(8, ObjectClass.bullet_9mm, PlanetSideGUID(79), 0, DetailedAmmoBoxData(8, 25))) ::
+            InventoryItem(ObjectClass.forceblade, PlanetSideGUID(80), 4, DetailedWeaponData(8, ObjectClass.melee_ammo, PlanetSideGUID(81), 0, DetailedAmmoBoxData(8, 1))) ::
+            InventoryItem(ObjectClass.locker_container, PlanetSideGUID(82), 5, DetailedAmmoBoxData(8, 1)) ::
+            InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(83), 6, DetailedAmmoBoxData(8, 50)) ::
+            InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(84), 9, DetailedAmmoBoxData(8, 50)) ::
+            InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(85), 12, DetailedAmmoBoxData(8, 50)) ::
+            InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(86), 33, DetailedAmmoBoxData(8, 50)) ::
+            InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(87), 36, DetailedAmmoBoxData(8, 50)) ::
+            InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(88), 39, DetailedREKData(8)) ::
+            Nil
+          val obj = DetailedCharacterData(
+            app,
+            100, 100,
+            50,
+            1, 7, 7,
+            100, 100,
+            28, 4, 44, 84, 104, 1900,
+            "xpe_sanctuary_help" :: "xpe_th_firemodes" :: "used_beamer" :: "map13" :: Nil,
+            List.empty,
+            InventoryData(inv),
+            DrawnSlot.None
+          )
+          val objectHex = ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(75), obj)
+
+
         if(player.continent != "i2") {
-          player.setExoSuitType(4)
+          player.setExoSuitType(ExoSuitType.Standard)
           traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
-            ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+            ObjectCreateMessage(ObjectClass.avatar, PlanetSideGUID(player.guid), DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(loc._1, loc._2, loc._3), 0, 0, 19),
+              BasicCharacterData(player.name, player.faction, player.sex, 41, player.voice), 3, false, false , player.getExoSuitType, "", 0, false, 0, 181, true, GrenadeState.None,
+              false, false, false, RibbonBars(6, 7, 8, 220)),
               player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
               "xpe_command_rank_5" :: "used_grenade_jammer" :: Nil,
-              List(),
-              InventoryData(true, false, false, userInv)))))
+              List.empty,
+              InventoryData(userInv),
+              DrawnSlot.None))))
         }
         if(player.continent == "i2") {
-          if(player.faction == PlanetSideEmpire.NC) {
             player.setExoSuitType(0)
             traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
               ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
                 player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
                 List(),
                 List(),
-                InventoryData(true, false, false, userInvFightNC)))))
-          }
-          else if(player.faction == PlanetSideEmpire.TR) {
-            player.setExoSuitType(0)
-            traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
-              ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
-                player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
-                List(),
-                List(),
-                InventoryData(true, false, false, userInvFightTR)))))
-          }
-          else if(player.faction == PlanetSideEmpire.VS) {
-            player.setExoSuitType(0)
-            traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
-              ObjectCreateMessage(0, ObjectClass.avatar, PlanetSideGUID(player.guid), CharacterData(CharacterAppearanceData(Vector3(loc._1, loc._2, loc._3), 19, player.faction, false, 4, player.name, player.getExoSuitType, player.sex, 2, 9, player.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
-                player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
-                List(),
-                List(),
-                InventoryData(true, false, false, userInvFightVS)))))
-          }
+                InventoryData(true, false, false, userInv)))))
+
           //init holsters
           player.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
           player.setEquipmentInHolster(1, Tool(3, 0)) // Beamer in pistol slot 1
