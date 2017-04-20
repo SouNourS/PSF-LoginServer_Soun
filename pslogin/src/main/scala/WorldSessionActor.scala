@@ -177,117 +177,117 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         if(function == "LoadMap" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && player.continent != "i2") {
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
-            onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
-            List(),
-            List(),
-            InventoryData(true, false, false, InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(onlineplayer.guid + 18), 0,
-              WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 19), 0, AmmoBoxData(600))) ::
-              InventoryItem(ObjectClass.suppressor, PlanetSideGUID(onlineplayer.guid + 6), 2,
-                WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(25))) ::
-              InventoryItem(ObjectClass.katana, PlanetSideGUID(onlineplayer.guid + 8), 4,
-                WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
-              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) ::
-              InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 11), 6, AmmoBoxData(50)) ::
-              InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(onlineplayer.guid + 12), 33, REKData(8)) ::
-              InventoryItem(ObjectClass.medkit, PlanetSideGUID(onlineplayer.guid + 13), 47, AmmoBoxData(1)) ::
-              InventoryItem(ObjectClass.frag_grenade, PlanetSideGUID(onlineplayer.guid + 14), 9,
-                WeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 15), 0, AmmoBoxData(600))) ::
-              InventoryItem(ObjectClass.plasma_grenade, PlanetSideGUID(onlineplayer.guid + 16), 27,
-                WeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 17), 0, AmmoBoxData(600))) ::
-              InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 12,
-                WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(85))) ::
-              Nil)))))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+//            onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
+//            List(),
+//            List(),
+//            InventoryData(true, false, false, InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(onlineplayer.guid + 18), 0,
+//              WeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 19), 0, AmmoBoxData(600))) ::
+//              InventoryItem(ObjectClass.suppressor, PlanetSideGUID(onlineplayer.guid + 6), 2,
+//                WeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(25))) ::
+//              InventoryItem(ObjectClass.katana, PlanetSideGUID(onlineplayer.guid + 8), 4,
+//                WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
+//              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) ::
+//              InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 11), 6, AmmoBoxData(50)) ::
+//              InventoryItem(ObjectClass.remote_electronics_kit, PlanetSideGUID(onlineplayer.guid + 12), 33, REKData(8)) ::
+//              InventoryItem(ObjectClass.medkit, PlanetSideGUID(onlineplayer.guid + 13), 47, AmmoBoxData(1)) ::
+//              InventoryItem(ObjectClass.frag_grenade, PlanetSideGUID(onlineplayer.guid + 14), 9,
+//                WeaponData(8, ObjectClass.frag_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 15), 0, AmmoBoxData(600))) ::
+//              InventoryItem(ObjectClass.plasma_grenade, PlanetSideGUID(onlineplayer.guid + 16), 27,
+//                WeaponData(8, ObjectClass.plasma_grenade_ammo, PlanetSideGUID(onlineplayer.guid + 17), 0, AmmoBoxData(600))) ::
+//              InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 12,
+//                WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(85))) ::
+//              Nil)))))
 
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),35,40))) // br40
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
         }
-        if(function == "LoadMap" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && player.continent == "i2") {
-          if(onlineplayer.faction == PlanetSideEmpire.NC) {
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
-              onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
-              List(),
-              List(),
-              InventoryData(true, false, false,
-                InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 1), 0,
-                  WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(50))) ::
-                  InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
-                    WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                  InventoryItem(ObjectClass.magcutter, PlanetSideGUID(onlineplayer.guid + 8), 4,
-                    WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
-                  InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
-            if (onlineplayer.fav_Infantry_Loadout == 0) {
-              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16)))))))
-            }
-            if (onlineplayer.fav_Infantry_Loadout == 1) {
-              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(30)))))))
-            }
-          }
-          if(onlineplayer.faction == PlanetSideEmpire.TR) {
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
-              onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
-              List(),
-              List(),
-              InventoryData(true, false, false,
-                InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 1), 0,
-                  WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(50))) ::
-                  InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
-                    WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                  InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
-                    WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
-                  InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
-            if (onlineplayer.fav_Infantry_Loadout == 0) {
-              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.mini_chaingun,PlanetSideGUID(onlineplayer.guid + 6),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
-                Some(ConcurrentFeedWeaponData(0,AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22 ), 0, AmmoBoxData(100)) ::
-                  AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)))))
-            }
-            if (onlineplayer.fav_Infantry_Loadout == 1) {
-              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(50)))))))
-            }
-          }
-          if(onlineplayer.faction == PlanetSideEmpire.VS) {
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
-              onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
-              List(),
-              List(),
-              InventoryData(true, false, false,
-                InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 1), 0,
-                  WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(50))) ::
-                  InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
-                    WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
-                  InventoryItem(ObjectClass.forceblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
-                    WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
-                  InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
-            if (onlineplayer.fav_Infantry_Loadout == 0) {
-              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35)))))))
-            }
-            if (onlineplayer.fav_Infantry_Loadout == 1) {
-              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(40)))))))
-            }
-          }
-          if (onlineplayer.fav_Infantry_Loadout == 2) {
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.flechette,PlanetSideGUID(onlineplayer.guid+6),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
-              Some(WeaponData(0,InternalSlot(ObjectClass.shotgun_shell,PlanetSideGUID(onlineplayer.guid+7),0,AmmoBoxData(12)))))))
-          }
-          if (onlineplayer.fav_Infantry_Loadout == 3) {
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.rocklet,PlanetSideGUID(onlineplayer.guid + 5),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
-              Some(ConcurrentFeedWeaponData(0,AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(onlineplayer.guid + 22 ), 0, AmmoBoxData(6)) ::
-                AmmoBoxData(ObjectClass.frag_cartridge, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(6)) :: Nil)))))
-          }
-          if (onlineplayer.fav_Infantry_Loadout == 4) {
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.bolt_driver,PlanetSideGUID(onlineplayer.guid+6),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
-              Some(WeaponData(0,InternalSlot(ObjectClass.bolt,PlanetSideGUID(onlineplayer.guid+7),0,AmmoBoxData(1)))))))
-          }
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),35,40))) // br40
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
-        }
+//        if(function == "LoadMap" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && player.continent == "i2") {
+//          if(onlineplayer.faction == PlanetSideEmpire.NC) {
+//            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+//              onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
+//              List(),
+//              List(),
+//              InventoryData(true, false, false,
+//                InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 1), 0,
+//                  WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(50))) ::
+//                  InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
+//                    WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
+//                  InventoryItem(ObjectClass.magcutter, PlanetSideGUID(onlineplayer.guid + 8), 4,
+//                    WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
+//                  InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
+//            if (onlineplayer.fav_Infantry_Loadout == 0) {
+//              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+//                Some(WeaponData(0, InternalSlot(ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16)))))))
+//            }
+//            if (onlineplayer.fav_Infantry_Loadout == 1) {
+//              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+//                Some(WeaponData(0, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(30)))))))
+//            }
+//          }
+//          if(onlineplayer.faction == PlanetSideEmpire.TR) {
+//            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+//              onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
+//              List(),
+//              List(),
+//              InventoryData(true, false, false,
+//                InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 1), 0,
+//                  WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(50))) ::
+//                  InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
+//                    WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
+//                  InventoryItem(ObjectClass.chainblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
+//                    WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
+//                  InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
+//            if (onlineplayer.fav_Infantry_Loadout == 0) {
+//              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.mini_chaingun,PlanetSideGUID(onlineplayer.guid + 6),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
+//                Some(ConcurrentFeedWeaponData(0,AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22 ), 0, AmmoBoxData(100)) ::
+//                  AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)))))
+//            }
+//            if (onlineplayer.fav_Infantry_Loadout == 1) {
+//              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+//                Some(WeaponData(0, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(50)))))))
+//            }
+//          }
+//          if(onlineplayer.faction == PlanetSideEmpire.VS) {
+//            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.avatar, avatar_guid, CharacterData(CharacterAppearanceData(onlineplayer.getPosition, 19, onlineplayer.faction, false, 4, onlineplayer.name, onlineplayer.getExoSuitType, onlineplayer.sex, 2, 9, onlineplayer.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars(6, 7, 8, 220)),
+//              onlineplayer.getMaxHealth, onlineplayer.getHealth, onlineplayer.getPersonalArmor, 1, 7, 7, onlineplayer.getMaxStamina, onlineplayer.getStamina, 28, 4, 44, 84, 104, 1900,
+//              List(),
+//              List(),
+//              InventoryData(true, false, false,
+//                InventoryItem(ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 1), 0,
+//                  WeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(50))) ::
+//                  InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), 1,
+//                    WeaponData(0, ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(50))) ::
+//                  InventoryItem(ObjectClass.forceblade, PlanetSideGUID(onlineplayer.guid + 8), 4,
+//                    WeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(1))) ::
+//                  InventoryItem(ObjectClass.locker_container, PlanetSideGUID(onlineplayer.guid + 10), 5, AmmoBoxData(1)) :: Nil)))))
+//            if (onlineplayer.fav_Infantry_Loadout == 0) {
+//              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+//                Some(WeaponData(0, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35)))))))
+//            }
+//            if (onlineplayer.fav_Infantry_Loadout == 1) {
+//              sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+//                Some(WeaponData(0, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(40)))))))
+//            }
+//          }
+//          if (onlineplayer.fav_Infantry_Loadout == 2) {
+//            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.flechette,PlanetSideGUID(onlineplayer.guid+6),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
+//              Some(WeaponData(0,InternalSlot(ObjectClass.shotgun_shell,PlanetSideGUID(onlineplayer.guid+7),0,AmmoBoxData(12)))))))
+//          }
+//          if (onlineplayer.fav_Infantry_Loadout == 3) {
+//            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.rocklet,PlanetSideGUID(onlineplayer.guid + 5),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
+//              Some(ConcurrentFeedWeaponData(0,AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(onlineplayer.guid + 22 ), 0, AmmoBoxData(6)) ::
+//                AmmoBoxData(ObjectClass.frag_cartridge, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(6)) :: Nil)))))
+//          }
+//          if (onlineplayer.fav_Infantry_Loadout == 4) {
+//            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.bolt_driver,PlanetSideGUID(onlineplayer.guid+6),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
+//              Some(WeaponData(0,InternalSlot(ObjectClass.bolt,PlanetSideGUID(onlineplayer.guid+7),0,AmmoBoxData(1)))))))
+//          }
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),35,40))) // br40
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid),36,5))) // cr5
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
+//        }
 
         if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && !onlineplayer.spectator) {
 //          if (distance(player.getPosition,onlineplayer.getPosition) < 500) {
@@ -445,15 +445,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if(unk1 == 0) { //load fav 0
             if (onlineplayer.faction == PlanetSideEmpire.NC) { // JH
               sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(16)))))))
+                Some(WeaponData(12, 0, 0, InternalSlot(ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
             }
             else if (onlineplayer.faction == PlanetSideEmpire.TR) { // MCG
               sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(ConcurrentFeedWeaponData(0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(100)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(100)) :: Nil)))))
+                Some(ConcurrentFeedWeaponData(12, 0, 0, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 22), 0, AmmoBoxData(8)) :: AmmoBoxData(ObjectClass.bullet_9mm_AP, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(8)) :: Nil)))))
             }
             else if (onlineplayer.faction == PlanetSideEmpire.VS) { // Lasher
               sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(35)))))))
+                Some(WeaponData(12,0 , 0, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
             }
             onlineplayer.fav_Infantry_Loadout = 0
             onlineplayer.weapon_ammo_mode = 0
@@ -462,15 +462,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if(unk1 == 1) { //load fav 1
             if (onlineplayer.faction == PlanetSideEmpire.NC) { // Gauss
               sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(30)))))))
+                Some(WeaponData(12, 0, 0, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
             }
             else if (onlineplayer.faction == PlanetSideEmpire.TR) { // Cycler
               sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(50)))))))
+                Some(WeaponData(12, 0, 0, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
             }
             else if (onlineplayer.faction == PlanetSideEmpire.VS) { // Pulsar
               sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                Some(WeaponData(0, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(40)))))))
+                Some(WeaponData(12, 0, 0, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
             }
             onlineplayer.fav_Infantry_Loadout = 1
             onlineplayer.weapon_ammo_mode = 0
@@ -478,21 +478,21 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
           if(unk1 == 2) { //load fav 2
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.flechette,PlanetSideGUID(onlineplayer.guid+6),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
-              Some(WeaponData(0,InternalSlot(ObjectClass.shotgun_shell,PlanetSideGUID(onlineplayer.guid+7),0,AmmoBoxData(12)))))))
+              Some(WeaponData(12, 0, 0,InternalSlot(ObjectClass.shotgun_shell,PlanetSideGUID(onlineplayer.guid+7),0,AmmoBoxData(8)))))))
             onlineplayer.fav_Infantry_Loadout = 2
             onlineplayer.weapon_ammo_mode = 0
             onlineplayer.weapon_fire_mode = 0
           }
           if(unk1 == 3) { //load fav 3
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.rocklet,PlanetSideGUID(onlineplayer.guid + 5),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
-              Some(ConcurrentFeedWeaponData(0,AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(onlineplayer.guid + 22 ), 0, AmmoBoxData(6)) :: AmmoBoxData(ObjectClass.frag_cartridge, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(6)) :: Nil)))))
+              Some(ConcurrentFeedWeaponData(12, 0, 0,AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(onlineplayer.guid + 22 ), 0, AmmoBoxData(8)) :: AmmoBoxData(ObjectClass.frag_cartridge, PlanetSideGUID(onlineplayer.guid + 23), 1, AmmoBoxData(8)) :: Nil)))))
             onlineplayer.fav_Infantry_Loadout = 3
             onlineplayer.weapon_ammo_mode = 0
             onlineplayer.weapon_fire_mode = 0
           }
           if(unk1 == 4) { //load fav 4
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,ObjectClass.bolt_driver,PlanetSideGUID(onlineplayer.guid+6),Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),2)),
-              Some(WeaponData(0,InternalSlot(ObjectClass.bolt,PlanetSideGUID(onlineplayer.guid+7),0,AmmoBoxData(1)))))))
+              Some(WeaponData(12, 0, 0,InternalSlot(ObjectClass.bolt,PlanetSideGUID(onlineplayer.guid+7),0,AmmoBoxData(8)))))))
             onlineplayer.fav_Infantry_Loadout = 4
             onlineplayer.weapon_ammo_mode = 0
             onlineplayer.weapon_fire_mode = 0
@@ -591,7 +591,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
     }
   }
 
-  val defaultApp = CharacterAppearanceData(Vector3(3674.8438f, 2726.789f, 91.15625f), 32, PlanetSideEmpire.TR, false, 4, "TestChar", 0, 2, 2, 9, 1, 3, 118, 30, 0x8080, 0xFFFF, 2, 0, 0, 7, RibbonBars(6, 7, 8, 220))
+  val defaultApp = CharacterAppearanceData(PlacementData(Vector3(3674.8438f, 2726.789f, 91.15625f), 0, 0, 19),
+    BasicCharacterData("TestChar", PlanetSideEmpire.TR, CharacterGender.Female, 41, 1),
+    3, false, false, ExoSuitType.Infiltration, "", 0, false, 0, 181, true, GrenadeState.None,
+    false, false, false, RibbonBars())
 
   var traveler = Traveler(this)
 
@@ -664,24 +667,28 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // NOTE: PlanetSideZoneID just chooses the background
       //      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
 
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(1), None,
-        Some(CharacterData(CharacterAppearanceData(Vector3(1,1,1), 19, PlanetSideEmpire.TR, false, 4, "You can create a character", 1, 1, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(1),
+        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
+          BasicCharacterData("You can create a character", PlanetSideEmpire.TR, CharacterGender.Female, 41, 1),
+          3, false, false, ExoSuitType.Agile, "", 0, false, 0, 181, true, GrenadeState.None,
+          false, false, false, RibbonBars()),
           100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
-          List(),
-          List(),
-          InventoryData(true, false, false, List()))))))
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(2), None,
-        Some(CharacterData(CharacterAppearanceData(Vector3(1,1,1), 19, PlanetSideEmpire.NC, false, 4, "with your own preferences and name", 1, 1, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+          List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(2),
+        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
+          BasicCharacterData("with your own preferences and name", PlanetSideEmpire.NC, CharacterGender.Male, 41, 1),
+          3, false, false, ExoSuitType.Agile, "", 0, false, 0, 181, true, GrenadeState.None,
+          false, false, false, RibbonBars()),
           100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
-          List(),
-          List(),
-          InventoryData(true, false, false, List()))))))
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(3), None,
-        Some(CharacterData(CharacterAppearanceData(Vector3(1,1,1), 19, PlanetSideEmpire.VS, false, 4, "or use these default characters", 1, 1, 2, 9, 1, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
+          List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(3),
+        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
+          BasicCharacterData("or use these default characters", PlanetSideEmpire.VS, CharacterGender.Female, 41, 1),
+          3, false, false, ExoSuitType.Infiltration, "", 0, false, 0, 181, true, GrenadeState.None,
+          false, false, false, RibbonBars()),
           100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
-          List(),
-          List(),
-          InventoryData(true, false, false, List()))))))
+          List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
+
       sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 1, PlanetSideGUID(1), false, 0)))
       sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(2), 2, PlanetSideGUID(2), false, 0)))
       sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(3), 3, PlanetSideGUID(3), true, 0)))
@@ -711,10 +718,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
             }
             //hardcoded avatar and some pertinent equipment setup
-            var avatar: PlayerAvatar = PlayerAvatar(guid, "Default_Character_"+sessionId, PlanetSideEmpire.TR, 1, 1, 1)
-            if (charId == 2) avatar = PlayerAvatar(guid, "Default_Character_"+sessionId, PlanetSideEmpire.NC, 1, 1, 1)
-            if (charId == 3) avatar = PlayerAvatar(guid, "Default_Character_"+sessionId, PlanetSideEmpire.VS, 1, 1, 1)
-            avatar.setExoSuitType(4)
+            var avatar: PlayerAvatar = PlayerAvatar(guid, "Default_Character_"+sessionId, PlanetSideEmpire.TR, CharacterGender.Male, 1, 1)
+            if (charId == 2) avatar = PlayerAvatar(guid, "Default_Character_"+sessionId, PlanetSideEmpire.NC, CharacterGender.Male, 1, 1)
+            if (charId == 3) avatar = PlayerAvatar(guid, "Default_Character_"+sessionId, PlanetSideEmpire.VS, CharacterGender.Male, 1, 1)
+            avatar.setExoSuitType(ExoSuitType.Standard)
             //init holsters
             avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
             //            avatar.setEquipmentInHolster(1, Tool(0, 0)) // Beamer in pistol slot 1
@@ -722,9 +729,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
             //            avatar.setEquipmentInHolster(3, Tool(1, 1)) // Suppressor in rifle slot 1
             avatar.setEquipmentInHolster(4, Tool(2, 2)) // Force Blade in melee slot
             avatar.setUsedHolster(0) // Start with Beamer drawn
-            avatar.setPosition(defaultApp.pos)
-            avatar.setPitch(defaultApp.viewPitch)
-            avatar.setYaw(defaultApp.viewYaw)
+            avatar.setPosition(defaultApp.pos.coord)
+            avatar.setPitch(defaultApp.pos.pitch)
+            avatar.setYaw(defaultApp.pos.yaw)
             avatar.redHealth = avatar.getMaxHealth
             avatar.blueArmor = avatar.getMaxPersonalArmor
             avatar.greenStamina = avatar.getMaxStamina
@@ -1005,8 +1012,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
       //hardcoded avatar and some pertinent equipment setup
-      val avatar: PlayerAvatar = PlayerAvatar(guid, name, empire, gender.id, head, voice)
-      avatar.setExoSuitType(1)
+      val avatar: PlayerAvatar = PlayerAvatar(guid, name, empire, gender, head, voice)
+      avatar.setExoSuitType(ExoSuitType.Standard)
       //init holsters
       avatar.setEquipmentInHolster(0, Tool(0, 0)) // Beamer in pistol slot 1
       avatar.setEquipmentInHolster(1, Tool(0, 0)) // Beamer in pistol slot 1
@@ -1014,9 +1021,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
       avatar.setEquipmentInHolster(3, Tool(1, 1)) // Suppressor in rifle slot 1
       avatar.setEquipmentInHolster(4, Tool(2, 2)) // Force Blade in melee slot
       avatar.setUsedHolster(0) // Start with Beamer drawn
-      avatar.setPosition(defaultApp.pos)
-      avatar.setPitch(defaultApp.viewPitch)
-      avatar.setYaw(defaultApp.viewYaw)
+      avatar.setPosition(defaultApp.pos.coord)
+      avatar.setPitch(defaultApp.pos.pitch)
+      avatar.setYaw(defaultApp.pos.yaw)
       avatar.redHealth = avatar.getMaxHealth
       avatar.blueArmor = avatar.getMaxPersonalArmor
       avatar.greenStamina = avatar.getMaxStamina
@@ -1026,11 +1033,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //add avatar
       PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
 
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, 121, PlanetSideGUID(avatar.guid), None, Some(CharacterData(CharacterAppearanceData(avatar.getPosition, 19, avatar.faction, false, 4, avatar.name, avatar.getExoSuitType, avatar.sex, 2, 9, avatar.voice, 3, 118, 30, 32896, 65535, 2, 255, 106, 7, RibbonBars()),
-        avatar.getMaxHealth, avatar.getHealth, avatar.getPersonalArmor, 1, 7, 7, avatar.getMaxStamina, avatar.getStamina, 28, 4, 44, 84, 104, 1900,
-        List(),
-        List(),
-        InventoryData(true, false, false, List()))))))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(avatar.guid),
+        DetailedCharacterData(CharacterAppearanceData(PlacementData(avatar.getPosition, 0, 0, 19),
+          BasicCharacterData(avatar.name, avatar.faction, avatar.sex, 41, avatar.voice),
+          3, false, false, avatar.getExoSuitType, "", 0, false, 0, 181, true, GrenadeState.None,
+          false, false, false, RibbonBars()),
+          avatar.getMaxHealth, avatar.getHealth, avatar.getPersonalArmor, 1, 7, 7, avatar.getMaxStamina, avatar.getStamina, 28, 4, 44, 84, 104, 1900,
+          List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
 
       sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(true, None)))
       //      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605313, PlanetSideGUID(xGUID), false, 6404428)))
