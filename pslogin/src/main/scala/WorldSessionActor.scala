@@ -540,8 +540,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, EmoteMsg(avatar_guid, emote)))
 
     case msg @ DropItemMessage(item_guid) =>
+      //item dropped where you spawn in VS Sanctuary
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(75), item_guid, app.pos, 0, 0, 0)))
       log.info("DropItem: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, DropItemMessage(item_guid)))
+
+    case msg @ PickupItemMessage(item_guid, player_guid, unk1, unk2) =>
+      log.info("PickupItem: " + msg)
 
     case msg @ ReloadMessage(item_guid, ammo_clip, unk1) =>
 //      log.info("Reload: " + msg)
@@ -693,7 +698,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
       log.info("BindPlayerMessage: " + msg)
 
-    case default => log.info(s"Unhandled GamePacket ${pkt}")
+    case default => log.error(s"Unhandled GamePacket ${pkt}")
   }
 
   def failWithError(error : String) = {
