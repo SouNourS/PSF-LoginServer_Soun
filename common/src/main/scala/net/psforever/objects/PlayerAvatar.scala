@@ -45,7 +45,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   var lastMedkit : Long = 0
 
   /** Last fav loaded */
-  var fav_Infantry_Loadout : Int = 0
+  var fav_Infantry_Loadout : Int = -1
 
   var weapon_ammo_mode : Int = 0
   var weapon_fire_mode : Int = 0
