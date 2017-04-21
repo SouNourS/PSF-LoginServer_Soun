@@ -16,11 +16,11 @@ import scodec.codecs._
   * @param unk5 na
   */
 final case class AvatarDeadStateMessage(unk1 : Int,
-                               unk2 : Long,
-                               unk3 : Long,
-                               pos : Vector3,
-                               unk4 : Long,
-                               unk5 : Boolean)
+                                        unk2 : Long,
+                                        unk3 : Long,
+                                        pos : Vector3,
+                                        unk4 : Long,
+                                        unk5 : Boolean)
   extends PlanetSideGamePacket {
   type Packet = AvatarDeadStateMessage
   def opcode = GamePacketOpcode.AvatarDeadStateMessage

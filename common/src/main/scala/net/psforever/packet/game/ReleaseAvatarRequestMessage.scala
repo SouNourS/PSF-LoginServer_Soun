@@ -5,6 +5,10 @@ import net.psforever.packet.{GamePacketOpcode, Marshallable, PacketHelpers, Plan
 import scodec.Codec
 
 
+/** Packet send by client when clic on button after death
+  * https://streamable.com/4r16m
+  */
+
 final case class ReleaseAvatarRequestMessage()
   extends PlanetSideGamePacket {
   type Packet = ReleaseAvatarRequestMessage
