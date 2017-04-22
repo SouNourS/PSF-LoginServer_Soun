@@ -1798,13 +1798,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
               else if ( player.faction == PlanetSideEmpire.VS) {
                 if (player.fav_Infantry_Loadout == 0 && player.weapon_fire_mode == 0) { // Lasher normal
-                  currentDamage = damages(lasher_projectile_velocity, lasher_projectile_lifespan, lasher_projectile_lifespan, lasher_projectile_degrade_multiplier, lasher_projectile_damage0, distanceBetweenPlayers)
+                  currentDamage = damages(lasher_projectile_velocity, lasher_projectile_lifespan, lasher_projectile_degrade_delay, lasher_projectile_degrade_multiplier, lasher_projectile_damage0, distanceBetweenPlayers)
                 }
                 else if (player.fav_Infantry_Loadout == 0 && player.weapon_fire_mode == 1) { // Lasher AP
                   currentDamage = damages(lasher_projectile_velocity, lasher_projectile_lifespan, lasher_projectile_degrade_delay, lasher_projectile_degrade_multiplier, lasher_projectile_AP_damage0, distanceBetweenPlayers)
                 }
                 else if (player.fav_Infantry_Loadout == 1 && player.weapon_fire_mode == 0) { // Pulsar normal
-                  currentDamage = damages(pulsar_projectile_velocity, pulsar_projectile_lifespan, pulsar_projectile_lifespan, pulsar_projectile_degrade_multiplier, pulsar_projectile_damage0, distanceBetweenPlayers)
+                  currentDamage = damages(pulsar_projectile_velocity, pulsar_projectile_lifespan, pulsar_projectile_degrade_delay, pulsar_projectile_degrade_multiplier, pulsar_projectile_damage0, distanceBetweenPlayers)
                 }
                 else if (player.fav_Infantry_Loadout == 1 && player.weapon_fire_mode == 1) { // Pulsar AP
                   currentDamage = damages(pulsar_projectile_velocity, pulsar_projectile_lifespan, pulsar_projectile_AP_degrade_delay, pulsar_projectile_AP_degrade_multiplier, pulsar_projectile_AP_damage0, distanceBetweenPlayers)
@@ -1894,7 +1894,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             var currentResistance : Int = 0
             // Lasher damages
             if (player.fav_Infantry_Loadout == 0 && player.weapon_fire_mode == 0) { // Lasher normal
-              currentDamage = damages(lasher_projectile_velocity, lasher_projectile_lifespan, lasher_projectile_lifespan, lasher_projectile_degrade_multiplier, lasher_projectile_damage0, distanceBetweenPlayers)
+              currentDamage = damages(lasher_projectile_velocity, lasher_projectile_lifespan, lasher_projectile_degrade_delay, lasher_projectile_degrade_multiplier, lasher_projectile_damage0, distanceBetweenPlayers)
             }
             else if (player.fav_Infantry_Loadout == 0 && player.weapon_fire_mode == 1) { // Lasher AP
               currentDamage = damages(lasher_projectile_velocity, lasher_projectile_lifespan, lasher_projectile_degrade_delay, lasher_projectile_degrade_multiplier, lasher_projectile_AP_damage0, distanceBetweenPlayers)
@@ -1902,9 +1902,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
             if (onlineplayer.fav_Infantry_Loadout <= 4) {
               currentResistance = lite_armor_resistance_direct
             }
-            // currentDamage * 0.2 for lash damages (0.5 for a Nick test)
-            onlineplayer.redHealth = damagesAfterResist((currentDamage*0.5).toInt, currentResistance, onlineplayer.redHealth, onlineplayer.blueArmor)._1
-            onlineplayer.blueArmor = damagesAfterResist((currentDamage*0.5).toInt, currentResistance, onlineplayer.redHealth, onlineplayer.blueArmor)._2
+            // currentDamage * 0.2 for lash damages
+            onlineplayer.redHealth = damagesAfterResist((currentDamage*0.2).toInt, currentResistance, onlineplayer.redHealth, onlineplayer.blueArmor)._1
+            onlineplayer.blueArmor = damagesAfterResist((currentDamage*0.2).toInt, currentResistance, onlineplayer.redHealth, onlineplayer.blueArmor)._2
             avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 0, onlineplayer.redHealth)
             avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
             if (onlineplayer.redHealth == 0) {
@@ -1938,6 +1938,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def distance(pos1 : Vector3, pos2 : Vector3) : Float = {
+//    import java.lang.Math
     math.sqrt(math.pow(pos1.x-pos2.x,2)+math.pow(pos1.y-pos2.y,2)+math.pow(pos1.z-pos2.z,2)).toFloat
   }
 
