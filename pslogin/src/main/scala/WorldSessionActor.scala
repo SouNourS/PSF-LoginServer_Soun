@@ -1078,7 +1078,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, 0)
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, 0)
           player.death_by = player.guid
-          Thread.sleep(450)
+          Thread.sleep(1000)
           sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(2,0,0,player.getPosition,0,true)))
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),6,1)
         }
