@@ -661,10 +661,10 @@ import scodec.bits._
         // certifications
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,1))) // Medium Assault
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,2))) // Heavy Assault
-                traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,3))) // Special Assault
+//                traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,3))) // Special Assault
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,4))) // Anti-Vehicular
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,5))) // Sniping
-                traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,6))) // Elite Assault
+//                traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,6))) // Elite Assault
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,7))) // Air Cavalry, Scout
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,8))) // Air Cavalry, Interceptor
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,9))) // Air Cavalry, Assault
@@ -684,8 +684,8 @@ import scodec.bits._
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,23))) // Galaxy Gunship
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,24))) // BFR Anti Aircraft
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,25))) // BFR Anti Infantry
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,28))) // Reinforced ExoSuit
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,29))) // Infiltration Suit
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,28))) // Reinforced ExoSuit
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,29))) // Infiltration Suit
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,33))) // Uni-MAX
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,34))) // Medical
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,35))) // Advanced Medical
@@ -696,14 +696,13 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,42))) // Combat Engineering
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,45))) // Advanced Engineering
 
-        traveler.sendToSelf(hex"cf06000000e7dd782c0000") // 2007 SOE Fan Faire Award (for Katana !)
-//        traveler.sendToSelf(hex"cf0201ae0000400000e7dd782c0000")
+//        traveler.sendToSelf(hex"cf06000000e7dd782c0000") // 2007 SOE Fan Faire Award (for Katana !)
 
-        traveler.sendToSelf(hex"cfa9010000fa172d228000") // werner
+//        traveler.sendToSelf(hex"cfa9010000fa172d228000") // werner
 
-        traveler.sendToSelf(hex"cfaa010000fa172d228000")
-        traveler.sendToSelf(hex"cfab010000fa172d228000")
-        traveler.sendToSelf(hex"cfac010000fa172d228000")
+//        traveler.sendToSelf(hex"cfaa010000fa172d228000")
+//        traveler.sendToSelf(hex"cfab010000fa172d228000")
+//        traveler.sendToSelf(hex"cfac010000fa172d228000")
 
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
 

@@ -52,8 +52,10 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
 
   var death_by : Int = 0
 
-  var doors :Array[Int] = Array.ofDim(120)
-  var doorsTime :Array[Long] = Array.ofDim(120)
+  var doors : Array[Int] = Array.ofDim(120)
+  var doorsTime : Array[Long] = Array.ofDim(120)
+
+  var lastSeenStreamMessage : Array[Long] = Array.ofDim(65535)
 
   /** An index reference to the type of exo-suit the player is wearing. */
   private var suit : ExoSuitType.Value = ExoSuitType.Standard

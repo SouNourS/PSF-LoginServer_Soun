@@ -270,9 +270,32 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && !onlineplayer.spectator) {
-//          if (distance(player.getPosition,onlineplayer.getPosition) < 500) {
+          val distancePlayers = distance(player.getPosition,onlineplayer.getPosition)
+          val time = System.currentTimeMillis() - player.lastSeenStreamMessage(onlineplayer.guid)
+          if ((jumping || time < 200) && distancePlayers < 400) {
             sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
-//          }
+            player.lastSeenStreamMessage(onlineplayer.guid) = System.currentTimeMillis()
+          }
+          if (vel.isEmpty && distancePlayers < 400 && time > 2000) {
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
+            player.lastSeenStreamMessage(onlineplayer.guid) = System.currentTimeMillis()
+          }
+          else if ((distancePlayers < 30 || player.fav_Infantry_Loadout == 4) && time > 200 ) {
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
+            player.lastSeenStreamMessage(onlineplayer.guid) = System.currentTimeMillis()
+          }
+          else if (distancePlayers < 100 && time > 500) {
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
+            player.lastSeenStreamMessage(onlineplayer.guid) = System.currentTimeMillis()
+          }
+          else if (distancePlayers < 400 && time > 1000) {
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
+            player.lastSeenStreamMessage(onlineplayer.guid) = System.currentTimeMillis()
+          }
+          else if (distancePlayers > 400 && time > 5000) {
+            sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
+            player.lastSeenStreamMessage(onlineplayer.guid) = System.currentTimeMillis()
+          }
         }
         if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && onlineplayer.spectator) {
           sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, Vector3(2,2,2), vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
@@ -959,7 +982,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
 
     case msg@PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
-      //      log.info("PlayerState: " + msg)
+//      log.info("PlayerState: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
@@ -1052,6 +1075,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //        }
 
         if (messagetype == ChatMessageType.CMT_SUICIDE) {
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, 0)
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, 0)
+          player.death_by = player.guid
+          Thread.sleep(450)
           sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(2,0,0,player.getPosition,0,true)))
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),6,1)
         }
