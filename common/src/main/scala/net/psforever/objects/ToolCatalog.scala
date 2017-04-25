@@ -11,12 +11,24 @@ object ToolCatalog {
   private val catalog : mutable.HashMap[Int, ToolDefinition] = new mutable.HashMap[Int, ToolDefinition]
 
   var tool : ToolDefinition = _
-  tool = ToolDefinition(0, "beamer")
+
+  tool = ToolDefinition(132, "bank")
+  tool.size = EquipmentSize.PISTOL
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.armor_canister
+  tool.fireModes(0).magazineSize = 100
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.armor_canister
+  tool.fireModes(1).magazineSize = 100
+  tool.inventoryTileWidth = 3
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(140, "beamer")
   tool.size = EquipmentSize.PISTOL
   tool.fireModes += new FireModeDefinition
   tool.fireModes(0).ammoTypes += Ammo.energy_cell
   tool.fireModes(0).magazineSize = 16
-  tool.fireModes(0).damage = 0
   tool.fireModes += new FireModeDefinition
   tool.fireModes(1).ammoTypes += Ammo.energy_cell
   tool.fireModes(1).magazineSize = 16
@@ -24,17 +36,16 @@ object ToolCatalog {
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool
 
-  tool = ToolDefinition(1, "suppressor")
+  tool = ToolDefinition(146, "bolt_driver")
   tool.size = EquipmentSize.RIFLE
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
-  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
-  tool.fireModes(0).magazineSize = 25
+  tool.fireModes(0).ammoTypes += Ammo.bolt
+  tool.fireModes(0).magazineSize = 1
   tool.inventoryTileWidth = 6
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool
 
-  tool = ToolDefinition(2, "force blade")
+  tool = ToolDefinition(175, "chainblade")
   tool.size = EquipmentSize.MELEE
   tool.fireModes += new FireModeDefinition
   tool.fireModes(0).ammoTypes += Ammo.FREE
@@ -45,12 +56,100 @@ object ToolCatalog {
   //should never end up in inventory; will match glitch knife dimensions, however, if it does
   catalog += tool.guid -> tool
 
-  tool = ToolDefinition(3, "amp")
+  tool = ToolDefinition(233, "cycler")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
+  tool.fireModes(0).magazineSize = 50
+  tool.inventoryTileWidth = 6
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(299, "Dragon")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.flamethrower_ammo
+  tool.fireModes(0).magazineSize = 100
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.flamethrower_ammo
+  tool.fireModes(1).magazineSize = 100
+  tool.inventoryTileWidth = 9
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(304, "sweeper")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.shotgun_shell
+  tool.fireModes(0).ammoTypes += Ammo.shotgun_shell_AP
+  tool.fireModes(0).magazineSize = 12
+  tool.inventoryTileWidth = 6
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(324, "forceblade")
+  tool.size = EquipmentSize.MELEE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.FREE
+  tool.fireModes(0).magazineSize = 1
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.FREE
+  tool.fireModes(1).magazineSize = 1
+  //should never end up in inventory; will match glitch knife dimensions, however, if it does
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(345, "gauss")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
+  tool.fireModes(0).magazineSize = 30
+  tool.inventoryTileWidth = 6
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(407, "amp")
   tool.size = EquipmentSize.PISTOL
   tool.fireModes += new FireModeDefinition
   tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
   tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
   tool.fireModes(0).magazineSize = 30
+  tool.inventoryTileWidth = 3
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(429, "lasher")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.energy_cell
+  tool.fireModes(0).magazineSize = 35
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.energy_cell
+  tool.fireModes(1).magazineSize = 35
+  tool.inventoryTileWidth = 9
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(468, "magcutter")
+  tool.size = EquipmentSize.MELEE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.FREE
+  tool.fireModes(0).magazineSize = 1
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.FREE
+  tool.fireModes(1).magazineSize = 1
+  //should never end up in inventory; will match glitch knife dimensions, however, if it does
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(531, "medical applicator")
+  tool.size = EquipmentSize.PISTOL
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.health_canister
+  tool.fireModes(0).magazineSize = 100
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.health_canister
+  tool.fireModes(1).magazineSize = 100
   tool.inventoryTileWidth = 3
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool
@@ -61,6 +160,44 @@ object ToolCatalog {
   tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
   tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
   tool.fireModes(0).magazineSize = 100
+  tool.inventoryTileWidth = 9
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(714, "r_shotgun")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.shotgun_shell
+  tool.fireModes(0).ammoTypes += Ammo.shotgun_shell_AP
+  tool.fireModes(0).magazineSize = 16
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.shotgun_shell
+  tool.fireModes(1).ammoTypes += Ammo.shotgun_shell_AP
+  tool.fireModes(1).magazineSize = 16
+  tool.inventoryTileWidth = 6
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(737, "ROCKLET")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.rocket
+  tool.fireModes(0).ammoTypes += Ammo.frag_cartridge
+  tool.fireModes(0).magazineSize = 6
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.rocket
+  tool.fireModes(1).ammoTypes += Ammo.frag_cartridge
+  tool.fireModes(1).magazineSize = 6
+  tool.inventoryTileWidth = 6
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(845, "suppressor")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
+  tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
+  tool.fireModes(0).magazineSize = 25
   tool.inventoryTileWidth = 6
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool

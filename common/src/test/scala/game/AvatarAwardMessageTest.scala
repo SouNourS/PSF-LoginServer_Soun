@@ -25,7 +25,7 @@ class AvatarAwardMessageTest extends Specification {
 
   "encode" in {
 //    val msg = AvatarAwardMessage(92, None)
-    val msg = AvatarAwardMessage(277, None)
+    val msg = AvatarAwardMessage(426, None)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 
     pkt mustEqual string

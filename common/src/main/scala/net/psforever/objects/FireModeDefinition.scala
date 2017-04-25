@@ -8,6 +8,5 @@ class FireModeDefinition {
   var ammoTypes : ListBuffer[Ammo.Value] = new ListBuffer[Ammo.Value]
   var chamberSize : Int = 1
   var magazineSize : Int = 1
-  var damage : Int = 0
   var target : String = "other" //TODO: create applicable target types
 }
