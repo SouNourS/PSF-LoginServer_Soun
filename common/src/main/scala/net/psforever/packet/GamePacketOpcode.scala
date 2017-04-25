@@ -399,7 +399,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x40 => noDecoder(MountVehicleCargoMsg)
     case 0x41 => noDecoder(DismountVehicleCargoMsg)
     case 0x42 => noDecoder(CargoMountPointStatusMessage)
-    case 0x43 => noDecoder(BeginZoningMessage)
+    case 0x43 => game.BeginZoningMessage.decode
     case 0x44 => game.ItemTransactionMessage.decode
     case 0x45 => game.ItemTransactionResultMessage.decode
     case 0x46 => game.ChangeFireModeMessage.decode
@@ -478,7 +478,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x83 => noDecoder(SquadWaypointRequest)
     case 0x84 => noDecoder(SquadWaypointEvent)
     case 0x85 => noDecoder(OffshoreVehicleMessage)
-    case 0x86 => noDecoder(ObjectDeployedMessage)
+    case 0x86 => game.ObjectDeployedMessage.decode
     case 0x87 => noDecoder(ObjectDeployedCountMessage)
     // 0x88
     case 0x88 => game.WeaponDelayFireMessage.decode
@@ -606,7 +606,7 @@ object GamePacketOpcode extends Enumeration {
 
     // OPCODES 0xf0-f3
     case 0xf0 => noDecoder(QueueTimedHelpMessage)
-    case 0xf1 => noDecoder(MailMessage)
+    case 0xf1 => game.MailMessage.decode
     case 0xf2 => noDecoder(GameVarUpdate)
     case 0xf3 => noDecoder(ClientCheatedMessage)
     case default => noDecoder(opcode)

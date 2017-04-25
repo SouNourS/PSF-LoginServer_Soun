@@ -1010,6 +1010,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       avatarService ! AvatarService.PlayerStateMessage(msg)
 
+    case msg @ BeginZoningMessage() =>
+      log.info("Reticulating splines ...")
+
+    case msg @ ChildObjectStateMessage(object_guid : PlanetSideGUID, pitch : Int, yaw : Int) =>
+      log.info("ChildObjectState: " + msg)
+
     case msg@ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       // TODO: Prevents log spam, but should be handled correctly
       if (messagetype != ChatMessageType.CMT_TOGGLE_GM) {
