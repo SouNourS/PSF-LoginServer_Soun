@@ -532,11 +532,11 @@ import scodec.bits._
               DetailedWeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, DetailedAmmoBoxData(8, 50))) ::
               InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
                 DetailedWeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
-              InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(player.guid + 6), 2,
-                DetailedWeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 7), 0, DetailedAmmoBoxData(8, 16))) ::
-              InventoryItem(ObjectClass.magcutter, PlanetSideGUID(player.guid + 8), 4,
-                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, DetailedAmmoBoxData(8, 1))) ::
-              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, DetailedAmmoBoxData(8, 1)) ::
+              InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(player.guid + 5), 2,
+                DetailedWeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 16))) ::
+              InventoryItem(ObjectClass.magcutter, PlanetSideGUID(player.guid + 7), 4,
+                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
+              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 20), 5, DetailedAmmoBoxData(8, 1)) ::
               InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, DetailedAmmoBoxData(8, 50)) ::
@@ -546,9 +546,13 @@ import scodec.bits._
               InventoryItem(ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15), 60, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, DetailedAmmoBoxData(8, 1)) :: Nil
           player.setEquipmentInHolster(0, Tool(player.guid + 1, ObjectClass.bank))
+          player.getEquipmentInHolster(0).get.magazine = player.getEquipmentInHolster(0).get.getFireMode.magazineSize
           player.setEquipmentInHolster(1, Tool(player.guid + 3, ObjectClass.medicalapplicator))
-          player.setEquipmentInHolster(2, Tool(player.guid + 6, ObjectClass.r_shotgun))
-          player.setEquipmentInHolster(4, Tool(player.guid + 8, ObjectClass.magcutter))
+          player.getEquipmentInHolster(1).get.magazine = player.getEquipmentInHolster(1).get.getFireMode.magazineSize
+          player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.r_shotgun))
+          player.getEquipmentInHolster(2).get.magazine = player.getEquipmentInHolster(2).get.getFireMode.magazineSize
+          player.setEquipmentInHolster(4, Tool(player.guid + 7, ObjectClass.magcutter))
+          player.getEquipmentInHolster(4).get.magazine = player.getEquipmentInHolster(4).get.getFireMode.magazineSize
         }
         else if (player.faction == PlanetSideEmpire.TR) {
           userInv =
@@ -560,15 +564,15 @@ import scodec.bits._
                 DetailedWeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
 //              InventoryItem(ObjectClass.dynomite, PlanetSideGUID(player.guid + 3), 1,
 //                DetailedWeaponData(0, ObjectClass.frag_grenade_ammo, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 1000))) ::
-              InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(player.guid + 6), 2,
-                DetailedWeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 7), 0, DetailedAmmoBoxData(8, 100))) ::
-//              InventoryItem(ObjectClass.flamethrower, PlanetSideGUID(player.guid + 6), 2,
-//                DetailedWeaponData(0, ObjectClass.flamethrower_ammo, PlanetSideGUID(player.guid + 7), 0, DetailedAmmoBoxData(8, 100))) ::
-//                InventoryItem(ObjectClass.pellet_gun, PlanetSideGUID(player.guid + 6), 2,
-//                  DetailedWeaponData(0, ObjectClass.pellet_gun_ammo, PlanetSideGUID(player.guid + 7), 0, DetailedAmmoBoxData(8, 1000))) ::
-              InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 8), 4,
-                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, DetailedAmmoBoxData(8, 1))) ::
-              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, DetailedAmmoBoxData(8, 1)) ::
+              InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(player.guid + 5), 2,
+                DetailedWeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 100))) ::
+//              InventoryItem(ObjectClass.flamethrower, PlanetSideGUID(player.guid + 5), 2,
+//                DetailedWeaponData(0, ObjectClass.flamethrower_ammo, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 100))) ::
+//                InventoryItem(ObjectClass.pellet_gun, PlanetSideGUID(player.guid + 5), 2,
+//                  DetailedWeaponData(0, ObjectClass.pellet_gun_ammo, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 1000))) ::
+              InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 7), 4,
+                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
+              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 20), 5, DetailedAmmoBoxData(8, 1)) ::
               InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, DetailedAmmoBoxData(8, 50)) ::
@@ -579,8 +583,8 @@ import scodec.bits._
               InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, DetailedAmmoBoxData(8, 1)) :: Nil
           player.setEquipmentInHolster(0, Tool(player.guid + 1, ObjectClass.bank))
           player.setEquipmentInHolster(1, Tool(player.guid + 3, ObjectClass.medicalapplicator))
-          player.setEquipmentInHolster(2, Tool(player.guid + 6, ObjectClass.mini_chaingun))
-          player.setEquipmentInHolster(4, Tool(player.guid + 8, ObjectClass.chainblade))
+          player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.mini_chaingun))
+          player.setEquipmentInHolster(4, Tool(player.guid + 7, ObjectClass.chainblade))
         }
         else if (player.faction == PlanetSideEmpire.VS) {
           userInv =
@@ -588,11 +592,11 @@ import scodec.bits._
               DetailedWeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, DetailedAmmoBoxData(8, 50))) ::
               InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
                 DetailedWeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
-              InventoryItem(ObjectClass.lasher, PlanetSideGUID(player.guid + 6), 2,
-                DetailedWeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 7), 0, DetailedAmmoBoxData(8, 35))) ::
-              InventoryItem(ObjectClass.forceblade, PlanetSideGUID(player.guid + 8), 4,
-                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 9), 0, DetailedAmmoBoxData(8, 1))) ::
-              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 10), 5, DetailedAmmoBoxData(8, 1)) ::
+              InventoryItem(ObjectClass.lasher, PlanetSideGUID(player.guid + 5), 2,
+                DetailedWeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 35))) ::
+              InventoryItem(ObjectClass.forceblade, PlanetSideGUID(player.guid + 7), 4,
+                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
+              InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 20), 5, DetailedAmmoBoxData(8, 1)) ::
               InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.energy_cell, PlanetSideGUID(player.guid + 19), 12, DetailedAmmoBoxData(8, 50)) ::
@@ -603,9 +607,13 @@ import scodec.bits._
               InventoryItem(ObjectClass.medkit, PlanetSideGUID(player.guid + 17), 73, DetailedAmmoBoxData(8, 1)) :: Nil
           player.setEquipmentInHolster(0, Tool(player.guid + 1, ObjectClass.bank))
           player.setEquipmentInHolster(1, Tool(player.guid + 3, ObjectClass.medicalapplicator))
-          player.setEquipmentInHolster(2, Tool(player.guid + 6, ObjectClass.lasher))
-          player.setEquipmentInHolster(4, Tool(player.guid + 8, ObjectClass.forceblade))
+          player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.lasher))
+          player.setEquipmentInHolster(4, Tool(player.guid + 7, ObjectClass.forceblade))
         }
+        player.getEquipmentInHolster(0).get.magazine = player.getEquipmentInHolster(0).get.getFireMode.magazineSize
+        player.getEquipmentInHolster(1).get.magazine = player.getEquipmentInHolster(1).get.getFireMode.magazineSize
+        player.getEquipmentInHolster(2).get.magazine = player.getEquipmentInHolster(2).get.getFireMode.magazineSize
+        player.getEquipmentInHolster(4).get.magazine = player.getEquipmentInHolster(4).get.getFireMode.magazineSize
 
         //edit in modified coordinates
         val pkt = PlayerStateShiftMessage(ShiftState(0,Vector3(loc._1.toFloat, loc._2.toFloat, loc._3.toFloat), 0))
@@ -624,7 +632,6 @@ import scodec.bits._
 
         //init holsters
         player.fav_Infantry_Loadout = 0
-        player.weapon_ammo_mode = 0
         player.weapon_fire_mode = 0
 
 
@@ -733,69 +740,69 @@ import scodec.bits._
 
                 if (onlineplayer.faction == PlanetSideEmpire.NC) {
 
-                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.magcutter,PlanetSideGUID(onlineplayer.guid + 8),
+                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.magcutter,PlanetSideGUID(onlineplayer.guid + 7),
                     Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),4)),
-                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.melee_ammo,PlanetSideGUID(onlineplayer.guid + 9),0, AmmoBoxData(8)))))))
+                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.melee_ammo,PlanetSideGUID(onlineplayer.guid + 8),0, AmmoBoxData(8)))))))
 
                   if (onlineplayer.fav_Infantry_Loadout == 0) {
-                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 6),
+                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 5),
                       Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.shotgun_shell,PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.shotgun_shell,PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                   }
                   if (onlineplayer.fav_Infantry_Loadout == 1) {
-                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 6),
+                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 5),
                       Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                   }
                 }
                 if (onlineplayer.faction == PlanetSideEmpire.TR) {
-                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.chainblade,PlanetSideGUID(onlineplayer.guid + 8),
+                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.chainblade,PlanetSideGUID(onlineplayer.guid + 7),
                     Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),4)),
-                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.melee_ammo,PlanetSideGUID(onlineplayer.guid + 9),0, AmmoBoxData(8)))))))
+                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.melee_ammo,PlanetSideGUID(onlineplayer.guid + 8),0, AmmoBoxData(8)))))))
 
                   if (onlineplayer.fav_Infantry_Loadout == 0) {
-                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 6),
+                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5),
                       Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                   }
                   if (onlineplayer.fav_Infantry_Loadout == 1) {
-                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 6),
+                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 5),
                       Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                      Some(WeaponData(0,8, onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                      Some(WeaponData(0,8, onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                   }
                 }
                 if (onlineplayer.faction == PlanetSideEmpire.VS) {
-                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.forceblade, PlanetSideGUID(onlineplayer.guid + 8),
+                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.forceblade, PlanetSideGUID(onlineplayer.guid + 7),
                     Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 4)),
-                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 9), 0, AmmoBoxData(8)))))))
+                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(8)))))))
 
                   if (onlineplayer.fav_Infantry_Loadout == 0) {
-                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 6),
+                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 5),
                       Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                   }
 
                   if (onlineplayer.fav_Infantry_Loadout == 1) {
-                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 6),
+                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 5),
                       Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                   }
                 }
                 if (onlineplayer.fav_Infantry_Loadout == 2) {
-                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.flechette, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.flechette, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                 }
                 if (onlineplayer.fav_Infantry_Loadout == 3) {
-                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.rocklet, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.rocklet, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                 }
                 if (onlineplayer.fav_Infantry_Loadout == 4) {
-                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.bolt_driver, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bolt, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.bolt_driver, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bolt, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                 }
                 if (onlineplayer.fav_Infantry_Loadout == 5) {
-                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.flamethrower, PlanetSideGUID(onlineplayer.guid + 6), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.flamethrower_ammo, PlanetSideGUID(onlineplayer.guid + 7), 0, AmmoBoxData(8)))))))
+                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.flamethrower, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
+                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.flamethrower_ammo, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
                 }
                 //                traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid), 35, 40))) // br40
                 //                traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(onlineplayer.guid), 36, 5))) // cr5

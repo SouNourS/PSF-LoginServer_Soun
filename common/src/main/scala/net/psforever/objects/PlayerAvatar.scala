@@ -47,7 +47,6 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   /** Last fav loaded */
   var fav_Infantry_Loadout : Int = -1
 
-  var weapon_ammo_mode : Int = 0
   var weapon_fire_mode : Int = 0
 
   var death_by : Int = 0
@@ -56,6 +55,8 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   var doorsTime : Array[Long] = Array.ofDim(120)
 
   var lastSeenStreamMessage : Array[Long] = Array.ofDim(65535)
+
+  var lastShotSeq_time : Int = -1
 
   /** An index reference to the type of exo-suit the player is wearing. */
   private var suit : ExoSuitType.Value = ExoSuitType.Standard
