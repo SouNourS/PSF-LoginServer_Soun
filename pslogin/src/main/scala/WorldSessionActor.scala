@@ -2096,10 +2096,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
             }
             else { // knife
-              if (player.weapon_fire_mode == 0) {
+              if (player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0) {
                 currentDamage = damages(melee_ammo_projectile_velocity, melee_ammo_projectile_lifespan, melee_ammo_projectile_lifespan, 0.0f, melee_ammo_projectile_damage, distanceBetweenPlayers)
               }
-              else if (player.weapon_fire_mode == 1) {
+              else if (player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1) {
                 currentDamage = damages(melee_ammo_projectile_velocity, melee_ammo_projectile_lifespan, melee_ammo_projectile_lifespan, 0.0f, chainblade_projectile_damage, distanceBetweenPlayers)
               }
             }
