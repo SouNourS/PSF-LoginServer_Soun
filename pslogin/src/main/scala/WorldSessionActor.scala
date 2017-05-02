@@ -2034,13 +2034,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg@BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
       log.info("BindPlayerMessage: " + msg)
 
-    case msg@CreateShortcutMessage(player_guid, slot, unk, addShortcut, shortcut) =>
-      log.info("CreateShortcutMessage: " + msg)
-
     case msg @ PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
       log.info("PlanetsideAttributeMessage: "+msg)
       //      sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
       avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,attribute_type,attribute_value)
+
+    case msg @ BattleplanMessage(char_id, player_name, zonr_id, diagrams) =>
+      log.info("Battleplan: "+msg)
+
+    case msg @ CreateShortcutMessage(player_guid, slot, unk, add, shortcut) =>
+      log.info("CreateShortcutMessage: "+msg)
 
     case msg @ FriendsRequest(action, friend) =>
       log.info("FriendsRequest: "+msg)

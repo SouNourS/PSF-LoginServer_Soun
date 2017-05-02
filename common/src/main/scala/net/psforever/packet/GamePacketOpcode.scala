@@ -429,7 +429,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x5a => noDecoder(DelayedPathMountMsg)
     case 0x5b => noDecoder(OrbitalShuttleTimeMsg)
     case 0x5c => noDecoder(AIDamage)
-    case 0x5d => noDecoder(DeployObjectMessage)
+    case 0x5d => game.DeployObjectMessage.decode
     case 0x5e => game.FavoritesRequest.decode
     case 0x5f => game.FavoritesResponse.decode
 
@@ -457,7 +457,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x71 => noDecoder(PlatoonEvent)
     case 0x72 => game.FriendsRequest.decode
     case 0x73 => game.FriendsResponse.decode
-    case 0x74 => noDecoder(TriggerEnvironmentalDamageMessage)
+    case 0x74 => game.TriggerEnvironmentalDamageMessage.decode
     case 0x75 => game.TrainingZoneMessage.decode
     case 0x76 => game.DeployableObjectsInfoMessage.decode
     case 0x77 => noDecoder(SquadState)
@@ -532,7 +532,7 @@ object GamePacketOpcode extends Enumeration {
     case 0xb0 => game.VoiceHostRequest.decode
     case 0xb1 => game.VoiceHostKill.decode
     case 0xb2 => game.VoiceHostInfo.decode
-    case 0xb3 => noDecoder(BattleplanMessage)
+    case 0xb3 => game.BattleplanMessage.decode
     case 0xb4 => game.BattleExperienceMessage.decode
     case 0xb5 => noDecoder(TargetingImplantRequest)
     case 0xb6 => game.ZonePopulationUpdateMessage.decode
