@@ -1077,6 +1077,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val player: PlayerAvatar = playerOpt.get
 
 //        if(messagetype == ChatMessageType.CMT_OPEN) {
+//          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"fury",72,true)))
 //          println(ServerInfo.mapRotation(System.currentTimeMillis()))
 //          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(contents.toInt - 1),PlanetSideEmpire.NEUTRAL)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(contents.toInt),PlanetSideEmpire.TR)))
@@ -1517,24 +1518,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         if (itemType == 121 && !unk3) {
           // TODO : medkit use ?!
-          sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
           //        if (playerOpt.isDefined) {
           //          val player: PlayerAvatar = playerOpt.get
           if (player.getMaxHealth - player.redHealth == 0) {
             sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225, false, "", "@HealComplete", None)))
           }
-          if (player.getMaxHealth - player.redHealth <= 25 && player.getMaxHealth - player.redHealth != 0 && System.currentTimeMillis() - player.lastMedkit > 5000) {
+          else if (System.currentTimeMillis() - player.lastMedkit < 5000) {
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225, false, "", "@TimeUntilNextUse^"+(5 - (System.currentTimeMillis() - player.lastMedkit) / 1000).toString+"~", None)))
+          }
+          else if (player.getMaxHealth - player.redHealth <= 25 && player.getMaxHealth - player.redHealth != 0 && System.currentTimeMillis() - player.lastMedkit > 5000) {
             player.redHealth = player.getMaxHealth
-            //            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
+//                        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
             avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.redHealth)
+            sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
             //            sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2))) // for nexus fight
+            sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(avatar_guid,"medkit",5,false)))
             player.lastMedkit = System.currentTimeMillis()
           }
           else if (player.getMaxHealth - player.redHealth > 25 && System.currentTimeMillis() - player.lastMedkit > 5000) {
             player.redHealth += 25
             //            sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(avatar_guid, 0, player.redHealth)))
             avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.redHealth)
+            sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
             //            sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(unk1), 2))) // for nexus fight
+            sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(avatar_guid,"medkit",5,false)))
             player.lastMedkit = System.currentTimeMillis()
           }
         }
@@ -1819,40 +1826,40 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if (seq_time - player.lastShotSeq_time < 0) {
             time = 1024 + (seq_time - player.lastShotSeq_time)}
           else time = seq_time - player.lastShotSeq_time
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss" && time < 5) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss" && time < 4) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time > 0 && time < 15) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time > 0 && time < 14) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time > 0 && time < 4) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time > 0 && time < 3) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette" && time > 0 && time < 18) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette" && time > 0 && time < 17) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 15) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 14) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 7) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 6) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 2) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 90) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 89) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun" && time < 3) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun" && time < 2) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler" && time < 4) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler" && time < 3) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher" && time < 7) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher" && time < 6) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar" && time < 5) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar" && time < 4) {
             discord(PlanetSideGUID(player.guid),player.name)
           }
         }
