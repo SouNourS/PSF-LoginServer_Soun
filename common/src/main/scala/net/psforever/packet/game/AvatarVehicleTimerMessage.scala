@@ -15,7 +15,7 @@ final case class AvatarVehicleTimerMessage(player_guid : PlanetSideGUID,
                                            text : String,
                                            time : Long,
                                            unk1 : Boolean
-                            ) extends PlanetSideGamePacket {
+                                          ) extends PlanetSideGamePacket {
   type Packet = AvatarVehicleTimerMessage
   def opcode = GamePacketOpcode.AvatarVehicleTimerMessage
   def encode = AvatarVehicleTimerMessage.encode(this)

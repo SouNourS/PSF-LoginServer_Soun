@@ -1307,7 +1307,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ PickupItemMessage(item_guid, player_guid, unk1, unk2) =>
       log.info("PickupItem: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, PickupItemMessage(item_guid, player_guid, unk1, unk2)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(player_guid, item_guid, 250)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(player_guid, item_guid, 250))) // item on mouse
 
     case msg @ ReloadMessage(item_guid, ammo_clip, unk1) =>
       log.info("Reload: " + msg)

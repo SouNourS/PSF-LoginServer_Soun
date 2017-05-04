@@ -18,7 +18,7 @@ import scodec.codecs._
   * @param unk6         ???
   * @param unk7         ??? 25 when door 223 when terminal
   * @param unk8         ??? 0 when door 1 when use rek (252 then equipment term)
-  * @param itemType object ID from game_objects.adb (ex 612 is an equipment terminal, for medkit we have 121 (avatar))
+  * @param itemType     object ID from game_objects.adb (ex 612 is an equipment terminal, for medkit we have 121 (avatar))
   */
 final case class UseItemMessage(avatar_guid : PlanetSideGUID,
                                 unk1 : Int,

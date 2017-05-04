@@ -52,7 +52,7 @@ final case class PlayerStateMessageUpstream(avatar_guid : PlanetSideGUID,
 
 object PlayerStateMessageUpstream extends Marshallable[PlayerStateMessageUpstream] {
   implicit val codec : Codec[PlayerStateMessageUpstream] = (
-      ("avatar_guid" | PlanetSideGUID.codec) ::
+    ("avatar_guid" | PlanetSideGUID.codec) ::
       ("pos" | Vector3.codec_pos) ::
       ("vel" | optional(bool, Vector3.codec_vel)) ::
       ("facingYaw" | uint8L) ::
