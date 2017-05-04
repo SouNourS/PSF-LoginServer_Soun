@@ -364,7 +364,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x23 => noDecoder(ActionCancelAcknowledgeMessage)
     case 0x24 => game.SetEmpireMessage.decode
     case 0x25 => game.EmoteMsg.decode
-    case 0x26 => noDecoder(UnuseItemMessage)
+    case 0x26 => game.UnuseItemMessage.decode
     case 0x27 => game.ObjectDetachMessage.decode
     // 0x28
     case 0x28 => game.CreateShortcutMessage.decode
@@ -534,7 +534,7 @@ object GamePacketOpcode extends Enumeration {
     case 0xb2 => game.VoiceHostInfo.decode
     case 0xb3 => game.BattleplanMessage.decode
     case 0xb4 => game.BattleExperienceMessage.decode
-    case 0xb5 => noDecoder(TargetingImplantRequest)
+    case 0xb5 => game.TargetingImplantRequest.decode
     case 0xb6 => game.ZonePopulationUpdateMessage.decode
     case 0xb7 => game.DisconnectMessage.decode
     // 0xb8

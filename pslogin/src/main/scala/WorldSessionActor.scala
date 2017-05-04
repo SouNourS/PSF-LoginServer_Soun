@@ -1580,6 +1580,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
 
+    case msg @ UnuseItemMessage(player, item) =>
+      log.info("UnuseItem: " + msg)
+
     case msg@GenericObjectStateMsg(object_guid, unk1) =>
       log.info("GenericObjectState: " + msg)
 
@@ -1868,6 +1871,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@WeaponDryFireMessage(weapon_guid) =>
       log.info("WeaponDryFireMessage: " + msg)
+
+    case msg @ TargetingImplantRequest(list) =>
+      log.info("TargetingImplantRequest: "+msg)
 
     case msg@WeaponLazeTargetPositionMessage(weapon, pos1, pos2) =>
       log.info("Lazing position: " + pos2.toString)
