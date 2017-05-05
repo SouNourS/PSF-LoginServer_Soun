@@ -2219,6 +2219,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
 
+    case msg @ TargetingImplantRequest(list) =>
+      log.info("TargetingImplantRequest: "+msg)
+
     case default => log.info("ID: " + sessionId + s" Unhandled GamePacket ${pkt} ")
   }
 

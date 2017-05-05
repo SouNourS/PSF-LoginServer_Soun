@@ -30,7 +30,7 @@ object TargetingImplantRequest extends Marshallable[TargetingImplantRequest] {
   private val request_codec : Codec[TargetRequest] = (
     ("target_guid" | PlanetSideGUID.codec) ::
       ("unk" | bool)
-    ).as[TargetRequest]
+  ).as[TargetRequest]
 
   implicit val codec : Codec[TargetingImplantRequest] = ("target_list" | listOfN(intL(6), request_codec)).as[TargetingImplantRequest]
 }
