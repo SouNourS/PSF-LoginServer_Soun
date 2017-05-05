@@ -127,10 +127,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def Started: Receive = {
     case ServiceManager.LookupResult(endpoint) =>
       chatService = endpoint
-      log.info("Got service " + endpoint)
+      log.info("ID: " + sessionId + " Got service " + endpoint)
     case ServiceManager2.LookupResult(endpoint) =>
       avatarService = endpoint
-      log.info("Got service " + endpoint)
+      log.info("ID: " + sessionId + " Got service " + endpoint)
     case ctrl@ControlPacket(_, _) =>
       handlePktContainer(ctrl)
     case game@GamePacket(_, _, _) =>
@@ -642,7 +642,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       val clientVersion = s"Client Version: ${majorVersion}.${minorVersion}.${revision}, ${buildDate}"
 
-      log.info(s"New world login to ${server} with Token:${token}. ${clientVersion}")
+      log.info("ID: " + sessionId + s" New world login to ${server} with Token:${token}. ${clientVersion}")
 
 
       // NOTE: PlanetSideZoneID just chooses the background
@@ -675,7 +675,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(3), 3, PlanetSideGUID(3), true, 0)))
 
     case msg@CharacterRequestMessage(charId, action) =>
-      log.info("Handling " + msg)
+      log.info("ID: " + sessionId + " Handling " + msg)
 
       action match {
         case CharacterRequestAction.Delete =>
@@ -966,7 +966,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           log.error("Unsupported " + default + " in " + msg)
       }
     case msg@CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
-      log.info("Handling " + msg)
+      log.info("ID: " + sessionId + " Handling " + msg)
 
       // define a new Player GUID
       var nbOnlineTF : Boolean = false
@@ -1009,7 +1009,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
 
     case msg@PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
-//      log.info("PlayerState: " + msg)
+//      log.info("ID: " + sessionId + " PlayerState: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
@@ -1062,19 +1062,20 @@ class WorldSessionActor extends Actor with MDCContextAware {
       avatarService ! AvatarService.PlayerStateMessage(msg)
 
     case msg @ BeginZoningMessage() =>
-      log.info("Reticulating splines ...")
+      log.info("ID: " + sessionId + " Reticulating splines ...")
 
     case msg @ ChildObjectStateMessage(object_guid : PlanetSideGUID, pitch : Int, yaw : Int) =>
-      log.info("ChildObjectState: " + msg)
+      log.info("ID: " + sessionId + " ChildObjectState: " + msg)
 
     case msg@ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       // TODO: Prevents log spam, but should be handled correctly
-      if (messagetype != ChatMessageType.CMT_TOGGLE_GM) {
-        log.info("Chat: " + msg)
-      }
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+
+        if (messagetype != ChatMessageType.CMT_TOGGLE_GM) {
+          log.info("ID: " + sessionId + " Name: " + player.name + " Chat: " + msg)
+        }
 
 //        if(messagetype == ChatMessageType.CMT_OPEN) {
 //          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"fury",72,true)))
@@ -1255,14 +1256,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, VoiceHostKill()))
 
     case msg@VoiceHostInfo(player_guid, data) =>
-      log.info("VoiceHostInfo: " + msg)
+      log.info("ID: " + sessionId + " VoiceHostInfo: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, VoiceHostKill()))
 
     case msg@ChangeFireModeMessage(item_guid, fire_mode) =>
-      log.info("ChangeFireMode: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " ChangeFireMode: " + msg)
         avatarService ! AvatarService.ChangeFireMode(item_guid, fire_mode, sessionId)
         player.getEquipmentInHolster(player.getUsedHolster).get.setFireModeIndex(fire_mode)
 //        if (item_guid.guid == player.guid + 1)  player.getEquipmentInHolster(0).get.setFireModeIndex(fire_mode)
@@ -1273,48 +1274,48 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
 
     case msg@ChangeFireStateMessage_Start(item_guid) =>
-      log.info("ChangeFireState_Start: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " ChangeFireState_Start: " + msg)
         player.shooting = true
         avatarService ! AvatarService.ChangeFireState(item_guid,sessionId)
       }
 
     case msg@ChangeFireStateMessage_Stop(item_guid) =>
-      log.info("ChangeFireState_Stop: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " ChangeFireState_Stop: " + msg)
         player.shooting = false
         player.lastShotSeq_time = -1
         avatarService ! AvatarService.ChangeFireState(item_guid,sessionId)
       }
 
     case msg@EmoteMsg(avatar_guid, emote) =>
-      log.info("Emote: " + msg)
+      log.info("ID: " + sessionId + " Emote: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, EmoteMsg(avatar_guid, emote)))
 
     case msg @ DropItemMessage(item_guid) =>
-      log.info("DropItem: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " DropItem: " + msg)
         sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.guid), item_guid, player.getPosition, 0, 0, 0)))
         sendResponse(PacketCoding.CreateGamePacket(0, DropItemMessage(item_guid)))
       }
 
     case msg @ PickupItemMessage(item_guid, player_guid, unk1, unk2) =>
-      log.info("PickupItem: " + msg)
+      log.info("ID: " + sessionId + " PickupItem: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, PickupItemMessage(item_guid, player_guid, unk1, unk2)))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(player_guid, item_guid, 250))) // item on mouse
 
     case msg @ ReloadMessage(item_guid, ammo_clip, unk1) =>
-      log.info("Reload: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         var ammo_clip2 : Int = 0
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " Reload: " + msg)
         if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun") ammo_clip2 = 16
         else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss") ammo_clip2 = 30
         else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun") ammo_clip2 = 100
@@ -1334,10 +1335,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@ObjectHeldMessage(avatar_guid, held_holsters, unk1) =>
-      log.info("ObjectHeld: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " ObjectHeld: " + msg)
         if(held_holsters != 255) {
           player.setUsedHolster(held_holsters)
         }
@@ -1345,17 +1346,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@AvatarJumpMessage(state) =>
-      log.info("AvatarJump: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " AvatarJump: " + msg)
         if (player.greenStamina - 10 <= 0) player.greenStamina = 0
         if (player.greenStamina - 10 > 0) player.greenStamina -= 10
         sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid), 2, player.greenStamina)))
       }
 
     case msg@ZipLineMessage(player_guid, origin_side, action, id, pos) =>
-      log.info("ZipLineMessage: " + msg)
+      log.info("ID: " + sessionId + " ZipLineMessage: " + msg)
       if (!origin_side && action == 0) {
         //doing this lets you use the zip line in one direction, cant come back
         sendResponse(PacketCoding.CreateGamePacket(0, ZipLineMessage(player_guid, origin_side, action, id, pos)))
@@ -1373,23 +1374,23 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@RequestDestroyMessage(object_guid) =>
-      log.info("RequestDestroy: " + msg)
+      log.info("ID: " + sessionId + " RequestDestroy: " + msg)
       // TODO: Make sure this is the correct response in all cases
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
 
     case msg@ObjectDeleteMessage(object_guid, unk1) =>
-      log.info("ObjectDelete: " + msg)
+      log.info("ID: " + sessionId + " ObjectDelete: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
 
     case msg@MoveItemMessage(item_guid, avatar_guid_1, avatar_guid_2, dest, unk1) =>
-      log.info("MoveItem: " + msg)
+      log.info("ID: " + sessionId + " MoveItem: " + msg)
 //      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(avatar_guid_1, item_guid, dest))) for rexo test
 
     case msg@ChangeAmmoMessage(item_guid, unk1) =>
-      log.info("ChangeAmmo: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " ChangeAmmo: " + msg)
         if (item_guid.guid == player.guid + 1 && player.getEquipmentInHolster(0).get.getAmmoTypeIndex == 0)  player.getEquipmentInHolster(0).get.setAmmoTypeIndex(1)
         else if (item_guid.guid == player.guid + 1 && player.getEquipmentInHolster(0).get.getAmmoTypeIndex == 1)  player.getEquipmentInHolster(0).get.setAmmoTypeIndex(0)
         else if (item_guid.guid == player.guid + 2 && player.getEquipmentInHolster(1).get.getAmmoTypeIndex == 0)  player.getEquipmentInHolster(1).get.setAmmoTypeIndex(1)
@@ -1434,12 +1435,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType) =>
-      log.info("UseItem: " + msg)
       // TODO: Not all fields in the response are identical to source in real packet logs (but seems to be ok)
       // TODO: Not all incoming UseItemMessage's respond with another UseItemMessage (i.e. doors only send out GenericObjectStateMsg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " UseItem: " + msg)
         if (itemType != 121 && unk1 - player.guid != 3) sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
         if (itemType == 121 && unk3 && unk1 - player.guid == 1) {
           // TODO : bank ?
@@ -1581,16 +1582,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg @ UnuseItemMessage(player, item) =>
-      log.info("UnuseItem: " + msg)
+      log.info("ID: " + sessionId + " UnuseItem: " + msg)
 
     case msg@GenericObjectStateMsg(object_guid, unk1) =>
-      log.info("GenericObjectState: " + msg)
+      log.info("ID: " + sessionId + " GenericObjectState: " + msg)
 
     case msg@ItemTransactionMessage(terminal_guid, transaction_type, item_page, item_name, unk1, item_guid) =>
-      log.info("ItemTransaction: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " ItemTransaction: " + msg)
 
         if (transaction_type == TransactionType.Sell) {
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(item_guid, 0)))
@@ -1816,13 +1817,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@WeaponDelayFireMessage(seq_time, weapon_guid) =>
-      log.info("WeaponDelayFire: " + msg)
+      log.info("ID: " + sessionId + " WeaponDelayFire: " + msg)
 
     case msg@WeaponFireMessage(seq_time, weapon_guid, projectile_guid, shot_origin, unk1, unk2, unk3, unk4, unk5, unk6, unk7) =>
-      log.info("WeaponFire: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " WeaponFire: " + msg)
         player.getEquipmentInHolster(player.getUsedHolster).get.magazine -= 1
         if (player.lastShotSeq_time != -1) {
           var time : Int = 0
@@ -1870,22 +1871,22 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@WeaponDryFireMessage(weapon_guid) =>
-      log.info("WeaponDryFireMessage: " + msg)
+      log.info("ID: " + sessionId + " WeaponDryFireMessage: " + msg)
 
     case msg @ TargetingImplantRequest(list) =>
-      log.info("TargetingImplantRequest: "+msg)
+      log.info("ID: " + sessionId + " TargetingImplantRequest: "+msg)
 
     case msg@WeaponLazeTargetPositionMessage(weapon, pos1, pos2) =>
-      log.info("Lazing position: " + pos2.toString)
+      log.info("ID: " + sessionId + " Lazing position: " + pos2.toString)
 
     case msg@HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
-      log.info("Hit: " + msg)
+      log.info("ID: " + sessionId + " Hit: " + msg)
 
     case msg@SplashHitMessage(seq_time, projectile_uid, projectile_pos, direct_victim_uid, unk3, projectile_vel, unk4, targets) =>
-      log.info("SplashHitMessage: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " SplashHitMessage: " + msg)
         val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(direct_victim_uid)
         if (OnlinePlayer.isDefined && !player.spectator && player.getUsedHolster != 255) {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
@@ -1980,22 +1981,22 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
 
     case msg@AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
-      log.info("AvatarFirstTimeEvent: " + msg)
+      log.info("ID: " + sessionId + " AvatarFirstTimeEvent: " + msg)
 
     case msg@AvatarGrenadeStateMessage(player_guid, state) =>
-      log.info("AvatarGrenadeStateMessage: " + msg)
+      log.info("ID: " + sessionId + " AvatarGrenadeStateMessage: " + msg)
 
     case msg@GenericActionMessage(action) =>
-      log.info("GenericActionMessage: " + msg)
+      log.info("ID: " + sessionId + " GenericActionMessage: " + msg)
 
     case msg@WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
-      log.info("WarpgateRequest: " + msg)
+      log.info("ID: " + sessionId + " WarpgateRequest: " + msg)
 
     case msg@ProximityTerminalUseMessage(player_guid, object_guid, unk) =>
-      log.info("ProximityTerminalUseMessage: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " ProximityTerminalUseMessage: " + msg)
         if(!unk && player.getVelocity.isEmpty){
           useProximityTerminalID = Option.apply(object_guid)
           sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(PlanetSideGUID(player.guid), object_guid, true)))
@@ -2012,25 +2013,25 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
-      log.info("MounVehicleMsg: "+msg)
+      log.info("ID: " + sessionId + " MounVehicleMsg: "+msg)
       sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(vehicle_guid, 0, 1000)))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid, player_guid, 0)))
 
     case msg@DismountVehicleMsg(player_guid, u1, u2) =>
-      log.info("DismountVehicleMsg: " + msg)
+      log.info("ID: " + sessionId + " DismountVehicleMsg: " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, DismountVehicleMsg(player_guid, u1, true))) //should be safe; replace with ObjectDetachMessage later
 
     case msg@SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
-      log.info("SquadDefinitionAction: " + msg)
+      log.info("ID: " + sessionId + " SquadDefinitionAction: " + msg)
 
     case msg@AvatarGrenadeStateMessage(player_guid, state) =>
-      log.info("AvatarGrenadeStateMsg: " + msg)
+      log.info("ID: " + sessionId + " AvatarGrenadeStateMsg: " + msg)
 
     case msg@GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
-      log.info("Ouch! " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(p)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " Ouch! " + msg)
         if (!player.spectator) {
           if (player.redHealth - 10 <= 0) player.redHealth = 1
           if (player.redHealth - 10 > 0) player.redHealth -= 10
@@ -2042,30 +2043,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@BugReportMessage(version_major, version_minor, version_date, bug_type, repeatable, location, zone, pos, summary, desc) =>
-      log.info("BugReportMessage: " + msg)
+      log.info("ID: " + sessionId + " BugReportMessage: " + msg)
 
     case msg@BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
-      log.info("BindPlayerMessage: " + msg)
+      log.info("ID: " + sessionId + " BindPlayerMessage: " + msg)
 
     case msg @ PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
-      log.info("PlanetsideAttributeMessage: "+msg)
+      log.info("ID: " + sessionId + " PlanetsideAttributeMessage: "+msg)
       //      sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
       avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,attribute_type,attribute_value)
 
     case msg @ BattleplanMessage(char_id, player_name, zonr_id, diagrams) =>
-      log.info("Battleplan: "+msg)
+      log.info("ID: " + sessionId + " Battleplan: "+msg)
 
     case msg @ CreateShortcutMessage(player_guid, slot, unk, add, shortcut) =>
-      log.info("CreateShortcutMessage: "+msg)
+      log.info("ID: " + sessionId + " CreateShortcutMessage: "+msg)
 
     case msg @ FriendsRequest(action, friend) =>
-      log.info("FriendsRequest: "+msg)
+      log.info("ID: " + sessionId + " FriendsRequest: "+msg)
 
     case msg@HitHint(source_guid,player_guid) =>
-      log.info("HitHint: "+msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(source_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " HitHint: "+msg)
         val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
         if (OnlinePlayer.isDefined && !player.spectator) {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
@@ -2139,10 +2140,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@SpawnRequestMessage(u1, u2, u3, u4, u5) =>
-      log.info("SpawnRequestMessage: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " SpawnRequestMessage: " + msg)
         sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(3,1000,1000,player.getPosition,0,true)))
         Transfer.disposeSelf(traveler,sessionId)
         avatarService ! AvatarService.unLoadMap(PlanetSideGUID(player.guid))
@@ -2172,19 +2173,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(0,0,0,player.getPosition,0,true)))
       }
     case msg@ReleaseAvatarRequestMessage() =>
-      log.info("ReleaseAvatarRequestMessage: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " ReleaseAvatarRequestMessage: " + msg)
         sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(2,0,0,player.getPosition,0,true)))
         avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),6,1)
       }
 
     case msg@LashMessage(seq_time, killer, victim, bullet, pos, unk1) =>
-      log.info("LashMessage: " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(killer)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " Name: " + player.name + " LashMessage: " + msg)
         val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(victim)
         if (OnlinePlayer.isDefined && !player.spectator) {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
@@ -2218,7 +2219,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
 
-    case default => log.info(s"Unhandled GamePacket ${pkt}")
+    case default => log.info("ID: " + sessionId + s" Unhandled GamePacket ${pkt} ")
   }
 
   def failWithError(error: String) = {
