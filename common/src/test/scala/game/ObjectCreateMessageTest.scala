@@ -464,7 +464,8 @@ class ObjectCreateMessageTest extends Specification {
         turret.deploy.pos.roll mustEqual 0
         turret.deploy.pos.pitch mustEqual 127
         turret.deploy.pos.yaw mustEqual 66
-        turret.deploy.unk mustEqual 44
+        turret.deploy.faction mustEqual PlanetSideEmpire.NC
+        turret.deploy.unk mustEqual 12
         turret.deploy.player_guid mustEqual PlanetSideGUID(3871)
         turret.health mustEqual 0
         turret.internals.isDefined mustEqual false
@@ -489,7 +490,8 @@ class ObjectCreateMessageTest extends Specification {
         turret.deploy.pos.roll mustEqual 0
         turret.deploy.pos.pitch mustEqual 0
         turret.deploy.pos.yaw mustEqual 105
-        turret.deploy.unk mustEqual 68
+        turret.deploy.faction mustEqual PlanetSideEmpire.VS
+        turret.deploy.unk mustEqual 4
         turret.deploy.player_guid mustEqual PlanetSideGUID(4232)
         turret.health mustEqual 255
         turret.internals.isDefined mustEqual true
@@ -529,7 +531,8 @@ class ObjectCreateMessageTest extends Specification {
         trap.deploy.pos.roll mustEqual 0
         trap.deploy.pos.pitch mustEqual 0
         trap.deploy.pos.yaw mustEqual 0
-        trap.deploy.unk mustEqual 68
+        trap.deploy.faction mustEqual PlanetSideEmpire.VS
+        trap.deploy.unk mustEqual 4
         trap.health mustEqual 255
         trap.deploy.player_guid mustEqual PlanetSideGUID(2502)
       case _ =>
@@ -553,7 +556,8 @@ class ObjectCreateMessageTest extends Specification {
         aegis.deploy.pos.roll mustEqual 0
         aegis.deploy.pos.pitch mustEqual 0
         aegis.deploy.pos.yaw mustEqual 0
-        aegis.deploy.unk mustEqual 68
+        aegis.deploy.faction mustEqual PlanetSideEmpire.VS
+        aegis.deploy.unk mustEqual 4
         aegis.health mustEqual 255
         aegis.deploy.player_guid mustEqual PlanetSideGUID(2366)
       case _ =>
@@ -577,7 +581,8 @@ class ObjectCreateMessageTest extends Specification {
         omft.deploy.pos.roll mustEqual 0
         omft.deploy.pos.pitch mustEqual 0
         omft.deploy.pos.yaw mustEqual 94
-        omft.deploy.unk mustEqual 68
+        omft.deploy.faction mustEqual PlanetSideEmpire.VS
+        omft.deploy.unk mustEqual 4
         omft.deploy.player_guid mustEqual PlanetSideGUID(0)
         omft.player_guid mustEqual PlanetSideGUID(2502)
         omft.health mustEqual 255
@@ -963,7 +968,7 @@ class ObjectCreateMessageTest extends Specification {
     val obj = SmallDeployableData(
       ACEDeployableData(
         PlacementData(Vector3(4704.172f, 5546.4375f, 82.234375f), 0, 0, 63),
-        0, PlanetSideGUID(4145)
+        PlanetSideEmpire.TR, 0, PlanetSideGUID(4145)
       )
     )
     val msg = ObjectCreateMessage(ObjectClass.boomer, PlanetSideGUID(3840), obj)
@@ -975,9 +980,8 @@ class ObjectCreateMessageTest extends Specification {
   "encode (spitfire, short)" in {
     val obj = SmallTurretData(
       ACEDeployableData(
-      PlacementData(Vector3(4577.7812f, 5624.828f, 72.046875f), 0, 127, 66),
-      44,
-      PlanetSideGUID(3871)
+        PlacementData(Vector3(4577.7812f, 5624.828f, 72.046875f), 0, 127, 66),
+        PlanetSideEmpire.NC, 12, PlanetSideGUID(3871)
       ),
       255 //sets to 0
     )
@@ -995,8 +999,7 @@ class ObjectCreateMessageTest extends Specification {
     val obj = SmallTurretData(
       ACEDeployableData(
         PlacementData(Vector3(4527.633f, 6271.3594f, 70.265625f), 0, 0, 105),
-        68,
-        PlanetSideGUID(4232)
+        PlanetSideEmpire.VS, 4, PlanetSideGUID(4232)
       ),
       255,
       SmallTurretData.spitfire(PlanetSideGUID(3064), 0xC, 0x8, PlanetSideGUID(3694), 8)
@@ -1015,8 +1018,7 @@ class ObjectCreateMessageTest extends Specification {
     val obj = TRAPData(
       ACEDeployableData(
         PlacementData(Vector3(3572.4453f, 3277.9766f, 114.0f), 0, 0, 0),
-        68,
-        PlanetSideGUID(2502)
+        PlanetSideEmpire.VS, 4, PlanetSideGUID(2502)
       ),
       255
     )
@@ -1034,8 +1036,7 @@ class ObjectCreateMessageTest extends Specification {
     val obj = AegisShieldGeneratorData(
       ACEDeployableData(
         PlacementData(Vector3(3571.2266f, 3278.0938f, 114.0f), 0, 0, 0),
-        68,
-        PlanetSideGUID(2366)
+        PlanetSideEmpire.VS, 4, PlanetSideGUID(2366)
       ),
       255
     )
@@ -1049,8 +1050,7 @@ class ObjectCreateMessageTest extends Specification {
     val obj = OneMannedFieldTurretData(
       ACEDeployableData(
         PlacementData(Vector3(3567.1406f, 2988.0078f, 71.84375f), 0, 0, 94),
-        68,
-        PlanetSideGUID(0)
+        PlanetSideEmpire.VS, 4, PlanetSideGUID(0)
       ),
       PlanetSideGUID(2502),
       255,

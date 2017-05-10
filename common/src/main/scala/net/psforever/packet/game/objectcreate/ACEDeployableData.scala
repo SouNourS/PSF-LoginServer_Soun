@@ -3,6 +3,7 @@ package net.psforever.packet.game.objectcreate
 
 import net.psforever.packet.Marshallable
 import net.psforever.packet.game.PlanetSideGUID
+import net.psforever.types.PlanetSideEmpire
 import scodec.{Attempt, Codec, Err}
 import scodec.codecs._
 import shapeless.{::, HNil}
@@ -14,6 +15,7 @@ import shapeless.{::, HNil}
   * @param player_guid the player who placed this object
   */
 final case class ACEDeployableData(pos : PlacementData,
+                                   faction : PlanetSideEmpire.Value,
                                    unk : Int,
                                    player_guid : PlanetSideGUID
                                   ) extends StreamBitSize {
@@ -59,19 +61,20 @@ object ACEDeployableData extends Marshallable[ACEDeployableData] {
 
   implicit val codec : Codec[ACEDeployableData] = (
     ("pos" | PlacementData.codec) ::
-      ("unk1" | uint(7)) ::
+      ("faction" | PlanetSideEmpire.codec) ::
+      ("unk1" | uint(5)) ::
       ("player_guid" | PlanetSideGUID.codec)
     ).exmap[ACEDeployableData] (
     {
-      case pos :: unk :: player :: HNil =>
-        Attempt.successful(ACEDeployableData(pos, unk, player))
+      case pos :: fac :: unk :: player :: HNil =>
+        Attempt.successful(ACEDeployableData(pos, fac, unk, player))
 
       case _ =>
         Attempt.failure(Err("invalid deployable data format"))
     },
     {
-      case ACEDeployableData(pos, unk, player) =>
-        Attempt.successful(pos :: unk :: player :: HNil)
+      case ACEDeployableData(pos, fac, unk, player) =>
+        Attempt.successful(pos :: fac :: unk :: player :: HNil)
     }
   )
 }
