@@ -13,7 +13,7 @@ import shapeless.{::, HNil}
   * <br>
   * The data for the weapons nests information for the default (current) type and number of ammunition in its magazine.
   * This ammunition data essentially is the weapon's magazines as numbered slots.
-  * An "expected" number of ammunition slot data can be passed into the function
+  * An "expected" number of ammunition slot data can be passed into the function.
   * @param unk1 na
   * @param unk2 na
   * @param ammo data regarding the currently loaded ammunition type(s) and quantity(ies)

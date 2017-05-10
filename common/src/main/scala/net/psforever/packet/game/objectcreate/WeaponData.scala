@@ -14,7 +14,7 @@ import shapeless.{::, HNil}
   * <br>
   * The data for the weapons nests information for the default (current) type and number of ammunition in its magazine.
   * This ammunition data essentially is the weapon's magazines as numbered slots.
-  * An "expected" number of ammunition slot data can be passed into the function
+  * An "expected" number of ammunition slot data can be passed into the function.
   * @param unk1 na;
   *             commonly 8
   * @param unk2 na;
@@ -58,7 +58,7 @@ object WeaponData extends Marshallable[WeaponData] {
     new WeaponData(unk1, unk2, 0, InternalSlot(cls, guid, parentSlot, ammo) :: Nil)
 
   /**
-    * An abbreviated constructor for creating `WeaponData` while masking use of `InternalSlot` for its `AmmoBoxData`.
+    * Overloaded constructor for creating `WeaponData` while masking use of `InternalSlot` for its `AmmoBoxData`.
     * @param unk1 na
     * @param unk2 na
     * @param fire_mode data regarding the currently loaded ammunition type
