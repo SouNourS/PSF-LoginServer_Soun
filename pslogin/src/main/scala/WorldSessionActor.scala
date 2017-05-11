@@ -1214,7 +1214,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
           messagetype != ChatMessageType.CMT_TOGGLE_GM &&
           messagetype != ChatMessageType.CMT_FLY &&
           messagetype != ChatMessageType.CMT_SPEED &&
-          messagetype != ChatMessageType.CMT_TELL) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
+          messagetype != ChatMessageType.CMT_TELL &&
+          messagetype != ChatMessageType.CMT_NOTE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent != "i2" ) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
         if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent == "i2" && player.spectator) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
@@ -1222,6 +1223,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, "off", note_contents)))
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "Please use /t spectator on (or off)", note_contents)))
+        }
+
+        if (messagetype == ChatMessageType.CMT_NOTE) {
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.U_CMT_GMTELLFROM, has_wide_contents, "Server", "Why do you try to /note ? That's a GM command !", None)))
         }
 
         if (messagetype == ChatMessageType.CMT_TELL) {
