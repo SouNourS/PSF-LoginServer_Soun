@@ -304,6 +304,8 @@ object ObjectClass {
   final val oicw_projectile = 602
   final val starfire_projectile = 831
   final val striker_missile_targeting_projectile = 841
+  //vehicles
+  final val fury = 335
   //other
   final val locker_container = 456
   final val implant_terminal_interface = 409
@@ -1112,6 +1114,8 @@ object ObjectClass {
       case ObjectClass.oicw_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       case ObjectClass.starfire_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       case ObjectClass.striker_missile_targeting_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
+      //vehicles
+      case ObjectClass.fury => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       //other
       case ObjectClass.avatar => ConstructorData.genericCodec(CharacterData.codec, "avatar")
       case ObjectClass.locker_container => ConstructorData.genericCodec(LockerContainerData.codec, "locker container")

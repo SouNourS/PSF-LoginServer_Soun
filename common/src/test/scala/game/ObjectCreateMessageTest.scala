@@ -617,8 +617,6 @@ class ObjectCreateMessageTest extends Specification {
         data.isDefined mustEqual true
         data.get.isInstanceOf[LockerContainerData] mustEqual true
         val locker = data.get.asInstanceOf[LockerContainerData]
-        locker.inventory.unk1 mustEqual false
-        locker.inventory.unk2 mustEqual false
         val contents = locker.inventory.contents
         contents.size mustEqual 3
         //0

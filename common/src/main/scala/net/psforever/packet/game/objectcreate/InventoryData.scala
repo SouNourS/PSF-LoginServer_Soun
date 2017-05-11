@@ -19,12 +19,8 @@ import shapeless.{::, HNil}
   * Inventories are usually prefaced with a `bin1` value not accounted for here.
   * It can be treated as optional.
   * @param contents the items in the inventory
-  * @param unk1 na
-  * @param unk2 na
   */
-final case class InventoryData(contents : List[InventoryItem] = List.empty,
-                               unk1 : Boolean = false,
-                               unk2 : Boolean = false) extends StreamBitSize {
+final case class InventoryData(contents : List[InventoryItem] = List.empty) extends StreamBitSize {
   override def bitsize : Long = {
     val base : Long = 10L //8u + 1u + 1u
     var invSize : Long = 0L //length of all items in inventory
@@ -36,20 +32,19 @@ final case class InventoryData(contents : List[InventoryItem] = List.empty,
 }
 
 object InventoryData {
-  private def inventoryCodec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
+  def inventoryCodec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
     uint8L >>:~ { len =>
-      ("unk1" | bool) ::
-        ("unk2" | bool) ::
+      uint2L ::
         ("contents" | PacketHelpers.listOfNSized(len, itemCodec))
     }
   ).xmap[InventoryData] (
     {
-      case _ :: a :: b :: c :: HNil =>
-        InventoryData(c, a, b)
+      case _ :: 0 :: c :: HNil =>
+        InventoryData(c)
     },
     {
-      case InventoryData(c, a, b) =>
-        c.size :: a :: b :: c :: HNil
+      case InventoryData(c) =>
+        c.size :: 0 :: c :: HNil
     }
   )
 
@@ -62,8 +57,8 @@ object InventoryData {
         inventory
     },
     {
-      case InventoryData(a, b, c) =>
-        InventoryData(a, b, c) :: HNil
+      case InventoryData(a) =>
+        InventoryData(a) :: HNil
     }
   )
 
@@ -76,8 +71,8 @@ object InventoryData {
         inventory
     },
     {
-      case InventoryData(a, b, c) =>
-        InventoryData(a, b, c) :: HNil
+      case InventoryData(a) =>
+        InventoryData(a) :: HNil
     }
   )
 }
