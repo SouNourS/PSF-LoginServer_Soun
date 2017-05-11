@@ -84,14 +84,14 @@ object VehicleData extends Marshallable[VehicleData] {
     }
   )
 
-  def codec(mount_capacity : Int = 1) : Codec[VehicleData] = (
+  def codec(mount_capacity : Int = 1)(typeCheck : (Any) => Boolean = allTypesAllowed) : Codec[VehicleData] = (
     ("basic" | ACEDeployableData.codec) ::
       uint2L ::
       ("health" | uint8L) ::
       uintL(7) ::
       uint4L ::
       uint2L ::
-      optional(bool, "mountings" | mountedUtilitiesCodec())
+      optional(bool, "mountings" | mountedUtilitiesCodec(typeCheck))
     ).exmap[VehicleData] (
     {
       case basic :: 0 :: health :: 0 :: 0 :: 0 :: None :: HNil =>
@@ -139,5 +139,5 @@ object VehicleData extends Marshallable[VehicleData] {
     }
   )
 
-  implicit val codec : Codec[VehicleData] = codec()
+  implicit val codec : Codec[VehicleData] = codec()()
 }
