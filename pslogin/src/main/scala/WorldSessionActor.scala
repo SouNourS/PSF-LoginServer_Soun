@@ -190,9 +190,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(ObjectClass.avatar,PlanetSideGUID(onlineplayer.guid),
             CharacterData(CharacterAppearanceData(PlacementData(onlineplayer.getPosition,0,0,0),
               BasicCharacterData(onlineplayer.name,onlineplayer.faction,onlineplayer.sex,1,onlineplayer.voice),3,false,false,onlineplayer.getExoSuitType,"",0,false,
-              onlineplayer.getPitch.toInt,onlineplayer.getYaw.toInt,false,GrenadeState.None,false,false,false,RibbonBars(425,138,286,360)),
+              onlineplayer.getPitch.toInt,onlineplayer.getYaw.toInt,false,GrenadeState.None,false,false,false,
+              RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
               math.ceil(2.55*onlineplayer.getHealth/onlineplayer.getMaxHealth*100).toInt,
-              math.ceil(2.55*onlineplayer.getPersonalArmor/onlineplayer.getMaxPersonalArmor*100).toInt,UniformStyle.ThirdUpgrade,5,Some(ImplantEffects.NoEffects),Some(Cosmetics(false,false,false,false,false)),
+              math.ceil(2.55*onlineplayer.getPersonalArmor/onlineplayer.getMaxPersonalArmor*100).toInt,UniformStyle.ThirdUpgrade,0,Some(ImplantEffects.NoEffects),Some(Cosmetics(false,false,false,false,false)),
               InventoryData(List.empty,false,false),DrawnSlot.None))))
 //          InventoryData(List(
 //            InventoryItem(InternalSlot(ObjectClass.bank,PlanetSideGUID(onlineplayer.guid + 1),0,
@@ -663,21 +664,21 @@ class WorldSessionActor extends Actor with MDCContextAware {
         DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
           BasicCharacterData("You can create a character", PlanetSideEmpire.TR, CharacterGender.Female, 41, 1),
           3, false, false, ExoSuitType.Agile, "", 0, false, 0, 181, true, GrenadeState.None,
-          false, false, false, RibbonBars()),
+          false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
           100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
           List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(2),
         DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
           BasicCharacterData("with your own preferences and name", PlanetSideEmpire.NC, CharacterGender.Male, 41, 1),
           3, false, false, ExoSuitType.Agile, "", 0, false, 0, 181, true, GrenadeState.None,
-          false, false, false, RibbonBars()),
+          false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
           100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
           List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(3),
         DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
           BasicCharacterData("or use these default characters", PlanetSideEmpire.VS, CharacterGender.Female, 41, 1),
           3, false, false, ExoSuitType.Infiltration, "", 0, false, 0, 181, true, GrenadeState.None,
-          false, false, false, RibbonBars()),
+          false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
           100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
           List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
 
@@ -1008,7 +1009,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         DetailedCharacterData(CharacterAppearanceData(PlacementData(avatar.getPosition, 0, 0, 19),
           BasicCharacterData(avatar.name, avatar.faction, avatar.sex, 41, avatar.voice),
           3, false, false, avatar.getExoSuitType, "", 0, false, 0, 181, true, GrenadeState.None,
-          false, false, false, RibbonBars()),
+          false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
           avatar.getMaxHealth, avatar.getHealth, avatar.getPersonalArmor, 1, 7, 7, avatar.getMaxStamina, avatar.getStamina, 28, 4, 44, 84, 104, 1900,
           List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
 

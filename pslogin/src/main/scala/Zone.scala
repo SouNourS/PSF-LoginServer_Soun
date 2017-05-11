@@ -611,7 +611,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
           ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(player.guid), DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(loc._1, loc._2, loc._3), 0, 0, 19),
             BasicCharacterData(player.name, player.faction, player.sex, 41, player.voice), 3, false, false , player.getExoSuitType, "", 0, false, 0, 181, false, GrenadeState.None,
-            false, false, false, RibbonBars(6, 7, 8, 220)),
+            false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
             player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
             "xpe_command_rank_5" :: "used_grenade_jammer" :: Nil,
             List.empty,
@@ -647,7 +647,7 @@ import scodec.bits._
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),9,"Agile Sweeper",Some(1))))
 
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),35,40))) // br40
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),36,5))) // cr5
+//        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),36,5))) // cr5
 
         Thread.sleep(200)
 
@@ -717,9 +717,10 @@ import scodec.bits._
                 traveler.sendToSelf(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(ObjectClass.avatar,PlanetSideGUID(onlineplayer.guid),
                   CharacterData(CharacterAppearanceData(PlacementData(onlineplayer.getPosition,0,0,0),
                     BasicCharacterData(onlineplayer.name,onlineplayer.faction,onlineplayer.sex,1,onlineplayer.voice),3,false,false,onlineplayer.getExoSuitType,"",0,false,
-                    onlineplayer.getPitch.toInt,onlineplayer.getYaw.toInt,false,GrenadeState.None,false,false,false,RibbonBars(425,138,286,360)),
+                    onlineplayer.getPitch.toInt,onlineplayer.getYaw.toInt,false,GrenadeState.None,false,false,false,
+                    RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
                     math.ceil(2.55*onlineplayer.getHealth/onlineplayer.getMaxHealth*100).toInt,
-                    math.ceil(2.55*onlineplayer.getPersonalArmor/onlineplayer.getMaxPersonalArmor*100).toInt,UniformStyle.ThirdUpgrade,5,Some(ImplantEffects.NoEffects),
+                    math.ceil(2.55*onlineplayer.getPersonalArmor/onlineplayer.getMaxPersonalArmor*100).toInt,UniformStyle.ThirdUpgrade,0,Some(ImplantEffects.NoEffects),
                     Some(Cosmetics(false,false,false,false,false)),
                     InventoryData(List.empty,false,false),DrawnSlot.None))))
 
