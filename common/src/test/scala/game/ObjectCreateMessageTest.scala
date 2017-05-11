@@ -667,10 +667,10 @@ class ObjectCreateMessageTest extends Specification {
         pc.appearance.pos.roll mustEqual 0
         pc.appearance.pos.pitch mustEqual 0
         pc.appearance.pos.yaw mustEqual 9
-        pc.appearance.pos.init_move.isDefined mustEqual true
-        pc.appearance.pos.init_move.get.x mustEqual 1.4375f
-        pc.appearance.pos.init_move.get.y mustEqual -0.4375f
-        pc.appearance.pos.init_move.get.z mustEqual 0f
+        pc.appearance.pos.vel.isDefined mustEqual true
+        pc.appearance.pos.vel.get.x mustEqual 1.4375f
+        pc.appearance.pos.vel.get.y mustEqual -0.4375f
+        pc.appearance.pos.vel.get.z mustEqual 0f
         pc.appearance.basic_appearance.name mustEqual "ScrawnyRonnie"
         pc.appearance.basic_appearance.faction mustEqual PlanetSideEmpire.TR
         pc.appearance.basic_appearance.sex mustEqual CharacterGender.Male
@@ -766,7 +766,7 @@ class ObjectCreateMessageTest extends Specification {
         pc.appearance.pos.roll mustEqual 0
         pc.appearance.pos.pitch mustEqual 0
         pc.appearance.pos.yaw mustEqual 115
-        pc.appearance.pos.init_move.isDefined mustEqual false
+        pc.appearance.pos.vel.isDefined mustEqual false
         pc.appearance.basic_appearance.name mustEqual "Angello"
         pc.appearance.basic_appearance.faction mustEqual PlanetSideEmpire.VS
         pc.appearance.basic_appearance.sex mustEqual CharacterGender.Male

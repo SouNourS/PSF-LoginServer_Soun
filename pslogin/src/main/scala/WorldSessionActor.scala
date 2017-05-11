@@ -255,6 +255,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ ChildObjectStateMessage(object_guid : PlanetSideGUID, pitch : Int, yaw : Int) =>
       //log.info("ChildObjectState: " + msg)
 
+    case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, roll, pitch, yaw, vel, unk5, unk6, unk7, wheels, unk9, unkA) =>
+      //log.info("VehicleState: " + msg)
+
     case msg @ ProjectileStateMessage(projectile_guid, shot_pos, shot_vector, unk1, unk2, unk3, unk4, time_alive) =>
       //log.info("ProjectileState: " + msg)
 
