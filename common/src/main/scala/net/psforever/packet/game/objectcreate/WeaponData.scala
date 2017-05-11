@@ -22,18 +22,18 @@ import shapeless.{::, HNil}
   * @param fire_mode the current mode of weapon's fire;
   *                  zero-indexed
   * @param ammo data regarding the currently loaded ammunition type(s)
-  * @param mag_size implicit;
-  *                 the total number of concurrently-loaded ammunition types allowed in this weapon;
-  *                 concurrent ammunition does not need to be unloaded to be switched;
-  *                 defaults to 1;
-  *                 0 or less ignores the imposed check
+  * @param mag_capacity implicit;
+  *                     the total number of concurrently-loaded ammunition types allowed in this weapon;
+  *                     concurrent ammunition does not need to be unloaded to be switched;
+  *                     defaults to 1;
+  *                     0 or less ignores the imposed check
   * @see `AmmoBoxData`
   */
 final case class WeaponData(unk1 : Int,
                             unk2 : Int,
                             fire_mode : Int,
                             ammo : List[InternalSlot]
-                           )(implicit val mag_size : Int = 1) extends ConstructorData {
+                           )(implicit val mag_capacity : Int = 1) extends ConstructorData {
   override def bitsize : Long = {
     var bitsize : Long = 0L
     for(o <- ammo) {
@@ -104,14 +104,14 @@ object WeaponData extends Marshallable[WeaponData] {
     },
     {
       case obj @ WeaponData(unk1, unk2, fmode, ammo) =>
-        val objMagSize = obj.mag_size
-        val size = ammo.size
-        if(objMagSize >= 1 && size != objMagSize)
-          Attempt.failure(Err(s"weapon encodes too much or too little ammunition - actual $size, expected $objMagSize"))
-        else if(size >= 255)
+        val magCapacity = obj.mag_capacity
+        val magSize = ammo.size
+        if(magCapacity >= 1 && magSize != magCapacity)
+          Attempt.failure(Err(s"weapon encodes too much or too little ammunition - actual $magSize, expected $magCapacity"))
+        else if(magSize >= 255)
           Attempt.failure(Err("weapon encodes too much ammunition (255+ types!)"))
         else
-          Attempt.successful(unk1 :: unk2 :: 0 :: fmode :: false :: true :: size :: 0 :: ammo :: false :: HNil)
+          Attempt.successful(unk1 :: unk2 :: 0 :: fmode :: false :: true :: magSize :: 0 :: ammo :: false :: HNil)
     }
   )
 
