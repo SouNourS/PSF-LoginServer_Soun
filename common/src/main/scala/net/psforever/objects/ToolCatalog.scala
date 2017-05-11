@@ -48,10 +48,10 @@ object ToolCatalog {
   tool = ToolDefinition(175, "chainblade")
   tool.size = EquipmentSize.MELEE
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(0).ammoTypes += Ammo.FREE
+  tool.fireModes(0).ammoTypes += Ammo.melee_ammo
   tool.fireModes(0).magazineSize = 1
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(1).ammoTypes += Ammo.FREE
+  tool.fireModes(1).ammoTypes += Ammo.melee_ammo
   tool.fireModes(1).magazineSize = 1
   //should never end up in inventory; will match glitch knife dimensions, however, if it does
   catalog += tool.guid -> tool
@@ -91,10 +91,10 @@ object ToolCatalog {
   tool = ToolDefinition(324, "forceblade")
   tool.size = EquipmentSize.MELEE
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(0).ammoTypes += Ammo.FREE
+  tool.fireModes(0).ammoTypes += Ammo.melee_ammo
   tool.fireModes(0).magazineSize = 1
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(1).ammoTypes += Ammo.FREE
+  tool.fireModes(1).ammoTypes += Ammo.melee_ammo
   tool.fireModes(1).magazineSize = 1
   //should never end up in inventory; will match glitch knife dimensions, however, if it does
   catalog += tool.guid -> tool
@@ -134,10 +134,10 @@ object ToolCatalog {
   tool = ToolDefinition(468, "magcutter")
   tool.size = EquipmentSize.MELEE
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(0).ammoTypes += Ammo.FREE
+  tool.fireModes(0).ammoTypes += Ammo.melee_ammo
   tool.fireModes(0).magazineSize = 1
   tool.fireModes += new FireModeDefinition
-  tool.fireModes(1).ammoTypes += Ammo.FREE
+  tool.fireModes(1).ammoTypes += Ammo.melee_ammo
   tool.fireModes(1).magazineSize = 1
   //should never end up in inventory; will match glitch knife dimensions, however, if it does
   catalog += tool.guid -> tool
@@ -160,6 +160,18 @@ object ToolCatalog {
   tool.fireModes(0).ammoTypes += Ammo.bullet_9mm
   tool.fireModes(0).ammoTypes += Ammo.bullet_9mm_AP
   tool.fireModes(0).magazineSize = 100
+  tool.inventoryTileWidth = 9
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
+  tool = ToolDefinition(673, "phoenix") // Decimator
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.phoenix_missile
+  tool.fireModes(0).magazineSize = 3
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.phoenix_missile
+  tool.fireModes(1).magazineSize = 3
   tool.inventoryTileWidth = 9
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool
