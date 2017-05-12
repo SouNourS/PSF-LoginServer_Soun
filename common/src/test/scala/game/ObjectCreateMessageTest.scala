@@ -584,8 +584,7 @@ class ObjectCreateMessageTest extends Specification {
         omft.deploy.pos.yaw mustEqual 94
         omft.deploy.faction mustEqual PlanetSideEmpire.VS
         omft.deploy.unk mustEqual 4
-        omft.deploy.player_guid mustEqual PlanetSideGUID(0)
-        omft.player_guid mustEqual PlanetSideGUID(2502)
+        omft.deploy.player_guid mustEqual PlanetSideGUID(2502)
         omft.health mustEqual 255
         omft.internals.isDefined mustEqual true
         val internals = omft.internals.get
@@ -1011,7 +1010,7 @@ class ObjectCreateMessageTest extends Specification {
 
   "encode (boomer)" in {
     val obj = SmallDeployableData(
-      ACEDeployableData(
+      CommonFieldData(
         PlacementData(Vector3(4704.172f, 5546.4375f, 82.234375f), 0, 0, 63),
         PlanetSideEmpire.TR, 0, PlanetSideGUID(4145)
       )
@@ -1024,7 +1023,7 @@ class ObjectCreateMessageTest extends Specification {
 
   "encode (spitfire, short)" in {
     val obj = SmallTurretData(
-      ACEDeployableData(
+      CommonFieldData(
         PlacementData(Vector3(4577.7812f, 5624.828f, 72.046875f), 0, 127, 66),
         PlanetSideEmpire.NC, 12, PlanetSideGUID(3871)
       ),
@@ -1042,7 +1041,7 @@ class ObjectCreateMessageTest extends Specification {
 
   "encode (spitfire)" in {
     val obj = SmallTurretData(
-      ACEDeployableData(
+      CommonFieldData(
         PlacementData(Vector3(4527.633f, 6271.3594f, 70.265625f), 0, 0, 105),
         PlanetSideEmpire.VS, 4, PlanetSideGUID(4232)
       ),
@@ -1061,7 +1060,7 @@ class ObjectCreateMessageTest extends Specification {
 
   "encode (trap)" in {
     val obj = TRAPData(
-      ACEDeployableData(
+      CommonFieldData(
         PlacementData(Vector3(3572.4453f, 3277.9766f, 114.0f), 0, 0, 0),
         PlanetSideEmpire.VS, 4, PlanetSideGUID(2502)
       ),
@@ -1079,7 +1078,7 @@ class ObjectCreateMessageTest extends Specification {
 
   "encode (aegis)"  in {
     val obj = AegisShieldGeneratorData(
-      ACEDeployableData(
+      CommonFieldData(
         PlacementData(Vector3(3571.2266f, 3278.0938f, 114.0f), 0, 0, 0),
         PlanetSideEmpire.VS, 4, PlanetSideGUID(2366)
       ),
@@ -1093,11 +1092,10 @@ class ObjectCreateMessageTest extends Specification {
 
   "encode (orion)" in {
     val obj = OneMannedFieldTurretData(
-      ACEDeployableData(
+      CommonFieldData(
         PlacementData(Vector3(3567.1406f, 2988.0078f, 71.84375f), 0, 0, 94),
-        PlanetSideEmpire.VS, 4, PlanetSideGUID(0)
+        PlanetSideEmpire.VS, 4, PlanetSideGUID(2502)
       ),
-      PlanetSideGUID(2502),
       255,
       OneMannedFieldTurretData.orion(PlanetSideGUID(2615), 0xC, 0x8, PlanetSideGUID(2510), 8)
     )
@@ -1239,11 +1237,9 @@ class ObjectCreateMessageTest extends Specification {
 
   "encode (fury)" in {
     val obj = VehicleData(
-      ACEDeployableData(
-        PlacementData( Vector3(6531.961f, 1872.1406f, 24.734375f), 0, 0, 33 ),
-        PlanetSideEmpire.VS,
-        4,
-        PlanetSideGUID(0)
+      CommonFieldData(
+        PlacementData(6531.961f, 1872.1406f, 24.734375f, 0, 0, 33),
+        PlanetSideEmpire.VS, 4
       ),
       255,
       InternalSlot(

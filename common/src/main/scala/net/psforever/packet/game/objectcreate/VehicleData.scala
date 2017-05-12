@@ -16,7 +16,7 @@ import shapeless.{::, HNil}
   *                        defaults to 1;
   *                        since vehicles can have nothing special on them, -1 or less ignores the imposed check
   */
-final case class VehicleData(basic : ACEDeployableData,
+final case class VehicleData(basic : CommonFieldData,
                              health : Int,
                              mountings : Option[List[InternalSlot]] = None
                             )(implicit val mount_capacity : Int = 1) extends ConstructorData {
@@ -44,7 +44,7 @@ object VehicleData extends Marshallable[VehicleData] {
     * @param mount data regarding the mounted weapon
     * @return a `VehicleData` object
     */
-  def apply(basic : ACEDeployableData,  health : Int,  mount : InternalSlot) : VehicleData =
+  def apply(basic : CommonFieldData, health : Int, mount : InternalSlot) : VehicleData =
     new VehicleData(basic, health, Some(mount :: Nil))
 
   def allTypesAllowed(item : Any) : Boolean = true
@@ -85,7 +85,7 @@ object VehicleData extends Marshallable[VehicleData] {
   )
 
   def codec(mount_capacity : Int = 1)(typeCheck : (Any) => Boolean = allTypesAllowed) : Codec[VehicleData] = (
-    ("basic" | ACEDeployableData.codec) ::
+    ("basic" | CommonFieldData.codec) ::
       uint2L ::
       ("health" | uint8L) ::
       uintL(7) ::

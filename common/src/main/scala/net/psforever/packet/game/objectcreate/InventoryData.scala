@@ -31,8 +31,7 @@ final case class InventoryData(contents : List[InventoryItem] = List.empty) exte
   }
 }
 
-object InventoryData {
-  def inventoryCodec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
+object InventoryData {def inventoryCodec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
     uint8L >>:~ { len =>
       uint2L ::
         ("contents" | PacketHelpers.listOfNSized(len, itemCodec))
