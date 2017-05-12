@@ -1239,7 +1239,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         if (messagetype == ChatMessageType.CMT_OPEN) {
           if (contents.length > 1 && contents.dropRight(contents.length - 1) == "!" && contents.drop(1).dropRight(contents.length - 2) != "!") {
-            if(contents.drop(1) == "list") {
+
+            if(contents.drop(1) == "list" && player.admin) {
               val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
               var guid : Int = 15000
               var j : Int = 1
@@ -1250,7 +1251,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   if (player.guid != onlineplayer.guid) {
                     j += 1
                     guid += 100
-                    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "ID/Name: " + onlineplayer.sessID + "/" + onlineplayer.name, note_contents)))
+                    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name, note_contents)))
                   }
                   else if (player.guid == onlineplayer.guid) {
                     guid += 100
@@ -1261,13 +1262,21 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 }
               }
             }
-            if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "kick") {
-              try {
-//                world ! DropSession(contents.drop(contents.indexOf(" ")).toLong, "Dropped from console")
-                sendResponse(DropSession(contents.drop(contents.indexOf(" ")).toLong, "Dropped from IG admin"))
-              } catch {
-                case e: NumberFormatException =>
-                  println("Invalid session id")
+            if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "kick" && player.admin) {
+              val sess : Long = contents.drop(contents.indexOf(" ") + 1).toLong
+              val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sess)
+              if (OnlinePlayer.isDefined) {
+                val onlineplayer: PlayerAvatar = OnlinePlayer.get
+                if (player.guid != onlineplayer.guid) {
+                  avatarService ! AvatarService.unLoadMap(PlanetSideGUID(onlineplayer.guid))
+                  sendResponse(DropSession(sess, "Dropped from IG admin"))
+                }
+                else {
+                  sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "Do you really want kick yourself ?", note_contents)))
+                }
+              }
+              else {
+                sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "That ID do not exist !", note_contents)))
               }
             }
           }

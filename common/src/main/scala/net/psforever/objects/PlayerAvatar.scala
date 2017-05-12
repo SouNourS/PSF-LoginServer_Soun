@@ -15,6 +15,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   /** The name of the character, as seen by others. */
   var name : String = "player"
   var sessID : Long = 0
+  var admin : Boolean = false
   /** The faction to which the character belongs. Defaults to tradition. */
   var faction : PlanetSideEmpire.Value = PlanetSideEmpire.TR
   /** The player's gender, which also affects their voice. Defaults to 1 (male). */
