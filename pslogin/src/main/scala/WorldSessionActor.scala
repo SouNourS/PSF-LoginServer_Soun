@@ -139,7 +139,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case PokeClient() =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
     case ChatMessage(to, from, fromGUID, data) =>
-      if (to.drop(6) == "local") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
+      if (to.drop(6) == "local") {
+        if (data.length > 1 && (data.dropRight(data.length-1) != "!" || data.drop(1).dropRight(data.length-2) == "!")) {
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
+        }
+        else if (data.length == 1) {
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
+        }
+      }
       if (to.drop(6) == "squad") {
         val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
         val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(fromGUID)
@@ -722,6 +729,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.redHealth = avatar.getMaxHealth
             avatar.blueArmor = avatar.getMaxPersonalArmor
             avatar.greenStamina = avatar.getMaxStamina
+            avatar.sessID = sessionId
             //add avatar
             PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
           }
@@ -1227,6 +1235,42 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         if (messagetype == ChatMessageType.CMT_NOTE) {
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.U_CMT_GMTELLFROM, has_wide_contents, "Server", "Why do you try to /note ? That's a GM command !", None)))
+        }
+
+        if (messagetype == ChatMessageType.CMT_OPEN) {
+          if (contents.length > 1 && contents.dropRight(contents.length - 1) == "!" && contents.drop(1).dropRight(contents.length - 2) != "!") {
+            if(contents.drop(1) == "list") {
+              val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
+              var guid : Int = 15000
+              var j : Int = 1
+              while (j != nbOnlinePlayer) {
+                val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+                if (OnlinePlayer.isDefined) {
+                  val onlineplayer: PlayerAvatar = OnlinePlayer.get
+                  if (player.guid != onlineplayer.guid) {
+                    j += 1
+                    guid += 100
+                    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "ID/Name: " + onlineplayer.sessID + "/" + onlineplayer.name, note_contents)))
+                  }
+                  else if (player.guid == onlineplayer.guid) {
+                    guid += 100
+                  }
+                }
+                else {
+                  guid += 100
+                }
+              }
+            }
+            if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "kick") {
+              try {
+//                world ! DropSession(contents.drop(contents.indexOf(" ")).toLong, "Dropped from console")
+                sendResponse(DropSession(contents.drop(contents.indexOf(" ")).toLong, "Dropped from IG admin"))
+              } catch {
+                case e: NumberFormatException =>
+                  println("Invalid session id")
+              }
+            }
+          }
         }
 
         if (messagetype == ChatMessageType.CMT_TELL) {
