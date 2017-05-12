@@ -729,13 +729,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.redHealth = avatar.getMaxHealth
             avatar.blueArmor = avatar.getMaxPersonalArmor
             avatar.greenStamina = avatar.getMaxStamina
-            avatar.sessID = sessionId
             //add avatar
             PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
           }
           playerOpt = PlayerMasterList.getPlayer(sessionId)
           if (playerOpt.isDefined) {
             val player: PlayerAvatar = playerOpt.get
+
+            player.sessID = sessionId
 
             var home = Zone.get("i2").get
             if (player.faction == PlanetSideEmpire.NC) {
