@@ -230,66 +230,66 @@ class ObjectCreateDetailedMessageTest extends Specification {
         val inventory = char.inventory.get.contents
         inventory.size mustEqual 10
         //0
-        inventory.head.item.objectClass mustEqual ObjectClass.beamer
-        inventory.head.item.guid mustEqual PlanetSideGUID(76)
-        inventory.head.item.parentSlot mustEqual 0
-        var wep = inventory.head.item.obj.asInstanceOf[DetailedWeaponData]
+        inventory.head.objectClass mustEqual ObjectClass.beamer
+        inventory.head.guid mustEqual PlanetSideGUID(76)
+        inventory.head.parentSlot mustEqual 0
+        var wep = inventory.head.obj.asInstanceOf[DetailedWeaponData]
         wep.ammo.head.objectClass mustEqual ObjectClass.energy_cell
         wep.ammo.head.guid mustEqual PlanetSideGUID(77)
         wep.ammo.head.parentSlot mustEqual 0
         wep.ammo.head.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 16
         //1
-        inventory(1).item.objectClass mustEqual ObjectClass.suppressor
-        inventory(1).item.guid mustEqual PlanetSideGUID(78)
-        inventory(1).item.parentSlot mustEqual 2
-        wep = inventory(1).item.obj.asInstanceOf[DetailedWeaponData]
+        inventory(1).objectClass mustEqual ObjectClass.suppressor
+        inventory(1).guid mustEqual PlanetSideGUID(78)
+        inventory(1).parentSlot mustEqual 2
+        wep = inventory(1).obj.asInstanceOf[DetailedWeaponData]
         wep.ammo.head.objectClass mustEqual ObjectClass.bullet_9mm
         wep.ammo.head.guid mustEqual PlanetSideGUID(79)
         wep.ammo.head.parentSlot mustEqual 0
         wep.ammo.head.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 25
         //2
-        inventory(2).item.objectClass mustEqual ObjectClass.forceblade
-        inventory(2).item.guid mustEqual PlanetSideGUID(80)
-        inventory(2).item.parentSlot mustEqual 4
-        wep = inventory(2).item.obj.asInstanceOf[DetailedWeaponData]
+        inventory(2).objectClass mustEqual ObjectClass.forceblade
+        inventory(2).guid mustEqual PlanetSideGUID(80)
+        inventory(2).parentSlot mustEqual 4
+        wep = inventory(2).obj.asInstanceOf[DetailedWeaponData]
         wep.ammo.head.objectClass mustEqual ObjectClass.melee_ammo
         wep.ammo.head.guid mustEqual PlanetSideGUID(81)
         wep.ammo.head.parentSlot mustEqual 0
         wep.ammo.head.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 1
         //3
-        inventory(3).item.objectClass mustEqual ObjectClass.locker_container
-        inventory(3).item.guid mustEqual PlanetSideGUID(82)
-        inventory(3).item.parentSlot mustEqual 5
-        inventory(3).item.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 1
+        inventory(3).objectClass mustEqual ObjectClass.locker_container
+        inventory(3).guid mustEqual PlanetSideGUID(82)
+        inventory(3).parentSlot mustEqual 5
+        inventory(3).obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 1
         //4
-        inventory(4).item.objectClass mustEqual ObjectClass.bullet_9mm
-        inventory(4).item.guid mustEqual PlanetSideGUID(83)
-        inventory(4).item.parentSlot mustEqual 6
-        inventory(4).item.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
+        inventory(4).objectClass mustEqual ObjectClass.bullet_9mm
+        inventory(4).guid mustEqual PlanetSideGUID(83)
+        inventory(4).parentSlot mustEqual 6
+        inventory(4).obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
         //5
-        inventory(5).item.objectClass mustEqual ObjectClass.bullet_9mm
-        inventory(5).item.guid mustEqual PlanetSideGUID(84)
-        inventory(5).item.parentSlot mustEqual 9
-        inventory(5).item.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
+        inventory(5).objectClass mustEqual ObjectClass.bullet_9mm
+        inventory(5).guid mustEqual PlanetSideGUID(84)
+        inventory(5).parentSlot mustEqual 9
+        inventory(5).obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
         //6
-        inventory(6).item.objectClass mustEqual ObjectClass.bullet_9mm
-        inventory(6).item.guid mustEqual PlanetSideGUID(85)
-        inventory(6).item.parentSlot mustEqual 12
-        inventory(6).item.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
+        inventory(6).objectClass mustEqual ObjectClass.bullet_9mm
+        inventory(6).guid mustEqual PlanetSideGUID(85)
+        inventory(6).parentSlot mustEqual 12
+        inventory(6).obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
         //7
-        inventory(7).item.objectClass mustEqual ObjectClass.bullet_9mm_AP
-        inventory(7).item.guid mustEqual PlanetSideGUID(86)
-        inventory(7).item.parentSlot mustEqual 33
-        inventory(7).item.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
+        inventory(7).objectClass mustEqual ObjectClass.bullet_9mm_AP
+        inventory(7).guid mustEqual PlanetSideGUID(86)
+        inventory(7).parentSlot mustEqual 33
+        inventory(7).obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
         //8
-        inventory(8).item.objectClass mustEqual ObjectClass.energy_cell
-        inventory(8).item.guid mustEqual PlanetSideGUID(87)
-        inventory(8).item.parentSlot mustEqual 36
-        inventory(8).item.obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
+        inventory(8).objectClass mustEqual ObjectClass.energy_cell
+        inventory(8).guid mustEqual PlanetSideGUID(87)
+        inventory(8).parentSlot mustEqual 36
+        inventory(8).obj.asInstanceOf[DetailedAmmoBoxData].magazine mustEqual 50
         //9
-        inventory(9).item.objectClass mustEqual ObjectClass.remote_electronics_kit
-        inventory(9).item.guid mustEqual PlanetSideGUID(88)
-        inventory(9).item.parentSlot mustEqual 39
+        inventory(9).objectClass mustEqual ObjectClass.remote_electronics_kit
+        inventory(9).guid mustEqual PlanetSideGUID(88)
+        inventory(9).parentSlot mustEqual 39
       //the rek has data but none worth testing here
         char.drawn_slot mustEqual DrawnSlot.Pistol1
       case _ =>

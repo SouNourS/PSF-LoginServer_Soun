@@ -620,11 +620,11 @@ class ObjectCreateMessageTest extends Specification {
         val contents = locker.inventory.contents
         contents.size mustEqual 3
         //0
-        contents.head.item.objectClass mustEqual ObjectClass.nano_dispenser
-        contents.head.item.guid mustEqual PlanetSideGUID(2935)
-        contents.head.item.parentSlot mustEqual 0
-        contents.head.item.obj.isInstanceOf[WeaponData] mustEqual true
-        val dispenser = contents.head.item.obj.asInstanceOf[WeaponData]
+        contents.head.objectClass mustEqual ObjectClass.nano_dispenser
+        contents.head.guid mustEqual PlanetSideGUID(2935)
+        contents.head.parentSlot mustEqual 0
+        contents.head.obj.isInstanceOf[WeaponData] mustEqual true
+        val dispenser = contents.head.obj.asInstanceOf[WeaponData]
         dispenser.unk1 mustEqual 0xC
         dispenser.unk2 mustEqual 0x0
         dispenser.ammo.head.objectClass mustEqual ObjectClass.armor_canister
@@ -633,17 +633,17 @@ class ObjectCreateMessageTest extends Specification {
         dispenser.ammo.head.obj.isInstanceOf[AmmoBoxData] mustEqual true
         dispenser.ammo.head.obj.asInstanceOf[AmmoBoxData].unk mustEqual 0
         //1
-        contents(1).item.objectClass mustEqual ObjectClass.armor_canister
-        contents(1).item.guid mustEqual PlanetSideGUID(4090)
-        contents(1).item.parentSlot mustEqual 45
-        contents(1).item.obj.isInstanceOf[AmmoBoxData] mustEqual true
-        contents(1).item.obj.asInstanceOf[AmmoBoxData].unk mustEqual 0
+        contents(1).objectClass mustEqual ObjectClass.armor_canister
+        contents(1).guid mustEqual PlanetSideGUID(4090)
+        contents(1).parentSlot mustEqual 45
+        contents(1).obj.isInstanceOf[AmmoBoxData] mustEqual true
+        contents(1).obj.asInstanceOf[AmmoBoxData].unk mustEqual 0
         //2
-        contents(2).item.objectClass mustEqual ObjectClass.armor_canister
-        contents(2).item.guid mustEqual PlanetSideGUID(3326)
-        contents(2).item.parentSlot mustEqual 78
-        contents(2).item.obj.isInstanceOf[AmmoBoxData] mustEqual true
-        contents(2).item.obj.asInstanceOf[AmmoBoxData].unk mustEqual 0
+        contents(2).objectClass mustEqual ObjectClass.armor_canister
+        contents(2).guid mustEqual PlanetSideGUID(3326)
+        contents(2).parentSlot mustEqual 78
+        contents(2).obj.isInstanceOf[AmmoBoxData] mustEqual true
+        contents(2).obj.asInstanceOf[AmmoBoxData].unk mustEqual 0
       case _ =>
         ko
     }
@@ -708,40 +708,40 @@ class ObjectCreateMessageTest extends Specification {
         val contents = pc.inventory.get.contents
         contents.size mustEqual 5
         //0
-        contents.head.item.objectClass mustEqual ObjectClass.plasma_grenade
-        contents.head.item.guid mustEqual PlanetSideGUID(3662)
-        contents.head.item.parentSlot mustEqual 0
-        contents.head.item.obj.asInstanceOf[WeaponData].fire_mode mustEqual 0
-        contents.head.item.obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.plasma_grenade_ammo
-        contents.head.item.obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(3751)
+        contents.head.objectClass mustEqual ObjectClass.plasma_grenade
+        contents.head.guid mustEqual PlanetSideGUID(3662)
+        contents.head.parentSlot mustEqual 0
+        contents.head.obj.asInstanceOf[WeaponData].fire_mode mustEqual 0
+        contents.head.obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.plasma_grenade_ammo
+        contents.head.obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(3751)
         //1
-        contents(1).item.objectClass mustEqual ObjectClass.bank
-        contents(1).item.guid mustEqual PlanetSideGUID(3908)
-        contents(1).item.parentSlot mustEqual 1
-        contents(1).item.obj.asInstanceOf[WeaponData].fire_mode mustEqual 1
-        contents(1).item.obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.armor_canister
-        contents(1).item.obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(4143)
+        contents(1).objectClass mustEqual ObjectClass.bank
+        contents(1).guid mustEqual PlanetSideGUID(3908)
+        contents(1).parentSlot mustEqual 1
+        contents(1).obj.asInstanceOf[WeaponData].fire_mode mustEqual 1
+        contents(1).obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.armor_canister
+        contents(1).obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(4143)
         //2
-        contents(2).item.objectClass mustEqual ObjectClass.mini_chaingun
-        contents(2).item.guid mustEqual PlanetSideGUID(4164)
-        contents(2).item.parentSlot mustEqual 2
-        contents(2).item.obj.asInstanceOf[WeaponData].fire_mode mustEqual 0
-        contents(2).item.obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.bullet_9mm
-        contents(2).item.obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(3728)
+        contents(2).objectClass mustEqual ObjectClass.mini_chaingun
+        contents(2).guid mustEqual PlanetSideGUID(4164)
+        contents(2).parentSlot mustEqual 2
+        contents(2).obj.asInstanceOf[WeaponData].fire_mode mustEqual 0
+        contents(2).obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.bullet_9mm
+        contents(2).obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(3728)
         //3
-        contents(3).item.objectClass mustEqual ObjectClass.phoenix //actually, a decimator
-        contents(3).item.guid mustEqual PlanetSideGUID(3603)
-        contents(3).item.parentSlot mustEqual 3
-        contents(3).item.obj.asInstanceOf[WeaponData].fire_mode mustEqual 0
-        contents(3).item.obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.phoenix_missile
-        contents(3).item.obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(3056)
+        contents(3).objectClass mustEqual ObjectClass.phoenix //actually, a decimator
+        contents(3).guid mustEqual PlanetSideGUID(3603)
+        contents(3).parentSlot mustEqual 3
+        contents(3).obj.asInstanceOf[WeaponData].fire_mode mustEqual 0
+        contents(3).obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.phoenix_missile
+        contents(3).obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(3056)
         //4
-        contents(4).item.objectClass mustEqual ObjectClass.chainblade
-        contents(4).item.guid mustEqual PlanetSideGUID(4088)
-        contents(4).item.parentSlot mustEqual 4
-        contents(4).item.obj.asInstanceOf[WeaponData].fire_mode mustEqual 1
-        contents(4).item.obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.melee_ammo
-        contents(4).item.obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(3279)
+        contents(4).objectClass mustEqual ObjectClass.chainblade
+        contents(4).guid mustEqual PlanetSideGUID(4088)
+        contents(4).parentSlot mustEqual 4
+        contents(4).obj.asInstanceOf[WeaponData].fire_mode mustEqual 1
+        contents(4).obj.asInstanceOf[WeaponData].ammo.head.objectClass mustEqual ObjectClass.melee_ammo
+        contents(4).obj.asInstanceOf[WeaponData].ammo.head.guid mustEqual PlanetSideGUID(3279)
         pc.drawn_slot mustEqual DrawnSlot.Rifle1
       case _ =>
         ko

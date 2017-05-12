@@ -1,6 +1,7 @@
 // Copyright (c) 2017 PSForever
 package net.psforever.packet.game.objectcreate
 
+import InventoryItem._
 import net.psforever.packet.PacketHelpers
 import scodec.Codec
 import scodec.codecs._
@@ -19,6 +20,7 @@ import shapeless.{::, HNil}
   * Inventories are usually prefaced with a `bin1` value not accounted for here.
   * It can be treated as optional.
   * @param contents the items in the inventory
+  * @see `InventoryItem`
   */
 final case class InventoryData(contents : List[InventoryItem] = List.empty) extends StreamBitSize {
   override def bitsize : Long = {
@@ -31,7 +33,8 @@ final case class InventoryData(contents : List[InventoryItem] = List.empty) exte
   }
 }
 
-object InventoryData {def inventoryCodec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
+object InventoryData {
+  private def inventoryCodec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
     uint8L >>:~ { len =>
       uint2L ::
         ("contents" | PacketHelpers.listOfNSized(len, itemCodec))
@@ -50,28 +53,10 @@ object InventoryData {def inventoryCodec(itemCodec : Codec[InventoryItem]) : Cod
   /**
     * A `Codec` for `0x17` `ObjectCreateMessage` data.
     */
-  val codec : Codec[InventoryData] = inventoryCodec(InventoryItem.codec).hlist.xmap[InventoryData] (
-    {
-      case inventory :: HNil =>
-        inventory
-    },
-    {
-      case InventoryData(a) =>
-        InventoryData(a) :: HNil
-    }
-  )
+  val codec : Codec[InventoryData] = inventoryCodec(InventoryItem.codec)
 
   /**
     * A `Codec` for `0x18` `ObjectCreateDetailedMessage` data.
     */
-  val codec_detailed : Codec[InventoryData] = inventoryCodec(InventoryItem.codec_detailed).hlist.xmap[InventoryData] (
-    {
-      case inventory :: HNil =>
-        inventory
-    },
-    {
-      case InventoryData(a) =>
-        InventoryData(a) :: HNil
-    }
-  )
+  val codec_detailed : Codec[InventoryData] = inventoryCodec(InventoryItem.codec_detailed)
 }
