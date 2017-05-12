@@ -306,6 +306,9 @@ object ObjectClass {
   final val striker_missile_targeting_projectile = 841
   //vehicles
   final val fury = 335
+  final val quadassault = 707
+  final val quadstealth = 710
+  final val two_man_assault_buggy = 896 //harasser
   //other
   final val locker_container = 456
   final val implant_terminal_interface = 409
@@ -1116,6 +1119,9 @@ object ObjectClass {
       case ObjectClass.striker_missile_targeting_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       //vehicles
       case ObjectClass.fury => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.quadassault => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.quadstealth => ConstructorData.genericCodec(VehicleData.codec(0)(), "vehicle")
+      case ObjectClass.two_man_assault_buggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       //other
       case ObjectClass.avatar => ConstructorData.genericCodec(CharacterData.codec, "avatar")
       case ObjectClass.locker_container => ConstructorData.genericCodec(LockerContainerData.codec, "locker container")
