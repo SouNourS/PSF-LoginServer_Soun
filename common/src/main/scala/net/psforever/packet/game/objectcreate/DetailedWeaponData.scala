@@ -22,7 +22,7 @@ import shapeless.{::, HNil}
   *                     concurrent ammunition does not need to be unloaded to be switched;
   *                     defaults to 1;
   *                     0 is invalid;
-  *                     -1 or less ignores the imposed check
+  *                     -1 or less ignores the imposed checks
   * @see `DetailedAmmoBoxData`
   * @see `WeaponData`
   */
@@ -77,15 +77,15 @@ object DetailedWeaponData extends Marshallable[DetailedWeaponData] {
         if(mag_capacity == 0 || magSize == 0) {
           Attempt.failure(Err("weapon must decode some ammunition"))
         }
-        else if(size != magSize) {
-          Attempt.failure(Err(s"weapon decodes wrong amount of ammunition - actual $magSize, expected $size"))
+        else if(mag_capacity > 0) {
+          if(size != magSize) {
+            Attempt.failure(Err(s"weapon decodes wrong amount of ammunition - actual $magSize, expected $size"))
+          }
+          else if(size != mag_capacity) {
+            Attempt.failure(Err(s"weapon decodes too much or too little ammunition - actual $size, expected $mag_capacity"))
+          }
         }
-        else if(mag_capacity > 0 && size != mag_capacity) {
-          Attempt.failure(Err(s"weapon decodes too much or too little ammunition - actual $size, expected $mag_capacity"))
-        }
-        else {
-          Attempt.successful(DetailedWeaponData(unk1, unk2, ammo)(ammo.size))
-        }
+        Attempt.successful(DetailedWeaponData(unk1, unk2, ammo)(ammo.size))
 
       case _ =>
         Attempt.failure(Err("invalid weapon data format"))
@@ -97,18 +97,18 @@ object DetailedWeaponData extends Marshallable[DetailedWeaponData] {
         if(mag_capacity == 0 || magCapacity == 0 || magSize == 0) {
           Attempt.failure(Err("weapon must encode some ammunition"))
         }
-        else if(magCapacity != mag_capacity) {
-          Attempt.failure(Err(s"different encoding expectations for amount of ammunition - actual $magCapacity, expected $mag_capacity"))
+        else if(magCapacity > 0 && mag_capacity > 0) {
+          if(magCapacity != mag_capacity) {
+            Attempt.failure(Err(s"different encoding expectations for amount of ammunition - actual $magCapacity, expected $mag_capacity"))
+          }
+          else if(magSize != mag_capacity) {
+            Attempt.failure(Err(s"weapon encodes wrong amount of ammunition - actual $magSize, expected $mag_capacity"))
+          }
+          else if(magSize >= 255) {
+            Attempt.failure(Err("weapon encodes too much ammunition (255+ types!)"))
+          }
         }
-        else if(mag_capacity > 0 && magSize != mag_capacity) {
-          Attempt.failure(Err(s"weapon encodes wrong amount of ammunition - actual $magSize, expected $mag_capacity"))
-        }
-        else if(magSize >= 255) {
-          Attempt.failure(Err("weapon encodes too much ammunition (255+ types!)"))
-        }
-        else {
-          Attempt.successful(unk1 :: unk2 :: 2 :: 0 :: 3 :: magSize :: 0 :: ammo :: false :: HNil)
-        }
+        Attempt.successful(unk1 :: unk2 :: 2 :: 0 :: 3 :: magSize :: 0 :: ammo :: false :: HNil)
 
       case _ =>
         Attempt.failure(Err("invalid weapon data format"))

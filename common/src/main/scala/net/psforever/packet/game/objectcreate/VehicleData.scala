@@ -14,7 +14,7 @@ import shapeless.{::, HNil}
   * @param mount_capacity implicit;
   *                       the total number of mounted utilities allowed on this vehicle;
   *                       defaults to 1;
-  *                       since vehicles can have nothing special on them, -1 or less ignores the imposed check
+  *                       -1 or less ignores the imposed checks
   */
 final case class VehicleData(basic : CommonFieldData,
                              health : Int,
@@ -40,7 +40,7 @@ object VehicleData extends Marshallable[VehicleData] {
   val baseVehicleDataSize : Long = 24L //2u + 8u + 7u + 4u + 2u + 1u
 
   /**
-    * Overloaded constructor that mandates information about the mounted weapons.
+    * Overloaded constructor that mandates information about a single weapon.
     * @param basic data common to objects
     * @param health the amount of health the object has, as a percentage of a filled bar
     * @param mount data regarding the mounted weapon
@@ -119,28 +119,28 @@ object VehicleData extends Marshallable[VehicleData] {
     {
       case obj @ VehicleData(basic, health, None) =>
         val objMountCapacity = obj.mount_capacity
-        if(mount_capacity != objMountCapacity) {
-          Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
+        if(objMountCapacity > -1 && mount_capacity > -1) {
+          if(mount_capacity != objMountCapacity) {
+            Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
+          }
+          else if(mount_capacity != 0) {
+            Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual 0, expected $mount_capacity"))
+          }
         }
-        else if(mount_capacity > -1 && mount_capacity != 0) {
-          Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual 0, expected $mount_capacity"))
-        }
-        else {
-          Attempt.successful(basic :: 0 :: health :: 0 :: 0 :: 0 :: None :: HNil)
-        }
+        Attempt.successful(basic :: 0 :: health :: 0 :: 0 :: 0 :: None :: HNil)
 
       case obj @ VehicleData(basic, health, mountings) =>
         val mountSize : Int = mountings.get.size
         val objMountCapacity = obj.mount_capacity
-        if(mount_capacity != objMountCapacity) {
-          Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
+        if(objMountCapacity > -1 && mount_capacity > -1) {
+          if(mount_capacity != objMountCapacity) {
+            Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
+          }
+          else if(mount_capacity != mountSize) {
+            Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $mountSize, expected $mount_capacity"))
+          }
         }
-        else if(mount_capacity > -1 && mount_capacity != mountSize) {
-          Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $mountSize, expected $mount_capacity"))
-        }
-        else {
-          Attempt.successful(basic :: 0 :: health :: 0 :: 0 :: 0 :: mountings :: HNil)
-        }
+        Attempt.successful(basic :: 0 :: health :: 0 :: 0 :: 0 :: mountings :: HNil)
 
       case _ =>
         Attempt.failure(Err("invalid vehicle data format"))

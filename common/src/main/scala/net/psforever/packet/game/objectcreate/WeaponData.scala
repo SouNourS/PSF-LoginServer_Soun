@@ -27,7 +27,7 @@ import shapeless.{::, HNil}
   *                     concurrent ammunition does not need to be unloaded to be switched;
   *                     defaults to 1;
   *                     0 is invalid;
-  *                     -1 or less ignores the imposed check
+  *                     -1 or less ignores the imposed checks
   * @see `AmmoBoxData`
   */
 final case class WeaponData(unk1 : Int,
@@ -46,7 +46,7 @@ final case class WeaponData(unk1 : Int,
 
 object WeaponData extends Marshallable[WeaponData] {
   /**
-    * Overloaded constructor for creating `WeaponData` while masking use of `InternalSlot` for its `AmmoBoxData`.
+    * Overloaded constructor for creating `WeaponData` that mandates information about a single type of ammunition.
     * @param unk1 na
     * @param unk2 na
     * @param cls the code for the type of object (ammunition) being constructed
@@ -59,7 +59,7 @@ object WeaponData extends Marshallable[WeaponData] {
     new WeaponData(unk1, unk2, 0, InternalSlot(cls, guid, parentSlot, ammo) :: Nil)
 
   /**
-    * Overloaded constructor for creating `WeaponData` while masking use of `InternalSlot` for its `AmmoBoxData`.
+    * Overloaded constructor for creating `WeaponData` that mandates information about the firemode and a single type of ammunition.
     * @param unk1 na
     * @param unk2 na
     * @param fire_mode data regarding the currently loaded ammunition type
@@ -71,6 +71,25 @@ object WeaponData extends Marshallable[WeaponData] {
     */
   def apply(unk1 : Int, unk2 : Int, fire_mode : Int, cls : Int, guid : PlanetSideGUID, parentSlot : Int, ammo : AmmoBoxData) : WeaponData =
     new WeaponData(unk1, unk2, fire_mode, InternalSlot(cls, guid, parentSlot, ammo) :: Nil)
+
+  /**
+    * Overloaded constructor for creating `WeaponData` with two types of ammunition concurrently loaded.
+    * This is a common weapon configuration, especially for vehicle-mounted weaponry.
+    * @param unk1 na
+    * @param unk2 na
+    * @param fire_mode data regarding the currently loaded ammunition type
+    * @param cls1 the code for the first type of object (ammunition) being constructed
+    * @param guid1 the globally unique id assigned to the first type of ammunition
+    * @param slot1 the slot where the first type of ammunition is to be installed in the weapon
+    * @param ammo1 the first ammunition object
+    * @param cls2 the code for the second type of object (ammunition) being constructed
+    * @param guid2 the globally unique id assigned to the second type of ammunition
+    * @param slot2 the slot where the second type of ammunition is to be installed in the weapon
+    * @param ammo2 the second ammunition object
+    * @return a `WeaponData` object
+    */
+  def apply(unk1 : Int, unk2 : Int, fire_mode : Int, cls1 : Int, guid1 : PlanetSideGUID, slot1 : Int, ammo1 : AmmoBoxData, cls2 : Int, guid2 : PlanetSideGUID, slot2 : Int, ammo2 : AmmoBoxData) : WeaponData =
+    new WeaponData(unk1, unk2, fire_mode, InternalSlot(cls1, guid1, slot1, ammo1) :: InternalSlot(cls2, guid2, slot2, ammo2) :: Nil)(2)
 
   /**
     * A `Codec` for `WeaponData`

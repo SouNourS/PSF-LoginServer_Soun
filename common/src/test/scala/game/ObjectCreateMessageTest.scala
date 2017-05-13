@@ -2,7 +2,7 @@
 package game
 
 import net.psforever.packet._
-import net.psforever.packet.game._
+import net.psforever.packet.game.{ObjectCreateMessage, _}
 import net.psforever.packet.game.objectcreate._
 import net.psforever.types._
 import org.specs2.mutable._
@@ -34,8 +34,6 @@ class ObjectCreateMessageTest extends Specification {
   val string_locker_container = hex"17 AF010000 E414C0C00000000000000000000600000818829DC2E030000000202378620D80C00000378FA0FADC000006F1FC199D800000"
   val string_character = hex"17 73070000 BC8 3E0F 6C2D7 65535 CA16 00 00 09 9741E4F804000000 234530063007200610077006E00790052006F006E006E0069006500 220B7 E67B540404001000000000022B50100 268042006C00610063006B002000420065007200650074002000410072006D006F007500720065006400200043006F00720070007300 1700E0030050040003BC00000234040001A004000 3FFF67A8F A0A5424E0E800000000080952A9C3A03000001081103E040000000A023782F1080C0000016244108200000000808382403A030000014284C3A0C0000000202512F00B80C00000578F80F840000000280838B3C320300000080"
   val string_character_backpack = hex"17 9C030000 BC8 340D F20A9 3956C AF0D 00 00 73 480000 87041006E00670065006C006C006F00 4A148 0000000000000000000000005C54200 24404F0072006900670069006E0061006C00200044006900730074007200690063007400 1740180181E8000000C202000042000000D202000000010A3C00"
-  val string_fury = hex"17 50010000 A79 9D01 FBC1C 12A83 2F06 00 00 21 4400003FC00101140C800C0E40000004048F3600301900000"
-  val string_ant =  hex"17 C2000000 9E0 7C01 6C2D7 65535 CA16 00 00 00 4400003FC000000"
 
   "decode (striker projectile)" in {
     PacketCoding.DecodePacket(string_striker_projectile).require match {
@@ -806,76 +804,6 @@ class ObjectCreateMessageTest extends Specification {
     }
   }
 
-  "decode (fury)" in {
-    PacketCoding.DecodePacket(string_fury).require match {
-      case ObjectCreateMessage(len, cls, guid, parent, data) =>
-        len mustEqual 336
-        cls mustEqual ObjectClass.fury
-        guid mustEqual PlanetSideGUID(413)
-        parent.isDefined mustEqual false
-        data.isDefined mustEqual true
-        data.get.isInstanceOf[VehicleData] mustEqual true
-        val fury = data.get.asInstanceOf[VehicleData]
-        fury.basic.pos.coord.x mustEqual 6531.961f
-        fury.basic.pos.coord.y mustEqual 1872.1406f
-        fury.basic.pos.coord.z mustEqual 24.734375f
-        fury.basic.pos.roll mustEqual 0
-        fury.basic.pos.pitch mustEqual 0
-        fury.basic.pos.yaw mustEqual 33
-        fury.basic.pos.vel.isDefined mustEqual false
-        fury.basic.faction mustEqual PlanetSideEmpire.VS
-        fury.basic.unk mustEqual 4
-        fury.basic.player_guid mustEqual PlanetSideGUID(0)
-        fury.health mustEqual 255
-        //
-        fury.mountings.isDefined mustEqual true
-        fury.mountings.get.size mustEqual 1
-        val mounting = fury.mountings.get.head
-        mounting.objectClass mustEqual ObjectClass.fury_weapon_systema
-        mounting.guid mustEqual PlanetSideGUID(400)
-        mounting.parentSlot mustEqual 1
-        mounting.obj.isInstanceOf[WeaponData] mustEqual true
-        val weapon = mounting.obj.asInstanceOf[WeaponData]
-        weapon.unk1 mustEqual 0xC
-        weapon.unk2 mustEqual 0x8
-        weapon.fire_mode mustEqual 0
-        weapon.ammo.size mustEqual 1
-        val ammo = weapon.ammo.head
-        ammo.objectClass mustEqual ObjectClass.hellfire_ammo
-        ammo.guid mustEqual PlanetSideGUID(432)
-        ammo.parentSlot mustEqual 0
-        ammo.obj.isInstanceOf[AmmoBoxData] mustEqual true
-        ammo.obj.asInstanceOf[AmmoBoxData].unk mustEqual 0x8
-      case _ =>
-        ko
-    }
-  }
-
-  "decode (ant)" in {
-    PacketCoding.DecodePacket(string_ant).require match {
-      case ObjectCreateMessage(len, cls, guid, parent, data) =>
-        len mustEqual 194L
-        cls mustEqual ObjectClass.ant
-        guid mustEqual PlanetSideGUID(380)
-        parent.isDefined mustEqual false
-        data.isDefined mustEqual true
-        data.get.isInstanceOf[ANTData] mustEqual true
-        val ant = data.get.asInstanceOf[ANTData]
-        ant.basic.pos.coord.x mustEqual 3674.8438f
-        ant.basic.pos.coord.y mustEqual 2726.789f
-        ant.basic.pos.coord.z mustEqual 91.15625f
-        ant.basic.pos.roll mustEqual 0
-        ant.basic.pos.pitch mustEqual 0
-        ant.basic.pos.yaw mustEqual 0
-        ant.basic.faction mustEqual PlanetSideEmpire.VS
-        ant.basic.unk mustEqual 4
-        ant.basic.player_guid mustEqual PlanetSideGUID(0)
-        ant.health mustEqual 255
-      case _ =>
-        ko
-    }
-  }
-
   "encode (striker projectile)" in {
     val obj = TrackedProjectileData.striker(
       PlacementData(4644.5938f, 5472.0938f, 82.375f, 0, 245, 227),
@@ -1259,38 +1187,5 @@ class ObjectCreateMessageTest extends Specification {
     pkt_bitv.drop(761).take(155) mustEqual ori_bitv.drop(761).take(155) //skip 1
     pkt_bitv.drop(917) mustEqual ori_bitv.drop(917)
     //TODO work on CharacterData to make this pass as a single stream
-  }
-
-  "encode (fury)" in {
-    val obj = VehicleData(
-      CommonFieldData(
-        PlacementData(6531.961f, 1872.1406f, 24.734375f, 0, 0, 33),
-        PlanetSideEmpire.VS, 4
-      ),
-      255,
-      InternalSlot(
-        ObjectClass.fury_weapon_systema, PlanetSideGUID(400), 1, WeaponData(
-          0xC, 0x8, 0, ObjectClass.hellfire_ammo, PlanetSideGUID(432), 0, AmmoBoxData(0x8)
-        )
-      )
-    )
-    val msg = ObjectCreateMessage(ObjectClass.fury, PlanetSideGUID(413), obj)
-    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
-
-    pkt mustEqual string_fury
-  }
-
-  "encode (ant)" in {
-    val obj = ANTData(
-      CommonFieldData(
-        PlacementData(3674.8438f, 2726.789f, 91.15625f),
-        PlanetSideEmpire.VS, 4
-      ),
-      255
-    )
-    val msg = ObjectCreateMessage(ObjectClass.ant, PlanetSideGUID(380), obj)
-    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
-
-    pkt mustEqual string_ant
   }
 }
