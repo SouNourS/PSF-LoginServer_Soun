@@ -17,17 +17,19 @@ import shapeless.{::, HNil}
   * @param unk1 na
   * @param unk2 na
   * @param ammo data regarding the currently loaded ammunition type(s) and quantity(ies)
-  * @param mag_size implicit;
-  *                 the total number of concurrently-loaded ammunition types allowed in this weapon;
-  *                 concurrent ammunition does not need to be unloaded to be switched;
-  *                 defaults to 1;
-  *                 0 or less ignores the imposed check
+  * @param mag_capacity implicit;
+  *                     the total number of concurrently-loaded ammunition types allowed in this weapon;
+  *                     concurrent ammunition does not need to be unloaded to be switched;
+  *                     defaults to 1;
+  *                     0 is invalid;
+  *                     -1 or less ignores the imposed check
   * @see `DetailedAmmoBoxData`
+  * @see `WeaponData`
   */
 final case class DetailedWeaponData(unk1 : Int,
                                     unk2 : Int,
                                     ammo : List[InternalSlot]
-                                   )(implicit val mag_size : Int = 1) extends ConstructorData {
+                                   )(implicit val mag_capacity : Int = 1) extends ConstructorData {
   override def bitsize : Long = {
     var bitsize : Long = 0L
     for(o <- ammo) {
@@ -53,11 +55,11 @@ object DetailedWeaponData extends Marshallable[DetailedWeaponData] {
 
   /**
     * A `Codec` for `DetailedWeaponData`
-    * @param magSize the total number of concurrently-loaded ammunition types allowed in this weapon;
-    *                 defaults to 1
+    * @param mag_capacity the total number of concurrently-loaded ammunition types allowed in this weapon;
+    *                     defaults to 1
     * @return a `WeaponData` object or a `BitVector`
     */
-  def codec(magSize : Int = 1) : Codec[DetailedWeaponData] = (
+  def codec(mag_capacity : Int = 1) : Codec[DetailedWeaponData] = (
     ("unk1" | uint4L) ::
       ("unk2" | uint4L) ::
       uint24 ::
@@ -71,26 +73,45 @@ object DetailedWeaponData extends Marshallable[DetailedWeaponData] {
     ).exmap[DetailedWeaponData] (
     {
       case unk1 :: unk2 :: 2 :: 0 :: 3 :: size :: 0 :: ammo :: false :: HNil =>
-        if(size != ammo.size)
-          Attempt.failure(Err(s"weapon decodes wrong number of ammunition - actual ${ammo.size}, expected $size"))
-        else if(magSize >= 1 && size != magSize)
-          Attempt.failure(Err(s"weapon decodes too much or too little ammunition - actual $size, expected $magSize"))
-        else
-          Attempt.successful(DetailedWeaponData(unk1, unk2, ammo)(magSize))
+        val magSize = ammo.size
+        if(mag_capacity == 0 || magSize == 0) {
+          Attempt.failure(Err("weapon must decode some ammunition"))
+        }
+        else if(size != magSize) {
+          Attempt.failure(Err(s"weapon decodes wrong amount of ammunition - actual $magSize, expected $size"))
+        }
+        else if(mag_capacity > 0 && size != mag_capacity) {
+          Attempt.failure(Err(s"weapon decodes too much or too little ammunition - actual $size, expected $mag_capacity"))
+        }
+        else {
+          Attempt.successful(DetailedWeaponData(unk1, unk2, ammo)(ammo.size))
+        }
 
       case _ =>
         Attempt.failure(Err("invalid weapon data format"))
     },
     {
       case obj @ DetailedWeaponData(unk1, unk2, ammo) =>
-        val objMagSize = obj.mag_size
-        val size = ammo.size
-        if(objMagSize >= 1 && size != objMagSize)
-          Attempt.failure(Err(s"weapon encodes too much or too little ammunition - actual $size, expected $objMagSize"))
-        else if(size >= 255)
+        val magSize = ammo.size
+        val magCapacity = obj.mag_capacity
+        if(mag_capacity == 0 || magCapacity == 0 || magSize == 0) {
+          Attempt.failure(Err("weapon must encode some ammunition"))
+        }
+        else if(magCapacity != mag_capacity) {
+          Attempt.failure(Err(s"different encoding expectations for amount of ammunition - actual $magCapacity, expected $mag_capacity"))
+        }
+        else if(mag_capacity > 0 && magSize != mag_capacity) {
+          Attempt.failure(Err(s"weapon encodes wrong amount of ammunition - actual $magSize, expected $mag_capacity"))
+        }
+        else if(magSize >= 255) {
           Attempt.failure(Err("weapon encodes too much ammunition (255+ types!)"))
-        else
-            Attempt.successful(unk1 :: unk2 :: 2 :: 0 :: 3 :: size :: 0 :: ammo :: false :: HNil)
+        }
+        else {
+          Attempt.successful(unk1 :: unk2 :: 2 :: 0 :: 3 :: magSize :: 0 :: ammo :: false :: HNil)
+        }
+
+      case _ =>
+        Attempt.failure(Err("invalid weapon data format"))
     }
   )
 

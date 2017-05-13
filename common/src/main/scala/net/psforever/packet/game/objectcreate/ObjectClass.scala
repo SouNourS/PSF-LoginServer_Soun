@@ -305,6 +305,7 @@ object ObjectClass {
   final val starfire_projectile = 831
   final val striker_missile_targeting_projectile = 841
   //vehicles
+  final val ant = 60
   final val fury = 335
   final val quadassault = 707
   final val quadstealth = 710
@@ -1118,6 +1119,7 @@ object ObjectClass {
       case ObjectClass.starfire_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       case ObjectClass.striker_missile_targeting_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       //vehicles
+      case ObjectClass.ant => ConstructorData.genericCodec(ANTData.codec, "vehicle")
       case ObjectClass.fury => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       case ObjectClass.quadassault => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       case ObjectClass.quadstealth => ConstructorData.genericCodec(VehicleData.codec(0)(), "vehicle")

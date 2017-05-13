@@ -12,9 +12,9 @@ import shapeless.{::, HNil}
   * @param health the amount of health the object has, as a percentage of a filled bar
   * @param mountings data regarding the mounted utilities, usually weapons
   * @param mount_capacity implicit;
-  *                        the total number of mounted utilities allowed on this vehicle;
-  *                        defaults to 1;
-  *                        since vehicles can have nothing special on them, -1 or less ignores the imposed check
+  *                       the total number of mounted utilities allowed on this vehicle;
+  *                       defaults to 1;
+  *                       since vehicles can have nothing special on them, -1 or less ignores the imposed check
   */
 final case class VehicleData(basic : CommonFieldData,
                              health : Int,
@@ -32,11 +32,13 @@ final case class VehicleData(basic : CommonFieldData,
     else {
       0L
     }
-    24L + basicSize + internalSize //2u + 8u + 7u + 4u + 2u + 1u
+    VehicleData.baseVehicleDataSize + basicSize + internalSize
   }
 }
 
 object VehicleData extends Marshallable[VehicleData] {
+  val baseVehicleDataSize : Long = 24L //2u + 8u + 7u + 4u + 2u + 1u
+
   /**
     * Overloaded constructor that mandates information about the mounted weapons.
     * @param basic data common to objects
@@ -99,7 +101,7 @@ object VehicleData extends Marshallable[VehicleData] {
           Attempt.failure(Err(s"vehicle decodes wrong number of mounts - actual 0, expected $mount_capacity"))
         }
         else {
-          Attempt.successful(VehicleData(basic, health, None))
+          Attempt.successful(VehicleData(basic, health, None)(0))
         }
 
       case basic :: 0 :: health :: 0 :: 0 :: 0 :: mountings :: HNil =>
@@ -108,7 +110,7 @@ object VehicleData extends Marshallable[VehicleData] {
           Attempt.failure(Err(s"vehicle decodes wrong number of mounts - actual $onboardMountCount, expected $mount_capacity"))
         }
         else {
-          Attempt.successful(VehicleData(basic, health, mountings))
+          Attempt.successful(VehicleData(basic, health, mountings)(onboardMountCount))
         }
 
       case _ =>
@@ -116,19 +118,25 @@ object VehicleData extends Marshallable[VehicleData] {
     },
     {
       case obj @ VehicleData(basic, health, None) =>
-        val weaponCount : Int = obj.mount_capacity
-        if(weaponCount > -1 && weaponCount != 0) {
-          Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual 0, expected $weaponCount"))
+        val objMountCapacity = obj.mount_capacity
+        if(mount_capacity != objMountCapacity) {
+          Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
+        }
+        else if(mount_capacity > -1 && mount_capacity != 0) {
+          Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual 0, expected $mount_capacity"))
         }
         else {
           Attempt.successful(basic :: 0 :: health :: 0 :: 0 :: 0 :: None :: HNil)
         }
 
       case obj @ VehicleData(basic, health, mountings) =>
-        val onboardMountCount : Int = mountings.get.size
-        val weaponCapacity : Int = obj.mount_capacity
-        if(weaponCapacity > -1 && weaponCapacity != onboardMountCount) {
-          Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $onboardMountCount, expected $weaponCapacity"))
+        val mountSize : Int = mountings.get.size
+        val objMountCapacity = obj.mount_capacity
+        if(mount_capacity != objMountCapacity) {
+          Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
+        }
+        else if(mount_capacity > -1 && mount_capacity != mountSize) {
+          Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $mountSize, expected $mount_capacity"))
         }
         else {
           Attempt.successful(basic :: 0 :: health :: 0 :: 0 :: 0 :: mountings :: HNil)
