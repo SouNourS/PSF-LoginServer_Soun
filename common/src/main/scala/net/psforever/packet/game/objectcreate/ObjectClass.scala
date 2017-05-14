@@ -308,6 +308,7 @@ object ObjectClass {
   final val ant = 60
   final val fury = 335
   final val lightning = 446
+  final val mediumtransport = 532
   final val quadassault = 707
   final val quadstealth = 710
   final val two_man_assault_buggy = 896 //harasser
@@ -1123,6 +1124,7 @@ object ObjectClass {
       case ObjectClass.ant => ConstructorData.genericCodec(ANTData.codec, "vehicle")
       case ObjectClass.fury => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       case ObjectClass.lightning => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.mediumtransport => ConstructorData.genericCodec(VehicleData.codec(-2)(), "vehicle")
       case ObjectClass.quadassault => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       case ObjectClass.quadstealth => ConstructorData.genericCodec(VehicleData.codec(0)(), "vehicle")
       case ObjectClass.two_man_assault_buggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")

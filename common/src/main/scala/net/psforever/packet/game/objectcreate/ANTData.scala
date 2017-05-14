@@ -13,7 +13,8 @@ import shapeless.{::, HNil}
   * @param health the amount of health the object has, as a percentage of a filled bar
   */
 final case class ANTData(basic : CommonFieldData,
-                         health : Int
+                         health : Int,
+                         unk : Int = 0
                         ) extends ConstructorData {
   override def bitsize : Long = {
     val basicSize = basic.bitsize
@@ -28,12 +29,12 @@ object ANTData extends Marshallable[ANTData] {
       uintL(6)
     ).xmap[ANTData] (
     {
-      case VehicleData(basic, health, _) :: 0 :: HNil =>
-        ANTData(basic, health)
+      case VehicleData(basic, health, unk, _) :: 0 :: HNil =>
+        ANTData(basic, health, unk)
     },
     {
-      case ANTData(basic, health) =>
-        VehicleData(basic, health, None)(0) :: 0 :: HNil
+      case ANTData(basic, health, unk) =>
+        VehicleData(basic, health, unk, None)(0) :: 0 :: HNil
     }
   )
 }

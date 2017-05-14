@@ -8,10 +8,11 @@ import net.psforever.types._
 import org.specs2.mutable._
 import scodec.bits._
 
-class ObjectCreateMessageTest_Vehicles extends Specification {
+class ObjectCreateMessageVehiclesTest extends Specification {
   val string_fury = hex"17 50010000 A79 9D01 FBC1C 12A83 2F06 00 00 21 4400003FC00101140C800C0E40000004048F3600301900000"
   val string_ant =  hex"17 C2000000 9E0 7C01 6C2D7 65535 CA16 00 00 00 4400003FC000000"
   val string_lightning = hex"17 8b010000 df1 5a00 6c2d7 65535 ca16 00 00 00 4400003fc00101300ad8040c4000000408190b801018000002617402070000000"
+  val string_mediumtransport = hex"17 DA010000 8A2 8301 FBC1C 12A83 2F06 00 00 21 2400003FC079020593F80C2E400000040410148030190000017458050D90000001010401F814064000000"
 
   "decode (fury)" in {
     PacketCoding.DecodePacket(string_fury).require match {
@@ -134,6 +135,68 @@ class ObjectCreateMessageTest_Vehicles extends Specification {
     }
   }
 
+  "decode (medium transport)" in {
+    PacketCoding.DecodePacket(string_mediumtransport).require match {
+      case ObjectCreateMessage(len, cls, guid, parent, data) =>
+        len mustEqual 474L
+        cls mustEqual ObjectClass.mediumtransport
+        guid mustEqual PlanetSideGUID(387)
+        parent.isDefined mustEqual false
+        data.isDefined mustEqual true
+        data.get.isInstanceOf[VehicleData] mustEqual true
+        val deliverer = data.get.asInstanceOf[VehicleData]
+        deliverer.basic.pos.coord.x mustEqual 6531.961f
+        deliverer.basic.pos.coord.y mustEqual 1872.1406f
+        deliverer.basic.pos.coord.z mustEqual 24.734375f
+        deliverer.basic.pos.roll mustEqual 0
+        deliverer.basic.pos.pitch mustEqual 0
+        deliverer.basic.pos.yaw mustEqual 33
+        deliverer.basic.faction mustEqual PlanetSideEmpire.NC
+        deliverer.basic.unk mustEqual 4
+        deliverer.basic.player_guid mustEqual PlanetSideGUID(0)
+        deliverer.health mustEqual 255
+        deliverer.unk mustEqual 0xF
+        deliverer.mountings.isDefined mustEqual true
+        deliverer.mountings.get.size mustEqual 2
+        //0
+        var mounting = deliverer.mountings.get.head
+        mounting.objectClass mustEqual ObjectClass.mediumtransport_weapon_systemA
+        mounting.guid mustEqual PlanetSideGUID(383)
+        mounting.parentSlot mustEqual 5
+        mounting.obj.isInstanceOf[WeaponData] mustEqual true
+        var weapon = mounting.obj.asInstanceOf[WeaponData]
+        weapon.unk1 mustEqual 0xC
+        weapon.unk2 mustEqual 0x8
+        weapon.fire_mode mustEqual 0
+        weapon.ammo.size mustEqual 1
+        var ammo = weapon.ammo.head
+        ammo.objectClass mustEqual ObjectClass.bullet_20mm
+        ammo.guid mustEqual PlanetSideGUID(420)
+        ammo.parentSlot mustEqual 0
+        ammo.obj.isInstanceOf[AmmoBoxData] mustEqual true
+        ammo.obj.asInstanceOf[AmmoBoxData].unk mustEqual 0x8
+        //1
+        mounting = deliverer.mountings.get(1)
+        mounting.objectClass mustEqual ObjectClass.mediumtransport_weapon_systemB
+        mounting.guid mustEqual PlanetSideGUID(556)
+        mounting.parentSlot mustEqual 6
+        mounting.obj.isInstanceOf[WeaponData] mustEqual true
+        weapon = mounting.obj.asInstanceOf[WeaponData]
+        weapon.unk1 mustEqual 0xC
+        weapon.unk2 mustEqual 0x8
+        weapon.fire_mode mustEqual 0
+        weapon.ammo.size mustEqual 1
+        ammo = weapon.ammo.head
+        ammo.objectClass mustEqual ObjectClass.bullet_20mm
+        ammo.guid mustEqual PlanetSideGUID(575)
+        ammo.parentSlot mustEqual 0
+        ammo.obj.isInstanceOf[AmmoBoxData] mustEqual true
+        ammo.obj.asInstanceOf[AmmoBoxData].unk mustEqual 0x8
+      case _ =>
+        ko
+    }
+  }
+
   "encode (fury)" in {
     val obj = VehicleData(
       CommonFieldData(
@@ -182,5 +245,31 @@ class ObjectCreateMessageTest_Vehicles extends Specification {
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 
     pkt mustEqual string_lightning
+  }
+
+  "encode (deliverer)" in {
+    val obj = VehicleData(
+      CommonFieldData(
+        PlacementData(6531.961f, 1872.1406f, 24.734375f, 0, 0, 33),
+        PlanetSideEmpire.NC, 4
+      ),
+      255,
+      0xF,
+      Some(
+        InternalSlot(
+          ObjectClass.mediumtransport_weapon_systemA, PlanetSideGUID(383), 5,
+          WeaponData(12, 8, ObjectClass.bullet_20mm, PlanetSideGUID(420), 0, AmmoBoxData(8))
+        ) ::
+          InternalSlot(
+            ObjectClass.mediumtransport_weapon_systemB, PlanetSideGUID(556), 6,
+            WeaponData(12, 8, ObjectClass.bullet_20mm, PlanetSideGUID(575), 0, AmmoBoxData(8))
+          ) ::
+          Nil
+        )
+      )(2)
+    val msg = ObjectCreateMessage(ObjectClass.mediumtransport, PlanetSideGUID(387), obj)
+    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
+
+    pkt mustEqual string_mediumtransport
   }
 }

@@ -18,6 +18,7 @@ import shapeless.{::, HNil}
   */
 final case class VehicleData(basic : CommonFieldData,
                              health : Int,
+                             unk : Int,
                              mountings : Option[List[InternalSlot]] = None
                             )(implicit val mount_capacity : Int = 1) extends ConstructorData {
   override def bitsize : Long = {
@@ -47,7 +48,7 @@ object VehicleData extends Marshallable[VehicleData] {
     * @return a `VehicleData` object
     */
   def apply(basic : CommonFieldData, health : Int, mount : InternalSlot) : VehicleData =
-    new VehicleData(basic, health, Some(mount :: Nil))
+    new VehicleData(basic, health, 0, Some(mount :: Nil))
 
   def allTypesAllowed(item : Any) : Boolean = true
 
@@ -73,7 +74,7 @@ object VehicleData extends Marshallable[VehicleData] {
         Attempt.failure(Err("invalid mounting data format"))
     },
     {
-      case list @ List(_) =>
+      case list =>
         if(list.size >= 255) {
           Attempt.failure(Err("vehicle encodes too many weapon mountings (255+ types!)"))
         }
@@ -91,33 +92,33 @@ object VehicleData extends Marshallable[VehicleData] {
       uint2L ::
       ("health" | uint8L) ::
       uintL(7) ::
-      uint4L ::
+      ("unk" | uint4L) ::
       uint2L ::
       optional(bool, "mountings" | mountedUtilitiesCodec(typeCheck))
     ).exmap[VehicleData] (
     {
-      case basic :: 0 :: health :: 0 :: 0 :: 0 :: None :: HNil =>
+      case basic :: 0 :: health :: 0 :: unk :: 0 :: None :: HNil =>
         if(mount_capacity > -1 && mount_capacity != 0) {
           Attempt.failure(Err(s"vehicle decodes wrong number of mounts - actual 0, expected $mount_capacity"))
         }
         else {
-          Attempt.successful(VehicleData(basic, health, None)(0))
+          Attempt.successful(VehicleData(basic, health, unk, None)(0))
         }
 
-      case basic :: 0 :: health :: 0 :: 0 :: 0 :: mountings :: HNil =>
+      case basic :: 0 :: health :: 0 :: unk :: 0 :: mountings :: HNil =>
         val onboardMountCount : Int = mountings.get.size
         if(mount_capacity > -1 && mount_capacity != onboardMountCount) {
           Attempt.failure(Err(s"vehicle decodes wrong number of mounts - actual $onboardMountCount, expected $mount_capacity"))
         }
         else {
-          Attempt.successful(VehicleData(basic, health, mountings)(onboardMountCount))
+          Attempt.successful(VehicleData(basic, health, unk, mountings)(onboardMountCount))
         }
 
       case _ =>
         Attempt.failure(Err("invalid vehicle data format"))
     },
     {
-      case obj @ VehicleData(basic, health, None) =>
+      case obj @ VehicleData(basic, health, unk, None) =>
         val objMountCapacity = obj.mount_capacity
         if(objMountCapacity > -1 && mount_capacity > -1) {
           if(mount_capacity != objMountCapacity) {
@@ -127,9 +128,9 @@ object VehicleData extends Marshallable[VehicleData] {
             Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual 0, expected $mount_capacity"))
           }
         }
-        Attempt.successful(basic :: 0 :: health :: 0 :: 0 :: 0 :: None :: HNil)
+        Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: None :: HNil)
 
-      case obj @ VehicleData(basic, health, mountings) =>
+      case obj @ VehicleData(basic, health, unk, mountings) =>
         val mountSize : Int = mountings.get.size
         val objMountCapacity = obj.mount_capacity
         if(objMountCapacity > -1 && mount_capacity > -1) {
@@ -140,7 +141,7 @@ object VehicleData extends Marshallable[VehicleData] {
             Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $mountSize, expected $mount_capacity"))
           }
         }
-        Attempt.successful(basic :: 0 :: health :: 0 :: 0 :: 0 :: mountings :: HNil)
+        Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: mountings :: HNil)
 
       case _ =>
         Attempt.failure(Err("invalid vehicle data format"))
