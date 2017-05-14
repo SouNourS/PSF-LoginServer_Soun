@@ -5,7 +5,6 @@ import net.psforever.packet.PacketHelpers
 import net.psforever.packet.game.PlanetSideGUID
 import scodec.{Attempt, Codec, Err}
 import scodec.bits.BitVector
-import scodec.codecs.{bool, either, uintL}
 import shapeless.{::, HNil}
 import scodec.codecs._
 
@@ -40,7 +39,7 @@ final case class ObjectCreateMessageParent(guid : PlanetSideGUID,
                                            slot : Int)
 
 object ObjectCreateBase {
-  private[this] val log = org.log4s.getLogger("ObjectCreateBase")
+  private[this] val log = org.log4s.getLogger("ObjectCreate")
 
   private type basePattern = Long :: Int :: PlanetSideGUID :: Option[ObjectCreateMessageParent] :: BitVector :: HNil
   private type parentPattern = Int :: PlanetSideGUID :: Option[ObjectCreateMessageParent] :: HNil
@@ -92,12 +91,13 @@ object ObjectCreateBase {
         case Attempt.Successful(decode) =>
           out = decode.value.asInstanceOf[ConstructorData.genericPattern]
         case Attempt.Failure(err) =>
-          log.error(err.toString)
+          log.error(s"an object $objectClass failed to decode - ${err.toString}")
+          log.debug(s"object type: $objectClass, input: ${data.toString}, problem: ${err.toString}")
       }
     }
     catch {
       case ex : Exception =>
-        log.error(ex.toString)
+        log.error(s"${ex.getClass.toString} - ${ex.toString}")
     }
     out
   }
@@ -106,25 +106,26 @@ object ObjectCreateBase {
     * Take the important information of a game piece and transform it into bit data.
     * This function is fail-safe because it catches errors involving bad parsing of the object data.
     * Generally, the `Exception` messages themselves are not useful here.
-    * @param objClass the code for the type of object being deconstructed
+    * @param objectClass the code for the type of object being deconstructed
     * @param obj the object data
     * @param getCodecFunc a lookup function that returns a `Codec` for this object class
     * @return the bitstream data
     * @see `ObjectClass`
     */
-  def encodeData(objClass : Int, obj : ConstructorData, getCodecFunc : (Int) => Codec[ConstructorData.genericPattern]) : BitVector = {
+  def encodeData(objectClass : Int, obj : ConstructorData, getCodecFunc : (Int) => Codec[ConstructorData.genericPattern]) : BitVector = {
     var out = BitVector.empty
     try {
-      getCodecFunc(objClass).encode(Some(obj.asInstanceOf[ConstructorData])) match {
+      getCodecFunc(objectClass).encode(Some(obj.asInstanceOf[ConstructorData])) match {
         case Attempt.Successful(encode) =>
           out = encode
         case Attempt.Failure(err) =>
-          log.error(err.toString)
+          log.error(s"an $objectClass object failed to encode - ${err.toString}")
+          log.debug(s"object type: $objectClass, input: ${obj.toString}, problem: ${err.toString}")
       }
     }
     catch {
       case ex : Exception =>
-        log.error(ex.toString)
+        log.error(s"${ex.getClass.toString} - ${ex.toString}")
     }
     out
   }

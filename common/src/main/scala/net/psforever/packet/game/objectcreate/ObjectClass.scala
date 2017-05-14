@@ -306,11 +306,14 @@ object ObjectClass {
   final val striker_missile_targeting_projectile = 841
   //vehicles
   final val ant = 60
+  final val aurora = 118
+  final val battlewagon = 135 //raider
   final val fury = 335
   final val lightning = 446
   final val mediumtransport = 532
   final val quadassault = 707
   final val quadstealth = 710
+  final val thunderer = 865
   final val two_man_assault_buggy = 896 //harasser
   //other
   final val locker_container = 456
@@ -1122,11 +1125,14 @@ object ObjectClass {
       case ObjectClass.striker_missile_targeting_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       //vehicles
       case ObjectClass.ant => ConstructorData.genericCodec(ANTData.codec, "vehicle")
+      case ObjectClass.aurora => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
+      case ObjectClass.battlewagon => ConstructorData.genericCodec(VehicleData.codec(4)(), "vehicle")
       case ObjectClass.fury => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       case ObjectClass.lightning => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
-      case ObjectClass.mediumtransport => ConstructorData.genericCodec(VehicleData.codec(-2)(), "vehicle")
+      case ObjectClass.mediumtransport => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.quadassault => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       case ObjectClass.quadstealth => ConstructorData.genericCodec(VehicleData.codec(0)(), "vehicle")
+      case ObjectClass.thunderer => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.two_man_assault_buggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       //other
       case ObjectClass.avatar => ConstructorData.genericCodec(CharacterData.codec, "avatar")
