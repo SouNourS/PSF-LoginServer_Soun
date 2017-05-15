@@ -313,8 +313,11 @@ object ObjectClass {
   final val mediumtransport = 532
   final val quadassault = 707
   final val quadstealth = 710
+  final val threemanheavybuggy = 862 //marauder
   final val thunderer = 865
   final val two_man_assault_buggy = 896 //harasser
+  final val twomanheavybuggy = 898 //enforcer
+  final val twomanhoverbuggy = 900 //thresher
   //other
   final val locker_container = 456
   final val implant_terminal_interface = 409
@@ -1139,8 +1142,11 @@ object ObjectClass {
       case ObjectClass.mediumtransport => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.quadassault => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       case ObjectClass.quadstealth => ConstructorData.genericCodec(VehicleData.codec(0)(), "vehicle")
+      case ObjectClass.threemanheavybuggy => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.thunderer => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.two_man_assault_buggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.twomanheavybuggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.twomanhoverbuggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       //other
       case ObjectClass.ams_respawn_tube => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
       case ObjectClass.avatar => ConstructorData.genericCodec(CharacterData.codec, "avatar")
