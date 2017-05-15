@@ -1679,7 +1679,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           //          val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
                     sendRawResponse(pkt)*/
           if(item_name == "katana") {
-            var color : Int = 3 // TR
+            var color : Int = 0 // TR
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid + 7), 0)))
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid + 8), 0)))
             Thread.sleep(100)
