@@ -14,6 +14,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
   val string_lightning = hex"17 8b010000 df1 5a00 6c2d7 65535 ca16 00 00 00 4400003fc00101300ad8040c4000000408190b801018000002617402070000000"
   val string_mediumtransport = hex"17 DA010000 8A2 8301 FBC1C 12A83 2F06 00 00 21 2400003FC079020593F80C2E400000040410148030190000017458050D90000001010401F814064000000"
   val string_ams = hex"17 B8010000 970 3D10 002D765535CA16000000 402285BB0037E4100749E1D03000000620D83A0A00000195798741C00000332E40D84800000"
+  val string_ams_destroyed = hex"17 8D000000 978 3D10 002D765535CA16000000 0"
 
   "decode (fury)" in {
     PacketCoding.DecodePacket(string_fury).require match {
@@ -253,6 +254,27 @@ class ObjectCreateMessageVehiclesTest extends Specification {
     }
   }
 
+  "decode (ams, destroyed)" in {
+    PacketCoding.DecodePacket(string_ams_destroyed).require match {
+      case ObjectCreateMessage(len, cls, guid, parent, data) =>
+        len mustEqual 141L
+        cls mustEqual ObjectClass.ams_destroyed
+        guid mustEqual PlanetSideGUID(4157)
+        parent.isDefined mustEqual false
+        data.isDefined mustEqual true
+        data.get.isInstanceOf[DestroyedVehicleData] mustEqual true
+        val dams = data.get.asInstanceOf[DestroyedVehicleData]
+        dams.pos.coord.x mustEqual 3674.0f
+        dams.pos.coord.y mustEqual 2726.789f
+        dams.pos.coord.z mustEqual 91.15625f
+        dams.pos.roll mustEqual 0
+        dams.pos.pitch mustEqual 0
+        dams.pos.yaw mustEqual 0
+      case _ =>
+        ko
+    }
+  }
+
   "encode (fury)" in {
     val obj = VehicleData(
       CommonFieldData(
@@ -329,7 +351,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
     pkt mustEqual string_mediumtransport
   }
 
-  "decode (ams)" in {
+  "encode (ams)" in {
     val obj = AMSData(
       CommonFieldData(PlacementData(3674.0f, 2726.789f, 91.15625f, 0, 0, 0),
         PlanetSideEmpire.VS, 0,
@@ -352,5 +374,13 @@ class ObjectCreateMessageVehiclesTest extends Specification {
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 
     pkt mustEqual string_ams
+  }
+
+  "encode (ams, destroyed)" in {
+    val obj = DestroyedVehicleData(PlacementData(3674.0f, 2726.789f, 91.15625f))
+    val msg = ObjectCreateMessage(ObjectClass.ams_destroyed, PlanetSideGUID(4157), obj)
+    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
+
+    pkt mustEqual string_ams_destroyed
   }
 }

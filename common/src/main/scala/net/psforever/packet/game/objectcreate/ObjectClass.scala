@@ -304,19 +304,29 @@ object ObjectClass {
   final val striker_missile_targeting_projectile = 841
   //vehicles
   final val ams = 46
+  final val ams_destroyed = 47
   final val ant = 60
+  final val ant_destroyed = 61
   final val aurora = 118
   final val battlewagon = 135 //raider
   final val fury = 335
   final val lightning = 446
+  final val lightning_destroyed = 447
   final val mediumtransport = 532
+  final val mediumtransport_destroyed = 533
   final val quadassault = 707
+  final val quadassault_destroyed = 708
   final val quadstealth = 710
+  final val quadstealth_destroyed = 711
   final val threemanheavybuggy = 862 //marauder
+  final val threemanheavybuggy_destroyed = 863
   final val thunderer = 865
   final val two_man_assault_buggy = 896 //harasser
+  final val two_man_assault_buggy_destroyed = 897
   final val twomanheavybuggy = 898 //enforcer
+  final val twomanheavybuggy_destroyed = 899
   final val twomanhoverbuggy = 900 //thresher
+  final val twomanhoverbuggy_destroyed = 901
   //other
   final val ams_respawn_tube = 49
   final val avatar = 121
@@ -1135,19 +1145,29 @@ object ObjectClass {
       case ObjectClass.striker_missile_targeting_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       //vehicles
       case ObjectClass.ams => ConstructorData.genericCodec(AMSData.codec, "ams")
+      case ObjectClass.ams_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.ant => ConstructorData.genericCodec(ANTData.codec, "ant")
+      case ObjectClass.ant_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.aurora => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.battlewagon => ConstructorData.genericCodec(VehicleData.codec(4)(), "vehicle")
       case ObjectClass.fury => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       case ObjectClass.lightning => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.lightning_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.mediumtransport => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
+      case ObjectClass.mediumtransport_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.quadassault => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.quadassault_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.quadstealth => ConstructorData.genericCodec(VehicleData.codec(0)(), "vehicle")
+      case ObjectClass.quadstealth_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.threemanheavybuggy => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
+      case ObjectClass.threemanheavybuggy_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.thunderer => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.two_man_assault_buggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.two_man_assault_buggy_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.twomanheavybuggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.twomanheavybuggy_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       case ObjectClass.twomanhoverbuggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
+      case ObjectClass.twomanhoverbuggy_destroyed => ConstructorData.genericCodec(DestroyedVehicleData.codec, "wreckage")
       //other
       case ObjectClass.ams_respawn_tube => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
       case ObjectClass.avatar => ConstructorData.genericCodec(CharacterData.codec, "avatar")
@@ -1166,11 +1186,11 @@ object ObjectClass {
 
   /**
     * `Codec` for handling a failure case upon not finding an appropriate object `Codec`.
-    * @param cls the object class whose `Codec` we have failed to find
+    * @param cls the object class whose `Codec` we have failed to find;
     * @return a failure
     */
   private def defaultFailureCodec(cls : Int) : Codec[ConstructorData.genericPattern] = {
-    conditional(false, bool).exmap[ConstructorData.genericPattern] (
+    conditional(cls == 0, bool).exmap[ConstructorData.genericPattern] (
       {
         case None | _ =>
           Attempt.failure(Err(s"decoding unknown object class $cls"))
