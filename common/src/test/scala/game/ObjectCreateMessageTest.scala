@@ -68,7 +68,8 @@ class ObjectCreateMessageTest extends Specification {
         parent.get.guid mustEqual PlanetSideGUID(514)
         parent.get.slot mustEqual 1
         data.isDefined mustEqual true
-        data.get.isInstanceOf[ImplantInterfaceData] mustEqual true
+        data.get.isInstanceOf[CommonTerminalData] mustEqual true
+        data.get.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
       case _ =>
         ko
     }
@@ -82,14 +83,18 @@ class ObjectCreateMessageTest extends Specification {
         guid mustEqual PlanetSideGUID(3827)
         parent.isDefined mustEqual false
         data.isDefined mustEqual true
-        val term = data.get.asInstanceOf[CommonTerminalData]
-        term.pos.coord.x mustEqual 4579.3438f
-        term.pos.coord.y mustEqual 5615.0703f
-        term.pos.coord.z mustEqual 72.953125f
-        term.pos.pitch mustEqual 0
-        term.pos.roll mustEqual 0
-        term.pos.yaw mustEqual 125
-        ok
+        data.get.isInstanceOf[DroppedItemData[_]] mustEqual true
+        val drop = data.get.asInstanceOf[DroppedItemData[_]]
+        drop.pos.coord.x mustEqual 4579.3438f
+        drop.pos.coord.y mustEqual 5615.0703f
+        drop.pos.coord.z mustEqual 72.953125f
+        drop.pos.pitch mustEqual 0
+        drop.pos.roll mustEqual 0
+        drop.pos.yaw mustEqual 125
+        drop.obj.isInstanceOf[CommonTerminalData] mustEqual true
+        val term = drop.obj.asInstanceOf[CommonTerminalData]
+        term.faction mustEqual PlanetSideEmpire.NC
+        term.unk mustEqual 0
       case _ =>
         ko
     }
@@ -816,7 +821,7 @@ class ObjectCreateMessageTest extends Specification {
   }
 
   "encode (implant interface)" in {
-    val obj = ImplantInterfaceData()
+    val obj = CommonTerminalData(PlanetSideEmpire.VS)
     val msg = ObjectCreateMessage(0x199, PlanetSideGUID(1075), ObjectCreateMessageParent(PlanetSideGUID(514), 1), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 
@@ -824,7 +829,10 @@ class ObjectCreateMessageTest extends Specification {
   }
 
   "encode (order terminal a)" in {
-    val obj = CommonTerminalData(PlacementData(Vector3(4579.3438f, 5615.0703f, 72.953125f), 0, 0, 125))
+    val obj = DroppedItemData(
+      PlacementData(4579.3438f, 5615.0703f, 72.953125f, 0, 0, 125),
+      CommonTerminalData(PlanetSideEmpire.NC)
+    )
     val msg = ObjectCreateMessage(ObjectClass.order_terminala, PlanetSideGUID(3827), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 

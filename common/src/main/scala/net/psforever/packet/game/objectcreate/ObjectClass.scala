@@ -891,7 +891,14 @@ object ObjectClass {
       case ObjectClass.advanced_ace => ConstructorData.genericCodec(CommandDetonaterData.codec, "advanced ace")
       case ObjectClass.boomer_trigger => ConstructorData.genericCodec(BoomerTriggerData.codec, "boomer trigger")
       //other
-      case ObjectClass.implant_terminal_interface => ConstructorData.genericCodec(ImplantInterfaceData.codec, "implant terminal")
+      case ObjectClass.ams_respawn_tube => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.implant_terminal_interface => ConstructorData.genericCodec(CommonTerminalData.codec, "implant terminal")
+      case ObjectClass.matrix_terminala => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.matrix_terminalb => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.matrix_terminalc => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.order_terminal => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.order_terminala => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.order_terminalb => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
       //failure case
       case _ => defaultFailureCodec(objClass)
     }
@@ -1135,16 +1142,17 @@ object ObjectClass {
       case ObjectClass.thunderer => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.two_man_assault_buggy => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
       //other
+      case ObjectClass.ams_respawn_tube => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
       case ObjectClass.avatar => ConstructorData.genericCodec(CharacterData.codec, "avatar")
-      case ObjectClass.locker_container => ConstructorData.genericCodec(LockerContainerData.codec, "locker container")
-      case ObjectClass.matrix_terminala => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal") //todo confirm
-      case ObjectClass.matrix_terminalb => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal") //todo confirm
-      case ObjectClass.matrix_terminalc => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
-      case ObjectClass.order_terminal => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal") //todo confirm
-      case ObjectClass.order_terminala => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
-      case ObjectClass.order_terminalb => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
-      case ObjectClass.ams_respawn_tube => ConstructorData.genericCodec(CommonTerminalData.codec, "terminal")
       case ObjectClass.capture_flag => ConstructorData.genericCodec(CaptureFlagData.codec, "capture flag")
+      case ObjectClass.implant_terminal_interface => DroppedItemData.genericCodec(CommonTerminalData.codec, "implant terminal")
+      case ObjectClass.locker_container => ConstructorData.genericCodec(LockerContainerData.codec, "locker container")
+      case ObjectClass.matrix_terminala => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.matrix_terminalb => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.matrix_terminalc => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.order_terminal => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.order_terminala => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
+      case ObjectClass.order_terminalb => DroppedItemData.genericCodec(CommonTerminalData.codec, "terminal")
       //failure case
       case _ => defaultFailureCodec(objClass)
     }

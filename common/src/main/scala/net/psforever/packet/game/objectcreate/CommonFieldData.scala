@@ -73,7 +73,7 @@ object CommonFieldData extends Marshallable[CommonFieldData] {
   implicit val codec : Codec[CommonFieldData] = (
     ("pos" | PlacementData.codec) ::
       ("faction" | PlanetSideEmpire.codec) ::
-      ("unk1" | uint(5)) ::
+      ("unk" | uint(5)) ::
       ("player_guid" | PlanetSideGUID.codec)
     ).exmap[CommonFieldData] (
     {
