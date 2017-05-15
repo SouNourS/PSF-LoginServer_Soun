@@ -6,6 +6,7 @@ import scala.collection.mutable.ListBuffer
 class ToolDefinition(val guid : Int, val name : String) {
   var fireModes : ListBuffer[FireModeDefinition] = new ListBuffer[FireModeDefinition]
   var size : EquipmentSize.Value = EquipmentSize.BLOCKED
+  var isConcurrentFeed : Boolean = false
   var inventoryTileWidth : Int = 1
   var inventoryTileHeight : Int = 1
 }

@@ -689,7 +689,7 @@ import scodec.bits._
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,42))) // Combat Engineering
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),24,45))) // Advanced Engineering
 
-//        traveler.sendToSelf(hex"cf06000000e7dd782c0000") // 2007 SOE Fan Faire Award (for Katana !)
+        traveler.sendToSelf(hex"cf06000000e7dd782c0000") // 2007 SOE Fan Faire Award (for Katana !)
 
 //        traveler.sendToSelf(hex"cfa9010000fa172d228000") // werner
 
@@ -726,11 +726,26 @@ import scodec.bits._
 
                 for (ind <- 0 to 4) {
                   if (onlineplayer.getHolster(ind).getEquipment.isDefined) {
-                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
-                      onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
-                      Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
-                      Some(WeaponData(0, 8, onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
-                        InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)))))))
+                    if (!onlineplayer.getEquipmentInHolster(ind).get.getToolDefinition.isConcurrentFeed){
+                      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
+                        onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
+                        Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
+                        Some(WeaponData(0, 8, onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
+                          InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)))))))
+                    }
+                    else {
+                      var color : Int = 0 // TR
+                      if (onlineplayer.faction == PlanetSideEmpire.NC) color = 4
+                      if (onlineplayer.faction == PlanetSideEmpire.VS) color = 8
+
+                      traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
+                        onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
+                        Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
+                        Some(ConcurrentFeedWeaponData(color, 8,
+                          onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
+                          List(InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)),
+                            InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 16), 1, AmmoBoxData(8))))))))
+                    }
                   }
                 }
 

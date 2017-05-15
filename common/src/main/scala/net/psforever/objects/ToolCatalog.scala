@@ -119,6 +119,18 @@ object ToolCatalog {
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool
 
+  tool = ToolDefinition(421, "katana")
+  tool.size = EquipmentSize.MELEE
+  tool.isConcurrentFeed = true
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.melee_ammo
+  tool.fireModes(0).magazineSize = 1
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(1).ammoTypes += Ammo.melee_ammo
+  tool.fireModes(1).magazineSize = 1
+  //should never end up in inventory; will match glitch knife dimensions, however, if it does
+  catalog += tool.guid -> tool
+
   tool = ToolDefinition(429, "lasher")
   tool.size = EquipmentSize.RIFLE
   tool.fireModes += new FireModeDefinition
