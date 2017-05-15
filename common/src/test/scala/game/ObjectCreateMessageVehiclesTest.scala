@@ -13,6 +13,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
   val string_ant =  hex"17 C2000000 9E0 7C01 6C2D7 65535 CA16 00 00 00 4400003FC000000"
   val string_lightning = hex"17 8b010000 df1 5a00 6c2d7 65535 ca16 00 00 00 4400003fc00101300ad8040c4000000408190b801018000002617402070000000"
   val string_mediumtransport = hex"17 DA010000 8A2 8301 FBC1C 12A83 2F06 00 00 21 2400003FC079020593F80C2E400000040410148030190000017458050D90000001010401F814064000000"
+  val string_ams = hex"17 B8010000 970 3D10 002D765535CA16000000 402285BB0037E4100749E1D03000000620D83A0A00000195798741C00000332E40D84800000"
 
   "decode (fury)" in {
     PacketCoding.DecodePacket(string_fury).require match {
@@ -197,6 +198,61 @@ class ObjectCreateMessageVehiclesTest extends Specification {
     }
   }
 
+  "decode (ams)" in {
+    PacketCoding.DecodePacket(string_ams).require match {
+      case ObjectCreateMessage(len, cls, guid, parent, data) =>
+        len mustEqual 440L
+        cls mustEqual ObjectClass.ams
+        guid mustEqual PlanetSideGUID(4157)
+        parent.isDefined mustEqual false
+        data.isDefined mustEqual true
+        data.get.isInstanceOf[AMSData] mustEqual true
+        val ams = data.get.asInstanceOf[AMSData]
+        ams.basic.pos.coord.x mustEqual 3674.0f
+        ams.basic.pos.coord.y mustEqual 2726.789f
+        ams.basic.pos.coord.z mustEqual 91.15625f
+        ams.basic.pos.roll mustEqual 0
+        ams.basic.pos.pitch mustEqual 0
+        ams.basic.pos.yaw mustEqual 0
+        ams.basic.faction mustEqual PlanetSideEmpire.VS
+        ams.basic.unk mustEqual 0
+        ams.basic.player_guid mustEqual PlanetSideGUID(34082)
+        ams.unk1 mustEqual 2
+        ams.health mustEqual 236
+        ams.unk2 mustEqual 63
+
+        ams.matrix_term.objectClass mustEqual ObjectClass.matrix_terminalc
+        ams.matrix_term.guid mustEqual PlanetSideGUID(3663)
+        ams.matrix_term.parentSlot mustEqual 1
+        ams.matrix_term.obj.isInstanceOf[CommonTerminalData] mustEqual true
+        ams.matrix_term.obj.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
+        ams.matrix_term.obj.asInstanceOf[CommonTerminalData].unk mustEqual 0
+
+        ams.respawn_tube.objectClass mustEqual ObjectClass.ams_respawn_tube
+        ams.respawn_tube.guid mustEqual PlanetSideGUID(3638)
+        ams.respawn_tube.parentSlot mustEqual 2
+        ams.respawn_tube.obj.isInstanceOf[CommonTerminalData] mustEqual true
+        ams.respawn_tube.obj.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
+        ams.respawn_tube.obj.asInstanceOf[CommonTerminalData].unk mustEqual 0
+
+        ams.order_term_a.objectClass mustEqual ObjectClass.order_terminala
+        ams.order_term_a.guid mustEqual PlanetSideGUID(3827)
+        ams.order_term_a.parentSlot mustEqual 3
+        ams.order_term_a.obj.isInstanceOf[CommonTerminalData] mustEqual true
+        ams.order_term_a.obj.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
+        ams.order_term_a.obj.asInstanceOf[CommonTerminalData].unk mustEqual 0
+
+        ams.order_term_b.objectClass mustEqual ObjectClass.order_terminalb
+        ams.order_term_b.guid mustEqual PlanetSideGUID(3556)
+        ams.order_term_b.parentSlot mustEqual 4
+        ams.order_term_b.obj.isInstanceOf[CommonTerminalData] mustEqual true
+        ams.order_term_b.obj.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
+        ams.order_term_b.obj.asInstanceOf[CommonTerminalData].unk mustEqual 0
+      case _ =>
+        ko
+    }
+  }
+
   "encode (fury)" in {
     val obj = VehicleData(
       CommonFieldData(
@@ -271,5 +327,30 @@ class ObjectCreateMessageVehiclesTest extends Specification {
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 
     pkt mustEqual string_mediumtransport
+  }
+
+  "decode (ams)" in {
+    val obj = AMSData(
+      CommonFieldData(PlacementData(3674.0f, 2726.789f, 91.15625f, 0, 0, 0),
+        PlanetSideEmpire.VS, 0,
+        PlanetSideGUID(34082)
+      ),
+      2,
+      236,
+      AMSDeployState.Deployed,
+      63,
+      PlanetSideGUID(3663),
+      PlanetSideGUID(3638),
+      PlanetSideGUID(3827),
+      PlanetSideGUID(3556)
+      //InternalSlot(ObjectClass.matrix_terminalc, PlanetSideGUID(3663), 1, CommonTerminalData(PlanetSideEmpire.VS)),
+      //InternalSlot(ObjectClass.ams_respawn_tube, PlanetSideGUID(3638), 2, CommonTerminalData(PlanetSideEmpire.VS)),
+      //InternalSlot(ObjectClass.order_terminala, PlanetSideGUID(3827), 3, CommonTerminalData(PlanetSideEmpire.VS)),
+      //InternalSlot(ObjectClass.order_terminalb, PlanetSideGUID(3556), 4, CommonTerminalData(PlanetSideEmpire.VS))
+    )
+    val msg = ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(4157), obj)
+    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
+
+    pkt mustEqual string_ams
   }
 }

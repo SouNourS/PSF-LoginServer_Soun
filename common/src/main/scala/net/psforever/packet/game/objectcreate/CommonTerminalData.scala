@@ -2,6 +2,7 @@
 package net.psforever.packet.game.objectcreate
 
 import net.psforever.packet.Marshallable
+import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.types.PlanetSideEmpire
 import scodec.{Attempt, Codec, Err}
 import scodec.codecs._
@@ -20,6 +21,17 @@ final case class CommonTerminalData(faction : PlanetSideEmpire.Value,
 }
 
 object CommonTerminalData extends Marshallable[CommonTerminalData] {
+  /**
+    * Overloaded constructor for a type of common terminal.
+    * @param cls the code for the type of object being constructed
+    * @param guid the GUID this object will be assigned
+    * @param parentSlot a parent-defined slot identifier that explains where the child is to be attached to the parent
+    * @param terminal the `CommonTerminalData`
+    * @return an `InternalSlot` object
+    */
+  def apply(cls : Int, guid : PlanetSideGUID, parentSlot : Int, terminal : CommonTerminalData) : InternalSlot =
+    InternalSlot(cls, guid, parentSlot, terminal)
+
   implicit val codec : Codec[CommonTerminalData] = (
     ("faction" | PlanetSideEmpire.codec) ::
       uint2L ::

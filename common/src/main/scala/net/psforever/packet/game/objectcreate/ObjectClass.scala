@@ -14,8 +14,6 @@ import scala.annotation.switch
   * The items that can be constructed with packets `ObjectCreateMessage` and `ObjectCreateDetailedMessage` number fewer than 1047.
   */
 object ObjectClass {
-  //character
-  final val avatar = 0x79 // 121
   //ammunition
   final val bullet_105mm = 0
   final val bullet_12mm = 3
@@ -305,6 +303,7 @@ object ObjectClass {
   final val starfire_projectile = 831
   final val striker_missile_targeting_projectile = 841
   //vehicles
+  final val ams = 46
   final val ant = 60
   final val aurora = 118
   final val battlewagon = 135 //raider
@@ -319,16 +318,17 @@ object ObjectClass {
   final val twomanheavybuggy = 898 //enforcer
   final val twomanhoverbuggy = 900 //thresher
   //other
-  final val locker_container = 456
+  final val ams_respawn_tube = 49
+  final val avatar = 121
+  final val capture_flag = 157
   final val implant_terminal_interface = 409
+  final val locker_container = 456
   final val matrix_terminala = 517
   final val matrix_terminalb = 518
   final val matrix_terminalc = 519
   final val order_terminal = 612
   final val order_terminala = 613
   final val order_terminalb = 614
-  final val ams_respawn_tube = 49
-  final val capture_flag = 157
 
   //TODO refactor the following functions into another object later
   /**
@@ -1134,7 +1134,8 @@ object ObjectClass {
       case ObjectClass.starfire_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       case ObjectClass.striker_missile_targeting_projectile => ConstructorData.genericCodec(TrackedProjectileData.codec, "projectile")
       //vehicles
-      case ObjectClass.ant => ConstructorData.genericCodec(ANTData.codec, "vehicle")
+      case ObjectClass.ams => ConstructorData.genericCodec(AMSData.codec, "ams")
+      case ObjectClass.ant => ConstructorData.genericCodec(ANTData.codec, "ant")
       case ObjectClass.aurora => ConstructorData.genericCodec(VehicleData.codec(2)(), "vehicle")
       case ObjectClass.battlewagon => ConstructorData.genericCodec(VehicleData.codec(4)(), "vehicle")
       case ObjectClass.fury => ConstructorData.genericCodec(VehicleData.codec, "vehicle")
