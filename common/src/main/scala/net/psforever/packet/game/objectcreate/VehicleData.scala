@@ -2,7 +2,7 @@
 package net.psforever.packet.game.objectcreate
 
 import net.psforever.packet.{Marshallable, PacketHelpers}
-import scodec.codecs._
+import scodec.codecs.{uint2L, _}
 import scodec.{Attempt, Codec, Err}
 import shapeless.{::, HNil}
 
@@ -27,7 +27,12 @@ import shapeless.{::, HNil}
   * Outside of managing mounted weaponry, any vehicle with special "utilities" must be handled as a special case.
   * This includes vehicles that go through a sessile physical conversion known as "deploying."
   * @param basic data common to objects
+  * @param unk1 na
   * @param health the amount of health the vehicle has, as a percentage of a filled bar
+  * @param unk2 na
+  * @param unk3 na
+  * @param unk4 na
+  * @param unk5 na
   * @param mountings data regarding the mounted utilities, usually weapons
   * @param mount_capacity implicit;
   *                       the total number of mounted utilities allowed on this vehicle;
@@ -35,8 +40,12 @@ import shapeless.{::, HNil}
   *                       -1 or less ignores the imposed checks
   */
 final case class VehicleData(basic : CommonFieldData,
+                             unk1 : Int,
                              health : Int,
-                             unk : Int,
+                             unk2 : Int,
+                             unk3 : Int,
+                             unk4 : Boolean,
+                             unk5 : Int,
                              mountings : Option[List[InternalSlot]] = None
                             )(implicit val mount_capacity : Int = 1) extends ConstructorData {
   override def bitsize : Long = {
@@ -51,12 +60,12 @@ final case class VehicleData(basic : CommonFieldData,
     else {
       0L
     }
-    VehicleData.baseVehicleDataSize + basicSize + internalSize
+    3L + VehicleData.baseVehicleSize + basicSize + internalSize
   }
 }
 
 object VehicleData extends Marshallable[VehicleData] {
-  val baseVehicleDataSize : Long = 24L //2u + 8u + 7u + 4u + 2u + 1u
+  val baseVehicleSize : Long = 21L //2u + 8u + 2u + 8u + 1u
 
   /**
     * Overloaded constructor that mandates information about a single weapon.
@@ -66,7 +75,7 @@ object VehicleData extends Marshallable[VehicleData] {
     * @return a `VehicleData` object
     */
   def apply(basic : CommonFieldData, health : Int, mount : InternalSlot) : VehicleData =
-    new VehicleData(basic, health, 0, Some(mount :: Nil))
+    new VehicleData(basic, 0, health, 0, 0, false, 0, Some(mount :: Nil))
 
   /**
     * Perform an evaluation of the provided object.
@@ -116,6 +125,17 @@ object VehicleData extends Marshallable[VehicleData] {
     }
   )
 
+  type basicVehiclePattern = CommonFieldData :: Int :: Int :: Int :: Int :: Boolean :: HNil
+
+  val basic_vehicle_codec : Codec[basicVehiclePattern] = (
+    CommonFieldData.codec :: //not certain if player_guid is valid
+      uint2L :: //often paired with the assumed 16u field in previous?
+      uint8L :: //usually "health"
+      uint2L :: //usually 0; second bit turns off vehicle seat entry points
+      uint8L :: //special field (AMS and ANT use for deploy state)
+      bool //unknown but generally false
+    ).as[basicVehiclePattern]
+
   /**
     * A `Codec` for `VehicleData`.
     * @param mount_capacity the total number of mounted weapons that are attached to this vehicle;
@@ -125,40 +145,45 @@ object VehicleData extends Marshallable[VehicleData] {
     * @return a `VehicleData` object or a `BitVector`
     */
   def codec(mount_capacity : Int = 1)(typeCheck : (List[InternalSlot]) => Boolean = allAllowed) : Codec[VehicleData] = (
-    ("basic" | CommonFieldData.codec) ::
-      uint2L ::
-      ("health" | uint8L) ::
-      uintL(7) ::
-      ("unk" | uint4L) :: //1 is jammered?
-      uint2L ::
+    basic_vehicle_codec.exmap[basicVehiclePattern] (
+      {
+        case basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil =>
+          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil)
+      },
+      {
+        case basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil =>
+          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil)
+      }
+    ) :+
+      uint2L :+
       optional(bool, "mountings" | mountedUtilitiesCodec(typeCheck))
     ).exmap[VehicleData] (
     {
-      case basic :: 0 :: health :: 0 :: unk :: 0 :: None :: HNil =>
+      case basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: None :: HNil =>
         if(mount_capacity > -1 && mount_capacity != 0) {
           Attempt.failure(Err(s"vehicle decodes wrong number of mounts - actual 0, expected $mount_capacity"))
         }
         else {
-          Attempt.successful(VehicleData(basic, health, unk, None)(0))
+          Attempt.successful(VehicleData(basic, u1, health, u2, u3, u4, u5, None)(0))
         }
 
-      case basic :: 0 :: health :: 0 :: unk :: 0 :: mountings :: HNil =>
+      case basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: mountings :: HNil =>
         val onboardMountCount : Int = mountings.get.size
         if(mount_capacity > -1 && mount_capacity != onboardMountCount) {
           Attempt.failure(Err(s"vehicle decodes wrong number of mounts - actual $onboardMountCount, expected $mount_capacity"))
         }
         else {
-          Attempt.successful(VehicleData(basic, health, unk, mountings)(onboardMountCount))
+          Attempt.successful(VehicleData(basic, u1, health, u2, u3, u4, u5, mountings)(onboardMountCount))
         }
 
       case _ =>
         Attempt.failure(Err("invalid vehicle data format"))
     },
     {
-      case obj @ VehicleData(basic, health, unk, None) =>
+      case obj @ VehicleData(basic, u1, health, u2, u3, u4, u5, None) =>
         val objMountCapacity = obj.mount_capacity
         if(objMountCapacity < 0 || mount_capacity < 0) {
-          Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: None :: HNil)
+          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: None :: HNil)
         }
         else {
           if(mount_capacity != objMountCapacity) {
@@ -168,14 +193,14 @@ object VehicleData extends Marshallable[VehicleData] {
             Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual 0, expected $mount_capacity"))
           }
           else {
-            Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: None :: HNil)
+            Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: None :: HNil)
           }
         }
 
-      case obj @ VehicleData(basic, health, unk, mountings) =>
+      case obj @ VehicleData(basic, u1, health, u2, u3, u4, u5, mountings) =>
         val objMountCapacity = obj.mount_capacity
         if(objMountCapacity < 0 || mount_capacity < 0) {
-          Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: mountings :: HNil)
+          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: mountings :: HNil)
         }
         else {
           val mountSize : Int = mountings.get.size
@@ -186,7 +211,7 @@ object VehicleData extends Marshallable[VehicleData] {
             Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $mountSize, expected $mount_capacity"))
           }
           else {
-            Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: mountings :: HNil)
+            Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: mountings :: HNil)
           }
         }
 

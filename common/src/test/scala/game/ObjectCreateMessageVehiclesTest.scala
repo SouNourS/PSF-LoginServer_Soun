@@ -157,8 +157,12 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         deliverer.basic.faction mustEqual PlanetSideEmpire.NC
         deliverer.basic.unk mustEqual 4
         deliverer.basic.player_guid mustEqual PlanetSideGUID(0)
+        deliverer.unk1 mustEqual 0
         deliverer.health mustEqual 255
-        deliverer.unk mustEqual 0xF
+        deliverer.unk2 mustEqual 0
+        deliverer.unk3 mustEqual 0x7
+        deliverer.unk4 mustEqual true
+        deliverer.unk5 mustEqual 0
         deliverer.mountings.isDefined mustEqual true
         deliverer.mountings.get.size mustEqual 2
         //0
@@ -277,7 +281,8 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         PlacementData(3674.8438f, 2726.789f, 91.15625f),
         PlanetSideEmpire.VS, 4
       ),
-      255
+      255,
+      ANTDeployState.Mobile
     )
     val msg = ObjectCreateMessage(ObjectClass.ant, PlanetSideGUID(380), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
@@ -308,8 +313,12 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         PlacementData(6531.961f, 1872.1406f, 24.734375f, 0, 0, 33),
         PlanetSideEmpire.NC, 4
       ),
+      0,
       255,
-      0xF,
+      0,
+      7,
+      true,
+      0,
       Some(
         InternalSlot(
           ObjectClass.mediumtransport_weapon_systemA, PlanetSideGUID(383), 5,

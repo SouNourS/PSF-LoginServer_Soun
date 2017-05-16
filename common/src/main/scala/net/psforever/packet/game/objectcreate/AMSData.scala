@@ -14,12 +14,12 @@ object AMSDeployState extends Enumeration {
   type Type = Value
 
   val Mobile, //drivable
-      Undeployed, //stationary, ejects possible game object intersections
-      DeployedButUnavailable, //stationary, spawn cloak bubble active, utilities are inaccessible
-      Deployed //stationary, spawn cloak bubble active, utilities functional, spawn-ready
+      Undeployed, //stationary
+      Unavailable, //stationary, cloak bubble active, utilities nonfunctional
+      Deployed //stationary, cloak bubble active, utilities functional
       = Value
 
-  implicit val codec = PacketHelpers.createEnumerationCodec(this, uint2L)
+  implicit val codec = PacketHelpers.createEnumerationCodec(this, uint8L)
 }
 
 /**
@@ -32,8 +32,9 @@ object AMSDeployState extends Enumeration {
   * @param basic data common to objects
   * @param unk1 na
   * @param health the amount of health the object has, as a percentage of a filled bar
+  * @param unk2 na
   * @param deployState the spawn-readiness condition
-  * @param unk2 na;
+  * @param unk3 na;
   *             common values are 0 or 63;
   *             usually in a non-`Mobile` state when non-zero
   * @param matrix_guid the GUID for the spawn matrix panel on the front
@@ -44,8 +45,9 @@ object AMSDeployState extends Enumeration {
 final case class AMSData(basic : CommonFieldData,
                          unk1 : Int,
                          health : Int,
-                         deployState : AMSDeployState.Value,
                          unk2 : Int,
+                         deployState : AMSDeployState.Value,
+                         unk3 : Int,
                          matrix_guid : PlanetSideGUID,
                          respawn_guid : PlanetSideGUID,
                          term_a_guid : PlanetSideGUID,
@@ -53,44 +55,62 @@ final case class AMSData(basic : CommonFieldData,
                         ) extends ConstructorData {
   override def bitsize : Long = {
     val basicSize = basic.bitsize
-    val vehicleSize : Long = VehicleData.baseVehicleDataSize
+    val vehicleSize : Long = VehicleData.baseVehicleSize
     //the four utilities should all be the same size
     val utilitySize : Long = 4 * InternalSlot(ObjectClass.matrix_terminalc, matrix_guid, 1, CommonTerminalData(basic.faction)).bitsize
-    16L + basicSize + vehicleSize + utilitySize
+    19L + basicSize + vehicleSize + utilitySize
   }
 }
 
 object AMSData extends Marshallable[AMSData] {
+  /**
+    * Overloaded constructor that ignores all of the unknown fields.
+    * @param basic data common to objects
+    * @param health the amount of health the object has, as a percentage of a filled bar
+    * @param deployState the nanite interaction-readiness condition
+    * @param matrix_guid the GUID for the spawn matrix panel on the front
+    * @param respawn_guid the GUID for the respawn apparatus on the rear
+    * @param term_a_guid the GUID for the equipment terminal on the AMS on the left side
+    * @param term_b_guid the GUID for the equipment on the AMS on the right side
+    * @return an `AMSData` object
+    */
+  def apply(basic : CommonFieldData, health : Int, deployState : AMSDeployState.Value, matrix_guid : PlanetSideGUID, respawn_guid : PlanetSideGUID, term_a_guid : PlanetSideGUID, term_b_guid : PlanetSideGUID) : AMSData =
+    new AMSData(basic, 0, health, 0, deployState, 0, matrix_guid, respawn_guid, term_a_guid, term_b_guid)
+
   implicit val codec : Codec[AMSData] = (
-    ("basic" | CommonFieldData.codec) :: //note: not certain if player_guid is a valid field for AMS context
-      ("unk1" | uint2L) :: //note: tied to previous questionable field boundary
-      ("health" | uint8L) ::
-      uint8L ::
-      ("deployState" | AMSDeployState.codec) ::
-      bool ::
-      ("unk2" | uintL(6)) ::
-      bool ::
-      uintL(12) ::
-      ("term1" | InternalSlot.codec) ::
-      ("tube" | InternalSlot.codec) ::
-      ("term2" | InternalSlot.codec) ::
+    VehicleData.basic_vehicle_codec.exmap[VehicleData.basicVehiclePattern] (
+      {
+        case basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil =>
+          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil)
+      },
+      {
+        case basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil =>
+          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil)
+      }
+    ) :+
+      uintL(6) :+
+      bool :+
+      uintL(12) :+
+      ("term1" | InternalSlot.codec) :+
+      ("tube" | InternalSlot.codec) :+
+      ("term2" | InternalSlot.codec) :+
       ("term3" | InternalSlot.codec)
     ).exmap[AMSData] (
     {
-      case basic :: unk1 :: health :: 0 :: deployState :: false :: unk2 :: false :: 0x41 ::
+      case basic :: unk1 :: health :: unk2 :: deployState :: false :: unk3 :: false :: 0x41 ::
         InternalSlot(ObjectClass.matrix_terminalc, matrix_guid, 1, CommonTerminalData(_, _)) ::
         InternalSlot(ObjectClass.ams_respawn_tube, respawn_guid,2, CommonTerminalData(_, _)) ::
         InternalSlot(ObjectClass.order_terminala,  terma_guid,  3, CommonTerminalData(_, _)) ::
         InternalSlot(ObjectClass.order_terminalb,  termb_guid,  4, CommonTerminalData(_, _)) :: HNil =>
-        Attempt.successful(AMSData(basic, unk1, health, deployState, unk2, matrix_guid, respawn_guid, terma_guid, termb_guid))
+        Attempt.successful(AMSData(basic, unk1, health, unk2, AMSDeployState(deployState), unk3, matrix_guid, respawn_guid, terma_guid, termb_guid))
 
       case _ =>
         Attempt.failure(Err("invalid AMS data"))
     },
     {
-      case AMSData(basic, unk1, health, deployState, unk2, matrix_guid, respawn_guid, terma_guid, termb_guid) =>
+      case AMSData(basic, unk1, health, unk2, deployState, unk3, matrix_guid, respawn_guid, terma_guid, termb_guid) =>
         Attempt.successful(
-          basic :: unk1 :: health :: 0 :: deployState :: false :: unk2 :: false :: 0x41 ::
+          basic :: unk1 :: health :: unk2 :: deployState.id :: false :: unk3 :: false :: 0x41 ::
             InternalSlot(ObjectClass.matrix_terminalc, matrix_guid, 1, CommonTerminalData(basic.faction)) ::
             InternalSlot(ObjectClass.ams_respawn_tube, respawn_guid,2, CommonTerminalData(basic.faction)) ::
             InternalSlot(ObjectClass.order_terminala,  terma_guid,  3, CommonTerminalData(basic.faction)) ::
