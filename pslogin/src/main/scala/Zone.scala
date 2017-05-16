@@ -1436,8 +1436,7 @@ import scodec.bits._
         "gate2" -> (2732, 1355, 36),
         "geowarp" -> (1424, 1640, 45)
       )
-      zones("i4").locations += "atar" -> (1981, 1886, 36)
-//      zones("i4").locations += "atar" -> (1915, 1936, 43)
+      zones("i4").locations += "atar" -> (1915, 1936, 43)
     }
   }
 

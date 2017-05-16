@@ -694,7 +694,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(3), 3, PlanetSideGUID(3), true, 0)))
 
     case msg@CharacterRequestMessage(charId, action) =>
-      log.info("ID: " + sessionId + " Handling " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
       action match {
         case CharacterRequestAction.Delete =>
@@ -987,7 +987,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           log.error("Unsupported " + default + " in " + msg)
       }
     case msg@CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
-      log.info("ID: " + sessionId + " Handling " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
       // define a new Player GUID
       var nbOnlineTF : Boolean = false
@@ -1030,7 +1030,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
 
     case msg@PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
-//      log.info("ID: " + sessionId + " PlayerState: " + msg)
+//      log.info("ID: " + sessionId + " " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
@@ -1086,10 +1086,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info("ID: " + sessionId + " Reticulating splines ...")
 
     case msg @ ChildObjectStateMessage(object_guid : PlanetSideGUID, pitch : Int, yaw : Int) =>
-      log.info("ID: " + sessionId + " ChildObjectState: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg @ ProjectileStateMessage(projectile_guid, shot_pos, shot_vector, unk1, unk2, unk3, unk4, time_alive) =>
-      log.info("ProjectileState: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg @ ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       // TODO: Prevents log spam, but should be handled correctly
@@ -1098,7 +1098,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val player: PlayerAvatar = playerOpt.get
 
         if (messagetype != ChatMessageType.CMT_TOGGLE_GM) {
-          log.info("ID: " + sessionId + " / " + player.name + " Chat: " + msg)
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         }
 
 //        if(messagetype == ChatMessageType.CMT_OPEN) {
@@ -1176,30 +1176,33 @@ class WorldSessionActor extends Actor with MDCContextAware {
             }
           }
 
-          if (zone == "oshur" || zone == "z8") {
-            if (player.faction == PlanetSideEmpire.NC) destination = (4689, 5458, 49)
-            if (player.faction == PlanetSideEmpire.TR) destination = (4694, 5399, 54)
-            if (player.faction == PlanetSideEmpire.VS) destination = (4720, 5401, 46)
-          }
+//          if (zone == "oshur" || zone == "z8") {
+//            if (player.faction == PlanetSideEmpire.NC) destination = (4689, 5458, 49)
+//            if (player.faction == PlanetSideEmpire.TR) destination = (4694, 5399, 54)
+//            if (player.faction == PlanetSideEmpire.VS) destination = (4720, 5401, 46)
+//          }
           if (zone == "ascension" || zone == "i2") {
 //            destination = (2082, 2191, 160) // center
-            if (player.faction == PlanetSideEmpire.NC) destination = (2238, 2133, 101)
-            if (player.faction == PlanetSideEmpire.TR) destination = (2048, 2325, 105)
-            if (player.faction == PlanetSideEmpire.VS) destination = (1882, 2040, 101)
+//            if (player.faction == PlanetSideEmpire.NC) destination = (2238, 2133, 101) // twr
+//            if (player.faction == PlanetSideEmpire.TR) destination = (2048, 2325, 105) // twr
+//            if (player.faction == PlanetSideEmpire.VS) destination = (1882, 2040, 101) // twr
+            if (player.faction == PlanetSideEmpire.NC) destination = (2629, 2278, 84) // base
+            if (player.faction == PlanetSideEmpire.TR) destination = (1804, 2693, 82) // base
+            if (player.faction == PlanetSideEmpire.VS) destination = (1728, 1740, 82) // base
           }
-          if (zone == "nexus" || zone == "i4") {
-            //          if (player.faction == PlanetSideEmpire.NC) destination = (1921, 2066, 40)
-            if (player.faction == PlanetSideEmpire.NC) destination = (1944, 1940, 36)
-            //          if (player.faction == PlanetSideEmpire.TR) destination = (1888, 1872, 40)
-            if (player.faction == PlanetSideEmpire.TR) destination = (1966, 1959, 26)
-            //          if (player.faction == PlanetSideEmpire.VS) destination = (2029, 2012, 40)
-            if (player.faction == PlanetSideEmpire.VS) destination = (2038, 1993, 31)
-          }
+//          if (zone == "nexus" || zone == "i4") {
+//            //          if (player.faction == PlanetSideEmpire.NC) destination = (1921, 2066, 40)
+//            if (player.faction == PlanetSideEmpire.NC) destination = (1944, 1940, 36)
+//            //          if (player.faction == PlanetSideEmpire.TR) destination = (1888, 1872, 40)
+//            if (player.faction == PlanetSideEmpire.TR) destination = (1966, 1959, 26)
+//            //          if (player.faction == PlanetSideEmpire.VS) destination = (2029, 2012, 40)
+//            if (player.faction == PlanetSideEmpire.VS) destination = (2038, 1993, 31)
+//          }
           Transfer.zone(traveler, this.sessionId, Zone.get(zone).get, destination)
           avatarService ! AvatarService.Join(player.continent)
           avatarService ! AvatarService.LoadMap(PlanetSideGUID(player.guid))
         }
-        if (player.continent != "i2") CSRWarp.read(traveler, msg)
+        if (player.continent != "i2" || player.admin) CSRWarp.read(traveler, msg)
 
         // TODO: handle this appropriately
         if (messagetype == ChatMessageType.CMT_QUIT) {
@@ -1240,7 +1243,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         if (messagetype == ChatMessageType.CMT_OPEN) {
           if (contents.length > 1 && contents.dropRight(contents.length - 1) == "!" && contents.drop(1).dropRight(contents.length - 2) != "!") {
-
             if(contents.drop(1) == "list" && !player.admin) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "You need the admin password ;)", note_contents)))
             if(contents.drop(1) == "list" && player.admin) {
               val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
@@ -1254,7 +1256,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     j += 1
                     guid += 100
                     sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
-                      "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + player.faction + ") " + player.continent, note_contents)))
+                      "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
+                        onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
                   }
                   else if (player.guid == onlineplayer.guid) {
                     guid += 100
@@ -1332,14 +1335,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, VoiceHostKill()))
 
     case msg@VoiceHostInfo(player_guid, data) =>
-      log.info("ID: " + sessionId + " VoiceHostInfo: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, VoiceHostKill()))
 
     case msg@ChangeFireModeMessage(item_guid, fire_mode) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " ChangeFireMode: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         avatarService ! AvatarService.ChangeFireMode(item_guid, fire_mode, sessionId)
         player.getEquipmentInHolster(player.getUsedHolster).get.setFireModeIndex(fire_mode)
 //        if (item_guid.guid == player.guid + 1)  player.getEquipmentInHolster(0).get.setFireModeIndex(fire_mode)
@@ -1353,7 +1356,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " ChangeFireState_Start: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         player.shooting = true
         avatarService ! AvatarService.ChangeFireState(item_guid,sessionId)
       }
@@ -1362,27 +1365,27 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " ChangeFireState_Stop: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         player.shooting = false
         player.lastShotSeq_time = -1
         avatarService ! AvatarService.ChangeFireState(item_guid,sessionId)
       }
 
     case msg@EmoteMsg(avatar_guid, emote) =>
-      log.info("ID: " + sessionId + " Emote: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, EmoteMsg(avatar_guid, emote)))
 
     case msg @ DropItemMessage(item_guid) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " DropItem: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.guid), item_guid, player.getPosition, 0, 0, 0)))
         sendResponse(PacketCoding.CreateGamePacket(0, DropItemMessage(item_guid)))
       }
 
     case msg @ PickupItemMessage(item_guid, player_guid, unk1, unk2) =>
-      log.info("ID: " + sessionId + " PickupItem: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, PickupItemMessage(item_guid, player_guid, unk1, unk2)))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(player_guid, item_guid, 250))) // item on mouse
 
@@ -1391,7 +1394,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (playerOpt.isDefined) {
         var ammo_clip2 : Int = 0
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " Reload: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun") ammo_clip2 = 16
         else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss") ammo_clip2 = 30
         else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun") ammo_clip2 = 100
@@ -1414,18 +1417,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " ObjectHeld: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         if(held_holsters != 255) {
           player.setUsedHolster(held_holsters)
-          log.info("ID: " + sessionId + " / " + player.name + " getName: " + player.getEquipmentInHolster(player.getUsedHolster).get.getName)
-          log.info("ID: " + sessionId + " / " + player.name + " guid: " + player.getEquipmentInHolster(player.getUsedHolster).get.guid)
-          log.info("ID: " + sessionId + " / " + player.name + " toolDef: " + player.getEquipmentInHolster(player.getUsedHolster).get.toolDef)
-          log.info("ID: " + sessionId + " / " + player.name + " getAmmoType: " + player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoType)
-          log.info("ID: " + sessionId + " / " + player.name + " getAmmoTypeIndex: " + player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoTypeIndex)
-          log.info("ID: " + sessionId + " / " + player.name + " getUsedHolster1: " + player.getUsedHolster)
-          log.info("ID: " + sessionId + " / " + player.name + " getUsedHolster2: " + player.getHolster(player.getUsedHolster))
-          log.info("ID: " + sessionId + " / " + player.name + " getUsedHolster3: " + player.getEquipmentInHolster(player.getUsedHolster))
-          log.info("ID: " + sessionId + " / " + player.name + " isDefined: " + player.getHolster(player.getUsedHolster).getEquipment.isDefined)
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getName: " + player.getEquipmentInHolster(player.getUsedHolster).get.getName)
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " guid: " + player.getEquipmentInHolster(player.getUsedHolster).get.guid)
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " toolDef: " + player.getEquipmentInHolster(player.getUsedHolster).get.toolDef)
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getAmmoType: " + player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoType)
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getAmmoTypeIndex: " + player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoTypeIndex)
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getUsedHolster1: " + player.getUsedHolster)
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getUsedHolster2: " + player.getHolster(player.getUsedHolster))
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getUsedHolster3: " + player.getEquipmentInHolster(player.getUsedHolster))
+          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " isDefined: " + player.getHolster(player.getUsedHolster).getEquipment.isDefined)
         }
         avatarService ! AvatarService.ObjectHeld(PlanetSideGUID(player.guid))
       }
@@ -1434,14 +1437,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " AvatarJump: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         if (player.greenStamina - 10 <= 0) player.greenStamina = 0
         if (player.greenStamina - 10 > 0) player.greenStamina -= 10
         sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid), 2, player.greenStamina)))
       }
 
     case msg@ZipLineMessage(player_guid, origin_side, action, id, pos) =>
-      log.info("ID: " + sessionId + " ZipLineMessage: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
       if (!origin_side && action == 0) {
         //doing this lets you use the zip line in one direction, cant come back
         sendResponse(PacketCoding.CreateGamePacket(0, ZipLineMessage(player_guid, origin_side, action, id, pos)))
@@ -1459,23 +1462,23 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@RequestDestroyMessage(object_guid) =>
-      log.info("ID: " + sessionId + " RequestDestroy: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
       // TODO: Make sure this is the correct response in all cases
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
 
     case msg@ObjectDeleteMessage(object_guid, unk1) =>
-      log.info("ID: " + sessionId + " ObjectDelete: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(object_guid, 0)))
 
     case msg@MoveItemMessage(item_guid, avatar_guid_1, avatar_guid_2, dest, unk1) =>
-      log.info("ID: " + sessionId + " MoveItem: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 //      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(avatar_guid_1, item_guid, dest))) for rexo test
 
     case msg@ChangeAmmoMessage(item_guid, unk1) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " ChangeAmmo: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         if (item_guid.guid == player.guid + 1 && player.getEquipmentInHolster(0).get.getAmmoTypeIndex == 0)  player.getEquipmentInHolster(0).get.setAmmoTypeIndex(1)
         else if (item_guid.guid == player.guid + 1 && player.getEquipmentInHolster(0).get.getAmmoTypeIndex == 1)  player.getEquipmentInHolster(0).get.setAmmoTypeIndex(0)
         else if (item_guid.guid == player.guid + 2 && player.getEquipmentInHolster(1).get.getAmmoTypeIndex == 0)  player.getEquipmentInHolster(1).get.setAmmoTypeIndex(1)
@@ -1525,7 +1528,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " UseItem: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         if (itemType != 121 && unk1 - player.guid != 3) sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
         if (itemType == 121 && unk3 && unk1 - player.guid == 1) {
           // TODO : bank ?
@@ -1657,16 +1660,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg @ UnuseItemMessage(player, item) =>
-      log.info("ID: " + sessionId + " UnuseItem: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@GenericObjectStateMsg(object_guid, unk1) =>
-      log.info("ID: " + sessionId + " GenericObjectState: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@ItemTransactionMessage(terminal_guid, transaction_type, item_page, item_name, unk1, item_guid) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " ItemTransaction: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
 
         if (transaction_type == TransactionType.Sell) {
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(item_guid, 0)))
@@ -1905,13 +1908,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@WeaponDelayFireMessage(seq_time, weapon_guid) =>
-      log.info("ID: " + sessionId + " WeaponDelayFire: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@WeaponFireMessage(seq_time, weapon_guid, projectile_guid, shot_origin, unk1, unk2, unk3, unk4, unk5, unk6, unk7) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " WeaponFire: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         player.getEquipmentInHolster(player.getUsedHolster).get.magazine -= 1
         if (player.lastShotSeq_time != -1) {
           var time : Int = 0
@@ -1919,62 +1922,77 @@ class WorldSessionActor extends Actor with MDCContextAware {
             time = 1024 + (seq_time - player.lastShotSeq_time)}
           else time = seq_time - player.lastShotSeq_time
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss" && time < 4) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time > 0 && time < 14) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time > 0 && time < 3) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette" && time > 0 && time < 17) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 14) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 6) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 89) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun" && time < 2) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler" && time < 3) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher" && time < 6) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar" && time < 4) {
-            discord(PlanetSideGUID(player.guid),player.name)
+            discordROF(PlanetSideGUID(player.guid),player.name)
           }
         }
         player.lastShotSeq_time = seq_time
       }
 
     case msg@WeaponDryFireMessage(weapon_guid) =>
-      log.info("ID: " + sessionId + " WeaponDryFireMessage: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg @ TargetingImplantRequest(list) =>
-      log.info("ID: " + sessionId + " TargetingImplantRequest: "+msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@WeaponLazeTargetPositionMessage(weapon, pos1, pos2) =>
       log.info("ID: " + sessionId + " Lazing position: " + pos2.toString)
 
     case msg@HitMessage(seq_time, projectile_guid, unk1, hit_info, unk2, unk3, unk4) =>
-      log.info("ID: " + sessionId + " Hit: " + msg)
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
+        if (hit_info.isDefined) {
+          if (hit_info.get.hitobject_guid.isDefined) {
+            val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(hit_info.get.hitobject_guid.get.guid)
+            if (OnlinePlayer.isDefined && !player.spectator) {
+              val onlineplayer: PlayerAvatar = OnlinePlayer.get
+              if (distance(hit_info.get.hit_pos, onlineplayer.getPosition) >= 5) {
+                discordPullH(PlanetSideGUID(player.guid), player.name)
+              }
+            }
+          }
+        }
+      }
 
     case msg@SplashHitMessage(seq_time, projectile_uid, projectile_pos, direct_victim_uid, unk3, projectile_vel, unk4, targets) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " SplashHitMessage: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(direct_victim_uid)
         if (OnlinePlayer.isDefined && !player.spectator && player.getUsedHolster != 255) {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
@@ -2069,22 +2087,22 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
 
     case msg@AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
-      log.info("ID: " + sessionId + " AvatarFirstTimeEvent: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@AvatarGrenadeStateMessage(player_guid, state) =>
-      log.info("ID: " + sessionId + " AvatarGrenadeStateMessage: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@GenericActionMessage(action) =>
-      log.info("ID: " + sessionId + " GenericActionMessage: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@WarpgateRequest(continent_guid, building_guid, dest_building_guid, dest_continent_guid, unk1, unk2) =>
-      log.info("ID: " + sessionId + " WarpgateRequest: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@ProximityTerminalUseMessage(player_guid, object_guid, unk) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " ProximityTerminalUseMessage: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         if(!unk && player.getVelocity.isEmpty){
           useProximityTerminalID = Option.apply(object_guid)
           sendResponse(PacketCoding.CreateGamePacket(0, ProximityTerminalUseMessage(PlanetSideGUID(player.guid), object_guid, true)))
@@ -2101,25 +2119,25 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@MountVehicleMsg(player_guid, vehicle_guid, entry_point) =>
-      log.info("ID: " + sessionId + " MounVehicleMsg: "+msg)
+      log.info("ID: " + sessionId + " " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(vehicle_guid, 0, 1000)))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(vehicle_guid, player_guid, 0)))
 
     case msg@DismountVehicleMsg(player_guid, u1, u2) =>
-      log.info("ID: " + sessionId + " DismountVehicleMsg: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
       sendResponse(PacketCoding.CreateGamePacket(0, DismountVehicleMsg(player_guid, u1, true))) //should be safe; replace with ObjectDetachMessage later
 
     case msg@SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
-      log.info("ID: " + sessionId + " SquadDefinitionAction: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@AvatarGrenadeStateMessage(player_guid, state) =>
-      log.info("ID: " + sessionId + " AvatarGrenadeStateMsg: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(p)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " Ouch! " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         if (!player.spectator) {
           if (player.redHealth - 10 <= 0) player.redHealth = 1
           if (player.redHealth - 10 > 0) player.redHealth -= 10
@@ -2131,30 +2149,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg@BugReportMessage(version_major, version_minor, version_date, bug_type, repeatable, location, zone, pos, summary, desc) =>
-      log.info("ID: " + sessionId + " BugReportMessage: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@BindPlayerMessage(action, bindDesc, unk1, logging, unk2, unk3, unk4, pos) =>
-      log.info("ID: " + sessionId + " BindPlayerMessage: " + msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg @ PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value) =>
-      log.info("ID: " + sessionId + " PlanetsideAttributeMessage: "+msg)
+      log.info("ID: " + sessionId + " " + msg)
       //      sendResponse(PacketCoding.CreateGamePacket(0,PlanetsideAttributeMessage(avatar_guid, attribute_type, attribute_value)))
       avatarService ! AvatarService.PlanetsideAttribute(avatar_guid,attribute_type,attribute_value)
 
     case msg @ BattleplanMessage(char_id, player_name, zonr_id, diagrams) =>
-      log.info("ID: " + sessionId + " Battleplan: "+msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg @ CreateShortcutMessage(player_guid, slot, unk, add, shortcut) =>
-      log.info("ID: " + sessionId + " CreateShortcutMessage: "+msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg @ FriendsRequest(action, friend) =>
-      log.info("ID: " + sessionId + " FriendsRequest: "+msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@HitHint(source_guid,player_guid) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(source_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " HitHint: "+msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(player_guid)
         if (OnlinePlayer.isDefined && !player.spectator) {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
@@ -2241,7 +2259,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " SpawnRequestMessage: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(3,1000,1000,player.getPosition,0,true)))
         Transfer.disposeSelf(traveler,sessionId)
         avatarService ! AvatarService.unLoadMap(PlanetSideGUID(player.guid))
@@ -2274,7 +2292,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " ReleaseAvatarRequestMessage: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(2,0,0,player.getPosition,0,true)))
         avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),6,1)
       }
@@ -2283,7 +2301,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(killer)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
-        log.info("ID: " + sessionId + " / " + player.name + " LashMessage: " + msg)
+        log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(victim)
         if (OnlinePlayer.isDefined && !player.spectator) {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
@@ -2318,7 +2336,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case msg @ TargetingImplantRequest(list) =>
-      log.info("TargetingImplantRequest: "+msg)
+      log.info("ID: " + sessionId + " " + msg)
 
     case default => log.info("ID: " + sessionId + s" Unhandled GamePacket ${pkt} ")
   }
@@ -2329,7 +2347,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def sendResponse(cont: PlanetSidePacketContainer): Unit = {
-//    log.info("WORLD SEND_" + sessionId + " : " + cont)
+//    log.info("WORLD SEND_" + sessionId + " " + cont)
     sendResponse(cont.asInstanceOf[Any])
   }
 
@@ -2382,9 +2400,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
     (newHP,newArmor)
   }
 
-  def discord(guid : PlanetSideGUID, name : String) = {
-    log.info("Cheat player : " + name + " ID : " + guid.guid)
+  def discordROF(guid : PlanetSideGUID, name : String) = {
+    log.info("Cheat player (ROF) : " + name + " ID : " + guid.guid)
     sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(guid, 15, 600)))
     sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_NOTE,true,"Live Server","Rate of fire hack detected. If you feel this may be in error, please report the weapon you are using in the Discord #bug-report channel.",Some(""))))
+  }
+  def discordPullH(guid : PlanetSideGUID, name : String) = {
+    log.info("Cheat player (PullHack) : " + name + " ID : " + guid.guid)
+    sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(guid, 15, 600)))
+    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_NOTE,true,"Live Server","Pull hack detected. If you feel this may be in error, please report the weapon you are using in the Discord #bug-report channel.",Some(""))))
   }
 }
