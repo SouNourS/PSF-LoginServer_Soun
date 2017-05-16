@@ -81,6 +81,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         ant.basic.unk mustEqual 4
         ant.basic.player_guid mustEqual PlanetSideGUID(0)
         ant.health mustEqual 255
+        ant.deployState mustEqual ANTDeployState.Mobile
       case _ =>
         ko
     }
@@ -221,34 +222,10 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         ams.unk1 mustEqual 2
         ams.health mustEqual 236
         ams.unk2 mustEqual 63
-
-        ams.matrix_term.objectClass mustEqual ObjectClass.matrix_terminalc
-        ams.matrix_term.guid mustEqual PlanetSideGUID(3663)
-        ams.matrix_term.parentSlot mustEqual 1
-        ams.matrix_term.obj.isInstanceOf[CommonTerminalData] mustEqual true
-        ams.matrix_term.obj.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
-        ams.matrix_term.obj.asInstanceOf[CommonTerminalData].unk mustEqual 0
-
-        ams.respawn_tube.objectClass mustEqual ObjectClass.ams_respawn_tube
-        ams.respawn_tube.guid mustEqual PlanetSideGUID(3638)
-        ams.respawn_tube.parentSlot mustEqual 2
-        ams.respawn_tube.obj.isInstanceOf[CommonTerminalData] mustEqual true
-        ams.respawn_tube.obj.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
-        ams.respawn_tube.obj.asInstanceOf[CommonTerminalData].unk mustEqual 0
-
-        ams.order_term_a.objectClass mustEqual ObjectClass.order_terminala
-        ams.order_term_a.guid mustEqual PlanetSideGUID(3827)
-        ams.order_term_a.parentSlot mustEqual 3
-        ams.order_term_a.obj.isInstanceOf[CommonTerminalData] mustEqual true
-        ams.order_term_a.obj.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
-        ams.order_term_a.obj.asInstanceOf[CommonTerminalData].unk mustEqual 0
-
-        ams.order_term_b.objectClass mustEqual ObjectClass.order_terminalb
-        ams.order_term_b.guid mustEqual PlanetSideGUID(3556)
-        ams.order_term_b.parentSlot mustEqual 4
-        ams.order_term_b.obj.isInstanceOf[CommonTerminalData] mustEqual true
-        ams.order_term_b.obj.asInstanceOf[CommonTerminalData].faction mustEqual PlanetSideEmpire.VS
-        ams.order_term_b.obj.asInstanceOf[CommonTerminalData].unk mustEqual 0
+        ams.matrix_guid mustEqual PlanetSideGUID(3663)
+        ams.respawn_guid mustEqual PlanetSideGUID(3638)
+        ams.term_a_guid mustEqual PlanetSideGUID(3827)
+        ams.term_b_guid mustEqual PlanetSideGUID(3556)
       case _ =>
         ko
     }
@@ -365,10 +342,6 @@ class ObjectCreateMessageVehiclesTest extends Specification {
       PlanetSideGUID(3638),
       PlanetSideGUID(3827),
       PlanetSideGUID(3556)
-      //InternalSlot(ObjectClass.matrix_terminalc, PlanetSideGUID(3663), 1, CommonTerminalData(PlanetSideEmpire.VS)),
-      //InternalSlot(ObjectClass.ams_respawn_tube, PlanetSideGUID(3638), 2, CommonTerminalData(PlanetSideEmpire.VS)),
-      //InternalSlot(ObjectClass.order_terminala, PlanetSideGUID(3827), 3, CommonTerminalData(PlanetSideEmpire.VS)),
-      //InternalSlot(ObjectClass.order_terminalb, PlanetSideGUID(3556), 4, CommonTerminalData(PlanetSideEmpire.VS))
     )
     val msg = ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(4157), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector

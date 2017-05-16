@@ -7,11 +7,8 @@ import scodec.codecs._
 import scala.annotation.switch
 
 /**
-  * A reference between all object class codes and the name of the object they represent.<br>
-  * <br>
-  * Object classes compose a number between 0 and 2047, always translating into an 11-bit value.
-  * In `scodec` terms, that's a `uintL(11)` or a `uintL(0xB)`.
-  * The items that can be constructed with packets `ObjectCreateMessage` and `ObjectCreateDetailedMessage` number fewer than 1047.
+  * A reference between all object class codes and the name of the object they represent.
+  * Object class types are defined by an 11-bit (`0xB`) value.
   */
 object ObjectClass {
   //ammunition

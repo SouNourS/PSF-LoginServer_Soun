@@ -7,9 +7,27 @@ import scodec.{Attempt, Codec, Err}
 import shapeless.{::, HNil}
 
 /**
-  * na
+  * A representation of a generic vehicle, with optional mounted weapons.
+  * This data will help construct most of the game's vehicular options such as the Lightning or the Harasser.<br>
+  * <br>
+  * Vehicles utilize their own packet to communicate position to the server, known as `VehicleStateMessage`.
+  * This takes the place of `PlayerStateMessageUpstream` when the player avatar is in control;
+  * and, it takes the place of `PlayerStateMessage` for other players when they are in control.
+  * If the vehicle is sufficiently complicated, a `ChildObjectStateMessage` will be used.
+  * This packet will control any turret(s) on the vehicle.
+  * For very complicated vehicles, the packets `FrameVehicleStateMessage` and `VehicleSubStateMessage` will also be employed.
+  * The tasks that these packets perform are different based on the vehicle that responds or generates them.<br>
+  * <br>
+  * Much like an inventory (though not actually the vehicle's inventory), weapons are placed into "slots" in this vehicle.
+  * In general, these slots are numbered outside of the vehicle's normal Infantry seating count.
+  * The acceptable weapon mounting slots, and the Infantry seat that asserts control of the weapon, are defined elsewhere.
+  * Such an alternate relationship can not be expressed in a packet of this data.
+  * An "expected" number of mounting data can be passed into the class for the purposes of validating input.<br>
+  * <br>
+  * Outside of managing mounted weaponry, any vehicle with special "utilities" must be handled as a special case.
+  * This includes vehicles that go through a sessile physical conversion known as "deploying."
   * @param basic data common to objects
-  * @param health the amount of health the object has, as a percentage of a filled bar
+  * @param health the amount of health the vehicle has, as a percentage of a filled bar
   * @param mountings data regarding the mounted utilities, usually weapons
   * @param mount_capacity implicit;
   *                       the total number of mounted utilities allowed on this vehicle;
@@ -50,9 +68,20 @@ object VehicleData extends Marshallable[VehicleData] {
   def apply(basic : CommonFieldData, health : Int, mount : InternalSlot) : VehicleData =
     new VehicleData(basic, health, 0, Some(mount :: Nil))
 
-  def allTypesAllowed(item : Any) : Boolean = true
+  /**
+    * Perform an evaluation of the provided object.
+    * @param list a List of objects to be compared against some criteria
+    * @return `true`, if the objects pass this test; false, otherwise
+    */
+  def allAllowed(list : List[InternalSlot]) : Boolean = true
 
-  def mountedUtilitiesCodec(typeCheck : (Any) => Boolean = allTypesAllowed) : Codec[List[InternalSlot]] = (
+  /**
+    * A `Codec` for mounted utilities, generally weapons (as `WeaponData`).
+    * @param slotChecker a function that takes an `InternalSlot` and returns `true` if that object passed its defined test;
+    *                    defaults to `allAllowed`
+    * @return a `VehicleData` object or a `BitVector`
+    */
+  def mountedUtilitiesCodec(slotChecker : (List[InternalSlot]) => Boolean = allAllowed) : Codec[List[InternalSlot]] = (
     uint8L >>:~ { size =>
       uint2L ::
         PacketHelpers.listOfNSized(size, InternalSlot.codec)
@@ -63,12 +92,12 @@ object VehicleData extends Marshallable[VehicleData] {
         if(listSize >= 255) {
           Attempt.failure(Err("vehicle decodes too many mountings (255+ types!)"))
         }
-        for(item <- list) {
-          if(!typeCheck(item.obj)) {
-            Attempt.failure(Err(s"vehicle mount decodes into a disallowed type - $item"))
-          }
+        else if(!slotChecker(list)) {
+          Attempt.failure(Err("vehicle mount decoding is disallowed by test failure"))
         }
-        Attempt.successful(list)
+        else {
+          Attempt.successful(list)
+        }
 
       case _ =>
         Attempt.failure(Err("invalid mounting data format"))
@@ -78,21 +107,29 @@ object VehicleData extends Marshallable[VehicleData] {
         if(list.size >= 255) {
           Attempt.failure(Err("vehicle encodes too many weapon mountings (255+ types!)"))
         }
-        for(item <- list) {
-          if(!typeCheck(item.obj)) {
-            Attempt.failure(Err(s"vehicle mount is a disallowed type - $item"))
-          }
+        else if(!slotChecker(list)) {
+          Attempt.failure(Err("vehicle mount encoding is disallowed by test failure"))
         }
-        Attempt.successful(list.size :: 0 :: list :: HNil)
+        else {
+          Attempt.successful(list.size :: 0 :: list :: HNil)
+        }
     }
   )
 
-  def codec(mount_capacity : Int = 1)(typeCheck : (Any) => Boolean = allTypesAllowed) : Codec[VehicleData] = (
+  /**
+    * A `Codec` for `VehicleData`.
+    * @param mount_capacity the total number of mounted weapons that are attached to this vehicle;
+    *                       defaults to 1
+    * @param typeCheck a function that takes an object and returns `true` if the object passed its defined test;
+    *                  defaults to `allAllowed`
+    * @return a `VehicleData` object or a `BitVector`
+    */
+  def codec(mount_capacity : Int = 1)(typeCheck : (List[InternalSlot]) => Boolean = allAllowed) : Codec[VehicleData] = (
     ("basic" | CommonFieldData.codec) ::
       uint2L ::
       ("health" | uint8L) ::
       uintL(7) ::
-      ("unk" | uint4L) ::
+      ("unk" | uint4L) :: //1 is jammered?
       uint2L ::
       optional(bool, "mountings" | mountedUtilitiesCodec(typeCheck))
     ).exmap[VehicleData] (
@@ -120,28 +157,38 @@ object VehicleData extends Marshallable[VehicleData] {
     {
       case obj @ VehicleData(basic, health, unk, None) =>
         val objMountCapacity = obj.mount_capacity
-        if(objMountCapacity > -1 && mount_capacity > -1) {
+        if(objMountCapacity < 0 || mount_capacity < 0) {
+          Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: None :: HNil)
+        }
+        else {
           if(mount_capacity != objMountCapacity) {
             Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
           }
           else if(mount_capacity != 0) {
             Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual 0, expected $mount_capacity"))
           }
+          else {
+            Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: None :: HNil)
+          }
         }
-        Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: None :: HNil)
 
       case obj @ VehicleData(basic, health, unk, mountings) =>
-        val mountSize : Int = mountings.get.size
         val objMountCapacity = obj.mount_capacity
-        if(objMountCapacity > -1 && mount_capacity > -1) {
+        if(objMountCapacity < 0 || mount_capacity < 0) {
+          Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: mountings :: HNil)
+        }
+        else {
+          val mountSize : Int = mountings.get.size
           if(mount_capacity != objMountCapacity) {
             Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
           }
           else if(mount_capacity != mountSize) {
             Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $mountSize, expected $mount_capacity"))
           }
+          else {
+            Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: mountings :: HNil)
+          }
         }
-        Attempt.successful(basic :: 0 :: health :: 0 :: unk :: 0 :: mountings :: HNil)
 
       case _ =>
         Attempt.failure(Err("invalid vehicle data format"))

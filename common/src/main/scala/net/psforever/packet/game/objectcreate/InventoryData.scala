@@ -17,8 +17,7 @@ import shapeless.{::, HNil}
   * No values are allowed to be misplaced and no unexpected regions of data can be discovered.
   * If there is even a minor failure, the remainder of the inventory will fail to translate.<br>
   * <br>
-  * Inventories are usually prefaced with a `bin1` value not accounted for here.
-  * It can be treated as optional.
+  * Inventories are usually prefaced with a single bit value not accounted for here to switch them "on."
   * @param contents the items in the inventory
   * @see `InventoryItem`
   */
@@ -34,7 +33,12 @@ final case class InventoryData(contents : List[InventoryItem] = List.empty) exte
 }
 
 object InventoryData {
-  private def inventoryCodec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
+  /**
+    * The primary `Codec` that parses the common format for an inventory `List`.
+    * @param itemCodec a `Codec` that describes each of the contents of the list
+    * @return an `InventoryData` object, or a `BitVector`
+    */
+  private def codec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
     uint8L >>:~ { len =>
       uint2L ::
         ("contents" | PacketHelpers.listOfNSized(len, itemCodec))
@@ -53,10 +57,10 @@ object InventoryData {
   /**
     * A `Codec` for `0x17` `ObjectCreateMessage` data.
     */
-  val codec : Codec[InventoryData] = inventoryCodec(InventoryItem.codec)
+  val codec : Codec[InventoryData] = codec(InventoryItem.codec)
 
   /**
     * A `Codec` for `0x18` `ObjectCreateDetailedMessage` data.
     */
-  val codec_detailed : Codec[InventoryData] = inventoryCodec(InventoryItem.codec_detailed)
+  val codec_detailed : Codec[InventoryData] = codec(InventoryItem.codec_detailed)
 }
