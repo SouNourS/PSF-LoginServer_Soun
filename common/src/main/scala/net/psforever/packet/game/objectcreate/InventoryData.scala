@@ -38,7 +38,7 @@ object InventoryData {
     * @param itemCodec a `Codec` that describes each of the contents of the list
     * @return an `InventoryData` object, or a `BitVector`
     */
-  private def codec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
+  def codec(itemCodec : Codec[InventoryItem]) : Codec[InventoryData] = (
     uint8L >>:~ { len =>
       uint2L ::
         ("contents" | PacketHelpers.listOfNSized(len, itemCodec))

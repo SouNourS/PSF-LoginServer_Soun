@@ -1,8 +1,8 @@
 // Copyright (c) 2017 PSForever
 package net.psforever.packet.game.objectcreate
 
-import net.psforever.packet.{Marshallable, PacketHelpers}
-import scodec.codecs.{uint2L, _}
+import net.psforever.packet.Marshallable
+import scodec.codecs._
 import scodec.{Attempt, Codec, Err}
 import shapeless.{::, HNil}
 
@@ -18,21 +18,32 @@ import shapeless.{::, HNil}
   * For very complicated vehicles, the packets `FrameVehicleStateMessage` and `VehicleSubStateMessage` will also be employed.
   * The tasks that these packets perform are different based on the vehicle that responds or generates them.<br>
   * <br>
-  * Much like an inventory (though not actually the vehicle's inventory), weapons are placed into "slots" in this vehicle.
-  * In general, these slots are numbered outside of the vehicle's normal Infantry seating count.
-  * The acceptable weapon mounting slots, and the Infantry seat that asserts control of the weapon, are defined elsewhere.
-  * Such an alternate relationship can not be expressed in a packet of this data.
-  * An "expected" number of mounting data can be passed into the class for the purposes of validating input.<br>
+  * Vehicles have a variety of features.
+  * They have their own inventory space, seating space for driver and passengers, Infantry mounting positions for the former two, and weapon mounting positions.
+  * Specialized vehicles also have terminals attached to them.
+  * The trunk is little different from player character inventories save for capacity and that it must be manually accessed.
+  * It is usually on the rear of the vehicle if that vehicle has a trunk at all.
+  * Weapons and infantry are allocated mounting slots from the same list.
+  * Weapons are constructed in their given slot with the vehicle itself and Infantry sit aside the weapons.
+  * Certain slots ("seats") allow control of one of the weapons in another slot ("weapon mounting").
+  * ("Seat" and "weapon mounting" do not coincide numerically.)
+  * For trunk and for Infantry slots, various glyphs are projected onto the ground, called "mounting positions."
+  * Standing nearly on top of the glyph and facing the vehicle allows access or seat-taking.
+  * ("Seat" and "mounting positions" will not necessarily coincide numerically either.)<br>
   * <br>
   * Outside of managing mounted weaponry, any vehicle with special "utilities" must be handled as a special case.
-  * This includes vehicles that go through a sessile physical conversion known as "deploying."
+  * Utilities are plastered onto the chassis and carried around with the vehicle.
+  * Some vehicles have to go through a sessile physical conversion known as "deploying" to get access to their utilities.<br>
+  * <br>
+  * An "expected" number of mounting data can be passed into the class for the purposes of validating input.
   * @param basic data common to objects
   * @param unk1 na
   * @param health the amount of health the vehicle has, as a percentage of a filled bar
   * @param unk2 na
   * @param unk3 na
   * @param unk4 na
-  * @param unk5 na
+  * @param unk5 na;
+  *             1 causes the `quadstealth` (Wraith) to cloak
   * @param mountings data regarding the mounted utilities, usually weapons
   * @param mount_capacity implicit;
   *                       the total number of mounted utilities allowed on this vehicle;
@@ -88,20 +99,14 @@ object VehicleData extends Marshallable[VehicleData] {
     * A `Codec` for mounted utilities, generally weapons (as `WeaponData`).
     * @param slotChecker a function that takes an `InternalSlot` and returns `true` if that object passed its defined test;
     *                    defaults to `allAllowed`
-    * @return a `VehicleData` object or a `BitVector`
+    * @return a `List` of mounted objects or a `BitVector` of the same
+    * @see `InventoryData`
     */
-  def mountedUtilitiesCodec(slotChecker : (List[InternalSlot]) => Boolean = allAllowed) : Codec[List[InternalSlot]] = (
-    uint8L >>:~ { size =>
-      uint2L ::
-        PacketHelpers.listOfNSized(size, InternalSlot.codec)
-    }).exmap[List[InternalSlot]] (
+  def mountedUtilitiesCodec(slotChecker : (List[InternalSlot]) => Boolean = allAllowed) : Codec[List[InternalSlot]] =
+    InventoryData.codec(InternalSlot.codec).exmap[List[InternalSlot]] (
     {
-      case _ :: 0 :: list :: HNil =>
-        val listSize = list.size
-        if(listSize >= 255) {
-          Attempt.failure(Err("vehicle decodes too many mountings (255+ types!)"))
-        }
-        else if(!slotChecker(list)) {
+      case InventoryData(list) =>
+        if(!slotChecker(list)) {
           Attempt.failure(Err("vehicle mount decoding is disallowed by test failure"))
         }
         else {
@@ -113,20 +118,27 @@ object VehicleData extends Marshallable[VehicleData] {
     },
     {
       case list =>
-        if(list.size >= 255) {
+        if(list.size > 255) {
           Attempt.failure(Err("vehicle encodes too many weapon mountings (255+ types!)"))
         }
         else if(!slotChecker(list)) {
           Attempt.failure(Err("vehicle mount encoding is disallowed by test failure"))
         }
         else {
-          Attempt.successful(list.size :: 0 :: list :: HNil)
+          Attempt.successful(InventoryData(list))
         }
     }
   )
 
+  /**
+    * This pattern translates between the listed datatypes and the bitstream encoding defined in `basic_vehicle_codec`.
+    */
   type basicVehiclePattern = CommonFieldData :: Int :: Int :: Int :: Int :: Boolean :: HNil
 
+  /**
+    * These values are parsed by all vehicles.
+    * Comments about the fields are provided where helpful.
+    */
   val basic_vehicle_codec : Codec[basicVehiclePattern] = (
     CommonFieldData.codec :: //not certain if player_guid is valid
       uint2L :: //often paired with the assumed 16u field in previous?
@@ -159,16 +171,8 @@ object VehicleData extends Marshallable[VehicleData] {
       optional(bool, "mountings" | mountedUtilitiesCodec(typeCheck))
     ).exmap[VehicleData] (
     {
-      case basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: None :: HNil =>
-        if(mount_capacity > -1 && mount_capacity != 0) {
-          Attempt.failure(Err(s"vehicle decodes wrong number of mounts - actual 0, expected $mount_capacity"))
-        }
-        else {
-          Attempt.successful(VehicleData(basic, u1, health, u2, u3, u4, u5, None)(0))
-        }
-
       case basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: mountings :: HNil =>
-        val onboardMountCount : Int = mountings.get.size
+        val onboardMountCount : Int = if(mountings.isDefined) { mountings.get.size } else { 0 }
         if(mount_capacity > -1 && mount_capacity != onboardMountCount) {
           Attempt.failure(Err(s"vehicle decodes wrong number of mounts - actual $onboardMountCount, expected $mount_capacity"))
         }
@@ -180,35 +184,18 @@ object VehicleData extends Marshallable[VehicleData] {
         Attempt.failure(Err("invalid vehicle data format"))
     },
     {
-      case obj @ VehicleData(basic, u1, health, u2, u3, u4, u5, None) =>
-        val objMountCapacity = obj.mount_capacity
-        if(objMountCapacity < 0 || mount_capacity < 0) {
-          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: None :: HNil)
-        }
-        else {
-          if(mount_capacity != objMountCapacity) {
-            Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
-          }
-          else if(mount_capacity != 0) {
-            Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual 0, expected $mount_capacity"))
-          }
-          else {
-            Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: None :: HNil)
-          }
-        }
-
       case obj @ VehicleData(basic, u1, health, u2, u3, u4, u5, mountings) =>
         val objMountCapacity = obj.mount_capacity
         if(objMountCapacity < 0 || mount_capacity < 0) {
           Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: mountings :: HNil)
         }
         else {
-          val mountSize : Int = mountings.get.size
+          val onboardMountCount : Int = if(mountings.isDefined) { mountings.get.size } else { 0 }
           if(mount_capacity != objMountCapacity) {
             Attempt.failure(Err(s"different encoding expectations for amount of mounts - actual $objMountCapacity, expected $mount_capacity"))
           }
-          else if(mount_capacity != mountSize) {
-            Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $mountSize, expected $mount_capacity"))
+          else if(mount_capacity != onboardMountCount) {
+            Attempt.failure(Err(s"vehicle encodes wrong number of mounts - actual $onboardMountCount, expected $mount_capacity"))
           }
           else {
             Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: u5 :: mountings :: HNil)

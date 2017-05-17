@@ -3,6 +3,7 @@ package net.psforever.packet.game.objectcreate
 
 import net.psforever.packet.{Marshallable, PacketHelpers}
 import net.psforever.packet.game.PlanetSideGUID
+import net.psforever.types.PlanetSideEmpire
 import scodec.codecs._
 import scodec.{Attempt, Codec, Err}
 import shapeless.{::, HNil}
@@ -91,10 +92,10 @@ object AMSData extends Marshallable[AMSData] {
       uintL(6) :+
       bool :+
       uintL(12) :+
-      ("term1" | InternalSlot.codec) :+
-      ("tube" | InternalSlot.codec) :+
-      ("term2" | InternalSlot.codec) :+
-      ("term3" | InternalSlot.codec)
+      InternalSlot.codec :+
+      InternalSlot.codec :+
+      InternalSlot.codec :+
+      InternalSlot.codec
     ).exmap[AMSData] (
     {
       case basic :: unk1 :: health :: unk2 :: deployState :: false :: unk3 :: false :: 0x41 ::
@@ -109,12 +110,13 @@ object AMSData extends Marshallable[AMSData] {
     },
     {
       case AMSData(basic, unk1, health, unk2, deployState, unk3, matrix_guid, respawn_guid, terma_guid, termb_guid) =>
+        val faction : PlanetSideEmpire.Value = basic.faction
         Attempt.successful(
           basic :: unk1 :: health :: unk2 :: deployState.id :: false :: unk3 :: false :: 0x41 ::
-            InternalSlot(ObjectClass.matrix_terminalc, matrix_guid, 1, CommonTerminalData(basic.faction)) ::
-            InternalSlot(ObjectClass.ams_respawn_tube, respawn_guid,2, CommonTerminalData(basic.faction)) ::
-            InternalSlot(ObjectClass.order_terminala,  terma_guid,  3, CommonTerminalData(basic.faction)) ::
-            InternalSlot(ObjectClass.order_terminalb,  termb_guid,  4, CommonTerminalData(basic.faction)) :: HNil
+            InternalSlot(ObjectClass.matrix_terminalc, matrix_guid, 1, CommonTerminalData(faction)) ::
+            InternalSlot(ObjectClass.ams_respawn_tube, respawn_guid,2, CommonTerminalData(faction)) ::
+            InternalSlot(ObjectClass.order_terminala,  terma_guid,  3, CommonTerminalData(faction)) ::
+            InternalSlot(ObjectClass.order_terminalb,  termb_guid,  4, CommonTerminalData(faction)) :: HNil
         )
     }
   )
