@@ -225,7 +225,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         ams.basic.player_guid mustEqual PlanetSideGUID(34082)
         ams.unk1 mustEqual 2
         ams.health mustEqual 236
-        ams.unk2 mustEqual 63
+        ams.unk2 mustEqual 0
         ams.matrix_guid mustEqual PlanetSideGUID(3663)
         ams.respawn_guid mustEqual PlanetSideGUID(3638)
         ams.term_a_guid mustEqual PlanetSideGUID(3827)
@@ -345,6 +345,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
       ),
       2,
       236,
+      0,
       AMSDeployState.Deployed,
       63,
       PlanetSideGUID(3663),
