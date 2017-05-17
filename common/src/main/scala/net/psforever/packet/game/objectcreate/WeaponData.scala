@@ -70,7 +70,7 @@ object WeaponData extends Marshallable[WeaponData] {
     * @return a `WeaponData` object
     */
   def apply(unk1 : Int, unk2 : Int, fire_mode : Int, cls : Int, guid : PlanetSideGUID, parentSlot : Int, ammo : AmmoBoxData) : WeaponData =
-    new WeaponData(unk1, unk2, fire_mode, InternalSlot(cls, guid, parentSlot, ammo) :: Nil)
+    WeaponData(unk1, unk2, fire_mode, InternalSlot(cls, guid, parentSlot, ammo) :: Nil)
 
   /**
     * Overloaded constructor for creating `WeaponData` with two types of ammunition concurrently loaded.
@@ -89,7 +89,7 @@ object WeaponData extends Marshallable[WeaponData] {
     * @return a `WeaponData` object
     */
   def apply(unk1 : Int, unk2 : Int, fire_mode : Int, cls1 : Int, guid1 : PlanetSideGUID, slot1 : Int, ammo1 : AmmoBoxData, cls2 : Int, guid2 : PlanetSideGUID, slot2 : Int, ammo2 : AmmoBoxData) : WeaponData =
-    new WeaponData(unk1, unk2, fire_mode, InternalSlot(cls1, guid1, slot1, ammo1) :: InternalSlot(cls2, guid2, slot2, ammo2) :: Nil)(2)
+    WeaponData(unk1, unk2, fire_mode, InternalSlot(cls1, guid1, slot1, ammo1) :: InternalSlot(cls2, guid2, slot2, ammo2) :: Nil)(2)
 
   /**
     * A `Codec` for `WeaponData`.
