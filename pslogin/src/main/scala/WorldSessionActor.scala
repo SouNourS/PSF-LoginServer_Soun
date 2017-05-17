@@ -1980,7 +1980,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(hit_info.get.hitobject_guid.get.guid)
             if (OnlinePlayer.isDefined && !player.spectator) {
               val onlineplayer: PlayerAvatar = OnlinePlayer.get
-              if (distance(hit_info.get.hit_pos, onlineplayer.getPosition) >= 5) {
+              if (distance(hit_info.get.hit_pos, onlineplayer.getPosition) >= 4) {
                 discordPullH(PlanetSideGUID(player.guid), player.name)
               }
             }
@@ -1988,7 +1988,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
 
-    case msg@SplashHitMessage(seq_time, projectile_uid, projectile_pos, direct_victim_uid, unk3, projectile_vel, unk4, targets) =>
+    case msg@SplashHitMessage(seq_time, projectile_uid, explosion_pos, direct_victim_uid, unk3, projectile_vel, unk4, targets) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
@@ -1997,86 +1997,103 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if (OnlinePlayer.isDefined && !player.spectator && player.getUsedHolster != 255) {
           val onlineplayer: PlayerAvatar = OnlinePlayer.get
 
-
-          avatarService ! AvatarService.HitHintReturn(PlanetSideGUID(player.guid), PlanetSideGUID(onlineplayer.guid))
-          val distanceBetweenPlayers : Float = distance(player.getPosition, onlineplayer.getPosition)
-          var currentDamage : Int = 0
-          var currentResistance : Int = 0
-
-
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoTypeIndex == 0) { // Rocklet
-            currentDamage = damages(rocket_projectile_velocity, rocket_projectile_lifespan, rocket_projectile_lifespan, 0.0f, rocket_projectile_damage, distanceBetweenPlayers)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "bolt_driver") { // Bolt Driver
-            currentDamage = damages(bolt_projectile_velocity, bolt_projectile_lifespan, bolt_projectile_lifespan, 0.0f, bolt_projectile_damage0, distanceBetweenPlayers)
+          if (distance(explosion_pos, onlineplayer.getPosition) >= 4) {
+            discordPullH(PlanetSideGUID(player.guid), player.name)
           }
 
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.getFireModeIndex == 0) { // Dragon mode 1
-            currentDamage = damages(flamethrower_projectile_velocity, flamethrower_projectile_lifespan, flamethrower_projectile_degrade_delay, flamethrower_projectile_degrade_multiplier, flamethrower_projectile_damage0, distanceBetweenPlayers)
-          }
-          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.getFireModeIndex == 1) { // Dragon mode 2
-            currentDamage = damages(flamethrower_fireball_velocity, flamethrower_fireball_lifespan, flamethrower_fireball_lifespan, 0.0f, flamethrower_fireball_damage0, distanceBetweenPlayers)
-          }
+          if ( !onlineplayer.spectator && onlineplayer.continent == "i2") {
 
-          if (onlineplayer.getExoSuitType == ExoSuitType.Agile && player.getEquipmentInHolster(player.getUsedHolster).get.getName != "flamethrower") {
-            currentResistance = lite_armor_resistance_splash
-          }
-//          else if (onlineplayer.getExoSuitType == ExoSuitType.Agile && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
-//            currentResistance = lite_armor_resistance_aggravated
-//          }
-          else if (onlineplayer.getExoSuitType == ExoSuitType.Reinforced && player.getEquipmentInHolster(player.getUsedHolster).get.getName != "flamethrower") {
-            currentResistance = med_armor_resistance_splash
-          }
-//          else if (onlineplayer.getExoSuitType == ExoSuitType.Reinforced && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
-//            currentResistance = med_armor_resistance_aggravated
-//          }
-          onlineplayer.redHealth = damagesAfterResist(currentDamage, currentResistance, onlineplayer.redHealth, onlineplayer.blueArmor)._1
-          onlineplayer.blueArmor = damagesAfterResist(currentDamage, currentResistance, onlineplayer.redHealth, onlineplayer.blueArmor)._2
-          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 0, onlineplayer.redHealth)
-          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
-          if (onlineplayer.redHealth == 0) {
-            onlineplayer.death_by = player.guid
-          }
+            avatarService ! AvatarService.HitHintReturn(PlanetSideGUID(player.guid), PlanetSideGUID(onlineplayer.guid))
+            val distanceBetweenPlayers: Float = distance(player.getPosition, onlineplayer.getPosition)
+            var currentDamage: Int = 0
+            var currentResistance: Int = 0
 
 
+            if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoTypeIndex == 0) {
+              // Rocklet
+              currentDamage = damages(rocket_projectile_velocity, rocket_projectile_lifespan, rocket_projectile_lifespan, 0.0f, rocket_projectile_damage, distanceBetweenPlayers)
+            }
+            if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "bolt_driver") {
+              // Bolt Driver
+              currentDamage = damages(bolt_projectile_velocity, bolt_projectile_lifespan, bolt_projectile_lifespan, 0.0f, bolt_projectile_damage0, distanceBetweenPlayers)
+            }
+
+            if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.getFireModeIndex == 0) {
+              // Dragon mode 1
+              currentDamage = damages(flamethrower_projectile_velocity, flamethrower_projectile_lifespan, flamethrower_projectile_degrade_delay, flamethrower_projectile_degrade_multiplier, flamethrower_projectile_damage0, distanceBetweenPlayers)
+            }
+            else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.getFireModeIndex == 1) {
+              // Dragon mode 2
+              currentDamage = damages(flamethrower_fireball_velocity, flamethrower_fireball_lifespan, flamethrower_fireball_lifespan, 0.0f, flamethrower_fireball_damage0, distanceBetweenPlayers)
+            }
+
+            if (onlineplayer.getExoSuitType == ExoSuitType.Agile && player.getEquipmentInHolster(player.getUsedHolster).get.getName != "flamethrower") {
+              currentResistance = lite_armor_resistance_splash
+            }
+            //          else if (onlineplayer.getExoSuitType == ExoSuitType.Agile && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
+            //            currentResistance = lite_armor_resistance_aggravated
+            //          }
+            else if (onlineplayer.getExoSuitType == ExoSuitType.Reinforced && player.getEquipmentInHolster(player.getUsedHolster).get.getName != "flamethrower") {
+              currentResistance = med_armor_resistance_splash
+            }
+            //          else if (onlineplayer.getExoSuitType == ExoSuitType.Reinforced && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
+            //            currentResistance = med_armor_resistance_aggravated
+            //          }
+            onlineplayer.redHealth = damagesAfterResist(currentDamage, currentResistance, onlineplayer.redHealth, onlineplayer.blueArmor)._1
+            onlineplayer.blueArmor = damagesAfterResist(currentDamage, currentResistance, onlineplayer.redHealth, onlineplayer.blueArmor)._2
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 0, onlineplayer.redHealth)
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer.guid), 4, onlineplayer.blueArmor)
+            if (onlineplayer.redHealth == 0) {
+              onlineplayer.death_by = player.guid
+            }
+
+          }
         }
         for(elem <- targets) {
           val OnlinePlayer2: Option[PlayerAvatar] = PlayerMasterList.getPlayer(elem.uid)
           if (OnlinePlayer2.isDefined && !player.spectator) {
             val onlineplayer2: PlayerAvatar = OnlinePlayer2.get
 
-
-            avatarService ! AvatarService.HitHintReturn(PlanetSideGUID(player.guid), PlanetSideGUID(onlineplayer2.guid))
-            val distanceBetweenPlayers : Float = distance(player.getPosition, onlineplayer2.getPosition)
-            var currentDamage : Int = 0
-            var currentResistance : Int = 0
-
-
-            if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoTypeIndex == 0) { // Rocklet
-              currentDamage = damages(rocket_projectile_velocity, rocket_projectile_lifespan, rocket_projectile_lifespan, 0.0f, rocket_projectile_damage, distanceBetweenPlayers)
-            }
-            if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") { // Dragon
-              currentDamage = damages(flamethrower_fireball_velocity, flamethrower_fireball_lifespan, flamethrower_fireball_lifespan, 0.0f, flamethrower_fireball_damage0, distanceBetweenPlayers)
+            if (distance(elem.pos, onlineplayer2.getPosition) >= 4) {
+              discordPullH(PlanetSideGUID(player.guid), player.name)
             }
 
-            if (onlineplayer2.getExoSuitType == ExoSuitType.Agile && player.getEquipmentInHolster(player.getUsedHolster).get.getName != "flamethrower") {
-              currentResistance = lite_armor_resistance_splash
-            }
-//            else if (onlineplayer2.getExoSuitType == ExoSuitType.Agile && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
-//              currentResistance = lite_armor_resistance_aggravated
-//            }
-            else if (onlineplayer2.getExoSuitType == ExoSuitType.Reinforced && player.getEquipmentInHolster(player.getUsedHolster).get.getName != "flamethrower") {
-              currentResistance = med_armor_resistance_splash
-            }
-//            else if (onlineplayer2.getExoSuitType == ExoSuitType.Reinforced && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
-//              currentResistance = med_armor_resistance_aggravated
-//            }
-            onlineplayer2.redHealth = damagesAfterResist((currentDamage*0.5).toInt, currentResistance, onlineplayer2.redHealth, onlineplayer2.blueArmor)._1
-            onlineplayer2.blueArmor = damagesAfterResist((currentDamage*0.5).toInt, currentResistance, onlineplayer2.redHealth, onlineplayer2.blueArmor)._2
-            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer2.guid), 0, onlineplayer2.redHealth)
-            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer2.guid), 4, onlineplayer2.blueArmor)
-            if (onlineplayer2.redHealth == 0) {
-              onlineplayer2.death_by = player.guid
+            if ( !onlineplayer2.spectator && onlineplayer2.continent == "i2") {
+
+              avatarService ! AvatarService.HitHintReturn(PlanetSideGUID(player.guid), PlanetSideGUID(onlineplayer2.guid))
+              val distanceBetweenPlayers: Float = distance(player.getPosition, onlineplayer2.getPosition)
+              var currentDamage: Int = 0
+              var currentResistance: Int = 0
+
+
+              if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoTypeIndex == 0) {
+                // Rocklet
+                currentDamage = damages(rocket_projectile_velocity, rocket_projectile_lifespan, rocket_projectile_lifespan, 0.0f, rocket_projectile_damage, distanceBetweenPlayers)
+              }
+              if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
+                // Dragon
+                currentDamage = damages(flamethrower_fireball_velocity, flamethrower_fireball_lifespan, flamethrower_fireball_lifespan, 0.0f, flamethrower_fireball_damage0, distanceBetweenPlayers)
+              }
+
+              if (onlineplayer2.getExoSuitType == ExoSuitType.Agile && player.getEquipmentInHolster(player.getUsedHolster).get.getName != "flamethrower") {
+                currentResistance = lite_armor_resistance_splash
+              }
+              //            else if (onlineplayer2.getExoSuitType == ExoSuitType.Agile && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
+              //              currentResistance = lite_armor_resistance_aggravated
+              //            }
+              else if (onlineplayer2.getExoSuitType == ExoSuitType.Reinforced && player.getEquipmentInHolster(player.getUsedHolster).get.getName != "flamethrower") {
+                currentResistance = med_armor_resistance_splash
+              }
+              //            else if (onlineplayer2.getExoSuitType == ExoSuitType.Reinforced && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") {
+              //              currentResistance = med_armor_resistance_aggravated
+              //            }
+              onlineplayer2.redHealth = damagesAfterResist((currentDamage * 0.5).toInt, currentResistance, onlineplayer2.redHealth, onlineplayer2.blueArmor)._1
+              onlineplayer2.blueArmor = damagesAfterResist((currentDamage * 0.5).toInt, currentResistance, onlineplayer2.redHealth, onlineplayer2.blueArmor)._2
+              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer2.guid), 0, onlineplayer2.redHealth)
+              avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(onlineplayer2.guid), 4, onlineplayer2.blueArmor)
+              if (onlineplayer2.redHealth == 0) {
+                onlineplayer2.death_by = player.guid
+              }
             }
 
             //rocket edge 50%
