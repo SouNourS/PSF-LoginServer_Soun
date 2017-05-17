@@ -1027,7 +1027,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605314, PlanetSideGUID(guid), true, 0)))
 
     case KeepAliveMessage(code) =>
-      sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
+      sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage()))
 
     case msg@PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
 //      log.info("ID: " + sessionId + " " + msg)
@@ -1665,6 +1665,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg@GenericObjectStateMsg(object_guid, unk1) =>
       log.info("ID: " + sessionId + " " + msg)
 
+    case msg @ DeployObjectMessage(guid, unk1, pos, roll, pitch, yaw, unk2) =>
+      log.info("ID: " + sessionId + " " + msg)
+
     case msg@ItemTransactionMessage(terminal_guid, transaction_type, item_page, item_name, unk1, item_guid) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {
@@ -2102,6 +2105,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
 
+    case msg @ DeployRequestMessage(player, entity, unk1, unk2, unk3, pos) =>
+      //if you try to deploy, can not undeploy
+      log.info("ID: " + sessionId + " " + msg)
 
     case msg@AvatarFirstTimeEventMessage(avatar_guid, object_guid, unk1, event_name) =>
       log.info("ID: " + sessionId + " " + msg)
