@@ -618,10 +618,6 @@ import scodec.bits._
             InventoryData(userInv),
             DrawnSlot.None))))
 
-        //init holsters
-        player.fav_Infantry_Loadout = 0
-        player.weapon_fire_mode = 0
-
 
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid),0,0)))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 1, 0, true, Shortcut.MEDKIT)))
@@ -632,19 +628,19 @@ import scodec.bits._
         //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 6, 0, true, Some(Shortcut(1,"shortcut_macro","s5","/speed 5")))))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 7, 0, true, Some(Shortcut(1,"shortcut_macro","zon","/zone i2")))))
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, CreateShortcutMessage(PlanetSideGUID(player.guid), 8, 0, true, Some(Shortcut(1,"shortcut_macro","col",
-          "/l Chat Colors (\\ + # + `number`) :\\#0 0 \\#1 1 \\#2 2 \\#3 3 \\#4 4 \\#5 5 \\#6 6 \\#7 7 \\#8 8 \\#9 9")))))
+          "/l Chat Colors (\\ + # + `number`) :\\#00 \\#11 \\#22 \\#33 \\#44 \\#55 \\#66 \\#77 \\#88 \\#99")))))
 
         // templates on equip terms
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),0,"Agile HA",Some(1))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),1,"Agile MA",Some(1))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),2,"Agile Sweeper",Some(1))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),3,"Agile Rocklet",Some(1))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),4,"Agile Bolt Driver",Some(1))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),5,"Agile Dragon _ bad damages",Some(1))))
-        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),6,"Rexo HA",Some(1))))
-        //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),7,"Agile Sweeper",Some(1))))
-        //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),8,"Agile Sweeper",Some(1))))
-        //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),9,"Agile Sweeper",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),0,"Rexo HA / Rocklet",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),1,"Rexo HA / MA",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),2,"Rexo Sweeper / MA",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),3,"Rexo HA / Dragon",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),4,"Rexo MA / Bolt Driver",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),5,"Agile HA",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),6,"Agile Sweeper",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),7,"Agile MA",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),8,"Agile Bolt Driver",Some(1))))
+        traveler.sendToSelf(PacketCoding.CreateGamePacket(0,FavoritesMessage(0,PlanetSideGUID(player.guid),9,"Agile Rocklet",Some(1))))
 
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),35,40))) // br40
 //        traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),36,5))) // cr5
@@ -748,101 +744,6 @@ import scodec.bits._
                     }
                   }
                 }
-
-//                if (onlineplayer.faction == PlanetSideEmpire.NC) {
-//                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.magcutter,PlanetSideGUID(onlineplayer.guid + 7),
-//                    Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),4)),
-//                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.melee_ammo,PlanetSideGUID(onlineplayer.guid + 8),0, AmmoBoxData(8)))))))
-//
-//                  if (onlineplayer.fav_Infantry_Loadout == 0) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 5),
-//                      Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.shotgun_shell,PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//                  if (onlineplayer.fav_Infantry_Loadout == 1) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.gauss, PlanetSideGUID(onlineplayer.guid + 5),
-//                      Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//                }
-//                if (onlineplayer.faction == PlanetSideEmpire.TR) {
-//                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.chainblade,PlanetSideGUID(onlineplayer.guid + 7),
-//                    Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),4)),
-//                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.melee_ammo,PlanetSideGUID(onlineplayer.guid + 8),0, AmmoBoxData(8)))))))
-//
-//                  if (onlineplayer.fav_Infantry_Loadout == 0) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5),
-//                      Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//                  if (onlineplayer.fav_Infantry_Loadout == 1) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.cycler, PlanetSideGUID(onlineplayer.guid + 5),
-//                      Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8, onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//                }
-//                if (onlineplayer.faction == PlanetSideEmpire.VS) {
-//                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.forceblade, PlanetSideGUID(onlineplayer.guid + 7),
-//                    Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 4)),
-//                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(8)))))))
-//
-//                  if (onlineplayer.fav_Infantry_Loadout == 0) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 5),
-//                      Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//
-//                  if (onlineplayer.fav_Infantry_Loadout == 1) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.pulsar, PlanetSideGUID(onlineplayer.guid + 5),
-//                      Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//                }
-//                if (onlineplayer.fav_Infantry_Loadout == 2) {
-//                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.flechette, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.shotgun_shell, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                }
-//                if (onlineplayer.fav_Infantry_Loadout == 3) {
-//                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.rocklet, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                }
-//                if (onlineplayer.fav_Infantry_Loadout == 4) {
-//                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.bolt_driver, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.bolt, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                }
-//                if (onlineplayer.fav_Infantry_Loadout == 5) {
-//                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.flamethrower, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.flamethrower_ammo, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                }
-//                if (onlineplayer.fav_Infantry_Loadout == 6) {
-//                  if (onlineplayer.faction == PlanetSideEmpire.NC) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.magcutter,PlanetSideGUID(onlineplayer.guid + 7), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),4)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.melee_ammo,PlanetSideGUID(onlineplayer.guid + 8),0, AmmoBoxData(8)))))))
-//
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.r_shotgun, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.shotgun_shell,PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//                  if (onlineplayer.faction == PlanetSideEmpire.TR) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.chainblade,PlanetSideGUID(onlineplayer.guid + 7), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid),4)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode,InternalSlot(ObjectClass.melee_ammo,PlanetSideGUID(onlineplayer.guid + 8),0, AmmoBoxData(8)))))))
-//
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.mini_chaingun, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//                  if (onlineplayer.faction == PlanetSideEmpire.VS) {
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.forceblade, PlanetSideGUID(onlineplayer.guid + 7), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 4)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(onlineplayer.guid + 8), 0, AmmoBoxData(8)))))))
-//
-//                    traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.lasher, PlanetSideGUID(onlineplayer.guid + 5), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 2)),
-//                      Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.energy_cell, PlanetSideGUID(onlineplayer.guid + 6), 0, AmmoBoxData(8)))))))
-//                  }
-//                  traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.flamethrower, PlanetSideGUID(onlineplayer.guid + 9), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 3)),
-//                    Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.flamethrower_ammo, PlanetSideGUID(onlineplayer.guid + 10), 0, AmmoBoxData(8)))))))
-//                }
-//                traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.bank, PlanetSideGUID(onlineplayer.guid + 1), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 0)),
-//                  Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.armor_canister, PlanetSideGUID(onlineplayer.guid + 2), 0, AmmoBoxData(8)))))))
-//                traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.medicalapplicator, PlanetSideGUID(onlineplayer.guid + 3), Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), 1)),
-//                  Some(WeaponData(0,8,onlineplayer.weapon_fire_mode, InternalSlot(ObjectClass.health_canister, PlanetSideGUID(onlineplayer.guid + 4), 0, AmmoBoxData(8)))))))
 
                 traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(PlanetSideGUID(onlineplayer.guid), onlineplayer.getUsedHolster, false)))
               }
