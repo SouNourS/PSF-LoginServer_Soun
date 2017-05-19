@@ -1307,6 +1307,28 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg@MoveItemMessage(item_guid, avatar_guid_1, avatar_guid_2, dest, unk1) =>
       log.info("ID: " + sessionId + " " + msg)
 //      sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(avatar_guid_1, item_guid, dest))) for rexo test
+//      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+//      if (playerOpt.isDefined) {
+//        val player: PlayerAvatar = playerOpt.get
+//        if (dest <= 3) {
+//          player.setEquipmentInHolster(dest, Tool(item_guid.guid, ObjectClass.katana))
+//          player.setEquipmentInHolster()
+//        }
+//      }
+////      Tool(item_guid.guid,100)
+//
+//      player.setUsedHolster(held_holsters)
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getName: " + player.getEquipmentInHolster(player.getUsedHolster).get.getName)
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " guid: " + player.getEquipmentInHolster(player.getUsedHolster).get.guid)
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " toolDef: " + player.getEquipmentInHolster(player.getUsedHolster).get.toolDef)
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getAmmoType: " + player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoType)
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getAmmoTypeIndex: " + player.getEquipmentInHolster(player.getUsedHolster).get.getAmmoTypeIndex)
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getUsedHolster1: " + player.getUsedHolster)
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getUsedHolster2: " + player.getHolster(player.getUsedHolster))
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getUsedHolster3: " + player.getEquipmentInHolster(player.getUsedHolster))
+//      log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " isDefined: " + player.getHolster(player.getUsedHolster).getEquipment.isDefined)
+
+
 
     case msg@ChangeAmmoMessage(item_guid, unk1) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
@@ -1364,7 +1386,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val player: PlayerAvatar = playerOpt.get
         log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         if (itemType != 121 && unk1 - player.guid != 3) sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
-        if (itemType == 121 && unk3 && unk1 - player.guid == 1) {
+        if (itemType == 121 && unk3 && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "bank") {
           // TODO : bank ?
           val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(object_guid)
           if (OnlinePlayer.isDefined) {
@@ -1401,7 +1423,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             }
           }
         }
-        if (itemType == 121 && unk3 && unk1 - player.guid == 3) {
+        if (itemType == 121 && unk3 && player.getEquipmentInHolster(player.getUsedHolster).get.getName == "medicalapplicator") {
           // TODO : med app ?
           val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(object_guid)
           if (OnlinePlayer.isDefined) {
