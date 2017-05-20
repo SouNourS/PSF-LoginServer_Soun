@@ -22,6 +22,10 @@ final class ServerInfo {
     }
     test
   }
+
+  var log : Boolean = true
+
+
 }
 
 
@@ -37,5 +41,13 @@ object ServerInfo {
   def mapRotation(time: Long): Long = {
     getInstance.mapRotation(time)
   }
+
+  def getLog : Boolean = {
+    getInstance.log
+  }
+  def setLog(newLogValue : Boolean) : Unit = {
+    getInstance.log = newLogValue
+  }
+
 
 }

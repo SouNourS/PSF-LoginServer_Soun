@@ -13,7 +13,7 @@ class Backpack(val owner : Int, width : Int, height : Int) extends ListInventory
     * The first cell is either (0,0) or 134 / 0x86.
     * This is necessary for calls to Inventory.fromHexIndex.
     */
-  override val indexOffset = 134
+  override val indexOffset = 0 // 6 as normal, 0 for testing
 
   /**
     * Override the string representation to provide additional information.

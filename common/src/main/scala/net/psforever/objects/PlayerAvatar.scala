@@ -62,7 +62,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   /** Which holster is depicted as having its equipment drawn. Valid numbers are 0-4 and 255 (no holster drawn). */
   private var drawnHolster : Int = 255
   /** The player's personal inventory. */
-  private val inventory : Backpack = Backpack(guid, 1,1)
+  val inventory : Backpack = Backpack(guid, 1,1)
   /** The player is shooting. */
   var shooting : Boolean = false
   /** The player is spectator. */
