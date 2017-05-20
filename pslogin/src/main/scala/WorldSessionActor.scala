@@ -1055,8 +1055,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         if (messagetype == ChatMessageType.CMT_OPEN) {
           if (contents.length > 1 && contents.dropRight(contents.length - 1) == "!" && contents.drop(1).dropRight(contents.length - 2) != "!") {
+            
             if(contents.drop(1) == "list" && !player.admin) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "You need the admin password ;)", note_contents)))
-            if(contents.drop(1) == "list" && player.admin) {
+            if(contents.drop(1) == "list" && contents.length == 5 && player.admin) {
               val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
               var guid : Int = 15000
               var j : Int = 1
@@ -1070,6 +1071,33 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
                       "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
                         onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                  }
+                  else if (player.guid == onlineplayer.guid) {
+                    guid += 100
+                  }
+                }
+                else {
+                  guid += 100
+                }
+              }
+            }
+            if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "list" && contents.length > 6 && player.admin) {
+              val search : String = contents.drop(contents.indexOf(" ") + 1)
+              val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
+              var guid : Int = 15000
+              var j : Int = 1
+              while (j != nbOnlinePlayer) {
+                val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+                if (OnlinePlayer.isDefined) {
+                  val onlineplayer: PlayerAvatar = OnlinePlayer.get
+                  if (player.guid != onlineplayer.guid) {
+                    j += 1
+                    guid += 100
+                    if (onlineplayer.name.indexOf(search) != -1) {
+                      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+                        "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
+                          onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                    }
                   }
                   else if (player.guid == onlineplayer.guid) {
                     guid += 100
@@ -2330,7 +2358,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
   def discordPullH(guid : PlanetSideGUID, name : String) = {
     log.info("Cheat player (PullHack) : " + name + " ID : " + guid.guid)
-    sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(guid, 15, 600)))
-    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_NOTE,true,"Live Server","Pull hack detected. If you feel this may be in error, please report the weapon you are using in the Discord #bug-report channel.",Some(""))))
+//    sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(guid, 15, 600)))
+//    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_NOTE,true,"Live Server","Pull hack detected. If you feel this may be in error, please report the weapon you are using in the Discord #bug-report channel.",Some(""))))
   }
 }
