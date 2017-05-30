@@ -180,7 +180,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
               math.ceil(2.55*onlineplayer.getHealth/onlineplayer.getMaxHealth*100).toInt,
               math.ceil(2.55*onlineplayer.getPersonalArmor/onlineplayer.getMaxPersonalArmor*100).toInt,UniformStyle.ThirdUpgrade,0,Some(ImplantEffects.NoEffects),Some(Cosmetics(false,false,false,false,false)),
-              InventoryData(List.empty,false,false),DrawnSlot.None))))
+              InventoryData(List.empty),DrawnSlot.None))))
 //          InventoryData(List(
 //            InventoryItem(InternalSlot(ObjectClass.bank,PlanetSideGUID(onlineplayer.guid + 1),0,
 //              WeaponData(0,0,0,InternalSlot(ObjectClass.armor_canister,PlanetSideGUID(onlineplayer.guid + 2),0,AmmoBoxData(0))))),
@@ -194,7 +194,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
                   Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
                   Some(WeaponData(0, 8, onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
-                    InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)))))))
+                    List(InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8))))))))
               }
               else {
                 var color : Int = 0 // TR
@@ -204,7 +204,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
                   onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
                   Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
-                  Some(ConcurrentFeedWeaponData(color, 8,
+                  Some(WeaponData(color, 8,
                     onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
                     List(InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)),
                       InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 16), 1, AmmoBoxData(8))))))))
@@ -354,7 +354,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
                     Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
                     Some(WeaponData(0, 8, onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
-                      InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)))))))
+                      List(InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8))))))))
                 }
                 else {
                   var color : Int = 0 // TR
@@ -364,10 +364,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
                     onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
                     Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
-                    Some(ConcurrentFeedWeaponData(color, 8,
+                    Some(WeaponData(color, 8,
                       onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
                       List(InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)),
-                        InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 16), 1, AmmoBoxData(8))))))))
+                        InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 16), 1, AmmoBoxData(8))))(2)))))
                 }
               }
             }
@@ -379,7 +379,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   onlineplayer.getEquipmentInHolster(unk1).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(unk1).get.guid),
                   Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), unk1)),
                   Some(WeaponData(0, 8, onlineplayer.getEquipmentInHolster(unk1).get.fireModeIndex,
-                    InternalSlot(onlineplayer.getEquipmentInHolster(unk1).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(unk1).get.guid + 1), 0, AmmoBoxData(8)))))))
+                    List(InternalSlot(onlineplayer.getEquipmentInHolster(unk1).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(unk1).get.guid + 1), 0, AmmoBoxData(8))))))))
               }
               else {
                 var color : Int = 0 // TR
@@ -389,10 +389,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
                   onlineplayer.getEquipmentInHolster(unk1).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(unk1).get.guid),
                   Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), unk1)),
-                  Some(ConcurrentFeedWeaponData(color, 8,
+                  Some(WeaponData(color, 8,
                     onlineplayer.getEquipmentInHolster(unk1).get.fireModeIndex,
                     List(InternalSlot(onlineplayer.getEquipmentInHolster(unk1).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(unk1).get.guid + 1), 0, AmmoBoxData(8)),
-                      InternalSlot(onlineplayer.getEquipmentInHolster(unk1).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(unk1).get.guid + 16), 1, AmmoBoxData(8))))))))
+                      InternalSlot(onlineplayer.getEquipmentInHolster(unk1).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(unk1).get.guid + 16), 1, AmmoBoxData(8))))(2)))))
               }
             }
           }
@@ -542,6 +542,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.redHealth = avatar.getMaxHealth
             avatar.blueArmor = avatar.getMaxPersonalArmor
             avatar.greenStamina = avatar.getMaxStamina
+//            avatar.admin = true // todo remove for live XXX
             //add avatar
             PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
           }
@@ -900,6 +901,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ ChildObjectStateMessage(object_guid : PlanetSideGUID, pitch : Int, yaw : Int) =>
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
 
+    case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, roll, pitch, yaw, vel, unk5, unk6, unk7, wheels, unk9, unkA) =>
+//      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
+
     case msg @ ProjectileStateMessage(projectile_guid, shot_pos, shot_vector, unk1, unk2, unk3, unk4, time_alive) =>
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
 
@@ -913,15 +917,32 @@ class WorldSessionActor extends Actor with MDCContextAware {
           log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         }
 
-//        if(messagetype == ChatMessageType.CMT_OPEN) {
-//          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"fury",72,true)))
+        if(messagetype == ChatMessageType.CMT_OPEN) {
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.fury, PlanetSideGUID(413), VehicleData(
+//            CommonFieldData(
+//              PlacementData(player.getPosition, 0, 0, 33),
+//              PlanetSideEmpire.VS, 4
+//            ),
+//            255,
+//            InternalSlot(
+//              ObjectClass.fury_weapon_systema, PlanetSideGUID(400), 1, WeaponData(
+//                0xC, 0x8, 0, ObjectClass.hellfire_ammo, PlanetSideGUID(432), 0, AmmoBoxData(0x8)
+//              )
+//            )
+//          ))
+//          ))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(440,46,PlanetSideGUID(5054),None,
+            Some(AMSData(CommonFieldData(PlacementData(player.getPosition,122,2,56,None),PlanetSideEmpire.VS,0,PlanetSideGUID(0)),
+              0,248,0,AMSDeployState.Deployed,63,PlanetSideGUID(3703),PlanetSideGUID(4608),PlanetSideGUID(3378),PlanetSideGUID(4832))))))
+
+          //          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"fury",72,true)))
 //          println(ServerInfo.mapRotation(System.currentTimeMillis()))
 //          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(contents.toInt - 1),PlanetSideEmpire.NEUTRAL)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(contents.toInt),PlanetSideEmpire.TR)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoTell_Target",None)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoChat_NoCommand",None)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),contents.toInt,1000)))
-//        }
+        }
 //        if(messagetype == ChatMessageType.CMT_TELL) {
 //          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),recipient.toInt,contents.toInt)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagSpawned^@amp_station~^@Pwyll~^@comm_station_dsp~^@Bel~^15~",None)))
@@ -1240,18 +1261,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
         var ammo_clip2 : Int = 0
         val player: PlayerAvatar = playerOpt.get
         if (ServerInfo.getLog) log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
-        if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun") ammo_clip2 = 16
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss") ammo_clip2 = 30
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun") ammo_clip2 = 100
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler") ammo_clip2 = 50
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher") ammo_clip2 = 35
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar") ammo_clip2 = 40
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette") ammo_clip2 = 12
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet") ammo_clip2 = 6
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "bolt_driver") ammo_clip2 = 1
-        else if(player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") ammo_clip2 = 100
-
-        player.getEquipmentInHolster(player.getUsedHolster).get.magazine = player.getEquipmentInHolster(player.getUsedHolster).get.getFireMode.magazineSize
+        if (player.getUsedHolster != 255) {
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun") ammo_clip2 = 16
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss") ammo_clip2 = 30
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun") ammo_clip2 = 100
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler") ammo_clip2 = 50
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher") ammo_clip2 = 35
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar") ammo_clip2 = 40
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette") ammo_clip2 = 12
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet") ammo_clip2 = 6
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "bolt_driver") ammo_clip2 = 1
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") ammo_clip2 = 100
+          player.getEquipmentInHolster(player.getUsedHolster).get.magazine = player.getEquipmentInHolster(player.getUsedHolster).get.getFireMode.magazineSize
+        }
         player.lastShotSeq_time = -1
 
         sendResponse(PacketCoding.CreateGamePacket(0, ReloadMessage(item_guid, ammo_clip2, unk1)))
@@ -1578,8 +1600,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
             if (player.faction == PlanetSideEmpire.NC) color = 4
             if (player.faction == PlanetSideEmpire.VS) color = 8
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.katana, PlanetSideGUID(player.guid + 7), Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 4)),
-              Some(DetailedConcurrentFeedWeaponData(color, 8,
-                List(InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(0,1)),InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 23), 1, DetailedAmmoBoxData(0,1))))))))
+              Some(DetailedWeaponData(color, 8,
+                List(InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0,
+                  DetailedAmmoBoxData(0,1)),InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 23), 1, DetailedAmmoBoxData(0,1))))(2)))))
             player.setEquipmentInHolster(4, Tool(player.guid + 7, ObjectClass.katana))
             avatarService ! AvatarService.ChangeWeapon(4, sessionId)
           }
@@ -1709,17 +1732,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0,
                     player.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid),
                     Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), ind)),
-                    Some(DetailedWeaponData(12,
-                      InternalSlot(player.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid + 1), 0,
-                        DetailedAmmoBoxData(0, player.getEquipmentInHolster(ind).get.getFireMode.magazineSize/8)))))))
+                    Some(DetailedWeaponData(0,8,
+                      List(InternalSlot(player.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid + 1), 0,
+                        DetailedAmmoBoxData(0, player.getEquipmentInHolster(ind).get.getFireMode.magazineSize/8))))))))
                 }
                 else {
                   sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0,
                     player.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid),
                     Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), ind)),
-                    Some(DetailedWeaponData(12,
-                      InternalSlot(player.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid + 1), 0,
-                        DetailedAmmoBoxData(0, player.getEquipmentInHolster(ind).get.getFireMode.magazineSize)))))))
+                    Some(DetailedWeaponData(0,8,
+                      List(InternalSlot(player.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid + 1), 0,
+                        DetailedAmmoBoxData(0, player.getEquipmentInHolster(ind).get.getFireMode.magazineSize))))))))
                 }
               }
               else {
@@ -1730,11 +1753,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0,
                   player.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid),
                   Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), ind)),
-                  Some(DetailedConcurrentFeedWeaponData(color, 8,
+                  Some(DetailedWeaponData(color, 8,
                     List(InternalSlot(player.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid + 1), 0,
                       DetailedAmmoBoxData(0, player.getEquipmentInHolster(ind).get.getFireMode.magazineSize)),
                       InternalSlot(player.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid + 16), 1,
-                        DetailedAmmoBoxData(0, player.getEquipmentInHolster(ind).get.getFireMode.magazineSize))))))))
+                        DetailedAmmoBoxData(0, player.getEquipmentInHolster(ind).get.getFireMode.magazineSize))))(2)))))
               }
               player.getEquipmentInHolster(ind).get.magazine = player.getEquipmentInHolster(ind).get.getFireMode.magazineSize
             }
@@ -1784,6 +1807,31 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
           avatarService ! AvatarService.ChangeWeapon(unk1 + 10, sessionId)
         }
+        println(transaction_type,terminal_guid,item_page,item_name)
+        if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "fury") {
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.fury, PlanetSideGUID(413), VehicleData(
+//            CommonFieldData(
+//              PlacementData(Vector3(1770f,2686f,92f), 0, 0, 33),
+//              player.faction, 4
+//            ),
+//            255,
+//            InternalSlot(
+//              ObjectClass.fury_weapon_systema, PlanetSideGUID(400), 1, WeaponData(
+//                0xC, 0x8, 0, ObjectClass.hellfire_ammo, PlanetSideGUID(432), 0, AmmoBoxData(0x8)
+//              )
+//            )
+//          ))
+//          ))
+
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(336,335,PlanetSideGUID(2703),None,Some(VehicleData(CommonFieldData(PlacementData(Vector3(1770f,2686f,92f),0,0,64,None),player.faction,4,PlanetSideGUID(0)),0,255,0,0,false,0,Some(List(InternalSlot(336,PlanetSideGUID(2705),1,WeaponData(12,8,0,List(InternalSlot(399,PlanetSideGUID(2704),0,AmmoBoxData(8))))))))))))
+          sendResponse(PacketCoding.CreateGamePacket(0, InventoryStateMessage(PlanetSideGUID(2704),0,PlanetSideGUID(2705),2)))
+
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124,399,PlanetSideGUID(374),Some(ObjectCreateMessageParent(PlanetSideGUID(2703),30)),Some(DetailedAmmoBoxData(8,24)))))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124,399,PlanetSideGUID(455),Some(ObjectCreateMessageParent(PlanetSideGUID(2703),34)),Some(DetailedAmmoBoxData(8,24)))))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124,399,PlanetSideGUID(363),Some(ObjectCreateMessageParent(PlanetSideGUID(2703),74)),Some(DetailedAmmoBoxData(8,24)))))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124,399,PlanetSideGUID(398),Some(ObjectCreateMessageParent(PlanetSideGUID(2703),78)),Some(DetailedAmmoBoxData(8,24)))))
+
+        }
       }
 
     case msg@WeaponDelayFireMessage(seq_time, weapon_guid) =>
@@ -1794,7 +1842,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         if (ServerInfo.getLog) log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
-        player.getEquipmentInHolster(player.getUsedHolster).get.magazine -= 1
+        if (player.getUsedHolster != 255) {
+          player.getEquipmentInHolster(player.getUsedHolster).get.magazine -= 1
+
         if (player.lastShotSeq_time != -1) {
           var time : Int = 0
           if (seq_time - player.lastShotSeq_time < 0) {
@@ -1836,6 +1886,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar" && time < 1) {
             discordROF(PlanetSideGUID(player.guid),player.name)
           }
+        }
         }
         player.lastShotSeq_time = seq_time
       }

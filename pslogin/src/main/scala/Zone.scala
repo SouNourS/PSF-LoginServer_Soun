@@ -523,19 +523,19 @@ import scodec.bits._
 
         var userInv =
           InventoryItem(ObjectClass.jammer_grenade, PlanetSideGUID(player.guid + 18), 0,
-            DetailedWeaponData(8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(player.guid + 19), 0, DetailedAmmoBoxData(8, 600))) ::
+            DetailedWeaponData(0,8, ObjectClass.jammer_grenade_ammo, PlanetSideGUID(player.guid + 19), 0, DetailedAmmoBoxData(8, 600))) ::
             Nil
 
         if (player.faction == PlanetSideEmpire.NC) {
           userInv =
             InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
-              DetailedWeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, DetailedAmmoBoxData(8, 50))) ::
+              DetailedWeaponData(0,8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, DetailedAmmoBoxData(8, 50))) ::
               InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
-                DetailedWeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
+                DetailedWeaponData(0,8, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
               InventoryItem(ObjectClass.r_shotgun, PlanetSideGUID(player.guid + 5), 2,
-                DetailedWeaponData(0, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 16))) ::
+                DetailedWeaponData(0,8, ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 16))) ::
               InventoryItem(ObjectClass.magcutter, PlanetSideGUID(player.guid + 7), 4,
-                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
+                DetailedWeaponData(0,8, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
               InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 20), 5, DetailedAmmoBoxData(8, 1)) ::
               InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, DetailedAmmoBoxData(8, 50)) ::
@@ -553,13 +553,13 @@ import scodec.bits._
         else if (player.faction == PlanetSideEmpire.TR) {
           userInv =
             InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
-              DetailedWeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, DetailedAmmoBoxData(8, 50))) ::
+              DetailedWeaponData(0,8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, DetailedAmmoBoxData(8, 50))) ::
               InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
-                DetailedWeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
+                DetailedWeaponData(0,8, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
               InventoryItem(ObjectClass.mini_chaingun, PlanetSideGUID(player.guid + 5), 2,
-                DetailedWeaponData(0, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 100))) ::
+                DetailedWeaponData(0,8, ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 100))) ::
               InventoryItem(ObjectClass.chainblade, PlanetSideGUID(player.guid + 7), 4,
-                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
+                DetailedWeaponData(0,8, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
               InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 20), 5, DetailedAmmoBoxData(8, 1)) ::
               InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, DetailedAmmoBoxData(8, 50)) ::
@@ -577,13 +577,13 @@ import scodec.bits._
         else if (player.faction == PlanetSideEmpire.VS) {
           userInv =
             InventoryItem(ObjectClass.bank, PlanetSideGUID(player.guid + 1), 0,
-              DetailedWeaponData(8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, DetailedAmmoBoxData(8, 50))) ::
+              DetailedWeaponData(0,8, ObjectClass.armor_canister, PlanetSideGUID(player.guid + 2), 0, DetailedAmmoBoxData(8, 50))) ::
               InventoryItem(ObjectClass.medicalapplicator, PlanetSideGUID(player.guid + 3), 1,
-                DetailedWeaponData(0, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
+                DetailedWeaponData(0,8, ObjectClass.health_canister, PlanetSideGUID(player.guid + 4), 0, DetailedAmmoBoxData(8, 50))) ::
               InventoryItem(ObjectClass.lasher, PlanetSideGUID(player.guid + 5), 2,
-                DetailedWeaponData(0, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 35))) ::
+                DetailedWeaponData(0,8, ObjectClass.energy_cell, PlanetSideGUID(player.guid + 6), 0, DetailedAmmoBoxData(8, 35))) ::
               InventoryItem(ObjectClass.forceblade, PlanetSideGUID(player.guid + 7), 4,
-                DetailedWeaponData(0, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
+                DetailedWeaponData(0,8, ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0, DetailedAmmoBoxData(8, 1))) ::
               InventoryItem(ObjectClass.locker_container, PlanetSideGUID(player.guid + 20), 5, DetailedAmmoBoxData(8, 1)) ::
               InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(player.guid + 11), 6, DetailedAmmoBoxData(8, 50)) ::
               InventoryItem(ObjectClass.shotgun_shell, PlanetSideGUID(player.guid + 18), 9, DetailedAmmoBoxData(8, 50)) ::
@@ -718,7 +718,7 @@ import scodec.bits._
                     math.ceil(2.55*onlineplayer.getHealth/onlineplayer.getMaxHealth*100).toInt,
                     math.ceil(2.55*onlineplayer.getPersonalArmor/onlineplayer.getMaxPersonalArmor*100).toInt,UniformStyle.ThirdUpgrade,0,Some(ImplantEffects.NoEffects),
                     Some(Cosmetics(false,false,false,false,false)),
-                    InventoryData(List.empty,false,false),DrawnSlot.None))))
+                    InventoryData(List.empty),DrawnSlot.None))))
 
                 for (ind <- 0 to 4) {
                   if (onlineplayer.getHolster(ind).getEquipment.isDefined) {
@@ -727,7 +727,7 @@ import scodec.bits._
                         onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
                         Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
                         Some(WeaponData(0, 8, onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
-                          InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)))))))
+                          List(InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8))))))))
                     }
                     else {
                       var color : Int = 0 // TR
@@ -737,10 +737,10 @@ import scodec.bits._
                       traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
                         onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
                         Some(ObjectCreateMessageParent(PlanetSideGUID(onlineplayer.guid), ind)),
-                        Some(ConcurrentFeedWeaponData(color, 8,
+                        Some(WeaponData(color, 8,
                           onlineplayer.getEquipmentInHolster(ind).get.fireModeIndex,
                           List(InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 1), 0, AmmoBoxData(8)),
-                            InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 16), 1, AmmoBoxData(8))))))))
+                            InternalSlot(onlineplayer.getEquipmentInHolster(ind).get.getAmmoType.id, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid + 16), 1, AmmoBoxData(8))))(2)))))
                     }
                   }
                 }
@@ -1319,7 +1319,8 @@ import scodec.bits._
         "rashnu" -> (1709, 1802, 91),
         "sraosha" -> (2729, 2349, 91),
         "zal" -> (1888, 2728, 91),
-        "center" -> (2082, 2192, 160)
+        "center" -> (2082, 2192, 160),
+        "vpad" -> (1770, 2686, 92)
       )
       zones("i1").gates += (
         "gate1" -> (1225, 2036, 67),
