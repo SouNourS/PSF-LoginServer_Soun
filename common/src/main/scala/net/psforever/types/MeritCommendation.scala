@@ -505,8 +505,11 @@ object MeritCommendation extends Enumeration {
       case 0xFFFFFFFFL =>
         Attempt.successful(MeritCommendation.None)
       case n =>
-        if(n > Int.MaxValue) {
-          Attempt.failure(Err(s"value $n is too high, above maximum integer value ${Int.MaxValue}"))
+//        if(n > Int.MaxValue) {
+//          Attempt.failure(Err(s"value $n is too high, above maximum integer value ${Int.MaxValue}"))
+//        }
+        if(n > 426) {
+          Attempt.failure(Err(s"value $n is too high, above maximum merit value : 426"))
         }
         else {
           Attempt.successful(MeritCommendation(n.toInt))

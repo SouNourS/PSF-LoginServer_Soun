@@ -80,6 +80,7 @@ import scodec.codecs._
   *         15 for plasma + ancient + LLU? + fire,`<br>
   * `55 - "Someone is attempting to Heal you". Value is 1`<br>
   * `56 - "Someone is attempting to Repair you". Value is 1`<br>
+  * `68 - "Vehicle shield". For full shield on AMS, value is 600 ?!`<br>
   * `73 - "You are locked into the Core Beam. Charging your Module now.". Value is 1 to active`<br>
   * `77 - Cavern Facility Captures. Value is the number of captures`<br>
   * `78 - Cavern Kills. Value is the number of kills`<br>

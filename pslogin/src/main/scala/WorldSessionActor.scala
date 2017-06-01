@@ -542,7 +542,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.redHealth = avatar.getMaxHealth
             avatar.blueArmor = avatar.getMaxPersonalArmor
             avatar.greenStamina = avatar.getMaxStamina
-//            avatar.admin = true // todo remove for live XXX
+            avatar.admin = true // todo remove for live XXX
             //add avatar
             PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
           }
@@ -841,6 +841,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case KeepAliveMessage(code) =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage()))
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        if (player.sortieVehicle != 0 && System.currentTimeMillis() - player.sortieVehicle > 5000) {
+          // amsd
+          println(System.currentTimeMillis() - player.sortieVehicle,player.sortieVehicle)
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.guid + 99),PlanetSideGUID(player.guid + 90),Vector3(1782f, 2651f, 91f),0,0,102)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),0,3000)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),68,590)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ServerVehicleOverrideMsg(true,true,false,false,0,0,9,Some(0))))
+          player.sortieVehicle = 0
+        }
+      }
 
     case msg@PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
@@ -1821,7 +1834,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
           avatarService ! AvatarService.ChangeWeapon(unk1 + 10, sessionId)
         }
-        println(transaction_type, terminal_guid, item_page, item_name)
         if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "fury") {
           //          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.fury, PlanetSideGUID(413), VehicleData(
           //            CommonFieldData(
@@ -1851,34 +1863,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
           sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"ams",300,true)))
 
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(4157), AMSData(
-            CommonFieldData(PlacementData(Vector3(1770f, 2686f, 92f), 0, 0, 102),
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(player.guid + 90), AMSData(
+            CommonFieldData(PlacementData(Vector3(1770f, 2686f, 85f), 0, 0, 102),
               player.faction, 4,
               PlanetSideGUID(0)),
-            2,
+            0,
             255,
             0,
             AMSDeployState.Mobile,
             0,
             PlanetSideGUID(3663), PlanetSideGUID(3638), PlanetSideGUID(3827), PlanetSideGUID(3556)))))
 
+          player.sortieVehicle = System.currentTimeMillis()
+
           // from PSCap-2015-11-06_08-49-16-PM_decoded.txt
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(1882),PlanetSideGUID(4157),3)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(4157),22,1)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),21,4157)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(4157),PlanetSideGUID(player.guid),0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(4157),22,0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(4157),0,3000)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(4157),68,0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(4157),113,0)))
-          Thread.sleep(1000)
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.guid + 99),PlanetSideGUID(player.guid + 90),3)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,1)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),21,player.guid + 90)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.guid + 90),PlanetSideGUID(player.guid),0)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,0)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),0,3000)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),68,0)))
+          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),113,0)))
 
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(1882),PlanetSideGUID(4157),Vector3(1770f, 2686f, 92f),0,0,102)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(4157),0,3000)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(4157),68,0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ServerVehicleOverrideMsg(true,true,false,false,0,0,9,Some(0))))
-
-
+          sendResponse(PacketCoding.CreateGamePacket(0, ItemTransactionResultMessage(terminal_guid, TransactionType.Learn, true, 0)))
 
         }
         if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "quadstealth") {
