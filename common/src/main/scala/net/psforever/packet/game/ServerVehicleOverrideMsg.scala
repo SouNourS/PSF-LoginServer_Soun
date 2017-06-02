@@ -13,7 +13,7 @@ import scodec.codecs._
   * @param unk4 na
   * @param unk5 na
   * @param unk6 na
-  * @param unk7 na
+  * @param speed 'something like vehicle speed (1 for AMS is 3kph, 2 -> 7, 3 -> 10, 10 -> 35)'
   * @param unk8 na
   */
 final case class ServerVehicleOverrideMsg(unk1 : Boolean,
@@ -22,7 +22,7 @@ final case class ServerVehicleOverrideMsg(unk1 : Boolean,
                                           unk4 : Boolean,
                                           unk5 : Int,
                                           unk6 : Int,
-                                          unk7 : Int,
+                                          speed : Int,
                                           unk8 : Option[Long] = None
                                          ) extends PlanetSideGamePacket {
   type Packet = ServerVehicleOverrideMsg
@@ -38,7 +38,7 @@ object ServerVehicleOverrideMsg extends Marshallable[ServerVehicleOverrideMsg] {
           ("unk4" | bool) ::
           ("unk5" | uint2L) ::
           ("unk6" | uint2L) ::
-          ("unk7" | uintL(9)) ::
+          ("speed" | uintL(9)) ::
           conditional(test, "unk8" | uint32L)
       })
     ).as[ServerVehicleOverrideMsg]

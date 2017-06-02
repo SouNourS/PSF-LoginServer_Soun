@@ -501,6 +501,16 @@ import scodec.bits._
         Thread.sleep(200)
       }
 
+//      if (zone.zonename == "i2") {
+//        var ind2 = 1
+//        for (ind <- 1 to 1000) {
+//          if (ind == 100 * ind2) Thread.sleep(100)
+//          traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(ind),50,0)))
+//          traveler.sendToSelf(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(ind),51,0)))
+//          ind2 += 1
+//        }
+//      }
+
     }
 
     /**

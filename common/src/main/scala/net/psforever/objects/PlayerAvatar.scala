@@ -55,7 +55,9 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
 
   var lastShotSeq_time : Int = -1
 
-  var sortieVehicle : Long = 0
+  var sortieVehicle1 : Long = 0
+  var sortieVehicle2 : Long = 0
+  var test : Int = 0
 
   /** An index reference to the type of exo-suit the player is wearing. */
   private var suit : ExoSuitType.Value = ExoSuitType.Standard
