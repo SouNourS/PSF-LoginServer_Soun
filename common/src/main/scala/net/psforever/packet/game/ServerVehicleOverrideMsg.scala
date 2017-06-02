@@ -7,18 +7,18 @@ import scodec.codecs._
 
 /**
   * na
-  * @param unk1 na
+  * @param unk1 true = lock vehicle control
   * @param unk2 na
-  * @param unk3 na
+  * @param reverse true seem "reverse"
   * @param unk4 na
   * @param unk5 na
   * @param unk6 na
-  * @param speed 'something like vehicle speed (1 for AMS is 3kph, 2 -> 7, 3 -> 10, 10 -> 35)'
+  * @param speed 'something like vehicle speed (1 for AMS is 3kph, 2 -> 7, 3 -> 10, 10 -> 35, 15 -> 52, 20 -> 68)'
   * @param unk8 na
   */
 final case class ServerVehicleOverrideMsg(unk1 : Boolean,
                                           unk2 : Boolean,
-                                          unk3 : Boolean,
+                                          reverse : Boolean,
                                           unk4 : Boolean,
                                           unk5 : Int,
                                           unk6 : Int,
@@ -34,7 +34,7 @@ object ServerVehicleOverrideMsg extends Marshallable[ServerVehicleOverrideMsg] {
   implicit val codec: Codec[ServerVehicleOverrideMsg] = (
     ("unk1" | bool) ::
       (("unk2" | bool) >>:~ { test =>
-        ("unk3" | bool) ::
+        ("reverse" | bool) ::
           ("unk4" | bool) ::
           ("unk5" | uint2L) ::
           ("unk6" | uint2L) ::

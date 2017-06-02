@@ -846,16 +846,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val player: PlayerAvatar = playerOpt.get
         if (player.sortieVehicle1 != 0 && System.currentTimeMillis() - player.sortieVehicle1 > 2500) {
           // amsd
-//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.test),PlanetSideGUID(player.guid + 90),Vector3(1782f, 2651f, 91f),0,0,102)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.test),PlanetSideGUID(player.guid + 90),Vector3(6531.961f, 1872.1406f, 24.734375f),0,0,33)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(575),PlanetSideGUID(player.guid + 90),Vector3(1770f, 2686f, 92f),0,0,102)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.test),PlanetSideGUID(player.guid + 90),Vector3(6531.961f, 1872.1406f, 24.734375f),0,0,33)))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),0,3300)))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),68,0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ServerVehicleOverrideMsg(true,true,false,false,0,0,3,Some(0))))
+          sendResponse(PacketCoding.CreateGamePacket(0, ServerVehicleOverrideMsg(true,true,false,false,0,0,9,Some(0))))
           player.sortieVehicle1 = 0
           player.sortieVehicle2 = System.currentTimeMillis()
         }
-        if (player.sortieVehicle2 != 0 && System.currentTimeMillis() - player.sortieVehicle2 > 10000) {
-          sendResponse(PacketCoding.CreateGamePacket(0, ServerVehicleOverrideMsg(false,false,false,true,0,0,10,None)))
+        if (player.sortieVehicle2 != 0 && System.currentTimeMillis() - player.sortieVehicle2 > 30000) {
+          sendResponse(PacketCoding.CreateGamePacket(0, ServerVehicleOverrideMsg(false,false,false,true,0,0,3,None)))
           player.sortieVehicle2 = 0
         }
       }
@@ -935,38 +935,40 @@ class WorldSessionActor extends Actor with MDCContextAware {
           log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
         }
 
-        if(messagetype == ChatMessageType.CMT_OPEN) {
+//        if(messagetype == ChatMessageType.CMT_OPEN) {
 
-          player.test = contents.toInt
+//          player.test = contents.toInt
+//
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.test),50,0)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.test),51,0)))
+//
+//          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"ams",300,true)))
+//
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(player.guid + 90), AMSData(
+//            CommonFieldData(PlacementData(Vector3(6531.961f,1872.1406f,24.734375f), 0, 0, 33),
+//              player.faction, 4,
+//              PlanetSideGUID(0)),
+//            0,
+//            255,
+//            0,
+//            AMSDeployState.Mobile,
+//            0,
+//            PlanetSideGUID(3663), PlanetSideGUID(3638), PlanetSideGUID(3827), PlanetSideGUID(3556)))))
+//
+//          player.sortieVehicle1 = System.currentTimeMillis()
+//
+//          // from PSCap-2015-11-06_08-49-16-PM_decoded.txt
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.test),PlanetSideGUID(player.guid + 90),3)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,1)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),80,10))) // need ?
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),21,player.guid + 90)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.guid + 90),PlanetSideGUID(player.guid),0)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,0)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),0,3300)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),68,0)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),113,0)))
 
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.test),50,0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.test),51,0)))
 
-          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"ams",300,true)))
-
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(player.guid + 90), AMSData(
-            CommonFieldData(PlacementData(Vector3(6531.961f,1872.1406f,24.734375f), 0, 0, 33),
-              player.faction, 4,
-              PlanetSideGUID(0)),
-            0,
-            255,
-            0,
-            AMSDeployState.Mobile,
-            0,
-            PlanetSideGUID(3663), PlanetSideGUID(3638), PlanetSideGUID(3827), PlanetSideGUID(3556)))))
-
-          player.sortieVehicle1 = System.currentTimeMillis()
-
-          // from PSCap-2015-11-06_08-49-16-PM_decoded.txt
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.test),PlanetSideGUID(player.guid + 90),3)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,1)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),80,10))) // need ?
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),21,player.guid + 90)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.guid + 90),PlanetSideGUID(player.guid),0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),0,3300)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),68,0)))
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),113,0)))
 
           //          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"fury",72,true)))
 //          println(ServerInfo.mapRotation(System.currentTimeMillis()))
@@ -975,7 +977,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoTell_Target",None)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,"","@NoChat_NoCommand",None)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),contents.toInt,1000)))
-        }
+//        }
 //        if(messagetype == ChatMessageType.CMT_TELL) {
 //          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(15000),recipient.toInt,contents.toInt)))
 //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_229,true,"","@CTF_FlagSpawned^@amp_station~^@Pwyll~^@comm_station_dsp~^@Bel~^15~",None)))
@@ -1901,7 +1903,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"ams",300,true)))
 
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(player.guid + 90), AMSData(
-            CommonFieldData(PlacementData(Vector3(1770f, 2686f, 85f), 0, 0, 102),
+            CommonFieldData(PlacementData(Vector3(1770f, 2686f, 92f), 0, 0, 102),
               player.faction, 4,
               PlanetSideGUID(0)),
             0,
@@ -1914,7 +1916,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           player.sortieVehicle1 = System.currentTimeMillis()
 
           // from PSCap-2015-11-06_08-49-16-PM_decoded.txt
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.guid + 99),PlanetSideGUID(player.guid + 90),3)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(575),PlanetSideGUID(player.guid + 90),3)))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,1)))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),21,player.guid + 90)))
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.guid + 90),PlanetSideGUID(player.guid),0)))
