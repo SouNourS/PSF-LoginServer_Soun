@@ -13,6 +13,8 @@ class PSGameObject {
   var posY : Float = 0f
   /** z-coordinate; typically between 0-4000 and is a NS distinction */
   var posZ : Float = 0f
+  /** Angle of rotation about a vector coplanar with the ground (ZX-plane). */
+  var aimRoll : Float = 0f //TODO should we store this value in radians?
   /** Angle of rotation about a vector perpendicular to the ground (ZX-plane). */
   var aimYaw : Float = 0f //TODO should we store this value in radians?
   /** Angle of rotation about a vector coplanar with the ground (ZX-plane). */
@@ -62,9 +64,27 @@ class PSGameObject {
     * @param vec a vector3 containing the new coordinates
     */
   def setPosition(vec : Vector3) : Unit = {
-    posX = vec.x
-    posY = vec.y
-    posZ = vec.z
+    setPosition(vec.x, vec.y, vec.z)
+  }
+
+  /**
+    * Get the orientation of the object respective to the perpendicular of the ground (ZX-plane).
+    * @return a positive value typically between >=0 degrees and <360 degrees.
+    */
+  def getRoll : Float = {
+    aimRoll
+  }
+
+  /**
+    * Set the orientation of the object respective to the perpendicular of the ground (ZX-plane).
+    * @param look a positive value clamped between n >= 0 degrees and n < 360 degrees
+    */
+  def setRoll(look : Float) : Unit = {
+    var dLook : Float = look
+    dLook %= 360f
+    if(look < 0)
+      dLook += 360
+    aimRoll = dLook
   }
 
   /**
