@@ -3,7 +3,7 @@ package game
 
 import net.psforever.packet._
 import net.psforever.packet.game.{ObjectCreateMessage, _}
-import net.psforever.packet.game.objectcreate._
+import net.psforever.packet.game.objectcreate.{DriveState, _}
 import net.psforever.types._
 import org.specs2.mutable._
 import scodec.bits._
@@ -15,6 +15,10 @@ class ObjectCreateMessageVehiclesTest extends Specification {
   val string_mediumtransport = hex"17 DA010000 8A2 8301 FBC1C 12A83 2F06 00 00 21 2400003FC079020593F80C2E400000040410148030190000017458050D90000001010401F814064000000"
   val string_ams = hex"17 B8010000 970 3D10 002D765535CA16000000 402285BB0037E4100749E1D03000000620D83A0A00000195798741C00000332E40D84800000"
   val string_ams_destroyed = hex"17 8D000000 978 3D10 002D765535CA16000000 0"
+  val string_switchblade = hex"17 93010000 A7B A201 FBC1C12A832F06000021 4400003FC00001013AD3180C0E4000000408330DC03019000006620406072000000"
+  val string_droppod = hex"17 C1000000 8110B0E00FA9000ACFFFF000000 4400007F83C0900"
+  val string_orbital_shuttle_1 = hex"17 82000000 0901B026904838000001FE0700"
+  val string_orbital_shuttle_2 = hex"17 C3000000 B02670402F5AA14F88C210000604000007F8FF03C0"
 
   "decode (fury)" in {
     PacketCoding.DecodePacket(string_fury).require match {
@@ -46,7 +50,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         mounting.parentSlot mustEqual 1
         mounting.obj.isInstanceOf[WeaponData] mustEqual true
         val weapon = mounting.obj.asInstanceOf[WeaponData]
-        weapon.unk1 mustEqual 0xC
+        weapon.unk1 mustEqual 0x6
         weapon.unk2 mustEqual 0x8
         weapon.fire_mode mustEqual 0
         weapon.ammo.size mustEqual 1
@@ -81,7 +85,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         ant.basic.unk mustEqual 4
         ant.basic.player_guid mustEqual PlanetSideGUID(0)
         ant.health mustEqual 255
-        ant.deployState mustEqual ANTDeployState.Mobile
+        ant.driveState mustEqual DriveState.Mobile
       case _ =>
         ko
     }
@@ -115,7 +119,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         mounting.parentSlot mustEqual 1
         mounting.obj.isInstanceOf[WeaponData] mustEqual true
         val weapon = mounting.obj.asInstanceOf[WeaponData]
-        weapon.unk1 mustEqual 0x8
+        weapon.unk1 mustEqual 0x4
         weapon.unk2 mustEqual 0x8
         weapon.fire_mode mustEqual 0
         weapon.ammo.size mustEqual 2
@@ -160,7 +164,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         deliverer.unk1 mustEqual 0
         deliverer.health mustEqual 255
         deliverer.unk2 mustEqual 0
-        deliverer.unk3 mustEqual 0x7
+        deliverer.driveState mustEqual DriveState.State7
         deliverer.unk4 mustEqual true
         deliverer.unk5 mustEqual 0
         deliverer.mountings.isDefined mustEqual true
@@ -172,7 +176,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         mounting.parentSlot mustEqual 5
         mounting.obj.isInstanceOf[WeaponData] mustEqual true
         var weapon = mounting.obj.asInstanceOf[WeaponData]
-        weapon.unk1 mustEqual 0xC
+        weapon.unk1 mustEqual 0x6
         weapon.unk2 mustEqual 0x8
         weapon.fire_mode mustEqual 0
         weapon.ammo.size mustEqual 1
@@ -189,7 +193,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         mounting.parentSlot mustEqual 6
         mounting.obj.isInstanceOf[WeaponData] mustEqual true
         weapon = mounting.obj.asInstanceOf[WeaponData]
-        weapon.unk1 mustEqual 0xC
+        weapon.unk1 mustEqual 0x6
         weapon.unk2 mustEqual 0x8
         weapon.fire_mode mustEqual 0
         weapon.ammo.size mustEqual 1
@@ -226,6 +230,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         ams.unk1 mustEqual 2
         ams.health mustEqual 236
         ams.unk2 mustEqual 0
+        ams.driveState mustEqual DriveState.Deployed
         ams.matrix_guid mustEqual PlanetSideGUID(3663)
         ams.respawn_guid mustEqual PlanetSideGUID(3638)
         ams.term_a_guid mustEqual PlanetSideGUID(3827)
@@ -256,6 +261,119 @@ class ObjectCreateMessageVehiclesTest extends Specification {
     }
   }
 
+  "decode (switchblade)" in {
+    PacketCoding.DecodePacket(string_switchblade).require match {
+      case ObjectCreateMessage(len, cls, guid, parent, data) =>
+        len mustEqual 403L
+        cls mustEqual ObjectClass.switchblade
+        guid mustEqual PlanetSideGUID(418)
+        parent.isDefined mustEqual false
+        data.isDefined mustEqual true
+        data.get.isInstanceOf[Vehicle2Data] mustEqual true
+        val switchblade = data.get.asInstanceOf[Vehicle2Data]
+        switchblade.basic.pos.coord.x mustEqual 6531.961f
+        switchblade.basic.pos.coord.y mustEqual 1872.1406f
+        switchblade.basic.pos.coord.z mustEqual 24.734375f
+        switchblade.basic.pos.roll mustEqual 0
+        switchblade.basic.pos.pitch mustEqual 0
+        switchblade.basic.pos.yaw mustEqual 33
+        switchblade.basic.faction mustEqual PlanetSideEmpire.VS
+        switchblade.basic.unk mustEqual 4
+        switchblade.health mustEqual 255
+        switchblade.driveState mustEqual DriveState.Mobile
+        switchblade.mountings.isDefined mustEqual true
+        switchblade.mountings.get.size mustEqual 1
+        //0
+        val weapon = switchblade.mountings.get.head
+        weapon.objectClass mustEqual ObjectClass.scythe
+        weapon.guid mustEqual PlanetSideGUID(355)
+        weapon.parentSlot mustEqual 1
+        weapon.obj.asInstanceOf[WeaponData].unk1 mustEqual 0x6
+        weapon.obj.asInstanceOf[WeaponData].unk2 mustEqual 0x8
+        weapon.obj.asInstanceOf[WeaponData].ammo.size mustEqual 2
+        //ammo-0
+        var ammo = weapon.obj.asInstanceOf[WeaponData].ammo.head
+        ammo.objectClass mustEqual ObjectClass.ancient_ammo_vehicle
+        ammo.guid mustEqual PlanetSideGUID(366)
+        ammo.parentSlot mustEqual 0
+        ammo.obj.asInstanceOf[AmmoBoxData].unk mustEqual 0x8
+        //ammo-1
+        ammo = weapon.obj.asInstanceOf[WeaponData].ammo(1)
+        ammo.objectClass mustEqual ObjectClass.ancient_ammo_vehicle
+        ammo.guid mustEqual PlanetSideGUID(385)
+        ammo.parentSlot mustEqual 1
+        ammo.obj.asInstanceOf[AmmoBoxData].unk mustEqual 0x8
+      case _ =>
+        ko
+    }
+  }
+
+  "decode (droppod)" in {
+    PacketCoding.DecodePacket(string_droppod).require match {
+      case ObjectCreateMessage(len, cls, guid, parent, data) =>
+        len mustEqual 193L
+        cls mustEqual ObjectClass.droppod
+        guid mustEqual PlanetSideGUID(3595)
+        parent.isDefined mustEqual false
+        data.isDefined mustEqual true
+        data.get.isInstanceOf[DroppodData] mustEqual true
+        val droppod = data.get.asInstanceOf[DroppodData]
+        droppod.basic.pos.coord.x mustEqual 5108.0f
+        droppod.basic.pos.coord.y mustEqual 6164.0f
+        droppod.basic.pos.coord.z mustEqual 1023.9844f
+        droppod.basic.pos.roll mustEqual 0
+        droppod.basic.pos.pitch mustEqual 0
+        droppod.basic.pos.yaw mustEqual 0
+        droppod.basic.unk mustEqual 4
+        droppod.basic.player_guid mustEqual PlanetSideGUID(0)
+        droppod.burn mustEqual false
+        droppod.health mustEqual 255
+      case _ =>
+        ko
+    }
+  }
+
+  "decode (shuttle 1)" in {
+    PacketCoding.DecodePacket(string_orbital_shuttle_1).require match {
+      case ObjectCreateMessage(len, cls, guid, parent, data) =>
+        len mustEqual 130
+        cls mustEqual ObjectClass.orbital_shuttle
+        guid mustEqual PlanetSideGUID(1129)
+        parent.isDefined mustEqual true
+        parent.get.guid mustEqual PlanetSideGUID(786)
+        parent.get.slot mustEqual 3
+        data.isDefined mustEqual true
+        data.get.isInstanceOf[OrbitalShuttleData] mustEqual true
+        data.get.asInstanceOf[OrbitalShuttleData].faction mustEqual PlanetSideEmpire.VS
+        data.get.asInstanceOf[OrbitalShuttleData].pos.isDefined mustEqual false
+      case _ =>
+        ko
+    }
+  }
+
+  "decode (shuttle 2)" in {
+    PacketCoding.DecodePacket(string_orbital_shuttle_2).require match {
+      case ObjectCreateMessage(len, cls, guid, parent, data) =>
+        len mustEqual 195
+        cls mustEqual ObjectClass.orbital_shuttle
+        guid mustEqual PlanetSideGUID(1127)
+        parent.isDefined mustEqual false
+        data.isDefined mustEqual true
+        data.get.isInstanceOf[OrbitalShuttleData] mustEqual true
+        val shuttle = data.get.asInstanceOf[OrbitalShuttleData]
+        shuttle.faction mustEqual PlanetSideEmpire.VS
+        shuttle.pos.isDefined mustEqual true
+        shuttle.pos.get.coord.x mustEqual 5610.0156f
+        shuttle.pos.get.coord.y mustEqual 4255.258f
+        shuttle.pos.get.coord.z mustEqual 134.1875f
+        shuttle.pos.get.roll mustEqual 0
+        shuttle.pos.get.pitch mustEqual 0
+        shuttle.pos.get.yaw mustEqual 96
+      case _ =>
+        ko
+    }
+  }
+
   "encode (fury)" in {
     val obj = VehicleData(
       CommonFieldData(
@@ -263,10 +381,8 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         PlanetSideEmpire.VS, 4
       ),
       255,
-      InternalSlot(
-        ObjectClass.fury_weapon_systema, PlanetSideGUID(400), 1, WeaponData(
-          0xC, 0x8, 0, ObjectClass.hellfire_ammo, PlanetSideGUID(432), 0, AmmoBoxData(0x8)
-        )
+      MountItem(ObjectClass.fury_weapon_systema, PlanetSideGUID(400), 1,
+        WeaponData(0x6, 0x8, 0, ObjectClass.hellfire_ammo, PlanetSideGUID(432), 0, AmmoBoxData(0x8))
       )
     )
     val msg = ObjectCreateMessage(ObjectClass.fury, PlanetSideGUID(413), obj)
@@ -282,7 +398,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         PlanetSideEmpire.VS, 4
       ),
       255,
-      ANTDeployState.Mobile
+      DriveState.Mobile
     )
     val msg = ObjectCreateMessage(ObjectClass.ant, PlanetSideGUID(380), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
@@ -297,8 +413,8 @@ class ObjectCreateMessageVehiclesTest extends Specification {
         PlanetSideEmpire.VS, 4
       ),
       255,
-      InternalSlot(ObjectClass.lightning_weapon_system, PlanetSideGUID(91), 1,
-        WeaponData(8, 8, 0, ObjectClass.bullet_75mm, PlanetSideGUID(92), 0, AmmoBoxData(), ObjectClass.bullet_25mm, PlanetSideGUID(93), 1, AmmoBoxData())
+      MountItem(ObjectClass.lightning_weapon_system, PlanetSideGUID(91), 1,
+        WeaponData(4, 8, 0, ObjectClass.bullet_75mm, PlanetSideGUID(92), 0, AmmoBoxData(), ObjectClass.bullet_25mm, PlanetSideGUID(93), 1, AmmoBoxData())
       )
     )
     val msg = ObjectCreateMessage(ObjectClass.lightning, PlanetSideGUID(90), obj)
@@ -316,17 +432,17 @@ class ObjectCreateMessageVehiclesTest extends Specification {
       0,
       255,
       0,
-      7,
+      DriveState.State7,
       true,
       0,
       Some(
-        InternalSlot(
+        MountItem(
           ObjectClass.mediumtransport_weapon_systemA, PlanetSideGUID(383), 5,
-          WeaponData(12, 8, ObjectClass.bullet_20mm, PlanetSideGUID(420), 0, AmmoBoxData(8))
+          WeaponData(6, 8, ObjectClass.bullet_20mm, PlanetSideGUID(420), 0, AmmoBoxData(8))
         ) ::
-          InternalSlot(
+          MountItem(
             ObjectClass.mediumtransport_weapon_systemB, PlanetSideGUID(556), 6,
-            WeaponData(12, 8, ObjectClass.bullet_20mm, PlanetSideGUID(575), 0, AmmoBoxData(8))
+            WeaponData(6, 8, ObjectClass.bullet_20mm, PlanetSideGUID(575), 0, AmmoBoxData(8))
           ) ::
           Nil
         )
@@ -346,7 +462,7 @@ class ObjectCreateMessageVehiclesTest extends Specification {
       2,
       236,
       0,
-      AMSDeployState.Deployed,
+      DriveState.Deployed,
       63,
       PlanetSideGUID(3663),
       PlanetSideGUID(3638),
@@ -365,5 +481,51 @@ class ObjectCreateMessageVehiclesTest extends Specification {
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 
     pkt mustEqual string_ams_destroyed
+  }
+
+  "encode (switchblade(" in {
+    val obj = Vehicle2Data(
+      CommonFieldData(PlacementData(6531.961f, 1872.1406f, 24.734375f ,0 ,0 ,33),
+        PlanetSideEmpire.VS, 4
+      ),
+      255,
+      DriveState.Mobile,
+      MountItem(ObjectClass.scythe, PlanetSideGUID(355), 1,
+        WeaponData(0x6, 0x8, 0, ObjectClass.ancient_ammo_vehicle, PlanetSideGUID(366), 0, AmmoBoxData(0x8), ObjectClass.ancient_ammo_vehicle, PlanetSideGUID(385), 1, AmmoBoxData(0x8))
+      )
+    )
+    val msg = ObjectCreateMessage(ObjectClass.switchblade, PlanetSideGUID(418), obj)
+    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
+
+    pkt mustEqual string_switchblade
+  }
+
+  "encode (droppod)" in {
+    val obj = DroppodData(
+      CommonFieldData(
+        PlacementData(5108.0f, 6164.0f, 1023.9844f),
+        PlanetSideEmpire.VS, 4
+      )
+    )
+    val msg = ObjectCreateMessage(ObjectClass.droppod, PlanetSideGUID(3595), obj)
+    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
+
+    pkt mustEqual string_droppod
+  }
+
+  "encode (shuttle 1)" in {
+    val obj = OrbitalShuttleData(PlanetSideEmpire.VS)
+    val msg = ObjectCreateMessage(ObjectClass.orbital_shuttle, PlanetSideGUID(1129), ObjectCreateMessageParent(PlanetSideGUID(786), 3), obj)
+    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
+
+    pkt mustEqual string_orbital_shuttle_1
+  }
+
+  "encode (shuttle 2)" in {
+    val obj = OrbitalShuttleData(PlacementData(5610.0156f, 4255.258f, 134.1875f, 0, 0, 96), PlanetSideEmpire.VS)
+    val msg = ObjectCreateMessage(ObjectClass.orbital_shuttle, PlanetSideGUID(1127), obj)
+    val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
+
+    pkt mustEqual string_orbital_shuttle_2
   }
 }

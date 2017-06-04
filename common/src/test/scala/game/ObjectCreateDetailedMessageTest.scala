@@ -96,7 +96,7 @@ class ObjectCreateDetailedMessageTest extends Specification {
         parent.get.slot mustEqual 2
         data.isDefined mustEqual true
         val obj_wep = data.get.asInstanceOf[DetailedWeaponData]
-        obj_wep.unk1 mustEqual 4
+        obj_wep.unk1 mustEqual 2
         obj_wep.unk2 mustEqual 8
         val obj_ammo = obj_wep.ammo
         obj_ammo.head.objectClass mustEqual 28
@@ -328,7 +328,7 @@ class ObjectCreateDetailedMessageTest extends Specification {
   }
 
   "encode (gauss)" in {
-    val obj = DetailedWeaponData(4, 8, ObjectClass.bullet_9mm, PlanetSideGUID(1286), 0, DetailedAmmoBoxData(8, 30))
+    val obj = DetailedWeaponData(2, 8, ObjectClass.bullet_9mm, PlanetSideGUID(1286), 0, DetailedAmmoBoxData(8, 30))
     val msg = ObjectCreateDetailedMessage(ObjectClass.gauss, PlanetSideGUID(1465), ObjectCreateMessageParent(PlanetSideGUID(75), 2), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 
@@ -336,9 +336,7 @@ class ObjectCreateDetailedMessageTest extends Specification {
   }
 
   "encode (punisher)" in {
-    val obj = DetailedWeaponData(
-      0,
-      8,
+    val obj = DetailedWeaponData(0, 8,
       DetailedAmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(1693), 0, DetailedAmmoBoxData(8, 30)) ::
         DetailedAmmoBoxData(ObjectClass.jammer_cartridge, PlanetSideGUID(1564), 1, DetailedAmmoBoxData(8, 1)) ::
         Nil
@@ -394,9 +392,9 @@ class ObjectCreateDetailedMessageTest extends Specification {
       false,
       RibbonBars()
     )
-    val inv = InventoryItem(ObjectClass.beamer, PlanetSideGUID(76), 0, DetailedWeaponData(8, 8, ObjectClass.energy_cell, PlanetSideGUID(77), 0, DetailedAmmoBoxData(8, 16))) ::
-      InventoryItem(ObjectClass.suppressor, PlanetSideGUID(78), 2, DetailedWeaponData(8, 8, ObjectClass.bullet_9mm, PlanetSideGUID(79), 0, DetailedAmmoBoxData(8, 25))) ::
-      InventoryItem(ObjectClass.forceblade, PlanetSideGUID(80), 4, DetailedWeaponData(8, 8, ObjectClass.melee_ammo, PlanetSideGUID(81), 0, DetailedAmmoBoxData(8, 1))) ::
+    val inv = InventoryItem(ObjectClass.beamer, PlanetSideGUID(76), 0, DetailedWeaponData(4, 8, ObjectClass.energy_cell, PlanetSideGUID(77), 0, DetailedAmmoBoxData(8, 16))) ::
+      InventoryItem(ObjectClass.suppressor, PlanetSideGUID(78), 2, DetailedWeaponData(4, 8, ObjectClass.bullet_9mm, PlanetSideGUID(79), 0, DetailedAmmoBoxData(8, 25))) ::
+      InventoryItem(ObjectClass.forceblade, PlanetSideGUID(80), 4, DetailedWeaponData(4, 8, ObjectClass.melee_ammo, PlanetSideGUID(81), 0, DetailedAmmoBoxData(8, 1))) ::
       InventoryItem(ObjectClass.locker_container, PlanetSideGUID(82), 5, DetailedAmmoBoxData(8, 1)) ::
       InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(83), 6, DetailedAmmoBoxData(8, 50)) ::
       InventoryItem(ObjectClass.bullet_9mm, PlanetSideGUID(84), 9, DetailedAmmoBoxData(8, 50)) ::

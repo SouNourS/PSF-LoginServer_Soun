@@ -98,29 +98,24 @@ object WeaponData extends Marshallable[WeaponData] {
     * @return a `WeaponData` object or a `BitVector`
     */
   def codec(mag_capacity : Int = 1) : Codec[WeaponData] = (
-    ("unk1" | uint4L) ::
-      ("unk2" | uint4L) ::
+    ("unk1" | uintL(3)) ::
+      bool :: //weapon refuses to shoot if set (not weapons lock?)
+      ("unk2" | uint4L) :: //8 - common; 4 - jammers weapons; 2 - weapon breaks; 1, 0 - safe
       uint(20) ::
       ("fire_mode" | int(3)) ::
       bool ::
       bool ::
-      (uint8L >>:~ { size =>
-        uint2L ::
-          ("ammo" | PacketHelpers.listOfNSized(size, InternalSlot.codec)) ::
-          bool
-      })
+      ("ammo" | InventoryData.codec) ::
+      bool
     ).exmap[WeaponData] (
     {
-      case unk1 :: unk2 :: 0 :: fmode :: false :: true :: size :: 0 :: ammo :: false :: HNil =>
+      case unk1 :: false :: unk2 :: 0 :: fmode :: false :: true :: InventoryData(ammo) :: false :: HNil =>
         val magSize = ammo.size
         if(mag_capacity == 0 || magSize == 0) {
           Attempt.failure(Err("weapon must decode some ammunition"))
         }
-        else if(size != magSize) {
-          Attempt.failure(Err(s"weapon decodes wrong amount of ammunition - actual $magSize, expected $size"))
-        }
-        else if(mag_capacity > 0 && size != mag_capacity) {
-          Attempt.failure(Err(s"weapon decodes too much or too little ammunition - actual $size, expected $mag_capacity"))
+        else if(mag_capacity > 0 && magSize != mag_capacity) {
+          Attempt.failure(Err(s"weapon decodes too much or too little ammunition - actual $magSize, expected $mag_capacity"))
         }
         else {
           Attempt.successful(WeaponData(unk1, unk2, fmode, ammo)(magSize))
@@ -140,7 +135,7 @@ object WeaponData extends Marshallable[WeaponData] {
           Attempt.failure(Err("weapon encodes too much ammunition (255+ types!)"))
         }
         else if(magCapacity < 0 || mag_capacity < 0) {
-          Attempt.successful(unk1 :: unk2 :: 0 :: fmode :: false :: true :: magSize :: 0 :: ammo :: false :: HNil)
+          Attempt.successful(unk1 :: false :: unk2 :: 0 :: fmode :: false :: true :: InventoryData(ammo) :: false :: HNil)
         }
         else {
           if(magCapacity != mag_capacity) {
@@ -150,7 +145,7 @@ object WeaponData extends Marshallable[WeaponData] {
             Attempt.failure(Err(s"weapon encodes wrong amount of ammunition - actual $magSize, expected $mag_capacity"))
           }
           else {
-            Attempt.successful(unk1 :: unk2 :: 0 :: fmode :: false :: true :: magSize :: 0 :: ammo :: false :: HNil)
+            Attempt.successful(unk1 :: false :: unk2 :: 0 :: fmode :: false :: true :: InventoryData(ammo) :: false :: HNil)
           }
         }
 

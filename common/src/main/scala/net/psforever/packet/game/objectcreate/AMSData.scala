@@ -1,27 +1,12 @@
 // Copyright (c) 2017 PSForever
 package net.psforever.packet.game.objectcreate
 
-import net.psforever.packet.{Marshallable, PacketHelpers}
+import net.psforever.packet.Marshallable
 import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.types.PlanetSideEmpire
 import scodec.codecs._
 import scodec.{Attempt, Codec, Err}
 import shapeless.{::, HNil}
-
-/**
-  * An `Enumeration` of the deployment states of the Advanced Mobile Station.
-  */
-object AMSDeployState extends Enumeration {
-  type Type = Value
-
-  val Mobile, //drivable
-      Undeployed, //stationary
-      Unavailable, //stationary, cloak bubble active, utilities nonfunctional
-      Deployed //stationary, cloak bubble active, utilities functional
-      = Value
-
-  implicit val codec = PacketHelpers.createEnumerationCodec(this, uint8L)
-}
 
 /**
   * A representation of a vehicle called the Advanced Mobile Station (AMS).<br>
@@ -34,7 +19,7 @@ object AMSDeployState extends Enumeration {
   * @param unk1 na
   * @param health the amount of health the object has, as a percentage of a filled bar
   * @param unk2 na
-  * @param deployState the spawn-readiness condition
+  * @param driveState the drivable condition
   * @param unk3 na;
   *             common values are 0 or 63;
   *             usually in a non-`Mobile` state when non-zero
@@ -47,7 +32,7 @@ final case class AMSData(basic : CommonFieldData,
                          unk1 : Int,
                          health : Int,
                          unk2 : Int,
-                         deployState : AMSDeployState.Value,
+                         driveState : DriveState.Value,
                          unk3 : Int,
                          matrix_guid : PlanetSideGUID,
                          respawn_guid : PlanetSideGUID,
@@ -68,27 +53,18 @@ object AMSData extends Marshallable[AMSData] {
     * Overloaded constructor that ignores all of the unknown fields.
     * @param basic data common to objects
     * @param health the amount of health the object has, as a percentage of a filled bar
-    * @param deployState the nanite interaction-readiness condition
+    * @param driveState the drivable condition
     * @param matrix_guid the GUID for the spawn matrix panel on the front
     * @param respawn_guid the GUID for the respawn apparatus on the rear
     * @param term_a_guid the GUID for the equipment terminal on the AMS on the left side
     * @param term_b_guid the GUID for the equipment on the AMS on the right side
     * @return an `AMSData` object
     */
-  def apply(basic : CommonFieldData, health : Int, deployState : AMSDeployState.Value, matrix_guid : PlanetSideGUID, respawn_guid : PlanetSideGUID, term_a_guid : PlanetSideGUID, term_b_guid : PlanetSideGUID) : AMSData =
-    new AMSData(basic, 0, health, 0, deployState, 0, matrix_guid, respawn_guid, term_a_guid, term_b_guid)
+  def apply(basic : CommonFieldData, health : Int, driveState : DriveState.Value, matrix_guid : PlanetSideGUID, respawn_guid : PlanetSideGUID, term_a_guid : PlanetSideGUID, term_b_guid : PlanetSideGUID) : AMSData =
+    new AMSData(basic, 0, health, 0, driveState, 0, matrix_guid, respawn_guid, term_a_guid, term_b_guid)
 
   implicit val codec : Codec[AMSData] = (
-    VehicleData.basic_vehicle_codec.exmap[VehicleData.basicVehiclePattern] (
-      {
-        case basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil =>
-          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil)
-      },
-      {
-        case basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil =>
-          Attempt.successful(basic :: u1 :: health :: u2 :: u3 :: u4 :: HNil)
-      }
-    ) :+
+    VehicleData.basic_vehicle_codec :+
       uintL(6) :+
       bool :+
       uintL(12) :+
@@ -98,21 +74,21 @@ object AMSData extends Marshallable[AMSData] {
       InternalSlot.codec
     ).exmap[AMSData] (
     {
-      case basic :: unk1 :: health :: unk2 :: deployState :: false :: unk3 :: false :: 0x41 ::
+      case basic :: unk1 :: health :: unk2 :: driveState :: false :: unk3 :: false :: 0x41 ::
         InternalSlot(ObjectClass.matrix_terminalc, matrix_guid, 1, CommonTerminalData(_, _)) ::
         InternalSlot(ObjectClass.ams_respawn_tube, respawn_guid,2, CommonTerminalData(_, _)) ::
         InternalSlot(ObjectClass.order_terminala,  terma_guid,  3, CommonTerminalData(_, _)) ::
         InternalSlot(ObjectClass.order_terminalb,  termb_guid,  4, CommonTerminalData(_, _)) :: HNil =>
-        Attempt.successful(AMSData(basic, unk1, health, unk2, AMSDeployState(deployState), unk3, matrix_guid, respawn_guid, terma_guid, termb_guid))
+        Attempt.successful(AMSData(basic, unk1, health, unk2, driveState, unk3, matrix_guid, respawn_guid, terma_guid, termb_guid))
 
       case _ =>
         Attempt.failure(Err("invalid AMS data"))
     },
     {
-      case AMSData(basic, unk1, health, unk2, deployState, unk3, matrix_guid, respawn_guid, terma_guid, termb_guid) =>
+      case AMSData(basic, unk1, health, unk2, driveState, unk3, matrix_guid, respawn_guid, terma_guid, termb_guid) =>
         val faction : PlanetSideEmpire.Value = basic.faction
         Attempt.successful(
-          basic :: unk1 :: health :: unk2 :: deployState.id :: false :: unk3 :: false :: 0x41 ::
+          basic :: unk1 :: health :: unk2 :: driveState :: false :: unk3 :: false :: 0x41 ::
             InternalSlot(ObjectClass.matrix_terminalc, matrix_guid, 1, CommonTerminalData(faction)) ::
             InternalSlot(ObjectClass.ams_respawn_tube, respawn_guid,2, CommonTerminalData(faction)) ::
             InternalSlot(ObjectClass.order_terminala,  terma_guid,  3, CommonTerminalData(faction)) ::

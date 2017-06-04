@@ -168,7 +168,7 @@ class ObjectCreateMessageTest extends Specification {
         data.isDefined mustEqual true
         data.get.isInstanceOf[WeaponData] mustEqual true
         val wep = data.get.asInstanceOf[WeaponData]
-        wep.unk1 mustEqual 8
+        wep.unk1 mustEqual 4
         wep.unk2 mustEqual 8
         wep.fire_mode mustEqual 0
         wep.ammo.head.objectClass mustEqual ObjectClass.energy_cell
@@ -194,7 +194,7 @@ class ObjectCreateMessageTest extends Specification {
         data.isDefined mustEqual true
         data.get.isInstanceOf[WeaponData] mustEqual true
         val wep = data.get.asInstanceOf[WeaponData]
-        wep.unk1 mustEqual 8
+        wep.unk1 mustEqual 4
         wep.unk2 mustEqual 8
         wep.fire_mode mustEqual 0
         val ammo = wep.ammo
@@ -350,7 +350,7 @@ class ObjectCreateMessageTest extends Specification {
         drop.pos.yaw mustEqual 32
         drop.obj.isInstanceOf[WeaponData] mustEqual true
         val wep = drop.obj.asInstanceOf[WeaponData]
-        wep.unk1 mustEqual 8
+        wep.unk1 mustEqual 4
         wep.unk2 mustEqual 0
         wep.fire_mode mustEqual 0
         wep.ammo.head.objectClass mustEqual ObjectClass.energy_cell
@@ -382,7 +382,7 @@ class ObjectCreateMessageTest extends Specification {
         drop.pos.yaw mustEqual 51
         drop.obj.isInstanceOf[WeaponData] mustEqual true
         val wep = drop.obj.asInstanceOf[WeaponData]
-        wep.unk1 mustEqual 4
+        wep.unk1 mustEqual 2
         wep.unk2 mustEqual 0
         wep.fire_mode mustEqual 0
         val ammo = wep.ammo
@@ -506,7 +506,7 @@ class ObjectCreateMessageTest extends Specification {
         internals.parentSlot mustEqual 0
         internals.obj.isInstanceOf[WeaponData] mustEqual true
         val wep = internals.obj.asInstanceOf[WeaponData]
-        wep.unk1 mustEqual 0xC
+        wep.unk1 mustEqual 0x6
         wep.unk2 mustEqual 0x8
         wep.fire_mode mustEqual 0
         val ammo = wep.ammo.head
@@ -597,7 +597,7 @@ class ObjectCreateMessageTest extends Specification {
         internals.parentSlot mustEqual 1
         internals.obj.isInstanceOf[WeaponData] mustEqual true
         val wep = internals.obj.asInstanceOf[WeaponData]
-        wep.unk1 mustEqual 0xC
+        wep.unk1 mustEqual 0x6
         wep.unk2 mustEqual 0x8
         wep.fire_mode mustEqual 0
         val ammo = wep.ammo.head
@@ -629,7 +629,7 @@ class ObjectCreateMessageTest extends Specification {
         contents.head.parentSlot mustEqual 0
         contents.head.obj.isInstanceOf[WeaponData] mustEqual true
         val dispenser = contents.head.obj.asInstanceOf[WeaponData]
-        dispenser.unk1 mustEqual 0xC
+        dispenser.unk1 mustEqual 0x6
         dispenser.unk2 mustEqual 0x0
         dispenser.ammo.head.objectClass mustEqual ObjectClass.armor_canister
         dispenser.ammo.head.guid mustEqual PlanetSideGUID(3426)
@@ -864,7 +864,7 @@ class ObjectCreateMessageTest extends Specification {
   }
 
   "encode (lasher, held)" in {
-    val obj = WeaponData(8, 8, ObjectClass.energy_cell, PlanetSideGUID(3548), 0, AmmoBoxData(8))
+    val obj = WeaponData(4, 8, ObjectClass.energy_cell, PlanetSideGUID(3548), 0, AmmoBoxData(8))
     val msg = ObjectCreateMessage(ObjectClass.lasher, PlanetSideGUID(3033), ObjectCreateMessageParent(PlanetSideGUID(4141), 3), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
 
@@ -873,7 +873,7 @@ class ObjectCreateMessageTest extends Specification {
 
   "encode (punisher, held)" in {
     val obj =
-      WeaponData(8, 8, 0,
+      WeaponData(4, 8, 0,
         AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(3918), 0, AmmoBoxData(8)) ::
           AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(3941), 1, AmmoBoxData(8)) ::
           Nil
@@ -936,7 +936,7 @@ class ObjectCreateMessageTest extends Specification {
   "encode (lasher, dropped)" in {
     val obj = DroppedItemData(
       PlacementData(Vector3(4691.1953f, 5537.039f, 65.484375f), 0, 0, 32),
-      WeaponData(8, 0, ObjectClass.energy_cell, PlanetSideGUID(3268), 0, AmmoBoxData())
+      WeaponData(4, 0, ObjectClass.energy_cell, PlanetSideGUID(3268), 0, AmmoBoxData())
     )
     val msg = ObjectCreateMessage(ObjectClass.lasher, PlanetSideGUID(3074), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
@@ -947,7 +947,7 @@ class ObjectCreateMessageTest extends Specification {
   "encode (punisher, dropped)" in {
     val obj = DroppedItemData(
       PlacementData(Vector3(4789.133f, 5522.3125f, 72.3125f), 0, 0, 51),
-      WeaponData(4, 0, 0,
+      WeaponData(2, 0, 0,
         AmmoBoxData(ObjectClass.bullet_9mm, PlanetSideGUID(3528), 0, AmmoBoxData()) ::
           AmmoBoxData(ObjectClass.rocket, PlanetSideGUID(3031), 1, AmmoBoxData()) ::
           Nil
@@ -1008,7 +1008,7 @@ class ObjectCreateMessageTest extends Specification {
         PlanetSideEmpire.VS, 4, PlanetSideGUID(4232)
       ),
       255,
-      SmallTurretData.spitfire(PlanetSideGUID(3064), 0xC, 0x8, PlanetSideGUID(3694), 8)
+      SmallTurretData.spitfire(PlanetSideGUID(3064), 0x6, 0x8, PlanetSideGUID(3694), 8)
     )
     val msg = ObjectCreateMessage(ObjectClass.spitfire_turret, PlanetSideGUID(4265), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
@@ -1059,7 +1059,7 @@ class ObjectCreateMessageTest extends Specification {
         PlanetSideEmpire.VS, 4, PlanetSideGUID(2502)
       ),
       255,
-      OneMannedFieldTurretData.orion(PlanetSideGUID(2615), 0xC, 0x8, PlanetSideGUID(2510), 8)
+      OneMannedFieldTurretData.orion(PlanetSideGUID(2615), 0x6, 0x8, PlanetSideGUID(2510), 8)
     )
     val msg = ObjectCreateMessage(ObjectClass.portable_manned_turret_vs, PlanetSideGUID(2916), obj)
     val pkt = PacketCoding.EncodePacket(msg).require.toByteVector
@@ -1074,7 +1074,7 @@ class ObjectCreateMessageTest extends Specification {
   "encode (locker container)" in {
     val obj = LockerContainerData(
       InventoryData(
-        InventoryItem(ObjectClass.nano_dispenser, PlanetSideGUID(2935), 0, WeaponData(0xC, 0x0, ObjectClass.armor_canister, PlanetSideGUID(3426), 0, AmmoBoxData())) ::
+        InventoryItem(ObjectClass.nano_dispenser, PlanetSideGUID(2935), 0, WeaponData(0x6, 0x0, ObjectClass.armor_canister, PlanetSideGUID(3426), 0, AmmoBoxData())) ::
           InventoryItem(ObjectClass.armor_canister, PlanetSideGUID(4090), 45, AmmoBoxData()) ::
           InventoryItem(ObjectClass.armor_canister, PlanetSideGUID(3326), 78, AmmoBoxData()) ::
           Nil
