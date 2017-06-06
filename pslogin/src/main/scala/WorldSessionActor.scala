@@ -542,7 +542,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.redHealth = avatar.getMaxHealth
             avatar.blueArmor = avatar.getMaxPersonalArmor
             avatar.greenStamina = avatar.getMaxStamina
-//            avatar.admin = true // todo remove for live XXX
+            avatar.admin = true // todo remove for live XXX
             //add avatar
             PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
           }
@@ -854,14 +854,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
           player.sortieVehicle1 = 0
           player.sortieVehicle2 = System.currentTimeMillis()
         }
-        if (player.sortieVehicle2 != 0 && System.currentTimeMillis() - player.sortieVehicle2 > 30000) {
+        if (player.sortieVehicle2 != 0 && System.currentTimeMillis() - player.sortieVehicle2 > 3000) {
           sendResponse(PacketCoding.CreateGamePacket(0, ServerVehicleOverrideMsg(false,false,false,true,0,0,3,None)))
           player.sortieVehicle2 = 0
         }
       }
 
     case msg@PlayerStateMessageUpstream(avatar_guid, pos, vel, unk1, aim_pitch, unk2, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
-      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
+//      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
@@ -951,7 +951,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //            0,
 //            255,
 //            0,
-//            AMSDeployState.Mobile,
+//            DriveState.Mobile,
 //            0,
 //            PlanetSideGUID(3663), PlanetSideGUID(3638), PlanetSideGUID(3827), PlanetSideGUID(3556)))))
 //
@@ -1001,8 +1001,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, 0)
           player.death_by = player.guid
           Thread.sleep(1000)
+//          sendResponse(PacketCoding.CreateGamePacket(0, BindPlayerMessage(1, "@ams", false, false, 4, 40, 0, Vector3(1770f, 2686f, 92f))))
+          sendResponse(PacketCoding.CreateGamePacket(0, BindPlayerMessage(4,"@ams",true,false,4,28,0,Vector3(1770f, 2686f, 92f))))
           sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(2,0,0,player.getPosition,0,true)))
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),6,1)
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),31,0)
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),32,0)
+          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),33,0)
         }
 
         if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
@@ -1889,7 +1894,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           //          ))
 
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(336, ObjectClass.fury, PlanetSideGUID(2703), None,
-            Some(VehicleData(CommonFieldData(PlacementData(Vector3(1770f, 2686f, 92f), 0, 0, 64, None), player.faction, 4, PlanetSideGUID(0)), 0, 255, 0, 0, false, 0, Some(List(InternalSlot(336, PlanetSideGUID(2705), 1, WeaponData(12, 8, 0, List(InternalSlot(399, PlanetSideGUID(2704), 0, AmmoBoxData(8))))))))))))
+            Some(VehicleData(CommonFieldData(PlacementData(Vector3(1770f, 2686f, 92f), 0, 0, 64, None), player.faction, 4, PlanetSideGUID(0)), 0, 255, 0, DriveState.Mobile, false, 0, Some(List(InternalSlot(336, PlanetSideGUID(2705), 1, WeaponData(12, 8, 0, List(InternalSlot(399, PlanetSideGUID(2704), 0, AmmoBoxData(8))))))))))))
           sendResponse(PacketCoding.CreateGamePacket(0, InventoryStateMessage(PlanetSideGUID(2704), 0, PlanetSideGUID(2705), 2)))
 
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124, 399, PlanetSideGUID(374), Some(ObjectCreateMessageParent(PlanetSideGUID(2703), 30)), Some(DetailedAmmoBoxData(8, 24)))))
@@ -1909,7 +1914,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             0,
             255,
             0,
-            AMSDeployState.Mobile,
+            DriveState.Mobile,
             0,
             PlanetSideGUID(3663), PlanetSideGUID(3638), PlanetSideGUID(3827), PlanetSideGUID(3556)))))
 
@@ -1931,7 +1936,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "quadstealth") {
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.ams, PlanetSideGUID(5054), None,
           Some(AMSData(CommonFieldData(PlacementData(player.getPosition, 122, 2, 56, None), PlanetSideEmpire.VS, 0, PlanetSideGUID(0)),
-          0, 248, 0, AMSDeployState.Deployed, 63, PlanetSideGUID(3703), PlanetSideGUID(4608), PlanetSideGUID(3378), PlanetSideGUID(4832))))))
+          0, 248, 0, DriveState.Deployed, 63, PlanetSideGUID(3703), PlanetSideGUID(4608), PlanetSideGUID(3378), PlanetSideGUID(4832))))))
         }
       }
 
@@ -2193,6 +2198,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(PacketCoding.CreateGamePacket(0, DeployRequestMessage(player, entity, unk1, unk2, unk3, Vector3(0f, 0f, 0f))))
         Thread.sleep(1000) // 2 seconds
         sendResponse(PacketCoding.CreateGamePacket(0, DeployRequestMessage(player, entity, 3, unk2, unk3, Vector3(0f, 0f, 0f))))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(entity, 10, 1)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(entity, 11, 1)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(entity, 12, 1)))
+        sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(entity, 13, 1)))
       }
       else if (unk1 == 1) { // undeploy AMS
         sendResponse(PacketCoding.CreateGamePacket(0, DeployRequestMessage(player, entity, unk1, unk2, unk3, Vector3(0f, 0f, 0f))))
