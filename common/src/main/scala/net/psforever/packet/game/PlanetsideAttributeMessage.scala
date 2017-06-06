@@ -66,7 +66,27 @@ import scodec.codecs._
   *         43 : Fortification Engineering<br>
   *         44 : Assault Engineering<br>
   *         45 : Advanced Engineering (= Fortification Engineering + Assault Engineering) Must have Combat Engineering<br>
-  * `29 - Visible ?! That's not the cloaked effect, Maybe for spectator mode ?. Value is 0 to visible, 1 to invisible.`<br>
+  * `27 - jam sound ?!. Value is 0 to have no sound, 1 to have sound.`<br>
+  * `28 - implant sound & visual effect ?!. Value :`<br>
+  *         00 : AdvancedRegen Off<br>
+  *         01 : AdvancedRegen On<br>
+  *         02 : Targeting Off<br>
+  *         03 : Targeting On<br>
+  *         04 : AudioAmplifier Off<br>
+  *         05 : AudioAmplifier On<br>
+  *         06 : DarklightVision Off<br>
+  *         07 : DarklightVision On<br>
+  *         10 : PersonalShield Off<br>
+  *         11 : PersonalShield On<br>
+  *         12 : RangeMagnifier Off<br>
+  *         13 : RangeMagnifier On<br>
+  *         14 : second_wind Off<br>
+  *         15 : second_wind On<br>
+  *         16 : SilentRun Off<br>
+  *         17 : SilentRun On<br>
+  *         18 : Surge Off<br>
+  *         19 : Surge On<br>
+  * `29 - Visible ?! That's not the cloaked effect, Maybe for spectator mode ? Seems Boomers use that Attribute. Value is 0 to visible, 1 to invisible.`<br>
   * `31 - Info under avatar name : 0 = LFS, 1 = Looking For Squad Members`<br>
   * `32 - Info under avatar name : 0 = Looking For Squad Members, 1 = LFS`<br>
   * `35 - BR. Value is the BR`<br>
