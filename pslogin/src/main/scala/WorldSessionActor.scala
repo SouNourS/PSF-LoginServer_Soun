@@ -249,6 +249,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if(function == "PlayerStateMessage" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent && onlineplayer.spectator) {
           sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateMessage(avatar_guid, Vector3(2,2,2), vel, facingYaw, facingPitch, facingUpper, 0, is_crouching, jumping, jthrust, is_cloaked)))
         }
+        if(function == "VehicleState"){
+          sendResponse(PacketCoding.CreateGamePacket(0, VehicleStateMessage(avatar_guid, 0, pos, facingUpper, facingPitch, facingYaw, vel, None, 0, 0, long.toInt, is_crouching, jumping)))
+        }
 
         if(function == "ObjectHeld" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent) {
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(avatar_guid, onlineplayer.getUsedHolster, false)))
@@ -310,8 +313,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
           val Killer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(itemID)
           if (Killer.isDefined) {
             val killer: PlayerAvatar = Killer.get
+            if (killer.getUsedHolster != 255) {
                 sendResponse(PacketCoding.CreateGamePacket(0,
                   DestroyDisplayMessage(killer.name, 30981173, killer.faction, false, 121, killer.getEquipmentInHolster(killer.getUsedHolster).get.toolDef, onlineplayer.name, 31035057, onlineplayer.faction, false)))
+            }
           }
           if (player.guid == onlineplayer.guid ) sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(1,30000,30000,onlineplayer.getPosition,0,true)))
         }
@@ -551,7 +556,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.redHealth = avatar.getMaxHealth
             avatar.blueArmor = avatar.getMaxPersonalArmor
             avatar.greenStamina = avatar.getMaxStamina
-            avatar.admin = true // todo remove for live XXX
+//            avatar.admin = true // todo remove for live XXX
             //add avatar
             PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
           }
@@ -855,8 +860,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val player: PlayerAvatar = playerOpt.get
         if (player.sortieVehicle1 != 0 && System.currentTimeMillis() - player.sortieVehicle1 > 2500) {
           // amsd
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(575),PlanetSideGUID(player.guid + 90),Vector3(1770f, 2686f, 92f),0,0,102)))
-//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.test),PlanetSideGUID(player.guid + 90),Vector3(6531.961f, 1872.1406f, 24.734375f),0,0,33)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectDetachMessage(PlanetSideGUID(player.lastVPad),PlanetSideGUID(player.guid + 90),player.lastVPadPos,0,0,player.lastVPadAngle)))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),0,3300)))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),68,0)))
           sendResponse(PacketCoding.CreateGamePacket(0, ServerVehicleOverrideMsg(true,true,false,false,0,0,9,Some(0))))
@@ -930,6 +934,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, roll, pitch, yaw, vel, unk5, unk6, unk7, wheels, unk9, unkA) =>
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
+      avatarService ! AvatarService.VehicleState(msg)
 
     case msg @ ProjectileStateMessage(projectile_guid, shot_pos, shot_vector, unk1, unk2, unk3, unk4, time_alive) =>
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
@@ -1015,9 +1020,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, BindPlayerMessage(4,"@ams",true,false,4,28,0,Vector3(1770f, 2686f, 92f))))
           sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(2,0,0,player.getPosition,0,true)))
           avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),6,1)
-          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),31,0)
-          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),32,0)
-          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),33,0)
+//          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),31,0)
+//          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),32,0)
+//          avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid),33,0)
         }
 
         if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
@@ -1888,50 +1893,40 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
           avatarService ! AvatarService.ChangeWeapon(unk1 + 10, sessionId)
         }
-        if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "fury") {
-          //          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.fury, PlanetSideGUID(413), VehicleData(
-          //            CommonFieldData(
-          //              PlacementData(Vector3(1770f,2686f,92f), 0, 0, 33),
-          //              player.faction, 4
-          //            ),
-          //            255,
-          //            InternalSlot(
-          //              ObjectClass.fury_weapon_systema, PlanetSideGUID(400), 1, WeaponData(
-          //                0xC, 0x8, 0, ObjectClass.hellfire_ammo, PlanetSideGUID(432), 0, AmmoBoxData(0x8)
-          //              )
-          //            )
-          //          ))
-          //          ))
+        if (transaction_type == TransactionType.Learn && item_page == 46769 && item_name == "fury") {
+          player.lastVTerm = terminal_guid.guid - 916
+          player.lastVPad = 575
+          player.lastVPadPos = Vector3(1770f,2686f,92f)
+          player.lastVPadAngle = 33
+          if (player.lastVTerm == 1) {
+            player.lastVPad = 576
+            player.lastVPadPos = Vector3(1804f,1718f,91f)
+            player.lastVPadAngle = 0
+          }
+          else if (player.lastVTerm == 2) {
+            player.lastVPad = 577
+            player.lastVPadPos = Vector3(2611f,2356f,91f)
+            player.lastVPadAngle = 0
+          }
 
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(336, ObjectClass.fury, PlanetSideGUID(2703), None,
-            Some(VehicleData(CommonFieldData(PlacementData(Vector3(1770f, 2686f, 92f), 0, 0, 64, None), player.faction, 4, PlanetSideGUID(0)), 0, 255, 0, DriveState.Mobile, false, 0, Some(List(InternalSlot(336, PlanetSideGUID(2705), 1, WeaponData(12, 8, 0, List(InternalSlot(399, PlanetSideGUID(2704), 0, AmmoBoxData(8))))))))))))
-          sendResponse(PacketCoding.CreateGamePacket(0, InventoryStateMessage(PlanetSideGUID(2704), 0, PlanetSideGUID(2705), 2)))
+          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"fury",120,true)))
 
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124, 399, PlanetSideGUID(374), Some(ObjectCreateMessageParent(PlanetSideGUID(2703), 30)), Some(DetailedAmmoBoxData(8, 24)))))
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124, 399, PlanetSideGUID(455), Some(ObjectCreateMessageParent(PlanetSideGUID(2703), 34)), Some(DetailedAmmoBoxData(8, 24)))))
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124, 399, PlanetSideGUID(363), Some(ObjectCreateMessageParent(PlanetSideGUID(2703), 74)), Some(DetailedAmmoBoxData(8, 24)))))
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124, 399, PlanetSideGUID(398), Some(ObjectCreateMessageParent(PlanetSideGUID(2703), 78)), Some(DetailedAmmoBoxData(8, 24)))))
-
-        }
-        if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "ams") {
-
-          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"ams",300,true)))
-
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(player.guid + 90), AMSData(
-            CommonFieldData(PlacementData(Vector3(1770f, 2686f, 92f), 0, 0, 102),
-              player.faction, 4,
-              PlanetSideGUID(0)),
-            0,
-            255,
-            0,
-            DriveState.Mobile,
-            0,
-            PlanetSideGUID(3663), PlanetSideGUID(3638), PlanetSideGUID(3827), PlanetSideGUID(3556)))))
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.fury, PlanetSideGUID(player.guid + 90),
+            VehicleData(CommonFieldData(PlacementData(player.lastVPadPos, 0, 0, player.lastVPadAngle),player.faction, 4),255,
+            InternalSlot(
+              ObjectClass.fury_weapon_systema, PlanetSideGUID(player.guid + 91), 1,
+              WeaponData(0x6, 0x8, 0, ObjectClass.hellfire_ammo, PlanetSideGUID(player.guid + 92), 0, AmmoBoxData(0x8))
+            )
+          ))
+          ))
 
           player.sortieVehicle1 = System.currentTimeMillis()
 
-          // from PSCap-2015-11-06_08-49-16-PM_decoded.txt
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(575),PlanetSideGUID(player.guid + 90),3)))
+          sendResponse(PacketCoding.CreateGamePacket(0, InventoryStateMessage(PlanetSideGUID(player.guid + 92), 0, PlanetSideGUID(player.guid + 91), 2)))
+
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(124, 399, PlanetSideGUID(player.guid + 93), Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid + 90), 30)), Some(DetailedAmmoBoxData(8, 24)))))
+
+          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.lastVPad),PlanetSideGUID(player.guid + 90),3)))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,1)))
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),21,player.guid + 90)))
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.guid + 90),PlanetSideGUID(player.guid),0)))
@@ -1942,12 +1937,44 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
           sendResponse(PacketCoding.CreateGamePacket(0, ItemTransactionResultMessage(terminal_guid, TransactionType.Learn, true, 0)))
 
+
+
         }
-        if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "quadstealth") {
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.ams, PlanetSideGUID(5054), None,
-          Some(AMSData(CommonFieldData(PlacementData(player.getPosition, 122, 2, 56, None), PlanetSideEmpire.VS, 0, PlanetSideGUID(0)),
-          0, 248, 0, DriveState.Deployed, 63, PlanetSideGUID(3703), PlanetSideGUID(4608), PlanetSideGUID(3378), PlanetSideGUID(4832))))))
-        }
+//        if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "ams") {
+//
+//          sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"ams",300,true)))
+//
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.ams, PlanetSideGUID(player.guid + 90), AMSData(
+//            CommonFieldData(PlacementData(Vector3(1770f, 2686f, 92f), 0, 0, 102),
+//              player.faction, 4,
+//              PlanetSideGUID(0)),
+//            0,
+//            255,
+//            0,
+//            DriveState.Mobile,
+//            0,
+//            PlanetSideGUID(3663), PlanetSideGUID(3638), PlanetSideGUID(3827), PlanetSideGUID(3556)))))
+//
+//          player.sortieVehicle1 = System.currentTimeMillis()
+//
+//          // from PSCap-2015-11-06_08-49-16-PM_decoded.txt
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(575),PlanetSideGUID(player.guid + 90),3)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,1)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),21,player.guid + 90)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectAttachMessage(PlanetSideGUID(player.guid + 90),PlanetSideGUID(player.guid),0)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),22,0)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),0,3000)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),68,0)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid + 90),113,0)))
+//
+//          sendResponse(PacketCoding.CreateGamePacket(0, ItemTransactionResultMessage(terminal_guid, TransactionType.Learn, true, 0)))
+//
+//        }
+//        if (transaction_type == TransactionType.Learn && terminal_guid.guid == 916 && item_page == 46769 && item_name == "quadstealth") {
+//          sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0, ObjectClass.ams, PlanetSideGUID(5054), None,
+//          Some(AMSData(CommonFieldData(PlacementData(player.getPosition, 122, 2, 56, None), PlanetSideEmpire.VS, 0, PlanetSideGUID(0)),
+//          0, 248, 0, DriveState.Deployed, 63, PlanetSideGUID(3703), PlanetSideGUID(4608), PlanetSideGUID(3378), PlanetSideGUID(4832))))))
+//        }
       }
 
     case msg@WeaponDelayFireMessage(seq_time, weapon_guid) =>

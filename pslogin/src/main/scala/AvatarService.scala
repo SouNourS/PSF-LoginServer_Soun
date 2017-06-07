@@ -3,7 +3,7 @@ import akka.actor.Actor
 import akka.event.{ActorEventBus, SubchannelClassification}
 import akka.util.Subclassification
 import net.psforever.objects.{PlayerAvatar, PlayerMasterList}
-import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID, PlayerStateMessageUpstream}
+import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID, PlayerStateMessageUpstream, VehicleStateMessage}
 import net.psforever.types.Vector3
 
 object AvatarService {
@@ -24,6 +24,7 @@ object AvatarService {
   case class ChangeAmmoMode(item_GUID : PlanetSideGUID, sessionId : Long)
   case class ChangeWeapon(unk1 : Int, sessionId : Long)
   case class Doors(guid : PlanetSideGUID, doors : Int)
+  case class VehicleState(msg : VehicleStateMessage)
 }
 
 /*
@@ -165,6 +166,14 @@ class AvatarService extends Actor {
         val player: PlayerAvatar = playerOpt.get
         AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "Doors", PlanetSideGUID(0),
           guid, Vector3(0f,0f,0f), None, 0, 0, doorsID))
+      }
+    case m @ VehicleState(msg) =>
+      //      log.info(s"NEW: ${m}")
+      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.vehicle_guid.guid - 90)
+      if (playerOpt.isDefined) {
+        val player: PlayerAvatar = playerOpt.get
+        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, "VehicleState", PlanetSideGUID(0),
+          msg.vehicle_guid, msg.pos, msg.vel, msg.yaw.toInt, msg.pitch.toInt, msg.roll.toInt, msg.unk5, msg.unk6, false, false, msg.wheel_direction))
       }
     case _ =>
   }

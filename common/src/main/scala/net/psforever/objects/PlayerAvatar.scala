@@ -2,7 +2,7 @@
 package net.psforever.objects
 
 import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.{CharacterGender, ExoSuitType, PlanetSideEmpire}
+import net.psforever.types.{CharacterGender, ExoSuitType, PlanetSideEmpire, Vector3}
 
 import scala.collection.mutable.ListBuffer
 
@@ -55,6 +55,11 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
 
   var lastShotSeq_time : Int = -1
 
+  var lastVTerm : Int = 0
+  var lastVPad : Int = 0
+  var lastVPadPos : Vector3 = Vector3(0f,0f,0f)
+  var lastVPadAngle : Int = 0
+  var lastVehicleName : String = ""
   var sortieVehicle1 : Long = 0
   var sortieVehicle2 : Long = 0
   var test : Int = 0
