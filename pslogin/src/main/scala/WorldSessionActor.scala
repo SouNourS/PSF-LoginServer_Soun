@@ -1131,7 +1131,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         if (messagetype == ChatMessageType.CMT_OPEN) {
           if (contents.length > 1 && contents.dropRight(contents.length - 1) == "!" && contents.drop(1).dropRight(contents.length - 2) != "!") {
-            
+
+            if(contents.drop(1) == "bid" && !player.admin) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "You need the admin password ;)", note_contents)))
+            if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "bid" && contents.length > 5 && player.admin) {
+              val bId: String = contents.drop(contents.indexOf(" ") + 1)
+              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(bId.toInt - 1),PlanetSideEmpire.NEUTRAL)))
+              sendResponse(PacketCoding.CreateGamePacket(0, SetEmpireMessage(PlanetSideGUID(bId.toInt),PlanetSideEmpire.TR)))
+            }
             if(contents.drop(1) == "list" && !player.admin) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "You need the admin password ;)", note_contents)))
             if(contents.drop(1) == "list" && contents.length == 5 && player.admin) {
               val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
@@ -1993,42 +1999,42 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if (seq_time - player.lastShotSeq_time < 0) {
             time = 1024 + (seq_time - player.lastShotSeq_time)}
           else time = seq_time - player.lastShotSeq_time
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss" && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time > 0 && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time > 0 && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette" && time > 0 && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun" && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler" && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher" && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
-          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar" && time < 1) {
-            discordROF(PlanetSideGUID(player.guid),player.name)
-          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss" && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time > 0 && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time > 0 && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette" && time > 0 && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun" && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler" && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher" && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
+//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar" && time < 1) {
+//            discordROF(PlanetSideGUID(player.guid),player.name)
+//          }
         }
         }
         player.lastShotSeq_time = seq_time
