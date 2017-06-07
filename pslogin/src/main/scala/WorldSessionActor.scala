@@ -476,6 +476,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       log.info("ID: " + sessionId + s" New world login to ${server} with Token:${token}. ${clientVersion}")
 
+      sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(0),75,0)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(true,None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_CULLWATERMARK,false,"","",None)))
+      sendRawResponse(hex"d70400000064006c6f636b2d69312d69322d69332d693461c06c6f636b2d7a3361c06c6f636b2d7a34a1c06c6f636b2d7a3904000000404010400418020300")
+
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_CULLWATERMARK,true,"","80 120",None)))
+
+      sendRawResponse(hex"6304ff80") // filter off
+
 
       // NOTE: PlanetSideZoneID just chooses the background
       //      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
@@ -936,7 +945,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         if(messagetype == ChatMessageType.CMT_OPEN) {
-          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),29,contents.toInt)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(player.guid),29,contents.toInt)))
 
 //          player.test = contents.toInt
 //
