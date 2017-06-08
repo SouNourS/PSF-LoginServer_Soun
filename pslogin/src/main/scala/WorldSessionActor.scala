@@ -138,6 +138,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     // temporary hack to keep the client from disconnecting
     case PokeClient() =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
+    // CHAT Sync
     case ChatMessage(to, from, fromGUID, data) =>
       if (to.drop(6) == "local") {
         if (data.length > 1 && (data.dropRight(data.length-1) != "!" || data.drop(1).dropRight(data.length-2) == "!")) {
@@ -157,6 +158,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       if (to.drop(6) == "voice") sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_VOICE, true, from, data, None)))
+    // Avatar Sync
     case AvatarMessage(to, function, itemID, avatar_guid, pos, vel, facingYaw, facingPitch, facingUpper, is_crouching, jumping, jthrust, is_cloaked, long) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(avatar_guid)
@@ -930,7 +932,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " Reticulating splines ...")
 
     case msg @ ChildObjectStateMessage(object_guid : PlanetSideGUID, pitch : Int, yaw : Int) =>
-      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
+//      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
 
     case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, roll, pitch, yaw, vel, unk5, unk6, unk7, wheels, unk9, unkA) =>
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
