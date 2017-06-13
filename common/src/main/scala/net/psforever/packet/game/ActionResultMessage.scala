@@ -9,6 +9,7 @@ import scodec.codecs._
 /**
   * Is sent by the server when the client has performed an action from a menu item
   * (i.e create character, delete character, etc...)
+  * For a "CharacterCreateRequestMessage", error code 1 = already exist, 2 = not allowed
   */
 final case class ActionResultMessage(successfull : Boolean, errorCode : Option[Long])
   extends PlanetSideGamePacket {

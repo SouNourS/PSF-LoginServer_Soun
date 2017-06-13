@@ -741,8 +741,8 @@ import scodec.bits._
                     }
                     else {
                       var color : Int = 0 // TR
-                      if (onlineplayer.faction == PlanetSideEmpire.NC) color = 4
-                      if (onlineplayer.faction == PlanetSideEmpire.VS) color = 8
+                      if (onlineplayer.faction == PlanetSideEmpire.NC) color = 2
+                      if (onlineplayer.faction == PlanetSideEmpire.VS) color = 4
 
                       traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
                         onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),

@@ -70,6 +70,7 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   private val holsters : Array[EquipmentSlot] = Array.fill[EquipmentSlot](5)(new EquipmentSlot)
   /** Which holster is depicted as having its equipment drawn. Valid numbers are 0-4 and 255 (no holster drawn). */
   private var drawnHolster : Int = 255
+  private var lastDrawnHolster : Int = 255
   /** The player's personal inventory. */
   val inventory : Backpack = Backpack(guid, 1,1)
   /** The player is shooting. */
@@ -263,6 +264,9 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   def getUsedHolster : Int = {
     drawnHolster
   }
+  def getLastUsedHolster : Int = {
+    lastDrawnHolster
+  }
 
   /**
     * Change whether a holster is drawn or put away.
@@ -300,6 +304,11 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
     else if(drawnHolster != 255) // What equipment do we currently have out
       equipmentOpt = holsters(drawnHolster).getEquipment
     (swapped, equipmentOpt)
+  }
+
+  def setLastUsedHolster(holster : Int) : Int = {
+    lastDrawnHolster = holster
+    lastDrawnHolster
   }
 
   /**

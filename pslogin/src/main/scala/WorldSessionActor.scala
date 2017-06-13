@@ -200,8 +200,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
               else {
                 var color : Int = 0 // TR
-                if (onlineplayer.faction == PlanetSideEmpire.NC) color = 4
-                if (onlineplayer.faction == PlanetSideEmpire.VS) color = 8
+                if (onlineplayer.faction == PlanetSideEmpire.NC) color = 2
+                if (onlineplayer.faction == PlanetSideEmpire.VS) color = 4
 
                 sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
                   onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
@@ -256,7 +256,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         if(function == "ObjectHeld" && PlanetSideGUID(player.guid) != avatar_guid && onlineplayer.continent == player.continent) {
-          sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(avatar_guid, onlineplayer.getUsedHolster, false)))
+          if(onlineplayer.getUsedHolster != 255) {
+            sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(avatar_guid, onlineplayer.getUsedHolster, false)))
+          }
+          else {
+            sendResponse(PacketCoding.CreateGamePacket(0, ObjectHeldMessage(avatar_guid, onlineplayer.getLastUsedHolster, false)))
+          }
         }
 
         if(function == "ChangeFireState" && onlineplayer.continent == player.continent && onlineplayer.shooting) {
@@ -365,8 +370,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 }
                 else {
                   var color : Int = 0 // TR
-                  if (onlineplayer.faction == PlanetSideEmpire.NC) color = 4
-                  if (onlineplayer.faction == PlanetSideEmpire.VS) color = 8
+                  if (onlineplayer.faction == PlanetSideEmpire.NC) color = 2
+                  if (onlineplayer.faction == PlanetSideEmpire.VS) color = 4
 
                   sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
                     onlineplayer.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(ind).get.guid),
@@ -390,8 +395,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
               else {
                 var color : Int = 0 // TR
-                if (onlineplayer.faction == PlanetSideEmpire.NC) color = 4
-                if (onlineplayer.faction == PlanetSideEmpire.VS) color = 8
+                if (onlineplayer.faction == PlanetSideEmpire.NC) color = 2
+                if (onlineplayer.faction == PlanetSideEmpire.VS) color = 4
 
                 traveler.sendToSelf(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(0,
                   onlineplayer.getEquipmentInHolster(unk1).get.toolDef, PlanetSideGUID(onlineplayer.getEquipmentInHolster(unk1).get.guid),
@@ -818,6 +823,27 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg@CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
       log.info("ID: " + sessionId + " " + msg)
 
+      var good : Boolean = true
+      val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
+      var guid : Int = 15000
+      var j : Int = 0
+      while (j != nbOnlinePlayer) {
+        val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+        if (OnlinePlayer.isDefined) {
+          val onlineplayer: PlayerAvatar = OnlinePlayer.get
+            j += 1
+            guid += 100
+            if (onlineplayer.name == name) {
+              good = false
+            }
+        }
+        else {
+          guid += 100
+        }
+      }
+
+      if (good) {
+
       // define a new Player GUID
       var nbOnlineTF : Boolean = false
       var guid : Int = 15000
@@ -833,27 +859,32 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       //hardcoded avatar and some pertinent equipment setup
       val avatar: PlayerAvatar = PlayerAvatar(guid, name, empire, gender, head, voice)
-      avatar.setExoSuitType(ExoSuitType.Agile)
-      avatar.setPosition(defaultApp.pos.coord)
-      avatar.setPitch(defaultApp.pos.pitch)
-      avatar.setYaw(defaultApp.pos.yaw)
-      avatar.redHealth = avatar.getMaxHealth
-      avatar.blueArmor = avatar.getMaxPersonalArmor
-      avatar.greenStamina = avatar.getMaxStamina
-      //add avatar
-      PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
 
-      sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(avatar.guid),
-        DetailedCharacterData(CharacterAppearanceData(PlacementData(avatar.getPosition, 0, 0, 19),
-          BasicCharacterData(avatar.name, avatar.faction, avatar.sex, 41, avatar.voice),
-          3, false, false, avatar.getExoSuitType, "", 0, false, 0, 181, true, GrenadeState.None,
-          false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
-          avatar.getMaxHealth, avatar.getHealth, avatar.getPersonalArmor, 1, 7, 7, avatar.getMaxStamina, avatar.getStamina, 28, 4, 44, 84, 104, 1900,
-          List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
+        avatar.setExoSuitType(ExoSuitType.Agile)
+        avatar.setPosition(defaultApp.pos.coord)
+        avatar.setPitch(defaultApp.pos.pitch)
+        avatar.setYaw(defaultApp.pos.yaw)
+        avatar.redHealth = avatar.getMaxHealth
+        avatar.blueArmor = avatar.getMaxPersonalArmor
+        avatar.greenStamina = avatar.getMaxStamina
+        //add avatar
+        PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
 
-      sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(true, None)))
-      //      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605313, PlanetSideGUID(xGUID), false, 6404428)))
-      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(0,PlanetSideZoneID(10000), 41605314, PlanetSideGUID(guid), true, 0)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(avatar.guid),
+          DetailedCharacterData(CharacterAppearanceData(PlacementData(avatar.getPosition, 0, 0, 19),
+            BasicCharacterData(avatar.name, avatar.faction, avatar.sex, 41, avatar.voice),
+            3, false, false, avatar.getExoSuitType, "", 0, false, 0, 181, true, GrenadeState.None,
+            false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
+            avatar.getMaxHealth, avatar.getHealth, avatar.getPersonalArmor, 1, 7, 7, avatar.getMaxStamina, avatar.getStamina, 28, 4, 44, 84, 104, 1900,
+            List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
+
+        sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(true, None)))
+        //      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(10000), 41605313, PlanetSideGUID(xGUID), false, 6404428)))
+        sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(0,PlanetSideZoneID(10000), 41605314, PlanetSideGUID(guid), true, 0)))
+      }
+      else if (!good) {
+        sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(false, Some(2))))
+      }
 
     case KeepAliveMessage(code) =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage()))
@@ -1348,8 +1379,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         if (ServerInfo.getLog) log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " " + msg)
-        if(held_holsters != 255) {
           player.setUsedHolster(held_holsters)
+        if(held_holsters != 255) {
+          player.setLastUsedHolster(held_holsters)
+        }
 //          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getName: " + player.getEquipmentInHolster(player.getUsedHolster).get.getName)
 //          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " guid: " + player.getEquipmentInHolster(player.getUsedHolster).get.guid)
 //          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " toolDef: " + player.getEquipmentInHolster(player.getUsedHolster).get.toolDef)
@@ -1359,8 +1392,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getUsedHolster2: " + player.getHolster(player.getUsedHolster))
 //          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " getUsedHolster3: " + player.getEquipmentInHolster(player.getUsedHolster))
 //          log.info("ID: " + sessionId + " / " + player.name + " (" + player.faction + ") " + player.continent + "-" + player.posX.toInt + "/" + player.posY.toInt + "/" + player.posZ.toInt + " isDefined: " + player.getHolster(player.getUsedHolster).getEquipment.isDefined)
-        }
-        avatarService ! AvatarService.ObjectHeld(PlanetSideGUID(player.guid))
+//        }
+          avatarService ! AvatarService.ObjectHeld(PlanetSideGUID(player.guid))
       }
 
     case msg@AvatarJumpMessage(state) =>
@@ -1660,8 +1693,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid + 7), 0)))
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectDeleteMessage(PlanetSideGUID(player.guid + 8), 0)))
             Thread.sleep(100)
-            if (player.faction == PlanetSideEmpire.NC) color = 4
-            if (player.faction == PlanetSideEmpire.VS) color = 8
+            if (player.faction == PlanetSideEmpire.NC) color = 2
+            if (player.faction == PlanetSideEmpire.VS) color = 4
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.katana, PlanetSideGUID(player.guid + 7), Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 4)),
               Some(DetailedWeaponData(color, 8,
                 List(InternalSlot(ObjectClass.melee_ammo, PlanetSideGUID(player.guid + 8), 0,
@@ -1841,8 +1874,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
               else {
                 var color: Int = 0 // TR
-                if (player.faction == PlanetSideEmpire.NC) color = 4
-                if (player.faction == PlanetSideEmpire.VS) color = 8
+                if (player.faction == PlanetSideEmpire.NC) color = 2
+                if (player.faction == PlanetSideEmpire.VS) color = 4
 
                 sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0,
                   player.getEquipmentInHolster(ind).get.toolDef, PlanetSideGUID(player.getEquipmentInHolster(ind).get.guid),
