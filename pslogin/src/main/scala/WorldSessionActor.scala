@@ -140,7 +140,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case PokeClient() =>
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
     // CHAT Sync
-    case ChatMessage(to, from, fromGUID, data) =>
+    case ChatMessage(to, from, fromGUID, toName, data) =>
+      if (to == "/chat/tell") {
+        println(toName,from,data)
+        val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+        if (playerOpt.isDefined) {
+          val player: PlayerAvatar = playerOpt.get
+          println(player.name,toName,from,data)
+          if (player.name == toName) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, true, from, data, None)))
+        }
+      }
       if (to.drop(6) == "local") {
         if (data.length > 1 && (data.dropRight(data.length-1) != "!" || data.drop(1).dropRight(data.length-2) == "!")) {
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_OPEN, true, from, data, None)))
@@ -182,7 +191,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               onlineplayer.getPitch.toInt,onlineplayer.getYaw.toInt,false,GrenadeState.None,false,false,false,
               RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
               math.ceil(2.55*onlineplayer.getHealth/onlineplayer.getMaxHealth*100).toInt,
-              math.ceil(2.55*onlineplayer.getPersonalArmor/onlineplayer.getMaxPersonalArmor*100).toInt,UniformStyle.ThirdUpgrade,0,Some(ImplantEffects.NoEffects),Some(Cosmetics(false,false,false,false,false)),
+              math.ceil(2.55*onlineplayer.getPersonalArmor/onlineplayer.getMaxPersonalArmor*100).toInt,UniformStyle.ThirdUpgrade,5,Some(ImplantEffects.NoEffects),Some(Cosmetics(false,false,false,false,false)),
               InventoryData(List.empty),DrawnSlot.None))))
 //          InventoryData(List(
 //            InventoryItem(InternalSlot(ObjectClass.bank,PlanetSideGUID(onlineplayer.guid + 1),0,
@@ -1149,14 +1158,34 @@ class WorldSessionActor extends Actor with MDCContextAware {
           messagetype != ChatMessageType.CMT_FLY &&
           messagetype != ChatMessageType.CMT_SPEED &&
           messagetype != ChatMessageType.CMT_TELL &&
+          messagetype != ChatMessageType.CMT_TOGGLESPECTATORMODE &&
           messagetype != ChatMessageType.CMT_NOTE) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent != "i2" ) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
         if ((messagetype == ChatMessageType.CMT_FLY || messagetype == ChatMessageType.CMT_SPEED) && player.continent == "i2" && player.spectator) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents)))
 
         if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, "off", note_contents)))
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "Please use /t spectator on (or off)", note_contents)))
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
+          if(contents == "on"){
+            player.spectator = true
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227, has_wide_contents, player.name, "You can use /hidespectator to hide the screen message", None)))
+            // TODO send objectdelete to others & stop sync upstream
+          }
+          else if(contents == "off" && player.spectator) {
+            player.spectator = false
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227, has_wide_contents, player.name, "Spectator mode desactivated, Prepare to Fight !", None)))
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, true, "", "off", None)))
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SPEED, true, "", "1", None)))
+            player.redHealth = player.getMaxHealth
+            player.blueArmor = player.getMaxPersonalArmor
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.redHealth)
+            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
+            sendResponse(PacketCoding.CreateGamePacket(0, AvatarDeadStateMessage(2,0,0,player.getPosition,0,true)))
+            // TODO send objectcreate to others & start sync upstream
+          }
+          else {
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_227, has_wide_contents, player.name, "Use /spectator on or /spectator off", None)))
+          }
         }
 
         if (messagetype == ChatMessageType.CMT_NOTE) {
@@ -1184,9 +1213,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   if (player.guid != onlineplayer.guid) {
                     j += 1
                     guid += 100
+                    if (onlineplayer.admin) {
                     sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
-                      "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
+                      "\\#dID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
                         onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                    }
+                    else {
+                      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+                        "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
+                          onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                    }
                   }
                   else if (player.guid == onlineplayer.guid) {
                     guid += 100
@@ -1210,9 +1246,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     j += 1
                     guid += 100
                     if (onlineplayer.name.indexOf(search) != -1) {
-                      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
-                        "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
-                          onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                      if (onlineplayer.admin) {
+                        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+                          "\\#dID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
+                            onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                      }
+                      else {
+                        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+                          "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
+                            onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                      }
                     }
                   }
                   else if (player.guid == onlineplayer.guid) {
@@ -1250,7 +1293,36 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         if (messagetype == ChatMessageType.CMT_TELL) {
-          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.U_CMT_TELLFROM, has_wide_contents, recipient, contents, note_contents)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.U_CMT_TELLFROM, has_wide_contents, recipient, contents, note_contents)))
+          val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
+          var guid : Int = 15000
+          var searchDone : Boolean = false
+          var j : Int = 1
+          while (j != nbOnlinePlayer) {
+            println(j,searchDone)
+            val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
+            if (OnlinePlayer.isDefined) {
+              val onlineplayer: PlayerAvatar = OnlinePlayer.get
+              if (player.guid != onlineplayer.guid) {
+                j += 1
+                guid += 100
+                if (onlineplayer.name == recipient) {
+                  sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.U_CMT_TELLFROM, has_wide_contents, recipient, contents, note_contents)))
+                  searchDone = true
+                  j = nbOnlinePlayer
+                }
+              }
+              else if (player.guid == onlineplayer.guid) {
+                guid += 100
+              }
+            }
+            else {
+              guid += 100
+            }
+          }
+          if (!searchDone) {
+            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_45,true,recipient,"@NoTell_Target",None)))
+          }
         }
 
         if (messagetype == ChatMessageType.CMT_TELL && recipient == "open") {
@@ -1261,33 +1333,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         if (messagetype == ChatMessageType.CMT_TELL && recipient == "spectator") {
-          //        if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
-          //          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, player.name, contents, note_contents)))
-          if(contents == "on"){
-            player.spectator = true
-            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "spectator", "Activated", note_contents)))
-            // TODO send objectdelete to others & stop sync upstream
-          }
-          if(contents == "off") {
-            player.spectator = false
-            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "spectator", "Deactivated", note_contents)))
-            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, true, "", "off", None)))
-            sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SPEED, true, "", "1", None)))
-            player.redHealth = player.getMaxHealth
-            player.blueArmor = player.getMaxPersonalArmor
-            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 0, player.redHealth)
-            avatarService ! AvatarService.PlanetsideAttribute(PlanetSideGUID(player.guid), 4, player.blueArmor)
-            if(player.faction == PlanetSideEmpire.NC && player.continent == "i2" && player.name != "Sounours") {
-              sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(2238, 2133, 101),0))))
-            }
-            if(player.faction == PlanetSideEmpire.TR && player.continent == "i2" && player.name != "Sounours") {
-              sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(2048, 2325, 105),0))))
-            }
-            if(player.faction == PlanetSideEmpire.VS && player.continent == "i2" && player.name != "Sounours") {
-              sendResponse(PacketCoding.CreateGamePacket(0, PlayerStateShiftMessage(ShiftState(0,Vector3(1882, 2040, 101),0))))
-            }
-            // TODO send objectcreate to others & start sync upstream
-          }
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "Please use /spectator on (or off)", note_contents)))
         }
       }
 

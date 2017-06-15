@@ -23,7 +23,7 @@ object ChatService {
      -
  */
 
-final case class ChatMessage(to : String, from : String, fromGUID : Int, data : String)
+final case class ChatMessage(to : String, from : String, fromGUID : Int, toName : String, data : String)
 
 class ChatEventBus extends ActorEventBus with SubchannelClassification {
   type Event = ChatMessage
@@ -73,16 +73,18 @@ class ChatService extends Actor {
       chatEvents.subscribe(who, path)
     case LeaveAll() =>
       chatEvents.unsubscribe(sender())
-    case m @ NewMessage(from,fromGUID, msg) =>
+    case m @ NewMessage(from, fromGUID, msg) =>
 //      log.info(s"NEW: ${m}")
 
       msg.messageType match {
         case ChatMessageType.CMT_OPEN =>
-          chatEvents.publish(ChatMessage("/chat/local", from, fromGUID, msg.contents))
+          chatEvents.publish(ChatMessage("/chat/local", from, fromGUID, msg.recipient, msg.contents))
         case ChatMessageType.CMT_SQUAD =>
-          chatEvents.publish(ChatMessage("/chat/squad", from, fromGUID, msg.contents))
+          chatEvents.publish(ChatMessage("/chat/squad", from, fromGUID, msg.recipient, msg.contents))
         case ChatMessageType.CMT_VOICE =>
-          chatEvents.publish(ChatMessage("/chat/voice", from, fromGUID, msg.contents))
+          chatEvents.publish(ChatMessage("/chat/voice", from, fromGUID, msg.recipient, msg.contents))
+        case ChatMessageType.CMT_TELL =>
+          chatEvents.publish(ChatMessage("/chat/tell", from, fromGUID, msg.recipient, msg.contents))
         case _ =>
       }
     case _ =>
