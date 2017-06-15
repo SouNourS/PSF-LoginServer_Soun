@@ -64,6 +64,9 @@ class PlayerAvatar(val guid : Int) extends PSGameObject {
   var sortieVehicle2 : Long = 0
   var test : Int = 0
 
+  var attemptROF : Long = 0
+  var attemptPullH : Long = 0
+
   /** An index reference to the type of exo-suit the player is wearing. */
   private var suit : ExoSuitType.Value = ExoSuitType.Standard
   /** Where equipment is stored for easy access on a player's person.  Permissions dependent on exo-suit type. */

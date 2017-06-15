@@ -141,12 +141,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, KeepAliveMessage(0)))
     // CHAT Sync
     case ChatMessage(to, from, fromGUID, toName, data) =>
-      if (to == "/chat/tell") {
-        println(toName,from,data)
+      if (to.drop(6) == "tell") {
         val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
         if (playerOpt.isDefined) {
           val player: PlayerAvatar = playerOpt.get
-          println(player.name,toName,from,data)
           if (player.name == toName) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, true, from, data, None)))
         }
       }
@@ -792,6 +790,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           chatService ! ChatService.Join("local")
           chatService ! ChatService.Join("squad")
           chatService ! ChatService.Join("voice")
+          chatService ! ChatService.Join("tell")
 
           Thread.sleep(200)
 
@@ -1203,6 +1202,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
             }
             if(contents.drop(1) == "list" && !player.admin) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "You need the admin password ;)", note_contents)))
             if(contents.drop(1) == "list" && contents.length == 5 && player.admin) {
+              sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+                "\\#8ID / Name (faction) Cont-PosX/PosY/PosZ ROFattempt/PullHattempt", note_contents)))
               val nbOnlinePlayer : Int = PlayerMasterList.getWorldPopulation._1 + PlayerMasterList.getWorldPopulation._2 + PlayerMasterList.getWorldPopulation._3
               var guid : Int = 15000
               var j : Int = 1
@@ -1216,12 +1217,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     if (onlineplayer.admin) {
                     sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
                       "\\#dID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
-                        onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                        onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt + " " +
+                        onlineplayer.attemptROF + "/" + onlineplayer.attemptPullH, note_contents)))
                     }
                     else {
                       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
                         "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
-                          onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                          onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt + " " +
+                          onlineplayer.attemptROF + "/" + onlineplayer.attemptPullH, note_contents)))
                     }
                   }
                   else if (player.guid == onlineplayer.guid) {
@@ -1249,12 +1252,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       if (onlineplayer.admin) {
                         sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
                           "\\#dID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
-                            onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                            onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt + " " +
+                            onlineplayer.attemptROF + "/" + onlineplayer.attemptPullH, note_contents)))
                       }
                       else {
                         sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
                           "ID / Name: " + onlineplayer.sessID + " / " + onlineplayer.name + " (" + onlineplayer.faction + ") " +
-                            onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt, note_contents)))
+                            onlineplayer.continent + "-" + onlineplayer.posX.toInt + "/" + onlineplayer.posY.toInt + "/" + onlineplayer.posZ.toInt + " " +
+                            onlineplayer.attemptROF + "/" + onlineplayer.attemptPullH, note_contents)))
                       }
                     }
                   }
@@ -1299,7 +1304,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
           var searchDone : Boolean = false
           var j : Int = 1
           while (j != nbOnlinePlayer) {
-            println(j,searchDone)
             val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(guid)
             if (OnlinePlayer.isDefined) {
               val onlineplayer: PlayerAvatar = OnlinePlayer.get
@@ -2081,42 +2085,42 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if (seq_time - player.lastShotSeq_time < 0) {
             time = 1024 + (seq_time - player.lastShotSeq_time)}
           else time = seq_time - player.lastShotSeq_time
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss" && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time > 0 && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time > 0 && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette" && time > 0 && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun" && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler" && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher" && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
-//          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar" && time < 1) {
-//            discordROF(PlanetSideGUID(player.guid),player.name)
-//          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "gauss" && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time > 0 && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "r_shotgun" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time > 0 && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette" && time > 0 && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 0 && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower" && player.getEquipmentInHolster(player.getUsedHolster).get.fireModeIndex == 1 && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "mini_chaingun" && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "cycler" && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "lasher" && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
+          if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "pulsar" && time < 1) {
+            discordROF(PlanetSideGUID(player.guid),player.name)
+          }
         }
         }
         player.lastShotSeq_time = seq_time
@@ -2650,11 +2654,21 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   def discordROF(guid : PlanetSideGUID, name : String) = {
     log.info("Cheat player (ROF) : " + name + " ID : " + guid.guid)
-    sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(guid, 15, 600)))
-    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_NOTE,true,"Live Server","Rate of fire hack detected. If you feel this may be in error, please report the weapon you are using in the Discord #bug-report channel.",Some(""))))
+    val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+    if (playerOpt.isDefined) {
+      val player: PlayerAvatar = playerOpt.get
+      player.attemptROF += 1
+    }
+//    sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(guid, 15, 600)))
+//    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_NOTE,true,"Live Server","Rate of fire hack detected. If you feel this may be in error, please report the weapon you are using in the Discord #bug-report channel.",Some(""))))
   }
   def discordPullH(guid : PlanetSideGUID, name : String) = {
     log.info("Cheat player (PullHack) : " + name + " ID : " + guid.guid)
+    val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
+    if (playerOpt.isDefined) {
+      val player: PlayerAvatar = playerOpt.get
+      player.attemptPullH += 1
+    }
 //    sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(guid, 15, 600)))
 //    sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_NOTE,true,"Live Server","Pull hack detected. If you feel this may be in error, please report the weapon you are using in the Discord #bug-report channel.",Some(""))))
   }
