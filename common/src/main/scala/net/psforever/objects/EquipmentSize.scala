@@ -11,6 +11,7 @@ object EquipmentSize extends Enumeration {
       PISTOL, //2x2, 2x3, 3x3
       RIFLE, //6x3 and 9x3
       MAX, //max weapon only
+      VEHICLEWEAPON, //for vehicle-mounted weapons
       ANY //currently unused
   = Value
 }

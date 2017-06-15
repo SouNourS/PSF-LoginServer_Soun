@@ -1,6 +1,7 @@
 // Copyright (c) 2017 PSForever
 
 import akka.actor.{Actor, ActorRef, Cancellable, MDCContextAware}
+import net.psforever.objects._
 import net.psforever.packet.{PlanetSideGamePacket, _}
 import net.psforever.packet.control._
 import net.psforever.packet.game._

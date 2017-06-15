@@ -15,6 +15,8 @@ class PSGameObject {
   var posZ : Float = 0f
   /** VEL ! */
   var vel : Option[Vector3] = None
+  /** Angle of rotation about a vector coplanar with the ground (ZX-plane). */
+  var aimRoll : Float = 0f //TODO should we store this value in radians?
   /** Angle of rotation about a vector perpendicular to the ground (ZX-plane). */
   var aimYaw : Float = 0f //TODO should we store this value in radians?
   /** Angle of rotation about a vector coplanar with the ground (ZX-plane). */
@@ -37,6 +39,15 @@ class PSGameObject {
     this(x, y, z)
     setYaw(yaw)
     setPitch(pitch)
+  }
+
+  // TODO : comments
+  def getVelocity : Option[Vector3] = {
+    vel
+  }
+  // TODO : comments
+  def setVelocity(vec : Option[Vector3])  = {
+    vel = vec
   }
 
   /**
@@ -64,19 +75,35 @@ class PSGameObject {
     * @param vec a vector3 containing the new coordinates
     */
   def setPosition(vec : Vector3) : Unit = {
-    posX = vec.x
-    posY = vec.y
-    posZ = vec.z
-  }
-  // TODO : comments
-  def getVelocity : Option[Vector3] = {
-    vel
-  }
-  // TODO : comments
-  def setVelocity(vec : Option[Vector3])  = {
-    vel = vec
+//<<<<<<< HEAD
+//    posX = vec.x
+//    posY = vec.y
+//    posZ = vec.z
+//  }
+//
+//=======
+    setPosition(vec.x, vec.y, vec.z)
   }
 
+  /**
+    * Get the orientation of the object respective to the perpendicular of the ground (ZX-plane).
+    * @return a positive value typically between >=0 degrees and <360 degrees.
+    */
+  def getRoll : Float = {
+    aimRoll
+  }
+
+  /**
+    * Set the orientation of the object respective to the perpendicular of the ground (ZX-plane).
+    * @param look a positive value clamped between n >= 0 degrees and n < 360 degrees
+    */
+  def setRoll(look : Float) : Unit = {
+    var dLook : Float = look
+    dLook %= 360f
+    if(look < 0)
+      dLook += 360
+    aimRoll = dLook
+  }
 
   /**
     * Get the orientation of the object respective to the perpendicular of the ground (ZX-plane).
