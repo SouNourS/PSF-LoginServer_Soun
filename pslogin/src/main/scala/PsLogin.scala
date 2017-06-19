@@ -182,8 +182,7 @@ object PsLogin {
 
     val serviceManager = ServiceManager.boot
     serviceManager ! ServiceManager.Register(Props[ChatService], "chat")
-    val serviceManager2 = ServiceManager2.boot
-    serviceManager2 ! ServiceManager2.Register(Props[AvatarService], "avatar")
+    serviceManager ! ServiceManager.Register(Props[AvatarService], "avatar")
 
     val loginServerPort = 51000
     val worldServerPort = 51001

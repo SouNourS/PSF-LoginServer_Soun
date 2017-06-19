@@ -10,7 +10,6 @@ import scodec.bits._
 import org.log4s.MDC
 import MDCContextAware.Implicits._
 import ServiceManager.Lookup
-import ServiceManager2.Lookup2
 import net.psforever.objects._
 
 import net.psforever.packet.game.objectcreate._
@@ -26,7 +25,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var rightRef: ActorRef = ActorRef.noSender
 
   var serviceManager = Actor.noSender
-  var serviceManager2 = Actor.noSender
   var chatService = Actor.noSender
   var avatarService = Actor.noSender
 
@@ -114,10 +112,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       leftRef = sender()
       rightRef = right.asInstanceOf[ActorRef]
 
-      // Chat Service
       ServiceManager.serviceManager ! Lookup("chat")
-      // Dunno why but cant use only 1 serviceManager
-      ServiceManager2.serviceManager2 ! Lookup2("avatar")
+      ServiceManager.serviceManager ! Lookup("avatar")
 
       context.become(Started)
     case msg =>
@@ -126,12 +122,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def Started: Receive = {
-    case ServiceManager.LookupResult(endpoint) =>
+    case ServiceManager.LookupResult("chat", endpoint) =>
       chatService = endpoint
-      log.info("ID: " + sessionId + " Got service " + endpoint)
-    case ServiceManager2.LookupResult(endpoint) =>
+      log.info("ID: " + sessionId + " Got chat service " + endpoint)
+    case ServiceManager.LookupResult("avatar", endpoint) =>
       avatarService = endpoint
-      log.info("ID: " + sessionId + " Got service " + endpoint)
+      log.info("ID: " + sessionId + " Got avatar service " + endpoint)
     case ctrl@ControlPacket(_, _) =>
       handlePktContainer(ctrl)
     case game@GamePacket(_, _, _) =>
@@ -2382,9 +2378,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg@SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
 
-    case msg@AvatarGrenadeStateMessage(player_guid, state) =>
-      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
-
     case msg@GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(p)
       if (playerOpt.isDefined) {
@@ -2586,9 +2579,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         }
       }
-
-    case msg @ TargetingImplantRequest(list) =>
-      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
 
     case default => log.info("ID: " + sessionId + s" Unhandled GamePacket ${pkt} ")
   }

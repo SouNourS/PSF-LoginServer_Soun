@@ -13,7 +13,7 @@ object ServiceManager {
 
   case class Register(props : Props, name : String)
   case class Lookup(name : String)
-  case class LookupResult(endpoint : ActorRef)
+  case class LookupResult(request : String, endpoint : ActorRef)
 }
 
 class ServiceManager extends Actor {
@@ -21,7 +21,7 @@ class ServiceManager extends Actor {
   private [this] val log = org.log4s.getLogger
 
   var nextLookupId : Long = 0
-  val lookups : mutable.Map[Long, ActorRef] = mutable.Map()
+  val lookups : mutable.LongMap[RequestEntry] = mutable.LongMap()
 
   override def preStart = {
     log.info("Starting...")
@@ -29,20 +29,36 @@ class ServiceManager extends Actor {
 
   def receive = {
     case Register(props, name) =>
-      log.info(s"Registered ${name} service")
+      log.info(s"Registered $name service")
       context.actorOf(props, name)
     case Lookup(name) =>
       context.actorSelection(name) ! Identify(nextLookupId)
-      lookups += (nextLookupId -> sender())
+      lookups += nextLookupId -> RequestEntry(name, sender())
       nextLookupId += 1
-    case ActorIdentity(id, ref) =>
-      val idNumber = id.asInstanceOf[Long]
 
-      if(lookups contains idNumber) {
-        lookups(idNumber) ! LookupResult(ref.get)
-        lookups.remove(idNumber)
+    case ActorIdentity(id, Some(ref)) =>
+      val idNumber = id.asInstanceOf[Long]
+      lookups.get(idNumber) match {
+        case Some(RequestEntry(name, sender)) =>
+          sender ! LookupResult(name, ref)
+          lookups.remove(idNumber)
+        case _ =>
+          //TODO something
       }
+
+    case ActorIdentity(id, None) =>
+      val idNumber = id.asInstanceOf[Long]
+      lookups.get(idNumber) match {
+        case Some(RequestEntry(name, _)) =>
+          log.error(s"request #$idNumber for service `$name` came back empty; it may not exist")
+          lookups.remove(idNumber)
+        case _ =>
+          //TODO something
+      }
+
     case default =>
-      log.error(s"Invalid message received ${default}")
+      log.error(s"invalid message received - $default")
   }
+
+  protected case class RequestEntry(request : String, responder : ActorRef)
 }
