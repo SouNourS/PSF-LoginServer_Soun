@@ -37,18 +37,18 @@ object DriveState extends Enumeration {
   *                   used in the initialization process (`loadVehicleDefinition`)
   */
 class Vehicle(val guid : Int, private val vehicleDef : VehicleDefinition) extends PSGameObject {
-  private var faction : PlanetSideEmpire.Value = PlanetSideEmpire.TR
-  private var owner : Option[PlanetSideGUID] = None
-  private var health : Int = 1
-  private var shields : Int = 0
-  private var deployed : DriveState.Value = DriveState.Mobile
-  private var decal : Int = 0
-  private var trunkLockState : VehicleLockState.Value = VehicleLockState.Locked
+  var faction : PlanetSideEmpire.Value = PlanetSideEmpire.TR
+  var owner : Option[PlanetSideGUID] = None
+  var health : Int = 1
+  var shields : Int = 0
+  var deployed : DriveState.Value = DriveState.Mobile
+  var decal : Int = 0
+  var trunkLockState : VehicleLockState.Value = VehicleLockState.Locked
 
-  private val seats : mutable.HashMap[Int, Seat] = mutable.HashMap()
-  private val weapons : mutable.HashMap[Int, EquipmentSlot] = mutable.HashMap()
-  private val utilities : mutable.ArrayBuffer[Utility] = mutable.ArrayBuffer()
-  private var trunk : Trunk = Trunk(1, 1, 0)
+  val seats : mutable.HashMap[Int, Seat] = mutable.HashMap()
+  val weapons : mutable.HashMap[Int, EquipmentSlot] = mutable.HashMap()
+  val utilities : mutable.ArrayBuffer[Utility] = mutable.ArrayBuffer()
+  var trunk : Trunk = Trunk(1, 1, 0)
 
   //init
   Vehicle.loadVehicleDefinition(this)
@@ -315,7 +315,7 @@ object Vehicle {
     * Overloaded constructor.
     * @param guid the vehicle's globally unique identifier
     * @param vehicleDef the vehicle's definition entry
-    * @return a `Vwehicle` object
+    * @return a `Vehicle` object
     */
   def apply(guid : Int, vehicleDef : VehicleDefinition) : Vehicle = {
     new Vehicle(guid, vehicleDef)
@@ -333,7 +333,7 @@ object Vehicle {
     //create weapons
     for((num, _/*definition*/) <- vdef.weapons) {
       val slot = EquipmentSlot(EquipmentSize.VEHICLEWEAPON)
-      slot.setEquipment(new Tool(0, 0/*definition*/)) //TODO for "new Tool(0, 0)," the second param should be a ToolDefinition
+      slot.setEquipment(new Tool(0, 336/*definition*/)) //TODO for "new Tool(0, 0)," the second param should be a ToolDefinition
       vehicle.weapons += num -> slot
     }
     //create seats

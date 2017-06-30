@@ -29,8 +29,8 @@ object VehicleDefinition {
   }
 
   //the following is just to make an example; the data is not expected to be correct
-  private val fury_weapon_system = ToolDefinition(0, "fury_weapon_system")
-  fury_weapon_system.size = EquipmentSize.VEHICLEWEAPON
+  private val fury_weapon_systema = ToolDefinition(336, "fury_weapon_systema")
+  fury_weapon_systema.size = EquipmentSize.VEHICLEWEAPON
 
   final val Fury = VehicleDefinition(335, "Fury")
   Fury.maxHealth = 1000
@@ -40,7 +40,7 @@ object VehicleDefinition {
   Fury.seats(0).setControlledWeapon(Some(1))
   Fury.mountPoints += 0 -> 0
   Fury.mountPoints += 2 -> 0
-  Fury.weapons += 1 -> fury_weapon_system
+  Fury.weapons += 1 -> fury_weapon_systema
   Fury.trunkSize = new InventoryTile(8, 8)
   Fury.trunkOffset = 2
 }

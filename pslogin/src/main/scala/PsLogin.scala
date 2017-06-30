@@ -183,6 +183,10 @@ object PsLogin {
     val serviceManager = ServiceManager.boot
     serviceManager ! ServiceManager.Register(Props[ChatService], "chat")
     serviceManager ! ServiceManager.Register(Props[AvatarService], "avatar")
+    serviceManager ! ServiceManager.Register(Props[VehicleService], "vehicle")
+    serviceManager ! ServiceManager.Register(Props[WeaponService], "weapon")
+    serviceManager ! ServiceManager.Register(Props[L_EnvironmentService], "local_environment")
+    serviceManager ! ServiceManager.Register(Props[G_EnvironmentService], "global_environment")
 
     val loginServerPort = 51000
     val worldServerPort = 51001

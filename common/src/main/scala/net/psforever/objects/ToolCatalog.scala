@@ -99,6 +99,13 @@ object ToolCatalog {
   //should never end up in inventory; will match glitch knife dimensions, however, if it does
   catalog += tool.guid -> tool
 
+  tool = ToolDefinition(336, "fury_weapon_systema")
+  tool.size = EquipmentSize.VEHICLEWEAPON
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.rocket
+  tool.fireModes(0).magazineSize = 2
+  catalog += tool.guid -> tool
+
   tool = ToolDefinition(345, "gauss")
   tool.size = EquipmentSize.RIFLE
   tool.fireModes += new FireModeDefinition
