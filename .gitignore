@@ -12,6 +12,7 @@ out/
 # Log files
 *.log
 logs/
+xActiveSession
 
 # Random
 *.swp
