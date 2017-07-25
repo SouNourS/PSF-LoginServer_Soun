@@ -149,7 +149,7 @@ class AvatarService extends Actor {
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, victim_guid,
-          AvatarServiceReply.DestroyDisplay(source_guid)
+          AvatarServiceReply.HitHintReturn(source_guid)
         ))
       }
     case AvatarService.ChangeWeapon(unk1, sessionId) =>
