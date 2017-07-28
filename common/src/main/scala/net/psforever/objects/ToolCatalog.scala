@@ -245,6 +245,15 @@ object ToolCatalog {
   tool.inventoryTileHeight = 3
   catalog += tool.guid -> tool
 
+  tool = ToolDefinition(1003, "winchester")
+  tool.size = EquipmentSize.RIFLE
+  tool.fireModes += new FireModeDefinition
+  tool.fireModes(0).ammoTypes += Ammo.winchester_ammo
+  tool.fireModes(0).magazineSize = 36
+  tool.inventoryTileWidth = 6
+  tool.inventoryTileHeight = 3
+  catalog += tool.guid -> tool
+
   /**
     * Reference an existing exo-suit from the catalog.
     * @param guid the globally unique identifier

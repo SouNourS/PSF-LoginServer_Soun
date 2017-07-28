@@ -93,6 +93,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
   val flamethrower_fireball_velocity : Int = 15
   val flamethrower_fireball_lifespan : Float = 1.2f
   val flamethrower_fireball_damage0 : Int = 30
+  val winchester_ammo_velocity : Int = 500
+  val winchester_ammo_lifespan : Float = 0.6f
+  val winchester_ammo_degrade_delay : Float = 0.6f
+  val winchester_ammo_degrade_multiplier : Float = 0.00f
+  val winchester_ammo_damage0 : Int = 17
+  val winchester_ammo_AP_damage0 : Int = 25
 
 
   override def postStop() = {
@@ -1525,6 +1531,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "rocklet") ammo_clip2 = 6
           else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "bolt_driver") ammo_clip2 = 1
           else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flamethrower") ammo_clip2 = 100
+          else if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "winchester") ammo_clip2 = 36
           player.getEquipmentInHolster(player.getUsedHolster).get.magazine = player.getEquipmentInHolster(player.getUsedHolster).get.getFireMode.magazineSize
         }
         player.lastShotSeq_time = -1
@@ -1968,18 +1975,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
           if (unk1 == 5) {
             //define fav 6
-            if (player.faction == PlanetSideEmpire.NC) {
-              // JH
-              player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.r_shotgun))
-            }
-            else if (player.faction == PlanetSideEmpire.TR) {
-              // MCG
-              player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.mini_chaingun))
-            }
-            else if (player.faction == PlanetSideEmpire.VS) {
-              // Lasher
-              player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.lasher))
-            }
+//            if (player.faction == PlanetSideEmpire.NC) {
+//              // JH
+//              player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.r_shotgun))
+//            }
+//            else if (player.faction == PlanetSideEmpire.TR) {
+//              // MCG
+//              player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.mini_chaingun))
+//            }
+//            else if (player.faction == PlanetSideEmpire.VS) {
+//              // Lasher
+//              player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.lasher))
+//            }
+            player.setEquipmentInHolster(2, Tool(player.guid + 5, ObjectClass.winchester))
           }
           if (unk1 == 6) {
             //define fav 7
@@ -2062,7 +2070,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 42)), Some(DetailedAmmoBoxData(8, 24)))))
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.bolt, PlanetSideGUID(player.guid + 14),
               Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 51)), Some(DetailedAmmoBoxData(8, 10)))))
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15),
+            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.winchester_ammo, PlanetSideGUID(player.guid + 15),
               Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 78)), Some(DetailedAmmoBoxData(8, 100)))))
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.medkit, PlanetSideGUID(player.guid + 17),
               Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 98)), Some(DetailedAmmoBoxData(8, 1)))))
@@ -2082,7 +2090,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 36)), Some(DetailedAmmoBoxData(8, 24)))))
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.bolt, PlanetSideGUID(player.guid + 14),
               Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 39)), Some(DetailedAmmoBoxData(8, 10)))))
-            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.bullet_9mm_AP, PlanetSideGUID(player.guid + 15),
+            sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.winchester_ammo, PlanetSideGUID(player.guid + 15),
               Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 60)), Some(DetailedAmmoBoxData(8, 100)))))
             sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(0, ObjectClass.medkit, PlanetSideGUID(player.guid + 17),
               Some(ObjectCreateMessageParent(PlanetSideGUID(player.guid), 73)), Some(DetailedAmmoBoxData(8, 1)))))
@@ -2304,6 +2312,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   }
                   if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "flechette") { // Sweeper
                     currentDamage = damages(shotgun_shell_velocity, shotgun_shell_lifespan, shotgun_shell_lifespan, 0.0f, shotgun_shell_damage0, distanceBetweenPlayers)
+                  }
+                  if (player.getEquipmentInHolster(player.getUsedHolster).get.getName == "winchester") { // winchester
+                    currentDamage = damages(winchester_ammo_velocity, winchester_ammo_lifespan, winchester_ammo_degrade_delay, winchester_ammo_degrade_multiplier, winchester_ammo_damage0, distanceBetweenPlayers)
                   }
                 }
                 else { // knife
