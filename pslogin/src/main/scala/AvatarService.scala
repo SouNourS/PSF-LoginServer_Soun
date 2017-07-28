@@ -12,7 +12,7 @@ object AvatarService {
   case class Join(channel : String)
   case class Leave()
   case class LeaveAll()
-  case class PlayerStateMessage(msg : PlayerStateMessageUpstream)
+  case class PlayerState(msg : PlayerStateMessageUpstream)
   case class LoadMap(msg : PlanetSideGUID)
   case class unLoadMap(msg : PlanetSideGUID)
   case class ObjectHeld(msg : PlanetSideGUID)
@@ -28,7 +28,7 @@ sealed trait Reply
 object AvatarServiceReply {
   final case class unLoadMap() extends Reply
   final case class LoadMap() extends Reply
-  final case class PlayerStateMessage(pos : Vector3, vel : Option[Vector3], facingYaw : Int, facingPitch : Int, facingUpper : Int, is_crouching : Boolean, jumping : Boolean, jthrust : Boolean, is_cloaked : Boolean) extends Reply
+  final case class PlayerState(pos : Vector3, vel : Option[Vector3], facingYaw : Float, facingPitch : Float, facingUpper : Float, is_crouching : Boolean, jumping : Boolean, jthrust : Boolean, is_cloaked : Boolean) extends Reply
   final case class ObjectHeld() extends Reply
   final case class PlanetSideAttribute(facingUpper : Int, long : Long) extends Reply
   final case class PlayerStateShift(itemID : PlanetSideGUID) extends Reply
@@ -86,13 +86,13 @@ class AvatarService extends Actor {
     case LeaveAll() =>
       AvatarEvents.unsubscribe(sender())
 
-    case AvatarService.PlayerStateMessage(msg) =>
+    case AvatarService.PlayerState(msg) =>
 //      log.info(s"NEW: ${m}")
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(msg.avatar_guid)
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, msg.avatar_guid,
-          AvatarServiceReply.PlayerStateMessage(msg.pos, msg.vel, msg.facingYaw, msg.facingPitch, msg.facingYawUpper, msg.is_crouching, msg.is_jumping, msg.jump_thrust, msg.is_cloaked)
+          AvatarServiceReply.PlayerState(msg.pos, msg.vel, msg.facingYaw, msg.facingPitch, msg.facingYawUpper, msg.is_crouching, msg.is_jumping, msg.jump_thrust, msg.is_cloaked)
         ))
 
       }

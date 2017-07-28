@@ -103,7 +103,7 @@ class VehicleService extends Actor {
       if (playerOpt.isDefined) {
         val player: PlayerAvatar = playerOpt.get
         VehicleEvents.publish(VehicleMessage("/Vehicle/" + player.continent, "VehicleState", PlanetSideGUID(0),
-          msg.vehicle_guid, PlanetSideGUID(0), msg.unk1, msg.unk3, msg.unk4, msg.wheel_direction, 0, msg.roll,msg.pitch,msg.yaw,0f,0f,
+          msg.vehicle_guid, PlanetSideGUID(0), msg.unk1, msg.unk3, msg.unk4, msg.wheel_direction, 0, msg.ang.x,msg.ang.y,msg.ang.z,0f,0f,
           msg.pos,Vector3(0f,0f,0f),Vector3(0f,0f,0f),Vector3(0f,0f,0f),Vector3(0f,0f,0f),
           msg.unk5,msg.unk6,false,false,false,0,0,0,0,0,msg.vel,None,msg.unk2))
       }

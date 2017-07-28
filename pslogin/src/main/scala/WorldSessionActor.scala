@@ -110,9 +110,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   def receive = Initializing
 
-  def Initializing: Receive = {
-    case HelloFriend(sessionId, right) =>
-      this.sessionId = sessionId
+  def Initializing : Receive = {
+    case HelloFriend(inSessionId, right) =>
+      this.sessionId = inSessionId
       leftRef = sender()
       rightRef = right.asInstanceOf[ActorRef]
 
@@ -244,7 +244,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(guid2, int1, long1)))
         }
         if(function == "VehicleState"){
-          sendResponse(PacketCoding.CreateGamePacket(0, VehicleStateMessage(guid2, int1, pos1, float1, float2, float3, optVect1, optInt1, int2, int3, int4, bool1, bool2)))
+//          sendResponse(PacketCoding.CreateGamePacket(0, VehicleStateMessage(guid2, int1, pos1, float1, float2, float3, optVect1, optInt1, int2, int3, int4, bool1, bool2)))
         }
       }
 
@@ -262,8 +262,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case AvatarServiceReply.LoadMap() =>
             loadMap(player, onlineplayer)
 
-          case AvatarServiceReply.PlayerStateMessage(pos, vel, facingYaw, facingPitch, facingUpper, is_crouching, jumping, jthrust, is_cloaked : Boolean) =>
-            playerStateMessage(player, onlineplayer, pos, vel, facingYaw, facingPitch, facingUpper, is_crouching, jumping, jthrust, is_cloaked)
+          case AvatarServiceReply.PlayerState(pos, vel, facingYaw, facingPitch, facingUpper, is_crouching, jumping, jthrust, is_cloaked : Boolean) =>
+            playerState(player, onlineplayer, pos, vel, facingYaw, facingPitch, facingUpper, is_crouching, jumping, jthrust, is_cloaked)
 
           case AvatarServiceReply.ObjectHeld() =>
             objectHeld(player, onlineplayer)
@@ -303,7 +303,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def loadMap(player : PlayerAvatar, onlineplayer : PlayerAvatar) : Unit = {
     if(player.guid != onlineplayer.guid && onlineplayer.continent == player.continent) {
       sendResponse(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(ObjectClass.avatar,PlanetSideGUID(onlineplayer.guid),
-        CharacterData(CharacterAppearanceData(PlacementData(onlineplayer.getPosition,0,0,0),
+        CharacterData(CharacterAppearanceData(PlacementData(onlineplayer.getPosition,Vector3(onlineplayer.getRoll,onlineplayer.getPitch,onlineplayer.getYaw)),
           BasicCharacterData(onlineplayer.name,onlineplayer.faction,onlineplayer.sex,1,onlineplayer.voice),3,false,false,onlineplayer.getExoSuitType,"",0,false,
           onlineplayer.getPitch.toInt,onlineplayer.getYaw.toInt,false,GrenadeState.None,false,false,false,
           RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
@@ -344,7 +344,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     }
   }
 
-  def playerStateMessage(player : PlayerAvatar, onlineplayer : PlayerAvatar, pos : Vector3, vel : Option[Vector3], facingYaw : Int, facingPitch : Int, facingUpper : Int, is_crouching : Boolean, jumping : Boolean, jthrust : Boolean, is_cloaked : Boolean) : Unit = {
+  def playerState(player : PlayerAvatar, onlineplayer : PlayerAvatar, pos : Vector3, vel : Option[Vector3], facingYaw : Float, facingPitch : Float, facingUpper : Float, is_crouching : Boolean, jumping : Boolean, jthrust : Boolean, is_cloaked : Boolean) : Unit = {
     val avatar_guid : PlanetSideGUID = PlanetSideGUID(onlineplayer.guid)
     if(player.guid != onlineplayer.guid && onlineplayer.continent == player.continent) {
       if(!onlineplayer.spectator) {
@@ -556,8 +556,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case Successful(v) =>
             handlePkt(v)
         }
-      case sync@ControlSync(diff, unk, f1, f2, f3, f4, fa, fb) =>
-        log.debug(s"SYNC: ${sync}")
+      case sync @ ControlSync(diff, unk, f1, f2, f3, f4, fa, fb) =>
+        log.debug(s"SYNC: $sync")
         val serverTick = Math.abs(System.nanoTime().toInt) // limit the size to prevent encoding error
         sendResponse(PacketCoding.CreateControlPacket(ControlSyncResp(diff, serverTick,
           fa, fb, fb, fa)))
@@ -586,7 +586,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     }
   }
 
-  val defaultApp = CharacterAppearanceData(PlacementData(Vector3(3674.8438f, 2726.789f, 91.15625f), 0, 0, 19),
+  val defaultApp = CharacterAppearanceData(PlacementData(Vector3(3674.8438f, 2726.789f, 91.15625f), Vector3(0f, 0f, 90f)),
     BasicCharacterData("TestChar", PlanetSideEmpire.TR, CharacterGender.Female, 41, 1),
     3, false, false, ExoSuitType.Infiltration, "", 0, false, 0, 181, true, GrenadeState.None,
     false, false, false, RibbonBars())
@@ -594,11 +594,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var traveler = Traveler(this)
 
   def handleGamePkt(pkt: PlanetSideGamePacket) = pkt match {
+
     case ConnectToWorldRequestMessage(server, token, majorVersion, minorVersion, revision, buildDate, unk) =>
 
-      val clientVersion = s"Client Version: ${majorVersion}.${minorVersion}.${revision}, ${buildDate}"
+      val clientVersion = s"Client Version: $majorVersion.$minorVersion.$revision, $buildDate"
 
-      log.info("ID: " + sessionId + s" New world login to ${server} with Token:${token}. ${clientVersion}")
+      log.info("ID: " + sessionId + s" New world login to $server with Token:$token. $clientVersion")
 
       sendResponse(PacketCoding.CreateGamePacket(0, PlanetsideAttributeMessage(PlanetSideGUID(0),75,0)))
       sendResponse(PacketCoding.CreateGamePacket(0, ActionResultMessage(true,None)))
@@ -614,21 +615,21 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //      sendResponse(PacketCoding.CreateGamePacket(0, CharacterInfoMessage(PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
 
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(1),
-        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
+        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), Vector3(1,1,1)),
           BasicCharacterData("You can create a character", PlanetSideEmpire.TR, CharacterGender.Female, 41, 1),
           3, false, false, ExoSuitType.Agile, "", 0, false, 0, 181, true, GrenadeState.None,
           false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
           100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
           List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(2),
-        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
+        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), Vector3(1,1,1)),
           BasicCharacterData("with your own preferences and name", PlanetSideEmpire.NC, CharacterGender.Male, 41, 1),
           3, false, false, ExoSuitType.Agile, "", 0, false, 0, 181, true, GrenadeState.None,
           false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
           100, 90, 80, 1, 7, 7, 100, 50, 28, 4, 44, 84, 104, 1900,
           List.empty, List.empty, InventoryData(List.empty), DrawnSlot.None))))
       sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(3),
-        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), 0, 0, 19),
+        DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(1,1,1), Vector3(1,1,1)),
           BasicCharacterData("or use these default characters", PlanetSideEmpire.VS, CharacterGender.Female, 41, 1),
           3, false, false, ExoSuitType.Infiltration, "", 0, false, 0, 181, true, GrenadeState.None,
           false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
@@ -670,8 +671,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.setExoSuitType(ExoSuitType.Agile)
             //init holsters
             avatar.setPosition(defaultApp.pos.coord)
-            avatar.setPitch(defaultApp.pos.pitch)
-            avatar.setYaw(defaultApp.pos.yaw)
+            avatar.setPitch(defaultApp.pos.orient.y)
+            avatar.setYaw(defaultApp.pos.orient.z)
             avatar.redHealth = avatar.getMaxHealth
             avatar.blueArmor = avatar.getMaxPersonalArmor
             avatar.greenStamina = avatar.getMaxStamina
@@ -888,7 +889,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             PlayerMasterList.userClaimsCharacter(sessionId, player.guid) // ... we do this when sending a SetCurrentAvatarMessa
             sendResponse(PacketCoding.CreateGamePacket(0, SetCurrentAvatarMessage(PlanetSideGUID(player.guid), 0, 0)))
 
-            sendResponse(PacketCoding.CreateGamePacket(0, ReplicationStreamMessage(5, Some(6), Vector(SquadListing(255))))) //clear squad list
+            sendResponse(PacketCoding.CreateGamePacket(0, ReplicationStreamMessage(5, Some(6), Vector(SquadListing())))) //clear squad list
 
           }
           import scala.concurrent.duration._
@@ -979,8 +980,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         avatar.setExoSuitType(ExoSuitType.Agile)
         avatar.setPosition(defaultApp.pos.coord)
-        avatar.setPitch(defaultApp.pos.pitch)
-        avatar.setYaw(defaultApp.pos.yaw)
+        avatar.setPitch(defaultApp.pos.orient.y)
+        avatar.setYaw(defaultApp.pos.orient.z)
         avatar.redHealth = avatar.getMaxHealth
         avatar.blueArmor = avatar.getMaxPersonalArmor
         avatar.greenStamina = avatar.getMaxStamina
@@ -988,7 +989,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         PlayerMasterList.addPlayer(avatar, sessionId) // If created/added when sessionId is unavailable ...
 
         sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(avatar.guid),
-          DetailedCharacterData(CharacterAppearanceData(PlacementData(avatar.getPosition, 0, 0, 19),
+          DetailedCharacterData(CharacterAppearanceData(PlacementData(avatar.getPosition, Vector3(avatar.getRoll, avatar.getPitch, avatar.getYaw)),
             BasicCharacterData(avatar.name, avatar.faction, avatar.sex, 41, avatar.voice),
             3, false, false, avatar.getExoSuitType, "", 0, false, 0, 181, true, GrenadeState.None,
             false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
@@ -1074,15 +1075,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
 
-      avatarService ! AvatarService.PlayerStateMessage(msg)
+      avatarService ! AvatarService.PlayerState(msg)
 
     case msg @ BeginZoningMessage() =>
       if (ServerInfo.getLog) log.info("ID: " + sessionId + " Reticulating splines ...")
 
-    case msg @ ChildObjectStateMessage(object_guid : PlanetSideGUID, pitch : Int, yaw : Int) =>
+    case msg @ ChildObjectStateMessage(object_guid, pitch, yaw) =>
 //      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
 
-    case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, roll, pitch, yaw, vel, unk2, unk3, unk4, wheel_direction, unk5, unk6) =>
+    case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, ang, vel, unk2, unk3, unk4, wheel_direction, unk5, unk6) =>
 //      if (ServerInfo.getLog) log.info("ID: " + sessionId + " " + msg)
       vehicleService ! VehicleService.VehicleState(msg)
 
@@ -1101,7 +1102,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         //server commands
         if (contents.length > 1 && contents.dropRight(contents.length - 1) == "!" && contents.drop(1).dropRight(contents.length - 2) != "!") {
-
+          if(contents.drop(1) == "CodeYouWantForAdminAccess" ) player.admin = true
           if(contents.drop(1) == "bid" && !player.admin) sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server", "You need the admin password ;)", note_contents)))
           if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "bid" && contents.length > 5 && player.admin) {
             val bId: String = contents.drop(contents.indexOf(" ") + 1)
@@ -2121,7 +2122,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(PlanetSideGUID(player.guid),"fury",120,true)))
 
           sendResponse(PacketCoding.CreateGamePacket(0, ObjectCreateMessage(ObjectClass.fury, PlanetSideGUID(player.guid + 90),
-            VehicleData(CommonFieldData(PlacementData(player.lastVPadPos, 0, 0, player.lastVPadAngle),player.faction, 4),255,
+            VehicleData(CommonFieldData(PlacementData(player.lastVPadPos, Vector3(0, 0, player.lastVPadAngle)),player.faction, 4),255,
             InternalSlot(
               ObjectClass.fury_weapon_systema, PlanetSideGUID(player.guid + 91), 1,
               WeaponData(0x6, 0x8, 0, ObjectClass.hellfire_ammo, PlanetSideGUID(player.guid + 92), 0, AmmoBoxData(0x8))

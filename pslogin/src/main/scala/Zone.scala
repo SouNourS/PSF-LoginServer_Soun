@@ -619,7 +619,7 @@ import scodec.bits._
 
         player.setExoSuitType(ExoSuitType.Agile)
         traveler.sendToSelf(PacketCoding.CreateGamePacket(0,
-          ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(player.guid), DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(loc._1, loc._2, loc._3), 0, 0, 19),
+          ObjectCreateDetailedMessage(ObjectClass.avatar, PlanetSideGUID(player.guid), DetailedCharacterData(CharacterAppearanceData(PlacementData(Vector3(loc._1, loc._2, loc._3), Vector3(player.getRoll,player.getPitch,player.getYaw)),
             BasicCharacterData(player.name, player.faction, player.sex, 41, player.voice), 3, false, false , player.getExoSuitType, "", 0, false, 0, 181, false, GrenadeState.None,
             false, false, false, RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
             player.getMaxHealth, player.getHealth, player.getPersonalArmor, 1, 7, 7, player.getMaxStamina, player.getStamina, 28, 4, 44, 84, 104, 1900,
@@ -721,7 +721,7 @@ import scodec.bits._
                 Thread.sleep(200)
 
                 traveler.sendToSelf(PacketCoding.CreateGamePacket(0,ObjectCreateMessage(ObjectClass.avatar,PlanetSideGUID(onlineplayer.guid),
-                  CharacterData(CharacterAppearanceData(PlacementData(onlineplayer.getPosition,0,0,0),
+                  CharacterData(CharacterAppearanceData(PlacementData(onlineplayer.getPosition,Vector3(onlineplayer.getRoll,onlineplayer.getPitch,onlineplayer.getYaw)),
                     BasicCharacterData(onlineplayer.name,onlineplayer.faction,onlineplayer.sex,1,onlineplayer.voice),3,false,false,onlineplayer.getExoSuitType,"",0,false,
                     onlineplayer.getPitch.toInt,onlineplayer.getYaw.toInt,false,GrenadeState.None,false,false,false,
                     RibbonBars(MeritCommendation.FanFaire2007, MeritCommendation.None, MeritCommendation.Loser, MeritCommendation.None)),
