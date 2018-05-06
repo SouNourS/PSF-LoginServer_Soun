@@ -2,7 +2,7 @@
 package services.vehicle.support
 
 import akka.actor.{Actor, ActorRef, Cancellable}
-import net.psforever.objects.{DefaultCancellable, Vehicle}
+import net.psforever.objects.{DefaultCancellable, GlobalDefinitions, Vehicle}
 import net.psforever.objects.guid.TaskResolver
 import net.psforever.objects.vehicles.Seat
 import net.psforever.objects.zones.Zone
@@ -84,6 +84,11 @@ class DeconstructionActor extends Actor {
         vehicle.Position = Vector3.Zero //somewhere it will not disturb anything
         entry.zone.Transport ! Zone.Vehicle.Despawn(vehicle)
         context.parent ! DeconstructionActor.DeleteVehicle(vehicle.GUID, zone.Id) //call up to the main event system
+        if(vehicle.Definition == GlobalDefinitions.ams) {
+          import net.psforever.types.DriveState
+          vehicle.DeploymentState = DriveState.Mobile //internally undeployed //TODO this should be temporary?
+          context.parent ! VehicleServiceMessage.AMSDeploymentChange(zone)
+        }
         taskResolver ! DeconstructionTask(vehicle, zone)
       })
 
