@@ -34,6 +34,6 @@ object AvatarAction {
 //  final case class PlayerStateShift(killer : PlanetSideGUID, victim : PlanetSideGUID) extends Action
   final case class DestroyDisplay(killer : Player, victim : Player) extends Action
   final case class Destroy(victim : PlanetSideGUID, killer : PlanetSideGUID, weapon : PlanetSideGUID, pos : Vector3) extends Action
-//  final case class HitHintReturn(killer : PlanetSideGUID, victim : PlanetSideGUID) extends Action
+  final case class HitHintReturn(killer : PlanetSideGUID, victim : PlanetSideGUID) extends Action
 //  final case class ChangeWeapon(unk1 : Int, sessionId : Long) extends Action
 }

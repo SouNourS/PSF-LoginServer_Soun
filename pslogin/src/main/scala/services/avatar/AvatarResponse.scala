@@ -33,6 +33,6 @@ object AvatarResponse {
   //  final case class PlayerStateShift(itemID : PlanetSideGUID) extends Response
   final case class DestroyDisplay(killer : Player, victim : Player) extends Response
   final case class Destroy(victim : PlanetSideGUID, killer : PlanetSideGUID, weapon : PlanetSideGUID, pos : Vector3) extends Response
-  //  final case class HitHintReturn(itemID : PlanetSideGUID) extends Response
+  final case class HitHintReturn(source : PlanetSideGUID) extends Response
   //  final case class ChangeWeapon(facingYaw : Int) extends Response
 }

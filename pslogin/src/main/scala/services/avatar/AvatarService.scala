@@ -122,6 +122,10 @@ class AvatarService extends Actor {
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", victim, AvatarResponse.Destroy(victim, killer, weapon, pos))
           )
+        case AvatarAction.HitHintReturn(source_guid,victim_guid) =>
+          AvatarEvents.publish(
+            AvatarServiceResponse(s"/$forChannel/Avatar", victim_guid, AvatarResponse.HitHintReturn(source_guid))
+          )
 
         case _ => ;
     }
@@ -189,14 +193,7 @@ class AvatarService extends Actor {
           AvatarServiceReply.DestroyDisplay(killer)
         ))
       }
-    case AvatarService.HitHintReturn(source_guid,victim_guid) =>
-      val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(source_guid)
-      if (playerOpt.isDefined) {
-        val player: PlayerAvatar = playerOpt.get
-        AvatarEvents.publish(AvatarMessage("/Avatar/" + player.continent, victim_guid,
-          AvatarServiceReply.DestroyDisplay(source_guid)
-        ))
-      }
+
     case AvatarService.ChangeWeapon(unk1, sessionId) =>
       val playerOpt: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sessionId)
       if (playerOpt.isDefined) {

@@ -425,6 +425,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
           // guid = victim // killer = killer ;)
           sendResponse(DestroyMessage(victim, killer, weapon, pos))
 
+        case AvatarResponse.HitHintReturn(source) =>
+          // guid = victim // source = killer ;)
+          if (tplayer_guid == guid) {
+            sendResponse(HitHint(source, guid))
+          }
+
         case _ => ;
       }
 
@@ -2095,12 +2101,26 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg@ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       var echoContents: String = contents
       //TODO messy on/off strings may work
-      if (messagetype == ChatMessageType.CMT_FLY && admin) {
+      if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
+        messagetype == ChatMessageType.CMT_WHO_PLATOONLEADERS || messagetype == ChatMessageType.CMT_WHO_SQUADLEADERS || messagetype == ChatMessageType.CMT_WHO_TEAMS) {
+        val poplist = continent.Players
+        val popTR = poplist.count(_.faction == PlanetSideEmpire.TR)
+        val popNC = poplist.count(_.faction == PlanetSideEmpire.NC)
+        val popVS = poplist.count(_.faction == PlanetSideEmpire.VS)
+
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now, but : ", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "NC online : " + popNC + " on Ishundar", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "TR online : " + popTR + " on Ishundar", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "VS online : " + popVS + " on Ishundar", None)))
+      }
+      else if (messagetype == ChatMessageType.CMT_FLY && admin) {
         if (contents.trim.equals("on")) {
           flying = true
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, has_wide_contents, recipient, contents, note_contents)))
         }
         else if (contents.trim.equals("off")) {
           flying = false
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, has_wide_contents, recipient, contents, note_contents)))
         }
       }
       else if (messagetype == ChatMessageType.CMT_SPEED && admin) {
@@ -2114,6 +2134,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               1f
           }
         }
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SPEED, has_wide_contents, recipient, contents, note_contents)))
       }
       else if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
         if (contents.trim.equals("on")) {
@@ -3110,14 +3131,27 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 case Some(projectile) =>
                   val distance: Float = Vector3.Distance(player.Position, obj.Position)
                   var currentDamage: Int = 0
-                  //if (obj.Definition.Fly) {}
-                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                    projectile.Damage1 + projectile.AddDamage1, distance)
+                  if(GlobalDefinitions.isFlightVehicle(obj.Definition)) {
+                    currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
+                      projectile.Damage2 + projectile.AddDamage2, distance)
+                  }
+                  else {
+                    currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
+                      projectile.Damage1 + projectile.AddDamage1, distance)
+                  }
                   obj.Health = obj.Health - currentDamage
                   if (obj.Health < 0) obj.Health = 0
-                  println(obj.Health)
                   if (obj.Health != 0) {
                     vehicleService ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(player.GUID, obj.GUID, 0, obj.Health))
+                    obj.Definition.MountPoints.values.foreach(seat_num => {
+                      obj.Seat(seat_num).get.Occupant match {
+                        case Some(tplayer) =>
+                          if (tplayer.HasGUID && tplayer.isAlive) {
+                            avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.HitHintReturn(player.GUID, tplayer.GUID)) // todo find real job to do in captures files
+                          }
+                        case None => ;
+                      }
+                    })
                   }
                   else {
                     //                    println(obj.Seats.values.count(_.isOccupied)) for later
@@ -3194,14 +3228,27 @@ class WorldSessionActor extends Actor with MDCContextAware {
             case Some(projectile) =>
               val distance: Float = Vector3.Distance(player.Position, obj.Position)
               var currentDamage: Int = 0
-              //if (obj.Definition.Fly) {}
-              currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                projectile.Damage1 + projectile.AddDamage1, distance)
+              if(GlobalDefinitions.isFlightVehicle(obj.Definition)) {
+                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
+                  projectile.Damage2 + projectile.AddDamage2, distance)
+              }
+              else {
+                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
+                  projectile.Damage1 + projectile.AddDamage1, distance)
+              }
               obj.Health = obj.Health - currentDamage
               if (obj.Health < 0) obj.Health = 0
-              println(obj.Health)
               if (obj.Health != 0) {
                 vehicleService ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(player.GUID, obj.GUID, 0, obj.Health))
+                obj.Definition.MountPoints.values.foreach(seat_num => {
+                  obj.Seat(seat_num).get.Occupant match {
+                    case Some(tplayer) =>
+                      if (tplayer.HasGUID && tplayer.isAlive) {
+                        avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.HitHintReturn(player.GUID, tplayer.GUID)) // todo find real job to do in captures files
+                      }
+                    case None => ;
+                  }
+                })
               }
               else {
                 //                    println(obj.Seats.values.count(_.isOccupied)) for later
@@ -3273,14 +3320,27 @@ class WorldSessionActor extends Actor with MDCContextAware {
               case Some(projectile) =>
                 val distance: Float = Vector3.Distance(player.Position, obj.Position)
                 var currentDamage: Int = 0
-                //if (obj.Definition.Fly) {}
-                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                  projectile.Damage1 + projectile.AddDamage1, distance)
+                if(GlobalDefinitions.isFlightVehicle(obj.Definition)) {
+                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
+                    projectile.Damage2 + projectile.AddDamage2, distance)
+                }
+                else {
+                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
+                    projectile.Damage1 + projectile.AddDamage1, distance)
+                }
                 obj.Health = obj.Health - currentDamage
                 if (obj.Health < 0) obj.Health = 0
-                println(obj.Health)
                 if (obj.Health != 0) {
                   vehicleService ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(player.GUID, obj.GUID, 0, obj.Health))
+                  obj.Definition.MountPoints.values.foreach(seat_num => {
+                    obj.Seat(seat_num).get.Occupant match {
+                      case Some(tplayer) =>
+                        if (tplayer.HasGUID && tplayer.isAlive) {
+                          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.HitHintReturn(player.GUID, tplayer.GUID)) // todo find real job to do in captures files
+                        }
+                      case None => ;
+                    }
+                  })
                 }
                 else {
                   //                    println(obj.Seats.values.count(_.isOccupied)) for later
@@ -3543,6 +3603,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg@HitHint(source, player_guid) =>
       log.info("HitHint: " + msg)
+      continent.GUID(player_guid) match {
+        case Some(tplayer: Player) =>
+          if ( !spectator ){
+            avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.HitHintReturn(source, tplayer.GUID))
+          }
+        case _ =>
+          log.warn(s"GUID $player_guid is not a player")
+      }
 
     case msg@TargetingImplantRequest(list) =>
       log.info("TargetingImplantRequest: " + msg)
@@ -5100,7 +5168,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def sendResponse(cont: PlanetSideGamePacket): Unit = {
-    if (cont.opcode.id != 186 && cont.opcode.id != 8)  log.info("SEND: " + cont)
+    if (cont.opcode.id != 186 && cont.opcode.id != 8)  log.info("SEND to " + sessionId + " : " + cont)
     sendResponse(PacketCoding.CreateGamePacket(0, cont))
   }
 

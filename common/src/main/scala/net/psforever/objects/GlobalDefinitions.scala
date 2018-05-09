@@ -2819,6 +2819,11 @@ object GlobalDefinitions {
     repeater.FireModes.head.AmmoTypeIndices += 1
     repeater.FireModes.head.AmmoSlotIndex = 0
     repeater.FireModes.head.Magazine = 20
+    repeater.FireModes.head.AddDamage0 = 2
+    repeater.FireModes.head.AddDamage1 = -3
+    repeater.FireModes.head.AddDamage2 = -3
+    repeater.FireModes.head.AddDamage3 = -3
+    repeater.FireModes.head.AddDamage4 = -3
     repeater.Tile = InventoryTile.Tile33
 
     isp.Size = EquipmentSize.Pistol
@@ -2832,6 +2837,11 @@ object GlobalDefinitions {
     isp.FireModes.head.AmmoSlotIndex = 0
     isp.FireModes.head.Magazine = 8
     isp.FireModes.head.Chamber = 6 //8 shells x 6 pellets = 48
+    isp.FireModes.head.AddDamage0 = 1
+    isp.FireModes.head.AddDamage1 = 0
+    isp.FireModes.head.AddDamage2 = 1
+    isp.FireModes.head.AddDamage3 = 1
+    isp.FireModes.head.AddDamage4 = 0
     isp.Tile = InventoryTile.Tile33
 
     beamer.Size = EquipmentSize.Pistol
@@ -2885,6 +2895,11 @@ object GlobalDefinitions {
     suppressor.FireModes.head.AmmoTypeIndices += 1
     suppressor.FireModes.head.AmmoSlotIndex = 0
     suppressor.FireModes.head.Magazine = 25
+    suppressor.FireModes.head.AddDamage0 = -1
+    suppressor.FireModes.head.AddDamage1 = -1
+    suppressor.FireModes.head.AddDamage2 = 0
+    suppressor.FireModes.head.AddDamage3 = 0
+    suppressor.FireModes.head.AddDamage4 = 0
     suppressor.Tile = InventoryTile.Tile63
 
     punisher.Size = EquipmentSize.Rifle
@@ -2905,6 +2920,11 @@ object GlobalDefinitions {
     punisher.FireModes.head.AmmoTypeIndices += 1
     punisher.FireModes.head.AmmoSlotIndex = 0
     punisher.FireModes.head.Magazine = 30
+    punisher.FireModes.head.AddDamage0 = 1
+    punisher.FireModes.head.AddDamage1 = 0
+    punisher.FireModes.head.AddDamage2 = 0
+    punisher.FireModes.head.AddDamage3 = 1
+    punisher.FireModes.head.AddDamage4 = 0
     punisher.FireModes += new FireModeDefinition
     punisher.FireModes(1).AmmoTypeIndices += 2
     punisher.FireModes(1).AmmoTypeIndices += 3
@@ -3388,6 +3408,11 @@ object GlobalDefinitions {
     nano_dispenser.FireModes.head.AmmoTypeIndices += 1
     nano_dispenser.FireModes.head.AmmoSlotIndex = 0
     nano_dispenser.FireModes.head.Magazine = 100
+    nano_dispenser.FireModes.head.AddDamage0 = 0
+    nano_dispenser.FireModes.head.AddDamage1 = 20
+    nano_dispenser.FireModes.head.AddDamage2 = 0
+    nano_dispenser.FireModes.head.AddDamage3 = 0
+    nano_dispenser.FireModes.head.AddDamage4 = 20
     nano_dispenser.Tile = InventoryTile.Tile63
 
     bank.Size = EquipmentSize.Pistol
@@ -3864,6 +3889,11 @@ object GlobalDefinitions {
     galaxy_gunship_cannon.FireModes.head.AmmoTypeIndices += 0
     galaxy_gunship_cannon.FireModes.head.AmmoSlotIndex = 0
     galaxy_gunship_cannon.FireModes.head.Magazine = 50
+    galaxy_gunship_cannon.FireModes.head.AddDamage0 = 0
+    galaxy_gunship_cannon.FireModes.head.AddDamage1 = 50
+    galaxy_gunship_cannon.FireModes.head.AddDamage2 = 50
+    galaxy_gunship_cannon.FireModes.head.AddDamage3 = 10
+    galaxy_gunship_cannon.FireModes.head.AddDamage4 = 50
 
     galaxy_gunship_tailgun.Size = EquipmentSize.VehicleWeapon
     galaxy_gunship_tailgun.AmmoTypes += bullet_35mm
