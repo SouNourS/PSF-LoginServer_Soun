@@ -17,6 +17,8 @@ object Zones {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
+      Building(5).get.Faction = PlanetSideEmpire.NEUTRAL //Akkan
+      Building(5).get.ModelId = 24
 //      Building(6).get.Faction = PlanetSideEmpire.TR //Baal
 //      Building(6).get.ModelId = 42
 //      Building(7).get.Faction = PlanetSideEmpire.TR //Dagon
@@ -38,7 +40,7 @@ object Zones {
       Building(35).get.ModelId = 69
       Building(36).get.Faction = PlanetSideEmpire.VS //West Girru Air Tower
       Building(36).get.ModelId = 83
-      Building(55).get.Faction = PlanetSideEmpire.VS //South Irkalla Air Tower
+      Building(55).get.Faction = PlanetSideEmpire.NC //South Irkalla Air Tower
       Building(55).get.ModelId = 86
       Building(56).get.Faction = PlanetSideEmpire.NC //Southwest Hanish Air Tower
       Building(56).get.ModelId = 82

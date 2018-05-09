@@ -287,7 +287,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
 
         case AvatarResponse.EquipmentInHand(target, slot, item) =>
-          if(tplayer_guid != guid) {
+          if (tplayer_guid != guid) {
             val definition = item.Definition
             sendResponse(
               ObjectCreateMessage(
@@ -316,7 +316,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
 
         case AvatarResponse.ObjectDelete(item_guid, unk) =>
-          if(tplayer_guid != guid) {
+          if (tplayer_guid != guid) {
             log.info(s"Made to delete item $item_guid")
             sendResponse(ObjectDeleteMessage(item_guid, unk))
           }
@@ -387,7 +387,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
 
         case AvatarResponse.StowEquipment(target, slot, item) =>
-          if(tplayer_guid != guid) {
+          if (tplayer_guid != guid) {
             val definition = item.Definition
             sendResponse(
               ObjectCreateDetailedMessage(
@@ -416,9 +416,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
             PlayerActionsToCancel()
             CancelAllProximityUnits()
 
-//            import scala.concurrent.duration._
-//            import scala.concurrent.ExecutionContext.Implicits.global
-//            reviveTimer = context.system.scheduler.scheduleOnce(30000 milliseconds, galaxy, Zone.Lattice.RequestSpawnPoint(Zones.SanctuaryZoneNumber(player.Faction), player, 7))
+            //            import scala.concurrent.duration._
+            //            import scala.concurrent.ExecutionContext.Implicits.global
+            //            reviveTimer = context.system.scheduler.scheduleOnce(30000 milliseconds, galaxy, Zone.Lattice.RequestSpawnPoint(Zones.SanctuaryZoneNumber(player.Faction), player, 7))
           }
 
         case AvatarResponse.Destroy(victim, killer, weapon, pos) =>
@@ -495,7 +495,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
 
         case VehicleResponse.DetachFromRails(vehicle_guid, pad_guid, pad_position, pad_orientation_z) =>
-          sendResponse(ObjectDetachMessage(pad_guid, vehicle_guid, pad_position + Vector3(0,0,0.5f), 0, 0, pad_orientation_z))
+          sendResponse(ObjectDetachMessage(pad_guid, vehicle_guid, pad_position + Vector3(0, 0, 0.5f), 0, 0, pad_orientation_z))
 
         case VehicleResponse.InventoryState(obj, parent_guid, start, con_data) =>
           if (tplayer_guid != guid) {
@@ -539,7 +539,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         case VehicleResponse.RevealPlayer(player_guid) =>
           //TODO any action will cause the player to appear after the effects of ConcealPlayer
-          if(player.GUID == player_guid) {
+          if (player.GUID == player_guid) {
             sendResponse(ChatMsg(ChatMessageType.CMT_OPEN, true, "", "You are in a strange situation.", None))
             KillPlayer(player)
           }
@@ -587,70 +587,72 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
     case ChatServiceResponse(toChannel, guid, personal, messageType, wideContents, recipient, contents, note) =>
-      personal match {
-        case 0 => // for other(s) user(s)
-          if (player.GUID != guid) {
-            sendResponse(ChatMsg(messageType, wideContents, recipient, contents, note))
-          }
-
-        case 1 => // for player
-          if (player.GUID == guid) {
-            sendResponse(ChatMsg(messageType, wideContents, recipient, contents, note))
-          }
-
-        case 2 => // both case
-          toChannel match {
-            case "/Chat/local" =>
-              if (contents.length > 1 && contents.dropRight(contents.length - 1) == "!" && contents.drop(1).dropRight(contents.length - 2) != "!" && player.GUID == guid) {
-                //                if(contents.drop(1) == "CodeYouWantForAdminAccess") Player.Administrate(player, true)
-                //                if(contents.drop(1) == "bid" && !player.Admin) sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server", "You need the admin password ;)", None))
-                //                if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "bid" && contents.length > 5 && player.Admin) {
-                //                  val bId: String = contents.drop(contents.indexOf(" ") + 1)
-                //                  sendResponse(SetEmpireMessage(PlanetSideGUID(bId.toInt - 1),PlanetSideEmpire.NEUTRAL))
-                //                  sendResponse(SetEmpireMessage(PlanetSideGUID(bId.toInt),PlanetSideEmpire.TR))
-                //                }
-                //                if(contents.drop(1) == "list" && !player.Admin) sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server", "You need the admin password ;)", None))
-                //                if(contents.drop(1) == "list" && contents.length == 5 && player.Admin) {
-                ////                  sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server",
-                ////                    "\\#8ID / Name (faction) Cont-PosX/PosY/PosZ ROFattempt/PullHattempt", None)))
-                //                  sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server",
-                //                    "do not work for now", None))
-                //                }
-                //                if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "list" && contents.length > 6 && player.Admin) {
-                //
-                //                }
-                //                if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "log" && player.Admin) {
-                ////                  val command : String = contents.drop(contents.indexOf(" ") + 1)
-                ////                  if (command == "on") ServerInfo.setLog(true)
-                ////                  if (command == "off") ServerInfo.setLog(false)
-                //                }
-                //                if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "kick" && player.Admin) {
-                ////                  val sess : Long = contents.drop(contents.indexOf(" ") + 1).toLong
-                ////                  val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sess)
-                ////                  if (OnlinePlayer.isDefined) {
-                ////                    val onlineplayer: PlayerAvatar = OnlinePlayer.get
-                ////                    if (player.guid != onlineplayer.guid) {
-                ////                      avatarService ! AvatarService.unLoadMap(PlanetSideGUID(onlineplayer.guid))
-                ////                      sendResponse(DropSession(sess, "Dropped from IG admin"))
-                ////                    }
-                ////                    else {
-                ////                      sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server", "Do you really want kick yourself ?", None)))
-                ////                    }
-                ////                  }
-                ////                  else {
-                ////                    sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server", "That ID do not exist !", None)))
-                ////                  }
-                //                }
-              } else if ((contents.length > 1 && (contents.dropRight(contents.length - 1) != "!" || contents.drop(1).dropRight(contents.length - 2) == "!")) || contents.length == 1) {
-                sendResponse(ChatMsg(messageType, wideContents, recipient, contents, note))
-              }
-
-            case _ =>
+      if (!contents.trim.equals("!admin")) {
+        personal match {
+          case 0 => // for other(s) user(s)
+            if (player.GUID != guid) {
               sendResponse(ChatMsg(messageType, wideContents, recipient, contents, note))
-          }
+            }
 
-        case _ => ;
+          case 1 => // for player
+            if (player.GUID == guid) {
+              sendResponse(ChatMsg(messageType, wideContents, recipient, contents, note))
+            }
 
+          case 2 => // both case
+            toChannel match {
+              case "/Chat/local" =>
+                if (contents.length > 1 && contents.dropRight(contents.length - 1) == "!" && contents.drop(1).dropRight(contents.length - 2) != "!" && player.GUID == guid) {
+                  //                if(contents.drop(1) == "CodeYouWantForAdminAccess") Player.Administrate(player, true)
+                  //                if(contents.drop(1) == "bid" && !player.Admin) sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server", "You need the admin password ;)", None))
+                  //                if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "bid" && contents.length > 5 && player.Admin) {
+                  //                  val bId: String = contents.drop(contents.indexOf(" ") + 1)
+                  //                  sendResponse(SetEmpireMessage(PlanetSideGUID(bId.toInt - 1),PlanetSideEmpire.NEUTRAL))
+                  //                  sendResponse(SetEmpireMessage(PlanetSideGUID(bId.toInt),PlanetSideEmpire.TR))
+                  //                }
+                  //                if(contents.drop(1) == "list" && !player.Admin) sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server", "You need the admin password ;)", None))
+                  //                if(contents.drop(1) == "list" && contents.length == 5 && player.Admin) {
+                  ////                  sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server",
+                  ////                    "\\#8ID / Name (faction) Cont-PosX/PosY/PosZ ROFattempt/PullHattempt", None)))
+                  //                  sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server",
+                  //                    "do not work for now", None))
+                  //                }
+                  //                if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "list" && contents.length > 6 && player.Admin) {
+                  //
+                  //                }
+                  //                if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "log" && player.Admin) {
+                  ////                  val command : String = contents.drop(contents.indexOf(" ") + 1)
+                  ////                  if (command == "on") ServerInfo.setLog(true)
+                  ////                  if (command == "off") ServerInfo.setLog(false)
+                  //                }
+                  //                if(contents.drop(1).dropRight(contents.length - contents.indexOf(" ")) == "kick" && player.Admin) {
+                  ////                  val sess : Long = contents.drop(contents.indexOf(" ") + 1).toLong
+                  ////                  val OnlinePlayer: Option[PlayerAvatar] = PlayerMasterList.getPlayer(sess)
+                  ////                  if (OnlinePlayer.isDefined) {
+                  ////                    val onlineplayer: PlayerAvatar = OnlinePlayer.get
+                  ////                    if (player.guid != onlineplayer.guid) {
+                  ////                      avatarService ! AvatarService.unLoadMap(PlanetSideGUID(onlineplayer.guid))
+                  ////                      sendResponse(DropSession(sess, "Dropped from IG admin"))
+                  ////                    }
+                  ////                    else {
+                  ////                      sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server", "Do you really want kick yourself ?", None)))
+                  ////                    }
+                  ////                  }
+                  ////                  else {
+                  ////                    sendResponse(ChatMsg(ChatMessageType.CMT_TELL, true, "Server", "That ID do not exist !", None)))
+                  ////                  }
+                  //                }
+                } else if ((contents.length > 1 && (contents.dropRight(contents.length - 1) != "!" || contents.drop(1).dropRight(contents.length - 2) == "!")) || contents.length == 1) {
+                  sendResponse(ChatMsg(messageType, wideContents, recipient, contents, note))
+                }
+
+              case _ =>
+                sendResponse(ChatMsg(messageType, wideContents, recipient, contents, note))
+            }
+
+          case _ => ;
+
+        }
       }
     //      reply match {
     //
@@ -1721,6 +1723,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         avatar.Certifications += CertificationType.UniMAX
         avatar.Certifications += CertificationType.Medical
         avatar.Certifications += CertificationType.Engineering
+        avatar.Certifications += CertificationType.Hacking
+        avatar.Certifications += CertificationType.AdvancedHacking
         //
         avatar.Certifications += CertificationType.Sniping
         avatar.Certifications += CertificationType.AntiVehicular
@@ -1814,6 +1818,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.Certifications += CertificationType.UniMAX
             avatar.Certifications += CertificationType.Medical
             avatar.Certifications += CertificationType.Engineering
+            avatar.Certifications += CertificationType.Hacking
+            avatar.Certifications += CertificationType.AdvancedHacking
             //
             avatar.Certifications += CertificationType.Sniping
             avatar.Certifications += CertificationType.AntiVehicular
@@ -1974,8 +1980,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         player.Crouching = is_crouching
         player.Jumping = is_jumping
 
-        if (is_crouching) {
-          //          sendResponse(ChatMsg(ChatMessageType.CMT_GMOPEN, true, "Server", " X : " + player.Position.x.toString + " Y : " + player.Position.y.toString + " Z : " + player.Position.z.toString + "  Orientation Yaw : " + player.Orientation.z.toInt.toString, None))
+        if (is_crouching && admin) {
+          sendResponse(ChatMsg(ChatMessageType.CMT_GMOPEN, true, "Server", " X : " + player.Position.x.toString + " Y : " + player.Position.y.toString + " Z : " + player.Position.z.toString + "  Orientation Yaw : " + player.Orientation.z.toInt.toString, None))
           println("(Vector3(" + player.Position.x + "f, " + player.Position.y + "f, " + player.Position.z + "f), Vector3(0, 0, " + player.Orientation.z.toInt + "))))")
         }
 
@@ -2089,27 +2095,27 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg@ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       var echoContents: String = contents
       //TODO messy on/off strings may work
-//      if (messagetype == ChatMessageType.CMT_FLY) {
-//        if (contents.trim.equals("on")) {
-//          flying = true
-//        }
-//        else if (contents.trim.equals("off")) {
-//          flying = false
-//        }
-//      }
-//      else if (messagetype == ChatMessageType.CMT_SPEED) {
-//        speed = {
-//          try {
-//            contents.trim.toFloat
-//          }
-//          catch {
-//            case _: Exception =>
-//              echoContents = "1.000"
-//              1f
-//          }
-//        }
-//      }
-      if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
+      if (messagetype == ChatMessageType.CMT_FLY && admin) {
+        if (contents.trim.equals("on")) {
+          flying = true
+        }
+        else if (contents.trim.equals("off")) {
+          flying = false
+        }
+      }
+      else if (messagetype == ChatMessageType.CMT_SPEED && admin) {
+        speed = {
+          try {
+            contents.trim.toFloat
+          }
+          catch {
+            case _: Exception =>
+              echoContents = "1.000"
+              1f
+          }
+        }
+      }
+      else if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
         if (contents.trim.equals("on")) {
           spectator = true
         }
@@ -2162,6 +2168,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if (contents.trim.equals("!loc")) { //dev hack; consider bang-commands to complement slash-commands in future
         echoContents = s"zone=${continent.Id} pos=${player.Position.x},${player.Position.y},${player.Position.z}; ori=${player.Orientation.x},${player.Orientation.y},${player.Orientation.z}"
         log.info(echoContents)
+      }
+
+      if (contents.trim.equals("!admin")) { //dev hack; consider bang-commands to complement slash-commands in future
+        admin = true
       }
 
       // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
@@ -4464,31 +4474,59 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * @param building        the building object
     */
   def initFacility(continentNumber: Int, buildingNumber: Int, building: Building): Unit = {
-    sendResponse(
-      BuildingInfoUpdateMessage(
-        continentNumber, //Zone
-        buildingNumber, //Facility
-        9, //NTU%
-        false, //Hacked
-        PlanetSideEmpire.NEUTRAL, //Base hacked by
-        0, //Time remaining for hack (ms)
-        building.Faction, //Base owned by
-        0, //!! Field != 0 will cause malformed packet. See class def.
-        None,
-        PlanetSideGeneratorState.Normal, //Generator state
-        true, //Respawn tubes operating state
-        false, //Force dome state
-        30, //Lattice benefits
-        188, //!! Field > 0 will cause malformed packet. See class def.
-        Nil,
-        0,
-        false,
-        8, //!! Field != 8 will cause malformed packet. See class def.
-        None,
-        false, //Boosted spawn room pain field
-        false //Boosted generator room pain field
+    if (continentNumber == 4 && buildingNumber == 5) {
+      sendResponse(
+        BuildingInfoUpdateMessage(
+          continentNumber, //Zone
+          buildingNumber, //Facility
+          9, //NTU%
+          false, //Hacked
+          PlanetSideEmpire.NEUTRAL, //Base hacked by
+          0, //Time remaining for hack (ms)
+          player.Faction, //Base owned by
+          0, //!! Field != 0 will cause malformed packet. See class def.
+          None,
+          PlanetSideGeneratorState.Normal, //Generator state
+          false, //Respawn tubes operating state
+          false, //Force dome state
+          30, //Lattice benefits
+          188, //!! Field > 0 will cause malformed packet. See class def.
+          Nil,
+          0,
+          false,
+          8, //!! Field != 8 will cause malformed packet. See class def.
+          None,
+          false, //Boosted spawn room pain field
+          false //Boosted generator room pain field
+        )
       )
-    )
+    } else {
+      sendResponse(
+        BuildingInfoUpdateMessage(
+          continentNumber, //Zone
+          buildingNumber, //Facility
+          9, //NTU%
+          false, //Hacked
+          PlanetSideEmpire.NEUTRAL, //Base hacked by
+          0, //Time remaining for hack (ms)
+          building.Faction, //Base owned by
+          0, //!! Field != 0 will cause malformed packet. See class def.
+          None,
+          PlanetSideGeneratorState.Normal, //Generator state
+          true, //Respawn tubes operating state
+          false, //Force dome state
+          30, //Lattice benefits
+          188, //!! Field > 0 will cause malformed packet. See class def.
+          Nil,
+          0,
+          false,
+          8, //!! Field != 8 will cause malformed packet. See class def.
+          None,
+          false, //Boosted spawn room pain field
+          false //Boosted generator room pain field
+        )
+      )
+    }
     sendResponse(DensityLevelUpdateMessage(continentNumber, buildingNumber, List(0, 0, 0, 0, 0, 0, 0, 0)))
   }
 
@@ -4544,12 +4582,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
     */
   def configZone(zone: Zone): Unit = {
     zone.Buildings.values.foreach(building => {
-      sendResponse(SetEmpireMessage(PlanetSideGUID(building.ModelId), building.Faction))
+      if (building.ModelId == 24) {
+        sendResponse(SetEmpireMessage(PlanetSideGUID(building.ModelId), player.Faction))
+      } else {
+        sendResponse(SetEmpireMessage(PlanetSideGUID(building.ModelId), building.Faction))
+      }
       building.Amenities.foreach(amenity => {
         Thread.sleep(15)
         val amenityId = amenity.GUID
-        sendResponse(PlanetsideAttributeMessage(amenityId, 50, 0))
-        sendResponse(PlanetsideAttributeMessage(amenityId, 51, 0))
+//        sendResponse(PlanetsideAttributeMessage(amenityId, 50, 0))
+//        sendResponse(PlanetsideAttributeMessage(amenityId, 51, 0))
+        sendResponse(MultiPacketBundle(List(PlanetsideAttributeMessage(amenityId, 50, 0),PlanetsideAttributeMessage(amenityId, 51, 0))))
       })
       sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
     })
@@ -5048,7 +5091,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def sendResponse(cont: PlanetSideGamePacket): Unit = {
-    //    if (cont.opcode.id != 186)  log.info("SEND: " + cont)
+    if (cont.opcode.id != 186 && cont.opcode.id != 8)  log.info("SEND: " + cont)
     sendResponse(PacketCoding.CreateGamePacket(0, cont))
   }
 
