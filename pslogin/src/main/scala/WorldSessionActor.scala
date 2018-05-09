@@ -5168,7 +5168,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def sendResponse(cont: PlanetSideGamePacket): Unit = {
-    if (cont.opcode.id != 186 && cont.opcode.id != 8)  log.info("SEND to " + sessionId + " : " + cont)
+//    if (cont.opcode.id != 186 && cont.opcode.id != 8)  log.info("SEND to " + sessionId + " : " + cont)
     sendResponse(PacketCoding.CreateGamePacket(0, cont))
   }
 
