@@ -49,7 +49,9 @@ class InterstellarCluster(zones : List[Zone]) extends Actor {
       }
 
     case InterstellarCluster.RequestClientInitialization() =>
-      zones.foreach(zone => { sender ! Zone.ClientInitialization(zone.ClientInitialization()) })
+      zones.foreach(zone => {
+        Thread.sleep(5)
+        sender ! Zone.ClientInitialization(zone.ClientInitialization()) })
       sender ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones
 
     case msg @ Zone.Lattice.RequestSpawnPoint(zone_number, _, _) =>

@@ -3147,7 +3147,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     vehicleService ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(player.GUID, obj.GUID, 13, 3))
                     import scala.concurrent.duration._
                     import scala.concurrent.ExecutionContext.Implicits.global
-                    context.system.scheduler.scheduleOnce(30000 milliseconds, vehicleService,  VehicleServiceMessage(player.Continent, VehicleAction.ObjectDelete(player.GUID, obj.GUID)))
+//                    context.system.scheduler.scheduleOnce(30000 milliseconds, vehicleService,  VehicleServiceMessage(player.Continent, VehicleAction.ObjectDelete(player.GUID, obj.GUID)))
+                    vehicleService ! VehicleServiceMessage.DelayedVehicleDeconstruction(obj, continent, 60L)
+//                    vehicleService ! VehicleServiceMessage.UnscheduleDeconstruction(obj.GUID)
+//                    vehicleService ! VehicleServiceMessage.RequestDeleteVehicle(obj, continent)
                   }
                   player.DeleteProjectile(projectile_guid)
                 case None =>
@@ -3228,7 +3231,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 vehicleService ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(player.GUID, obj.GUID, 13, 3))
                 import scala.concurrent.duration._
                 import scala.concurrent.ExecutionContext.Implicits.global
-                context.system.scheduler.scheduleOnce(30000 milliseconds, vehicleService,  VehicleServiceMessage(player.Continent, VehicleAction.ObjectDelete(player.GUID, obj.GUID)))
+//                context.system.scheduler.scheduleOnce(30000 milliseconds, vehicleService,  VehicleServiceMessage(player.Continent, VehicleAction.ObjectDelete(player.GUID, obj.GUID)))
+                vehicleService ! VehicleServiceMessage.DelayedVehicleDeconstruction(obj, continent, 60L)
+                //                    vehicleService ! VehicleServiceMessage.UnscheduleDeconstruction(obj.GUID)
+                //                    vehicleService ! VehicleServiceMessage.RequestDeleteVehicle(obj, continent)
               }
               player.DeleteProjectile(projectile_guid)
             case None =>
@@ -3304,7 +3310,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   vehicleService ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(player.GUID, obj.GUID, 13, 3))
                   import scala.concurrent.duration._
                   import scala.concurrent.ExecutionContext.Implicits.global
-                  context.system.scheduler.scheduleOnce(30000 milliseconds, vehicleService,  VehicleServiceMessage(player.Continent, VehicleAction.ObjectDelete(player.GUID, obj.GUID)))
+//                  context.system.scheduler.scheduleOnce(30000 milliseconds, vehicleService,  VehicleServiceMessage(player.Continent, VehicleAction.ObjectDelete(player.GUID, obj.GUID)))
+                  vehicleService ! VehicleServiceMessage.DelayedVehicleDeconstruction(obj, continent, 60L)
+                  //                    vehicleService ! VehicleServiceMessage.UnscheduleDeconstruction(obj.GUID)
+                  //                    vehicleService ! VehicleServiceMessage.RequestDeleteVehicle(obj, continent)
                 }
                 player.DeleteProjectile(projectile_guid)
               case None =>
