@@ -196,11 +196,13 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
   }
 
   def SaveProjectile(id : PlanetSideGUID, from : Int, damage0 : Int, damage1 : Int, damage2 : Int, damage3 : Int, damage4 : Int,
+                     acceleration : Int, accelerationUntil : Float,
                      addDamage0 : Int, addDamage1 : Int, addDamage2 : Int, addDamage3 : Int, addDamage4 : Int,
                      damageAtEdge : Float, damageRadius : Float, damageType : DamageType.Value, degradeDelay : Float,
                      degradeMultiplier : Float, initialVelocity : Int, lifespan : Float) : Unit = {
     val temp = id.guid - 40100
     projectile(temp) = Some(Projectile(this, from, damage0, damage1, damage2, damage3, damage4,
+      acceleration, accelerationUntil,
       addDamage0, addDamage1, addDamage2, addDamage3, addDamage4,
       damageAtEdge, damageRadius, damageType, degradeDelay,
       degradeMultiplier, initialVelocity, lifespan))

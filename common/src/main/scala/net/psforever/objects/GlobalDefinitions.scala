@@ -1473,6 +1473,8 @@ object GlobalDefinitions {
     aphelion_plasma_rocket_projectile.Damage2 = 95
     aphelion_plasma_rocket_projectile.Damage3 = 55
     aphelion_plasma_rocket_projectile.Damage4 = 60
+    aphelion_plasma_rocket_projectile.Acceleration = 20
+    aphelion_plasma_rocket_projectile.AccelerationUntil = 2f
     aphelion_plasma_rocket_projectile.DamageAtEdge = .1f
     aphelion_plasma_rocket_projectile.DamageRadius = 3f
     aphelion_plasma_rocket_projectile.ProjectileDamageType = DamageType.Splash
@@ -1501,6 +1503,8 @@ object GlobalDefinitions {
     aphelion_starfire_projectile.Damage2 = 15
     aphelion_starfire_projectile.Damage3 = 19
     aphelion_starfire_projectile.Damage4 = 17
+    aphelion_starfire_projectile.Acceleration = 11
+    aphelion_starfire_projectile.AccelerationUntil = 5f
     aphelion_starfire_projectile.InitialVelocity = 45
     aphelion_starfire_projectile.Lifespan = 7f
     aphelion_starfire_projectile.ProjectileDamageType = DamageType.Aggravated
@@ -1604,6 +1608,8 @@ object GlobalDefinitions {
     comet_projectile.Damage2 = 60
     comet_projectile.Damage3 = 38
     comet_projectile.Damage4 = 64
+    comet_projectile.Acceleration = 10
+    comet_projectile.AccelerationUntil = 2f
     comet_projectile.DamageAtEdge = 0.45f
     comet_projectile.DamageRadius = 1.0f
     comet_projectile.ProjectileDamageType = DamageType.Aggravated
@@ -1691,6 +1697,8 @@ object GlobalDefinitions {
     falcon_projectile.Damage2 = 132
     falcon_projectile.Damage3 = 83
     falcon_projectile.Damage4 = 144
+    falcon_projectile.Acceleration = 10
+    falcon_projectile.AccelerationUntil = 2f
     falcon_projectile.DamageAtEdge = 0.2f
     falcon_projectile.DamageRadius = 1f
     falcon_projectile.ProjectileDamageType = DamageType.Splash
@@ -1703,6 +1711,8 @@ object GlobalDefinitions {
     firebird_missile_projectile.Damage2 = 220
     firebird_missile_projectile.Damage3 = 200
     firebird_missile_projectile.Damage4 = 181
+    firebird_missile_projectile.Acceleration = 20
+    firebird_missile_projectile.AccelerationUntil = 2f
     firebird_missile_projectile.DamageAtEdge = .1f
     firebird_missile_projectile.DamageRadius = 5f
     firebird_missile_projectile.ProjectileDamageType = DamageType.Splash
@@ -1741,6 +1751,8 @@ object GlobalDefinitions {
     flamethrower_projectile.Damage2 = 0
     flamethrower_projectile.Damage3 = 4
     flamethrower_projectile.Damage4 = 0
+    flamethrower_projectile.Acceleration = -5
+    flamethrower_projectile.AccelerationUntil = 2f
     flamethrower_projectile.ProjectileDamageType = DamageType.Aggravated
     flamethrower_projectile.DegradeDelay = 1.0f
     flamethrower_projectile.DegradeMultiplier = 0.5f
@@ -1902,6 +1914,8 @@ object GlobalDefinitions {
     hellfire_projectile.Damage2 = 250
     hellfire_projectile.Damage3 = 125
     hellfire_projectile.Damage4 = 250
+    hellfire_projectile.Acceleration = 10
+    hellfire_projectile.AccelerationUntil = 2f
     hellfire_projectile.DamageAtEdge = .25f
     hellfire_projectile.DamageRadius = 3f
     hellfire_projectile.ProjectileDamageType = DamageType.Splash
@@ -2181,6 +2195,8 @@ object GlobalDefinitions {
     // oicw_projectile
     oicw_projectile.Damage0 = 50
     oicw_projectile.Damage1 = 50
+    oicw_projectile.Acceleration = 15
+    oicw_projectile.AccelerationUntil = 5f
     oicw_projectile.DamageAtEdge = 0.1f
     oicw_projectile.DamageRadius = 10f
     oicw_projectile.ProjectileDamageType = DamageType.Splash
@@ -2237,6 +2253,8 @@ object GlobalDefinitions {
     peregrine_rocket_pod_projectile.Damage2 = 50
     peregrine_rocket_pod_projectile.Damage3 = 45
     peregrine_rocket_pod_projectile.Damage4 = 40
+    peregrine_rocket_pod_projectile.Acceleration = 10
+    peregrine_rocket_pod_projectile.AccelerationUntil = 2f
     peregrine_rocket_pod_projectile.DamageAtEdge = 0.1f
     peregrine_rocket_pod_projectile.DamageRadius = 3f
     peregrine_rocket_pod_projectile.ProjectileDamageType = DamageType.Splash
@@ -2250,6 +2268,8 @@ object GlobalDefinitions {
     peregrine_sparrow_projectile.Damage2 = 30
     peregrine_sparrow_projectile.Damage3 = 30
     peregrine_sparrow_projectile.Damage4 = 31
+    peregrine_sparrow_projectile.Acceleration = 12
+    peregrine_sparrow_projectile.AccelerationUntil = 5f
     peregrine_sparrow_projectile.DamageAtEdge = 0.1f
     peregrine_sparrow_projectile.DamageRadius = 2f
     peregrine_sparrow_projectile.ProjectileDamageType = DamageType.Splash
@@ -2295,6 +2315,8 @@ object GlobalDefinitions {
     phoenix_missile_guided_projectile.Damage2 = 400
     phoenix_missile_guided_projectile.Damage3 = 300
     phoenix_missile_guided_projectile.Damage4 = 600
+    phoenix_missile_guided_projectile.Acceleration = 60
+    phoenix_missile_guided_projectile.AccelerationUntil = 2.5f
     phoenix_missile_guided_projectile.DamageAtEdge = 0.3f
     phoenix_missile_guided_projectile.DamageRadius = 1.5f
     phoenix_missile_guided_projectile.ProjectileDamageType = DamageType.Splash
@@ -2307,6 +2329,8 @@ object GlobalDefinitions {
     phoenix_missile_projectile.Damage2 = 400
     phoenix_missile_projectile.Damage3 = 300
     phoenix_missile_projectile.Damage4 = 600
+    phoenix_missile_projectile.Acceleration = 60
+    phoenix_missile_projectile.AccelerationUntil = 2.5f
     phoenix_missile_projectile.DamageAtEdge = 0.3f
     phoenix_missile_projectile.DamageRadius = 1.5f
     phoenix_missile_projectile.ProjectileDamageType = DamageType.Splash
@@ -2434,6 +2458,8 @@ object GlobalDefinitions {
     reaver_rocket_projectile.Damage2 = 75
     reaver_rocket_projectile.Damage3 = 75
     reaver_rocket_projectile.Damage4 = 88
+    reaver_rocket_projectile.Acceleration = 50
+    reaver_rocket_projectile.AccelerationUntil = 1f
     reaver_rocket_projectile.DamageAtEdge = 0.1f
     reaver_rocket_projectile.DamageRadius = 3f
     reaver_rocket_projectile.ProjectileDamageType = DamageType.Splash
@@ -2446,6 +2472,8 @@ object GlobalDefinitions {
     rocket_projectile.Damage2 = 75
     rocket_projectile.Damage3 = 75
     rocket_projectile.Damage4 = 75
+    rocket_projectile.Acceleration = 10
+    rocket_projectile.AccelerationUntil = 2f
     rocket_projectile.DamageAtEdge = .5f
     rocket_projectile.DamageRadius = 3f
     rocket_projectile.ProjectileDamageType = DamageType.Splash
@@ -2467,6 +2495,8 @@ object GlobalDefinitions {
 
     // rocklet_jammer_projectile
     rocklet_jammer_projectile.Damage0 = 0
+    rocklet_jammer_projectile.Acceleration = 10
+    rocklet_jammer_projectile.AccelerationUntil = 2f
     rocklet_jammer_projectile.DamageAtEdge = 1.0f
     rocklet_jammer_projectile.DamageRadius = 10f
     rocklet_jammer_projectile.ProjectileDamageType = DamageType.Splash
@@ -2536,6 +2566,8 @@ object GlobalDefinitions {
     sparrow_projectile.Damage0 = 35
     sparrow_projectile.Damage1 = 50
     sparrow_projectile.Damage2 = 125
+    sparrow_projectile.Acceleration = 12
+    sparrow_projectile.AccelerationUntil = 5f
     sparrow_projectile.DamageAtEdge = 0.1f
     sparrow_projectile.DamageRadius = 3f
     sparrow_projectile.ProjectileDamageType = DamageType.Splash
@@ -2547,6 +2579,8 @@ object GlobalDefinitions {
     sparrow_secondary_projectile.Damage0 = 35
     sparrow_secondary_projectile.Damage1 = 50
     sparrow_secondary_projectile.Damage2 = 125
+    sparrow_secondary_projectile.Acceleration = 12
+    sparrow_secondary_projectile.AccelerationUntil = 5f
     sparrow_secondary_projectile.DamageAtEdge = 0.1f
     sparrow_secondary_projectile.DamageRadius = 3f
     sparrow_secondary_projectile.ProjectileDamageType = DamageType.Splash
@@ -2591,6 +2625,8 @@ object GlobalDefinitions {
     starfire_projectile.Damage0 = 16
     starfire_projectile.Damage1 = 20
     starfire_projectile.Damage2 = 58
+    starfire_projectile.Acceleration = 12
+    starfire_projectile.AccelerationUntil = 5f
     starfire_projectile.ProjectileDamageType = DamageType.Aggravated
     starfire_projectile.InitialVelocity = 45
     starfire_projectile.Lifespan = 7.8f
@@ -2601,6 +2637,8 @@ object GlobalDefinitions {
     striker_missile_projectile.Damage2 = 125
     striker_missile_projectile.Damage3 = 125
     striker_missile_projectile.Damage4 = 263
+    striker_missile_projectile.Acceleration = 20
+    striker_missile_projectile.AccelerationUntil = 2f
     striker_missile_projectile.DamageAtEdge = 0.1f
     striker_missile_projectile.DamageRadius = 1.5f
     striker_missile_projectile.ProjectileDamageType = DamageType.Splash
@@ -2614,6 +2652,8 @@ object GlobalDefinitions {
     striker_missile_targeting_projectile.Damage2 = 125
     striker_missile_targeting_projectile.Damage3 = 125
     striker_missile_targeting_projectile.Damage4 = 263
+    striker_missile_targeting_projectile.Acceleration = 20
+    striker_missile_targeting_projectile.AccelerationUntil = 2f
     striker_missile_targeting_projectile.DamageAtEdge = 0.1f
     striker_missile_targeting_projectile.DamageRadius = 1.5f
     striker_missile_targeting_projectile.ProjectileDamageType = DamageType.Splash
@@ -2626,6 +2666,8 @@ object GlobalDefinitions {
     trek_projectile.Damage2 = 0
     trek_projectile.Damage3 = 0
     trek_projectile.Damage4 = 0
+    trek_projectile.Acceleration = -20
+    trek_projectile.AccelerationUntil = 1f
     trek_projectile.ProjectileDamageType = DamageType.Direct
     trek_projectile.InitialVelocity = 40
     trek_projectile.Lifespan = 7f
@@ -2690,6 +2732,8 @@ object GlobalDefinitions {
     wasp_rocket_projectile.Damage0 = 35
     wasp_rocket_projectile.Damage1 = 50
     wasp_rocket_projectile.Damage2 = 300
+    wasp_rocket_projectile.Acceleration = 10
+    wasp_rocket_projectile.AccelerationUntil = 5f
     wasp_rocket_projectile.DamageAtEdge = 0.1f
     wasp_rocket_projectile.DamageRadius = 3f
     wasp_rocket_projectile.ProjectileDamageType = DamageType.Splash

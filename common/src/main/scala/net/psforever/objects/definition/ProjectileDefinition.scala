@@ -10,6 +10,8 @@ class ProjectileDefinition(objectId : Int) extends EquipmentDefinition(objectId)
   private var damage2 : Int = -1
   private var damage3 : Int = -1
   private var damage4 : Int = -1
+  private var acceleration : Int = 0
+  private var accelerationUntil : Float = 0f
   private var damageType : DamageType.Value = DamageType.None
   private var damageTypeSecondary : DamageType.Value = DamageType.None
   private var degradeDelay : Float = 1f
@@ -57,6 +59,18 @@ class ProjectileDefinition(objectId : Int) extends EquipmentDefinition(objectId)
   def Damage4_=(damage : Int) : Int = {
     this.damage4 = damage
     Damage4
+  }
+
+  def Acceleration : Int = acceleration
+  def Acceleration_=(accel : Int) : Int = {
+    acceleration = accel
+    Acceleration
+  }
+
+  def AccelerationUntil : Float = accelerationUntil
+  def AccelerationUntil_=(accelUntil : Float) : Float = {
+    accelerationUntil = accelUntil
+    AccelerationUntil
   }
 
   def ProjectileDamageType : DamageType.Value = damageType

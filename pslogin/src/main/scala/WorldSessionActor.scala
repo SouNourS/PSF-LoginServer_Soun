@@ -3076,14 +3076,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
       FindWeapon match {
         case Some(tool: Tool) =>
           if (player.VehicleSeated.isEmpty) {
-            player.SaveProjectile(projectile_guid, tool.Definition.ObjectId, tool.Damage0, tool.Damage1, tool.Damage2, tool.Damage3, tool.Damage4,
+            player.SaveProjectile(projectile_guid, tool.Definition.ObjectId, tool.Damage0, tool.Damage1, tool.Damage2, tool.Damage3, tool.Damage4, tool.Acceleration, tool.AccelerationUntil,
               tool.FireMode.AddDamage0, tool.FireMode.AddDamage1, tool.FireMode.AddDamage2, tool.FireMode.AddDamage3, tool.FireMode.AddDamage4,
               tool.DamageAtEdge, tool.DamageRadius, tool.DamageType, tool.DegradeDelay, tool.DegradeMultiplier, tool.InitialVelocity, tool.Lifespan)
           }
           else {
             continent.GUID(player.VehicleSeated.get.guid) match {
               case Some(obj: Vehicle) =>
-                player.SaveProjectile(projectile_guid, obj.Definition.ObjectId, tool.Damage0, tool.Damage1, tool.Damage2, tool.Damage3, tool.Damage4,
+                player.SaveProjectile(projectile_guid, obj.Definition.ObjectId, tool.Damage0, tool.Damage1, tool.Damage2, tool.Damage3, tool.Damage4, tool.Acceleration, tool.AccelerationUntil,
                   tool.FireMode.AddDamage0, tool.FireMode.AddDamage1, tool.FireMode.AddDamage2, tool.FireMode.AddDamage3, tool.FireMode.AddDamage4,
                   tool.DamageAtEdge, tool.DamageRadius, tool.DamageType, tool.DegradeDelay, tool.DegradeMultiplier, tool.InitialVelocity, tool.Lifespan)
               case _ => ;
@@ -3132,12 +3132,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   val distance: Float = Vector3.Distance(player.Position, obj.Position)
                   var currentDamage: Int = 0
                   if(GlobalDefinitions.isFlightVehicle(obj.Definition)) {
-                    currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                      projectile.Damage2 + projectile.AddDamage2, distance)
+                    currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                      projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage2 + projectile.AddDamage2, distance)
                   }
                   else {
-                    currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                      projectile.Damage1 + projectile.AddDamage1, distance)
+                    currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                      projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distance)
                   }
                   obj.Health = obj.Health - currentDamage
                   if (obj.Health < 0) obj.Health = 0
@@ -3196,10 +3196,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   val distanceBetweenPlayers: Float = Vector3.Distance(player.Position, obj.Position)
                   var currentDamage: Int = 0
                   var currentResistance: Int = ExoSuitDefinition.Select(obj.ExoSuit).DamageResistanceDirectHit
-                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                    projectile.Damage0 + projectile.AddDamage0, distanceBetweenPlayers)
-                  obj.Health = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Health)._1
-                  obj.Armor = damagesAfterResist(currentDamage, currentResistance, obj.Armor, obj.Armor)._2
+                  if (obj.ExoSuit != ExoSuitType.MAX) {
+                    currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                      projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage0 + projectile.AddDamage0, distanceBetweenPlayers)
+                    obj.Health = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._1
+                    obj.Armor = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._2
+                  } else {
+                    currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                      projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distanceBetweenPlayers)
+                    obj.Health = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._1
+                    obj.Armor = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._2
+                  }
                   //                  sendResponse(ChatMsg(ChatMessageType.CMT_GMOPEN,true,"server","damages: "+currentDamage+" hp: "+obj.Health+" armor: "+obj.Armor,None))
                   if (obj.Health < 0) obj.Health = 0
                   if (obj.Health != 0) {
@@ -3229,12 +3236,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
               val distance: Float = Vector3.Distance(player.Position, obj.Position)
               var currentDamage: Int = 0
               if(GlobalDefinitions.isFlightVehicle(obj.Definition)) {
-                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                  projectile.Damage2 + projectile.AddDamage2, distance)
+                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                  projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage2 + projectile.AddDamage2, distance)
               }
               else {
-                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                  projectile.Damage1 + projectile.AddDamage1, distance)
+                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                  projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distance)
               }
               obj.Health = obj.Health - currentDamage
               if (obj.Health < 0) obj.Health = 0
@@ -3293,10 +3300,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
               val distanceBetweenPlayers: Float = Vector3.Distance(player.Position, obj.Position)
               var currentDamage: Int = 0
               var currentResistance: Int = ExoSuitDefinition.Select(obj.ExoSuit).DamageResistanceSplash
-              currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                projectile.Damage0 + projectile.AddDamage0, distanceBetweenPlayers)
-              obj.Health = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Health)._1
-              obj.Armor = damagesAfterResist(currentDamage, currentResistance, obj.Armor, obj.Armor)._2
+              if (obj.ExoSuit != ExoSuitType.MAX) {
+                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                  projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage0 + projectile.AddDamage0, distanceBetweenPlayers)
+                obj.Health = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._1
+                obj.Armor = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._2
+              } else {
+                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                  projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distanceBetweenPlayers)
+                obj.Health = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._1
+                obj.Armor = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._2
+              }
               //              sendResponse(ChatMsg(ChatMessageType.CMT_GMOPEN,true,"server","damages: "+currentDamage+" hp: "+obj.Health+" armor: "+obj.Armor,None))
               if (obj.Health < 0) obj.Health = 0
               if (obj.Health != 0) {
@@ -3318,16 +3332,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case Some(obj: Vehicle) =>
             player.LoadProjectile(projectile_guid) match {
               case Some(projectile) =>
-                val distance: Float = Vector3.Distance(player.Position, obj.Position)
+                val distanceObject: Float = Vector3.Distance(player.Position, obj.Position)
+                val distanceBetweenEplosionObject: Float = Vector3.Distance(explosion_pos, obj.Position)
                 var currentDamage: Int = 0
                 if(GlobalDefinitions.isFlightVehicle(obj.Definition)) {
-                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                    projectile.Damage2 + projectile.AddDamage2, distance)
+                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                    projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage2 + projectile.AddDamage2, distanceObject)
                 }
                 else {
-                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                    projectile.Damage1 + projectile.AddDamage1, distance)
+                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                    projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distanceObject)
                 }
+                currentDamage = (((currentDamage - (projectile.damageAtEdge * currentDamage)) / (-projectile.damageRadius)) * distanceBetweenEplosionObject + currentDamage).toInt
                 obj.Health = obj.Health - currentDamage
                 if (obj.Health < 0) obj.Health = 0
                 if (obj.Health != 0) {
@@ -3383,12 +3399,21 @@ class WorldSessionActor extends Actor with MDCContextAware {
             player.LoadProjectile(projectile_guid) match {
               case Some(projectile) =>
                 val distanceBetweenPlayers: Float = Vector3.Distance(player.Position, obj.Position)
+                val distanceBetweenEplosionPlayer: Float = Vector3.Distance(explosion_pos, obj.Position)
                 var currentDamage: Int = 0
                 var currentResistance: Int = ExoSuitDefinition.Select(obj.ExoSuit).DamageResistanceSplash
-                currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.DegradeDelay, projectile.DegradeMultiplier,
-                  projectile.Damage0 + projectile.AddDamage0, distanceBetweenPlayers)
-                obj.Health = damagesAfterResist((projectile.damageAtEdge * currentDamage).toInt, currentResistance, obj.Health, obj.Health)._1
-                obj.Armor = damagesAfterResist((projectile.damageAtEdge * currentDamage).toInt, currentResistance, obj.Armor, obj.Armor)._2
+                if (obj.ExoSuit != ExoSuitType.MAX) {
+                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                    projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage0 + projectile.AddDamage0, distanceBetweenPlayers)
+                  obj.Health = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._1
+                  obj.Armor = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._2
+                } else {
+                  currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
+                    projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distanceBetweenPlayers)
+                  obj.Health = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._1
+                  obj.Armor = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._2
+                }
+                currentDamage = (((currentDamage - (projectile.damageAtEdge * currentDamage)) / (-projectile.damageRadius)) * distanceBetweenEplosionPlayer + currentDamage).toInt
                 //                sendResponse(ChatMsg(ChatMessageType.CMT_GMOPEN,true,"server","damages: "+currentDamage+" hp: "+obj.Health+" armor: "+obj.Armor,None))
                 if (obj.Health < 0) obj.Health = 0
                 if (obj.Health != 0) {
@@ -4667,9 +4692,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       building.Amenities.foreach(amenity => {
         Thread.sleep(15)
         val amenityId = amenity.GUID
-//        sendResponse(PlanetsideAttributeMessage(amenityId, 50, 0))
-//        sendResponse(PlanetsideAttributeMessage(amenityId, 51, 0))
-        sendResponse(MultiPacketBundle(List(PlanetsideAttributeMessage(amenityId, 50, 0),PlanetsideAttributeMessage(amenityId, 51, 0))))
+        sendResponse(PlanetsideAttributeMessage(amenityId, 50, 0))
+        sendResponse(PlanetsideAttributeMessage(amenityId, 51, 0))
       })
       sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
     })
@@ -4885,16 +4909,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
     }
   }
 
-  def damages(velocity: Int, lifespan: Float, degrade_delay: Float, degrade_multiplier: Float, damage0: Int, distance: Float): Int = {
-    val distanceMax: Float = lifespan * velocity
+  def damages(velocity: Int, lifespan: Float, acceleration : Int, accelerationUntil : Float, degrade_delay: Float, degrade_multiplier: Float, rawDamage: Int, distance: Float): Int = {
+    val distanceMax: Float = (lifespan * velocity.toFloat) + (1f / 2f * acceleration.toFloat * accelerationUntil * accelerationUntil) // todo is that real ?
     val distanceNoDegrade: Float = degrade_delay * velocity
     var damage: Int = 0
     if (distance <= distanceNoDegrade && distance <= distanceMax) {
-      damage = damage0
+      damage = rawDamage
     }
     else if (distance > distanceNoDegrade && distance <= distanceMax) {
-      damage = (damage0 - (distance - distanceNoDegrade) * degrade_multiplier).toInt
-      if (damage < 6) damage = 6
+//      damage = (rawDamage - (distance - distanceNoDegrade) * degrade_multiplier).toInt
+      damage = (((rawDamage - (degrade_multiplier * rawDamage)) / (distanceMax - distanceNoDegrade)) * (distance - distanceNoDegrade) + rawDamage).toInt
     }
     damage
   }
@@ -4915,6 +4939,22 @@ class WorldSessionActor extends Actor with MDCContextAware {
       else if (currentArmor < resistance && currentArmor >= 0) {
         newArmor = 0
         newHP = currentHP - damages + currentArmor
+      }
+      if (newHP < 0) newHP = 0
+    }
+    (newHP, newArmor)
+  }
+
+  def damagesAfterResistMAX(damages: Int, resistance: Int, currentHP: Int, currentArmor: Int): (Int, Int) = {
+    var newHP: Int = currentHP
+    var newArmor: Int = currentArmor
+    if (damages != 0) {
+      if (damages <= currentArmor) {
+        newArmor = currentArmor + resistance - damages
+      }
+      else {
+        newHP = currentHP - damages
+        newArmor = 0
       }
       if (newHP < 0) newHP = 0
     }

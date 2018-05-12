@@ -60,6 +60,9 @@ class Tool(private val toolDef : ToolDefinition) extends Equipment with FireMode
   def Damage3 : Int = if (toolDef.ProjectileTypes(AmmoTypeIndex).Damage3 == -1) {Damage2} else {toolDef.ProjectileTypes(AmmoTypeIndex).Damage3}
   def Damage4 : Int = if (toolDef.ProjectileTypes(AmmoTypeIndex).Damage4 == -1) {Damage3} else {toolDef.ProjectileTypes(AmmoTypeIndex).Damage4}
 
+  def Acceleration : Int = toolDef.ProjectileTypes(AmmoTypeIndex).Acceleration
+  def AccelerationUntil : Float = toolDef.ProjectileTypes(AmmoTypeIndex).AccelerationUntil
+
   def DamageAtEdge : Float = toolDef.ProjectileTypes(AmmoTypeIndex).DamageAtEdge
 
   def DamageRadius : Float = toolDef.ProjectileTypes(AmmoTypeIndex).DamageRadius

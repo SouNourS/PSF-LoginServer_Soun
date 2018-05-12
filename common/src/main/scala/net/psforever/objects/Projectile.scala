@@ -7,6 +7,7 @@ import net.psforever.objects.equipment.DamageType
   * From a `Player` ...
   */
 final case class Projectile(private val from : Int, damage0 : Int, damage1 : Int, damage2 : Int, damage3 : Int, damage4 : Int,
+                            acceleration : Int, accelerationUntil : Float,
                             addDamage0 : Int, addDamage1 : Int, addDamage2 : Int, addDamage3 : Int, addDamage4 : Int,
                             damageAtEdge : Float, damageRadius : Float, damageType : Int , degradeDelay : Float,
                             degradeMultiplier : Float, initialVelocity : Int, lifespan : Float ) {
@@ -17,6 +18,8 @@ final case class Projectile(private val from : Int, damage0 : Int, damage1 : Int
   def Damage2 : Int = damage2
   def Damage3 : Int = damage3
   def Damage4 : Int = damage4
+  def Acceleration : Int = acceleration
+  def AccelerationUntil : Float = accelerationUntil
   def AddDamage0 : Int = addDamage0
   def AddDamage1 : Int = addDamage1
   def AddDamage2 : Int = addDamage2
@@ -35,10 +38,12 @@ final case class Projectile(private val from : Int, damage0 : Int, damage1 : Int
 
 object Projectile {
   def apply(player: Player, from : Int, damage0 : Int, damage1 : Int, damage2 : Int, damage3 : Int, damage4 : Int,
+            acceleration : Int, accelerationUntil : Float,
             addDamage0 : Int, addDamage1 : Int, addDamage2 : Int, addDamage3 : Int, addDamage4 : Int,
             damageAtEdge : Float, damageRadius : Float, damageType : DamageType.Value, degradeDelay : Float,
             degradeMultiplier : Float, initialVelocity : Int, lifespan : Float ): Projectile = {
-    new Projectile(from, damage0, damage1, damage2, damage3, damage4, addDamage0, addDamage1, addDamage2, addDamage3, addDamage4,
+    new Projectile(from, damage0, damage1, damage2, damage3, damage4, acceleration, accelerationUntil,
+      addDamage0, addDamage1, addDamage2, addDamage3, addDamage4,
       damageAtEdge, damageRadius, damageType.id, degradeDelay, degradeMultiplier, initialVelocity, lifespan)
   }
 }
