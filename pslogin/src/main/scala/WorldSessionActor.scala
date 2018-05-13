@@ -2726,7 +2726,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             sendResponse(UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
             accessedContainer = Some(obj)
           }
-          if (itemType == 121 && !unk3) { // TODO : medkit use ?!
+          else if (itemType == 121 && !unk3) { // TODO : medkit use ?!
             player.Find(PlanetSideGUID(unk1)) match {
               case Some(slot) =>
                 if (player.MaxHealth - player.Health == 0) {
