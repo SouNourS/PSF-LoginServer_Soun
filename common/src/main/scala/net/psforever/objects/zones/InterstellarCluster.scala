@@ -50,7 +50,6 @@ class InterstellarCluster(zones : List[Zone]) extends Actor {
 
     case InterstellarCluster.RequestClientInitialization() =>
       zones.foreach(zone => {
-        Thread.sleep(5)
         sender ! Zone.ClientInitialization(zone.ClientInitialization()) })
       sender ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones
 
