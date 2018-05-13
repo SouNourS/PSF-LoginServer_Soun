@@ -2726,6 +2726,116 @@ class WorldSessionActor extends Actor with MDCContextAware {
             sendResponse(UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
             accessedContainer = Some(obj)
           }
+          if (itemType == 121 && !unk3) { // TODO : medkit use ?!
+            player.Find(PlanetSideGUID(unk1)) match {
+              case Some(slot) =>
+                if (player.MaxHealth - player.Health == 0) {
+                  sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225, false, "", "@HealComplete", None)))
+                }
+                else if (System.currentTimeMillis() - player.lastMedkit < 5000) {
+                  sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225, false, "", "@TimeUntilNextUse^" + (5 - (System.currentTimeMillis() - player.lastMedkit) / 1000).toString + "~", None)))
+                }
+                else if (player.MaxHealth - player.Health <= 25 && player.MaxHealth - player.Health != 0 && System.currentTimeMillis() - player.lastMedkit > 5000) {
+                  player.Health = player.MaxHealth
+                  avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
+                  sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
+                  taskResolver ! RemoveEquipmentFromSlot(player, player.Slot(slot).Equipment.get, slot)
+                  sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(avatar_guid, "medkit", 5, false)))
+                  player.lastMedkit = System.currentTimeMillis()
+                }
+                else if (player.MaxHealth - player.Health > 25 && System.currentTimeMillis() - player.lastMedkit > 5000) {
+                  player.Health += 25
+                  avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
+                  sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
+                  taskResolver ! RemoveEquipmentFromSlot(player, player.Slot(slot).Equipment.get, slot)
+                  sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(avatar_guid, "medkit", 5, false)))
+                  player.lastMedkit = System.currentTimeMillis()
+                }
+              case None =>
+                //                sendResponse(ObjectDeleteMessage(PlanetSideGUID(unk1), 0))
+                sendResponse(UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
+                log.warn(s"RequestDestroy: object $unk1 not found")
+            }
+          }
+          else if (itemType == 121 && unk3) {
+            FindWeapon match {
+              case Some(tool: Tool) =>
+                if (tool.Definition.ObjectId == 132) {
+                  // TODO : bank ?
+                  continent.GUID(object_guid) match {
+                    case Some(tplayer: Player) =>
+                      if (player.GUID != tplayer.GUID && player.Velocity.isEmpty && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction) {
+                        if (tplayer.MaxArmor - tplayer.Armor <= 15) {
+                          tplayer.Armor = tplayer.MaxArmor
+                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          val RepairPercent: Int = tplayer.Armor * 100 / tplayer.MaxArmor
+                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, tplayer.Armor))
+                        }
+                        if (tplayer.MaxArmor - tplayer.Armor > 15) {
+                          tplayer.Armor += 15
+                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          val RepairPercent: Int = tplayer.Armor * 100 / tplayer.MaxArmor
+                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, tplayer.Armor))
+                        }
+                      } else if (player.GUID == object_guid && player.Velocity.isEmpty) {
+                        if (player.MaxArmor - player.Armor <= 15) {
+                          player.Armor = player.MaxArmor
+                          //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Armor)))
+                          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
+                        }
+                        if (player.MaxArmor - player.Armor > 15) {
+                          player.Armor += 15
+                          //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Armor)))
+                          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
+                        }
+                      }
+                    case _ => ;
+                  }
+                } else if (tool.Definition.ObjectId == 531) {
+                  // TODO : med app ?
+                  continent.GUID(object_guid) match {
+                    case Some(tplayer: Player) =>
+                      if (player.GUID != tplayer.GUID && player.Velocity.isEmpty && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction && tplayer.death_by == 0) {
+                        if (tplayer.MaxHealth - tplayer.Health <= 5) {
+                          tplayer.Health = tplayer.MaxHealth
+                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          val RepairPercent: Int = tplayer.Health * 100 / tplayer.MaxHealth
+                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 0, tplayer.Health))
+                        }
+                        if (tplayer.MaxHealth - tplayer.Health > 5) {
+                          tplayer.Health += 5
+                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          val RepairPercent: Int = tplayer.Health * 100 / tplayer.MaxHealth
+                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 0, tplayer.Health))
+                        }
+                      }
+                    case _ => ;
+                  }
+                  if (player.GUID == object_guid && player.Velocity.isEmpty) {
+                    if (player.MaxHealth - player.Health <= 5) {
+                      player.Health = player.MaxHealth
+                      //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                      sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Health)))
+                      avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
+                    }
+                    if (player.MaxHealth - player.Health > 5) {
+                      player.Health += 5
+                      //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                      sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Health)))
+                      avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
+                    }
+                  }
+
+                }
+              case None => ;
+            }
+          }
 
         case Some(obj : Locker) =>
           if(player.Faction == obj.Faction) {
@@ -2815,116 +2925,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if (itemType != 121) {
             sendResponse(UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
           }
-          else if (itemType == 121 && !unk3) { // TODO : medkit use ?!
-            player.Find(PlanetSideGUID(unk1)) match {
-              case Some(slot) =>
-                if (player.MaxHealth - player.Health == 0) {
-                  sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225, false, "", "@HealComplete", None)))
-                }
-                else if (System.currentTimeMillis() - player.lastMedkit < 5000) {
-                  sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.UNK_225, false, "", "@TimeUntilNextUse^" + (5 - (System.currentTimeMillis() - player.lastMedkit) / 1000).toString + "~", None)))
-                }
-                else if (player.MaxHealth - player.Health <= 25 && player.MaxHealth - player.Health != 0 && System.currentTimeMillis() - player.lastMedkit > 5000) {
-                  player.Health = player.MaxHealth
-                  avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
-                  sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
-                  taskResolver ! RemoveEquipmentFromSlot(player, player.Slot(slot).Equipment.get, slot)
-                  sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(avatar_guid, "medkit", 5, false)))
-                  player.lastMedkit = System.currentTimeMillis()
-                }
-                else if (player.MaxHealth - player.Health > 25 && System.currentTimeMillis() - player.lastMedkit > 5000) {
-                  player.Health += 25
-                  avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
-                  sendResponse(PacketCoding.CreateGamePacket(0, UseItemMessage(avatar_guid, unk1, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType)))
-                  taskResolver ! RemoveEquipmentFromSlot(player, player.Slot(slot).Equipment.get, slot)
-                  sendResponse(PacketCoding.CreateGamePacket(0, AvatarVehicleTimerMessage(avatar_guid, "medkit", 5, false)))
-                  player.lastMedkit = System.currentTimeMillis()
-                }
-              case None =>
-//                sendResponse(ObjectDeleteMessage(PlanetSideGUID(unk1), 0))
-                sendResponse(UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
-                log.warn(s"RequestDestroy: object $unk1 not found")
-            }
-          }
-          else if (itemType == 121 && unk3) {
-            FindWeapon match {
-              case Some(tool: Tool) =>
-                if (tool.Definition.ObjectId == 132) {
-                  // TODO : bank ?
-                  continent.GUID(object_guid) match {
-                    case Some(tplayer: Player) =>
-                      if (player.GUID != tplayer.GUID && player.Velocity.isEmpty && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction) {
-                        if (tplayer.MaxArmor - tplayer.Armor <= 15) {
-                          tplayer.Armor = tplayer.MaxArmor
-                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                          val RepairPercent: Int = tplayer.Armor * 100 / tplayer.MaxArmor
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
-                          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, tplayer.Armor))
-                        }
-                        if (tplayer.MaxArmor - tplayer.Armor > 15) {
-                          tplayer.Armor += 15
-                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                          val RepairPercent: Int = tplayer.Armor * 100 / tplayer.MaxArmor
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
-                          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, tplayer.Armor))
-                        }
-                      } else if (player.GUID == object_guid && player.Velocity.isEmpty) {
-                        if (player.MaxArmor - player.Armor <= 15) {
-                          player.Armor = player.MaxArmor
-                          //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Armor)))
-                          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
-                        }
-                        if (player.MaxArmor - player.Armor > 15) {
-                          player.Armor += 15
-                          //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Armor)))
-                          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
-                        }
-                      }
-                    case _ => ;
-                  }
-                } else if (tool.Definition.ObjectId == 531) {
-                  // TODO : med app ?
-                  continent.GUID(object_guid) match {
-                    case Some(tplayer: Player) =>
-                      if (player.GUID != tplayer.GUID && player.Velocity.isEmpty && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction && tplayer.death_by == 0) {
-                        if (tplayer.MaxHealth - tplayer.Health <= 5) {
-                          tplayer.Health = tplayer.MaxHealth
-                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                          val RepairPercent: Int = tplayer.Health * 100 / tplayer.MaxHealth
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
-                          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 0, tplayer.Health))
-                        }
-                        if (tplayer.MaxHealth - tplayer.Health > 5) {
-                          tplayer.Health += 5
-                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                          val RepairPercent: Int = tplayer.Health * 100 / tplayer.MaxHealth
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
-                          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 0, tplayer.Health))
-                        }
-                      }
-                    case _ => ;
-                  }
-                  if (player.GUID == object_guid && player.Velocity.isEmpty) {
-                    if (player.MaxHealth - player.Health <= 5) {
-                      player.Health = player.MaxHealth
-                      //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                      sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Health)))
-                      avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
-                    }
-                    if (player.MaxHealth - player.Health > 5) {
-                      player.Health += 5
-                      //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-                      sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Health)))
-                      avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
-                    }
-                  }
 
-                }
-              case None => ;
-            }
-          }
         case None => ;
           sendResponse(UseItemMessage(avatar_guid, unk1, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
       }
@@ -3294,6 +3295,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distanceObject)
                 }
                 currentDamage = (((currentDamage - (projectile.damageAtEdge * currentDamage)) / (-projectile.damageRadius)) * distanceBetweenEplosionObject + currentDamage).toInt
+                if (currentDamage < 0) {
+                  currentDamage = 0
+                  log.info("Negative damages : " + currentDamage + projectile.damageAtEdge + projectile.damageRadius + distanceBetweenEplosionObject + projectile.FromWeaponId)
+                }
                 obj.Health = obj.Health - currentDamage
                 if (obj.Health < 0) obj.Health = 0
                 if (obj.Health != 0) {
@@ -5131,7 +5136,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         newArmor = currentArmor + resistance - damages
       }
       else {
-        newHP = currentHP - damages
+        if (currentArmor != 0) {newHP = currentHP - damages + currentArmor + resistance}
+        else {newHP = currentHP - damages}
         newArmor = 0
       }
       if (newHP < 0) newHP = 0
