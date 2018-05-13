@@ -1516,8 +1516,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //FavoritesMessage
       for (i : Int <- 0 to 9) {
         if (player.LoadLoadout(i).isDefined) {
-          sendResponse(FavoritesMessage(0, player.GUID, i, player.LoadLoadout(i).get.Label, Some(1)))
-          println(player.LoadLoadout(i).get.ExoSuit.id)
+          sendResponse(FavoritesMessage(0, player.GUID, i, player.LoadLoadout(i).get.Label, Some(1))) // todo Some(1) ?
         }
       }
 
