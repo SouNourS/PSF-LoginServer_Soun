@@ -157,7 +157,7 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
 
   def Locker : LockerContainer = core.Locker
 
-  def Fit(obj : Equipment) : Option[Int] = {
+  override def Fit(obj : Equipment) : Option[Int] = {
     recursiveHolsterFit(holsters.iterator, obj.Size) match {
       case Some(index) =>
         Some(index)
@@ -218,18 +218,13 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
     projectile(temp) = None
   }
 
-  def Find(obj : Equipment) : Option[Int] = Find(obj.GUID)
-
-  def Find(guid : PlanetSideGUID) : Option[Int] = {
+  override def Find(guid : PlanetSideGUID) : Option[Int] = {
     findInHolsters(holsters.iterator, guid)
-      .orElse(findInInventory(inventory.Items.values.iterator, guid)) match {
+      .orElse(inventory.Find(guid)) match {
       case Some(index) =>
         Some(index)
       case None =>
-        if(Locker.Find(guid).isDefined) {
-          Some(5)
-        }
-        else if(freeHand.Equipment.isDefined && freeHand.Equipment.get.GUID == guid) {
+        if(freeHand.Equipment.isDefined && freeHand.Equipment.get.GUID == guid) {
           Some(Player.FreeHandSlot)
         }
         else {
@@ -249,21 +244,6 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
       }
       else {
         findInHolsters(iter, guid, index + 1)
-      }
-    }
-  }
-
-  @tailrec private def findInInventory(iter : Iterator[InventoryItem], guid : PlanetSideGUID) : Option[Int] = {
-    if(!iter.hasNext) {
-      None
-    }
-    else {
-      val item = iter.next
-      if(item.obj.GUID == guid) {
-        Some(item.start)
-      }
-      else {
-        findInInventory(iter, guid)
       }
     }
   }
