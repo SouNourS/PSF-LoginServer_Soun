@@ -1512,7 +1512,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(CreateShortcutMessage(guid, 2, 0, true, Shortcut.SURGE))
       sendResponse(CreateShortcutMessage(guid, 3, 0, true, Shortcut.DARKLIGHT_VISION))
       sendResponse(ChangeShortcutBankMessage(guid, 0))
+
       //FavoritesMessage
+      for (i : Int <- 0 to 9) {
+        if (player.LoadLoadout(i).isDefined) {
+          sendResponse(FavoritesMessage(0, player.GUID, i, player.LoadLoadout(i).get.Label, Some(1)))
+          println(player.LoadLoadout(i).get.ExoSuit.id)
+        }
+      }
+
       sendResponse(SetChatFilterMessage(ChatChannel.Local, false, ChatChannel.values.toList)) //TODO will not always be "on" like this
       sendResponse(AvatarDeadStateMessage(DeadState.Alive, 0, 0, tplayer.Position, player.Faction, true))
       sendResponse(PlanetsideAttributeMessage(guid, 53, 1))
