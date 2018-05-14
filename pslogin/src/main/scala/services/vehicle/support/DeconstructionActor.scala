@@ -2,7 +2,7 @@
 package services.vehicle.support
 
 import akka.actor.{Actor, ActorRef, Cancellable}
-import net.psforever.objects.{DefaultCancellable, Vehicle}
+import net.psforever.objects.{DefaultCancellable, GlobalDefinitions, Vehicle}
 import net.psforever.objects.guid.TaskResolver
 import net.psforever.objects.vehicles.Seat
 import net.psforever.objects.zones.Zone
@@ -96,9 +96,21 @@ class DeconstructionActor extends Actor {
       heapEmptyProcess.cancel
       val now : Long = System.nanoTime
       val (vehiclesToScrap, vehiclesRemain) = PartitionEntries(vehicles, now)
-      vehicles = vehiclesRemain //entries from original list before partition
-      vehicleScrapHeap = vehicleScrapHeap ++ vehiclesToScrap //may include existing entries
-      vehiclesToScrap.foreach { RetirementTask }
+      vehicles = vehiclesRemain
+      vehiclesToScrap.foreach(entry => {
+        val vehicle = entry.vehicle
+        val zone = entry.zone
+        vehicle.Position = Vector3.Zero //somewhere it will not disturb anything
+        entry.zone.Transport ! Zone.Vehicle.Despawn(vehicle)
+        context.parent ! DeconstructionActor.DeleteVehicle(vehicle.GUID, zone.Id) //call up to the main event system
+        if(vehicle.Definition == GlobalDefinitions.ams) {
+          import net.psforever.types.DriveState
+          vehicle.DeploymentState = DriveState.Mobile //internally undeployed //TODO this should be temporary?
+          context.parent ! VehicleServiceMessage.AMSDeploymentChange(zone)
+        }
+        taskResolver ! DeconstructionTask(vehicle, zone)
+      })
+
       if(vehiclesRemain.nonEmpty) {
         val short_timeout : FiniteDuration = math.max(1, DeconstructionActor.timeout_time - (now - vehiclesRemain.head.time)) nanoseconds
         import scala.concurrent.ExecutionContext.Implicits.global

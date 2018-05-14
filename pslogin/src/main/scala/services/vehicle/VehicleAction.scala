@@ -27,4 +27,6 @@ object VehicleAction {
   final case class PlanetsideAttribute(player_guid : PlanetSideGUID, vehicle_guid : PlanetSideGUID, attribute_type : Int, attribute_value : Long) extends Action
   final case class ProximityTerminalUse(player_guid : PlanetSideGUID, pad_guid : PlanetSideGUID, bool : Boolean) extends Action
   final case class ObjectDelete(player_guid : PlanetSideGUID, item_guid : PlanetSideGUID, unk : Int = 0) extends Action
+
+  final case class UpdateAmsSpawnPoint(zone : Zone) extends Action
 }

@@ -1,6 +1,7 @@
 // Copyright (c) 2017 PSForever
 package services.vehicle
 
+import net.psforever.objects.serverobject.tube.SpawnTube
 import net.psforever.objects.{PlanetSideGameObject, Vehicle}
 import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.packet.game.objectcreate.ConstructorData
@@ -30,4 +31,6 @@ object VehicleResponse {
   final case class PlanetsideAttribute(vehicle_guid : PlanetSideGUID, attribute_type : Int, attribute_value : Long) extends Response
   final case class ProximityTerminalUse(pad_guid : PlanetSideGUID, bool : Boolean) extends Response
   final case class ObjectDelete(item_guid : PlanetSideGUID, unk : Int) extends Response
+
+  final case class UpdateAmsSpawnPoint(list : List[SpawnTube]) extends Response
 }
