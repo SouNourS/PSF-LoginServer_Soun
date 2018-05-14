@@ -88,6 +88,10 @@ final case class StrokeFive(x : Float,
   *              1 is red;
   *              2 is green;
   *              3 is blue
+  *              4 is yellow
+  *              5 is "sky" blue
+  *              6 is violet
+  *              7 is black
   * @param channel the available "slots" in which to display messages on the map;
   *                a maximum of 16 channels/messages (0-15) are available per player;
   *                no two messages may inhabit the same channel

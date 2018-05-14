@@ -603,7 +603,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction(DiagramActionCode.StartDrawing)))
                 )
                 sendResponse(
-                  BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction.drawString(tube.Position.x, tube.Position.y, 3, 0, "AMS")))
+                  BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction.drawString(tube.Position.x, tube.Position.y, 2, 0, "AMS")))
                 )
                 amsSpawnPoint = Some(tube)
               case None => ;
@@ -2207,7 +2207,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "VS online : " + popVS + " on Ishundar", None)))
       }
       //TODO messy on/off strings may work
-      else if (messagetype == ChatMessageType.CMT_FLY && admin) {
+      else if (messagetype == ChatMessageType.CMT_FLY && spectator) {
         if (trimContents.equals("on")) {
           flying = true
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, has_wide_contents, recipient, contents, note_contents)))
@@ -2217,7 +2217,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_FLY, has_wide_contents, recipient, contents, note_contents)))
         }
       }
-      else if (messagetype == ChatMessageType.CMT_SPEED && admin) {
+      else if (messagetype == ChatMessageType.CMT_SPEED && spectator) {
         speed = {
           try {
             trimContents.toFloat
@@ -2233,9 +2233,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
       else if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
         if(trimContents.equals("on")) {
           spectator = true
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, recipient, contents, note_contents)))
         }
         else if (trimContents.equals("off")) {
           spectator = false
+          sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, recipient, contents, note_contents)))
+          
+          //deconstruction
+          PlayerActionsToCancel()
+          CancelAllProximityUnits()
+          player.Release
+          sendResponse(AvatarDeadStateMessage(DeadState.Release, 0, 0, player.Position, player.Faction, true))
+          continent.Population ! Zone.Population.Release(avatar)
         }
       }
       else if (messagetype == ChatMessageType.CMT_ZONE) {
