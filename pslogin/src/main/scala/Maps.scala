@@ -109,8 +109,8 @@ object Maps {
       TerminalToSpawnPad(283, 282)
 
       //Akkan Medical Terminals
-      LocalObject(1900, ProximityTerminal.Constructor(medical_terminal))
-      LocalObject(1901, ProximityTerminal.Constructor(medical_terminal))
+//      LocalObject(1900, ProximityTerminal.Constructor(medical_terminal))
+//      LocalObject(1901, ProximityTerminal.Constructor(medical_terminal))
 
       //Akkan ObjectToBuilding
       ObjectToBuilding(281, 5)
@@ -151,8 +151,8 @@ object Maps {
       ObjectToBuilding(1049, 5)
       ObjectToBuilding(1053, 5)
       ObjectToBuilding(1881, 5)
-      ObjectToBuilding(1900, 5)
-      ObjectToBuilding(1901, 5)
+//      ObjectToBuilding(1900, 5)
+//      ObjectToBuilding(1901, 5)
       ObjectToBuilding(1949, 5)
       ObjectToBuilding(1950, 5)
       ObjectToBuilding(1951, 5)
@@ -232,8 +232,8 @@ object Maps {
       LocalObject(177, Terminal.Constructor(air_vehicle_terminal))
       LocalObject(1890, VehicleSpawnPad.Constructor(Vector3(4407.0f, 5927.0f, 93.0f), Vector3(0f, 0f, 0f)))
 
-      LocalObject(1909, ProximityTerminal.Constructor(medical_terminal))
-      LocalObject(1910, ProximityTerminal.Constructor(medical_terminal))
+//      LocalObject(1909, ProximityTerminal.Constructor(medical_terminal))
+//      LocalObject(1910, ProximityTerminal.Constructor(medical_terminal))
       
       ObjectToBuilding(513, 9)
       ObjectToBuilding(514, 9)
@@ -283,8 +283,8 @@ object Maps {
       ObjectToBuilding(1148, 9)
       ObjectToBuilding(1149, 9)
       ObjectToBuilding(1517, 9)
-      ObjectToBuilding(1909, 9)
-      ObjectToBuilding(1910, 9)
+//      ObjectToBuilding(1909, 9)
+//      ObjectToBuilding(1910, 9)
       ObjectToBuilding(2014, 9)
       ObjectToBuilding(2015, 9)
       ObjectToBuilding(2016, 9)
@@ -382,11 +382,11 @@ object Maps {
       LocalObject(244, Terminal.Constructor(cert_terminal))
       LocalObject(245, Terminal.Constructor(cert_terminal))
 
-      LocalObject(948, ImplantTerminalMech.Constructor)
-      LocalObject(949, ImplantTerminalMech.Constructor)
-
-      LocalObject(10000, Terminal.Constructor(implant_terminal_interface))
-      LocalObject(10001, Terminal.Constructor(implant_terminal_interface))
+//      LocalObject(948, ImplantTerminalMech.Constructor)
+//      LocalObject(949, ImplantTerminalMech.Constructor)
+//
+//      LocalObject(10000, Terminal.Constructor(implant_terminal_interface))
+//      LocalObject(10001, Terminal.Constructor(implant_terminal_interface))
 
       LocalObject(1991, Terminal.Constructor(order_terminal))
       LocalObject(1992, Terminal.Constructor(order_terminal))
@@ -402,11 +402,11 @@ object Maps {
       LocalObject(3070, Terminal.Constructor(vehicle_terminal_combined))
       LocalObject(1886, VehicleSpawnPad.Constructor(Vector3(3675.0f, 5458.0f, 89.0f), Vector3(0f, 0f, 0f)))
 
-      LocalObject(169, ProximityTerminal.Constructor(adv_med_terminal))
-      LocalObject(1906, ProximityTerminal.Constructor(medical_terminal))
+//      LocalObject(169, ProximityTerminal.Constructor(adv_med_terminal))
+//      LocalObject(1906, ProximityTerminal.Constructor(medical_terminal))
       
-      ObjectToBuilding(169, 10)
-      ObjectToBuilding(1906, 10)
+//      ObjectToBuilding(169, 10)
+//      ObjectToBuilding(1906, 10)
       ObjectToBuilding(464, 10)
       ObjectToBuilding(470, 10)
       ObjectToBuilding(471, 10)
@@ -466,11 +466,11 @@ object Maps {
       ObjectToBuilding(244, 10)
       ObjectToBuilding(245, 10)
 
-      ObjectToBuilding(948, 10)
-      ObjectToBuilding(949, 10)
+//      ObjectToBuilding(948, 10)
+//      ObjectToBuilding(949, 10)
 
-      ObjectToBuilding(10000, 10)
-      ObjectToBuilding(10001, 10)
+//      ObjectToBuilding(10000, 10)
+//      ObjectToBuilding(10001, 10)
 
       ObjectToBuilding(1991, 10)
       ObjectToBuilding(1992, 10)
@@ -495,8 +495,8 @@ object Maps {
       DoorToLock(785, 1115)
       DoorToLock(923, 971)
 
-      TerminalToInterface(948, 10000)
-      TerminalToInterface(949, 10001)
+//      TerminalToInterface(948, 10000)
+//      TerminalToInterface(949, 10001)
 
       TerminalToSpawnPad(3070, 1886)
 
@@ -577,11 +577,11 @@ object Maps {
       LocalObject(3074, Terminal.Constructor(vehicle_terminal_combined))
       LocalObject(1892, VehicleSpawnPad.Constructor(Vector3(4834.0f, 5185.0f, 67.0f), Vector3(0f, 0f, 45.0f)))
 
-      LocalObject(1912, ProximityTerminal.Constructor(medical_terminal))
-      LocalObject(1913, ProximityTerminal.Constructor(medical_terminal))
+//      LocalObject(1912, ProximityTerminal.Constructor(medical_terminal))
+//      LocalObject(1913, ProximityTerminal.Constructor(medical_terminal))
 
-      ObjectToBuilding(1912, 11)
-      ObjectToBuilding(1913, 11)
+//      ObjectToBuilding(1912, 11)
+//      ObjectToBuilding(1913, 11)
       
       ObjectToBuilding(562, 11)
       ObjectToBuilding(563, 11)
