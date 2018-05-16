@@ -3249,7 +3249,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     obj.Armor = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._2
                   } else {
                     currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
-                      projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distanceBetweenPlayers)
+                      projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage3 + projectile.AddDamage3, distanceBetweenPlayers)
                     obj.Health = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._1
                     obj.Armor = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._2
                   }
@@ -3353,7 +3353,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 obj.Armor = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._2
               } else {
                 currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
-                  projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distanceBetweenPlayers)
+                  projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage3 + projectile.AddDamage3, distanceBetweenPlayers)
                 obj.Health = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._1
                 obj.Armor = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._2
               }
@@ -3459,7 +3459,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   obj.Armor = damagesAfterResist(currentDamage, currentResistance, obj.Health, obj.Armor)._2
                 } else {
                   currentDamage = damages(projectile.InitialVelocity, projectile.Lifespan, projectile.acceleration, projectile.accelerationUntil,
-                    projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage1 + projectile.AddDamage1, distanceBetweenPlayers)
+                    projectile.DegradeDelay, projectile.DegradeMultiplier, projectile.Damage3 + projectile.AddDamage3, distanceBetweenPlayers)
                   obj.Health = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._1
                   obj.Armor = damagesAfterResistMAX(currentDamage, currentResistance, obj.Health, obj.Armor)._2
                 }
