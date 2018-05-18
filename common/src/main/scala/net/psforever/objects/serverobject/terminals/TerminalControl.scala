@@ -19,8 +19,7 @@ class TerminalControl(term : Terminal) extends Actor with FactionAffinityBehavio
       }
       sender ! Terminal.TerminalMessage(player, msg, term.Request(player, msg))
 
-    case _ =>
-      sender ! Terminal.NoDeal()
+    case _ => ;
   }
 
   override def toString : String = term.Definition.Name

@@ -399,6 +399,21 @@ object Maps {
       LocalObject(2937, Door.Constructor) //spawn tube door
       LocalObject(2938, Door.Constructor) //spawn tube door
 
+      LocalObject(2228, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2229, Terminal.Constructor(pad_landing))
+      LocalObject(2231, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2232, Terminal.Constructor(pad_landing))
+      LocalObject(2234, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2235, Terminal.Constructor(pad_landing))
+      LocalObject(2237, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2238, Terminal.Constructor(pad_landing))
+
+      LocalObject(2595, ProximityTerminal.Constructor(repair_silo))
+      LocalObject(2596, Terminal.Constructor(repair_silo))
+
+      LocalObject(2599, ProximityTerminal.Constructor(repair_silo))
+      LocalObject(2600, Terminal.Constructor(repair_silo))
+
       LocalObject(3070, Terminal.Constructor(vehicle_terminal_combined))
       LocalObject(1886, VehicleSpawnPad.Constructor(Vector3(3675.0f, 5458.0f, 89.0f), Vector3(0f, 0f, 0f)))
 
@@ -482,6 +497,20 @@ object Maps {
       ObjectToBuilding(2934, 10)
       ObjectToBuilding(2937, 10)
       ObjectToBuilding(2938, 10)
+
+      ObjectToBuilding(2228, 10)
+      ObjectToBuilding(2229, 10)
+      ObjectToBuilding(2231, 10)
+      ObjectToBuilding(2232, 10)
+      ObjectToBuilding(2234, 10)
+      ObjectToBuilding(2235, 10)
+      ObjectToBuilding(2237, 10)
+      ObjectToBuilding(2238, 10)
+
+      ObjectToBuilding(2595, 10)
+      ObjectToBuilding(2596, 10)
+      ObjectToBuilding(2599, 10)
+      ObjectToBuilding(2600, 10)
 
       ObjectToBuilding(3070, 10)
       ObjectToBuilding(1886, 10)
@@ -1185,9 +1214,21 @@ object Maps {
       LocalObject(1576, Terminal.Constructor(order_terminal))
       LocalObject(1577, Terminal.Constructor(order_terminal))
       LocalObject(1578, Terminal.Constructor(order_terminal))
+      LocalObject(1744, ProximityTerminal.Constructor(pad_landing)) //air pad A
+      LocalObject(1745, Terminal.Constructor(pad_landing)) //air pad A
+      LocalObject(1747, ProximityTerminal.Constructor(pad_landing)) //air pad B
+      LocalObject(1748, Terminal.Constructor(pad_landing)) //air pad B
+      LocalObject(1756, ProximityTerminal.Constructor(pad_landing)) //air pad C
+      LocalObject(1757, Terminal.Constructor(pad_landing)) //air pad C
+      LocalObject(1765, ProximityTerminal.Constructor(pad_landing)) //air pad D
+      LocalObject(1766, Terminal.Constructor(pad_landing)) //air pad D
       LocalObject(2145, SpawnTube.Constructor(Vector3(3980.4062f, 4252.7656f, 257.5625f), Vector3(0, 0, 90)))
       LocalObject(2146, SpawnTube.Constructor(Vector3(3980.4062f, 4259.992f, 257.5625f), Vector3(0, 0, 90)))
       LocalObject(2147, SpawnTube.Constructor(Vector3(3980.4062f, 4267.3047f, 257.5625f), Vector3(0, 0, 90)))
+      LocalObject(2049, ProximityTerminal.Constructor(repair_silo)) //repair terminal A
+      LocalObject(2050, Terminal.Constructor(repair_silo)) //rearm terminal A
+      LocalObject(2061, ProximityTerminal.Constructor(repair_silo)) //repair terminal B
+      LocalObject(2062, Terminal.Constructor(repair_silo)) //rearm terminal B
       LocalObject(2239, Terminal.Constructor(spawn_terminal))
       LocalObject(2244, Terminal.Constructor(spawn_terminal))
       LocalObject(2245, Terminal.Constructor(spawn_terminal))
@@ -1289,6 +1330,18 @@ object Maps {
       ObjectToBuilding(1576, 2)
       ObjectToBuilding(1577, 2)
       ObjectToBuilding(1578, 2)
+      ObjectToBuilding(1744, 2)
+      ObjectToBuilding(1745, 2)
+      ObjectToBuilding(1747, 2)
+      ObjectToBuilding(1748, 2)
+      ObjectToBuilding(1756, 2)
+      ObjectToBuilding(1757, 2)
+      ObjectToBuilding(1765, 2)
+      ObjectToBuilding(1766, 2)
+      ObjectToBuilding(2049, 2)
+      ObjectToBuilding(2050, 2)
+      ObjectToBuilding(2061, 2)
+      ObjectToBuilding(2062, 2)
       ObjectToBuilding(2145, 2)
       ObjectToBuilding(2146, 2)
       ObjectToBuilding(2147, 2)
@@ -1426,6 +1479,10 @@ object Maps {
       LocalObject(1591, Terminal.Constructor(order_terminal))
       LocalObject(1592, Terminal.Constructor(order_terminal))
       LocalObject(1593, Terminal.Constructor(order_terminal))
+      LocalObject(1846, ProximityTerminal.Constructor(pad_landing)) //air pad S
+      LocalObject(1847, Terminal.Constructor(pad_landing)) //air pad S
+      LocalObject(1849, ProximityTerminal.Constructor(pad_landing)) //air pad N
+      LocalObject(1850, Terminal.Constructor(pad_landing)) //air pad N
       LocalObject(2156, SpawnTube.Constructor(respawn_tube_tower, Vector3(4364.633f, 3994.125f, 228.1875f), Vector3(0, 0, 90)))
       LocalObject(2157, SpawnTube.Constructor(respawn_tube_tower, Vector3(4364.633f, 3977.7266f, 228.1875f), Vector3(0, 0, 90)))
       LocalObject(2333, Door.Constructor) //spawn tube door
@@ -1449,6 +1506,10 @@ object Maps {
       ObjectToBuilding(1591, 49)
       ObjectToBuilding(1592, 49)
       ObjectToBuilding(1593, 49)
+      ObjectToBuilding(1846, 49)
+      ObjectToBuilding(1847, 49)
+      ObjectToBuilding(1849, 49)
+      ObjectToBuilding(1850, 49)
       ObjectToBuilding(2156, 49)
       ObjectToBuilding(2157, 49)
       ObjectToBuilding(2333, 49)
@@ -1565,6 +1626,8 @@ object Maps {
     def Building2() : Unit = {
       //HART building C
       LocalBuilding(2, FoundationBuilder(Building.Structure(StructureType.Building)))
+      LocalObject(12, ProximityTerminal.Constructor(repair_silo)) //repair terminal A
+      LocalObject(13, Terminal.Constructor(repair_silo)) //rearm terminal A //ItemTransaction: ItemTransactionMessage(PlanetSideGUID(2050),Buy,3,25mmbullet,0,PlanetSideGUID(0))
       LocalObject(186, Terminal.Constructor(cert_terminal))
       LocalObject(187, Terminal.Constructor(cert_terminal))
       LocalObject(188, Terminal.Constructor(cert_terminal))
@@ -1612,6 +1675,8 @@ object Maps {
       LocalObject(1087, Terminal.Constructor(implant_terminal_interface)) //TODO guid not correct
       LocalObject(1088, Terminal.Constructor(implant_terminal_interface)) //TODO guid not correct
       LocalObject(1089, Terminal.Constructor(implant_terminal_interface)) //TODO guid not correct
+      ObjectToBuilding(12, 2)
+      ObjectToBuilding(13, 2)
       ObjectToBuilding(186, 2)
       ObjectToBuilding(187, 2)
       ObjectToBuilding(188, 2)
