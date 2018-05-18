@@ -9,6 +9,7 @@ import scodec.Attempt.{Failure, Successful}
 import scodec.bits._
 import org.log4s.MDC
 import MDCContextAware.Implicits._
+import csr.{CSRWarp, CSRZone, Traveler}
 import net.psforever.objects.GlobalDefinitions._
 import services.ServiceManager.Lookup
 import net.psforever.objects._
@@ -70,6 +71,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var usingProximityTerminal : Set[PlanetSideGUID] = Set.empty
   var delayedProximityTerminalResets : Map[PlanetSideGUID, Cancellable] = Map.empty
   var controlled : Option[Int] = None //keep track of avatar's ServerVehicleOverride state
+  var traveler : Traveler = null
 
   var clientKeepAlive : Cancellable = DefaultCancellable.obj
   var progressBarUpdate : Cancellable = DefaultCancellable.obj
@@ -1221,6 +1223,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case InterstellarCluster.ClientInitializationComplete() =>
       LivePlayerList.Add(sessionId, avatar)
+      traveler = new Traveler(self, continent.Id)
       //PropertyOverrideMessage
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
@@ -1466,6 +1469,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ BeginZoningMessage() =>
       log.info("Reticulating splines ...")
+      traveler.zone = continent.Id
       configZone(continent)
       sendResponse(TimeOfDayMessage(1191182336))
 
@@ -1693,6 +1697,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
         else if(contents.trim.equals("off")) {
           spectator = false
         }
+      }
+
+      CSRZone.read(traveler, msg) match {
+        case (true, zone, pos) =>
+          if(player.isAlive) {
+            player.Die //die to suspend position client-driven change updates
+            player.Position = pos
+            traveler.zone = zone
+            continent.Population ! Zone.Population.Release(avatar)
+            continent.Population ! Zone.Population.Leave(avatar)
+            taskResolver ! TaskBeforeZoneChange(GUIDTask.UnregisterAvatar(player)(continent.GUID), zone)
+          }
+
+        case (false, _, _) => ;
+      }
+
+      CSRWarp.read(traveler, msg) match {
+        case (true, pos) =>
+          if(player.isAlive) {
+            sendResponse(PlayerStateShiftMessage(ShiftState(0, pos, player.Orientation.z, None)))
+            player.Position = pos
+          }
+
+        case (false, _) => ;
       }
 
       // TODO: Prevents log spam, but should be handled correctly
