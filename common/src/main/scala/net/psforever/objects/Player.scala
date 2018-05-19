@@ -21,7 +21,7 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
   private var maxHealth : Int = 100 //TODO affected by empire benefits, territory benefits, and bops
   private var maxStamina : Int = 100 //does anything affect this?
 
-  private var exosuit : ExoSuitType.Value = ExoSuitType.Standard
+  private var exosuit : ExoSuitDefinition = ExoSuitDefinition.Standard
   private val freeHand : EquipmentSlot = new OffhandEquipmentSlot(EquipmentSize.Inventory)
   private val holsters : Array[EquipmentSlot] = Array.fill[EquipmentSlot](5)(new EquipmentSlot)
   private val inventory : GridInventory = GridInventory()
@@ -130,9 +130,9 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
     Armor
   }
 
-  def MaxArmor : Int = ExoSuitDefinition.Select(exosuit).MaxArmor
+  def MaxArmor : Int = exosuit.MaxArmor
 
-  def VisibleSlots : Set[Int] = if(exosuit == ExoSuitType.MAX) { Set(0) } else { Set(0,1,2,3,4) }
+  def VisibleSlots : Set[Int] = if(exosuit.SuitType == ExoSuitType.MAX) { Set(0) } else { Set(0,1,2,3,4) }
 
   override def Slot(slot : Int) : EquipmentSlot = {
     if(inventory.Offset <= slot && slot <= inventory.LastIndex) {
@@ -288,10 +288,11 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
 
   def LastDrawnSlot : Int = lastDrawnSlot
 
-  def ExoSuit : ExoSuitType.Value = exosuit
+  def ExoSuit : ExoSuitType.Value = exosuit.SuitType
 
   def ExoSuit_=(suit : ExoSuitType.Value) : Unit = {
-    exosuit = suit
+    exosuit = ExoSuitDefinition.Select(suit)
+    ChangeSpecialAbility()
   }
 
   def LoadLoadout(line : Int) : Option[Loadout] = core.LoadLoadout(line)
@@ -347,6 +348,93 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
     cloaked = isCloaked
     Cloaked
   }
+
+  private var usingSpecial : (SpecialExoSuitDefinition.Mode.Value)=>SpecialExoSuitDefinition.Mode.Value = DefaultUsingSpecial
+
+  private var gettingSpecial : ()=>SpecialExoSuitDefinition.Mode.Value = DefaultGettingSpecial
+
+  private def ChangeSpecialAbility() : Unit = {
+    if(ExoSuit == ExoSuitType.MAX) {
+      gettingSpecial = MAXGettingSpecial
+      usingSpecial = Faction match {
+        case PlanetSideEmpire.TR => UsingAnchorsOrOverdrive
+        case PlanetSideEmpire.NC => UsingShield
+        case _ => DefaultUsingSpecial
+      }
+    }
+    else {
+      usingSpecial = DefaultUsingSpecial
+      gettingSpecial = DefaultGettingSpecial
+    }
+  }
+
+  def UsingSpecial : SpecialExoSuitDefinition.Mode.Value = { gettingSpecial() }
+
+  def UsingSpecial_=(state : SpecialExoSuitDefinition.Mode.Value) : SpecialExoSuitDefinition.Mode.Value = usingSpecial(state)
+
+  private def DefaultUsingSpecial(state : SpecialExoSuitDefinition.Mode.Value) : SpecialExoSuitDefinition.Mode.Value = SpecialExoSuitDefinition.Mode.Normal
+
+  private def UsingAnchorsOrOverdrive(state : SpecialExoSuitDefinition.Mode.Value) : SpecialExoSuitDefinition.Mode.Value = {
+    import SpecialExoSuitDefinition.Mode._
+    val curr = UsingSpecial
+    val next = if(curr == Normal) {
+      if(state == Anchored || state == Overdrive) {
+        state
+      }
+      else {
+        Normal
+      }
+    }
+    else if(state == Normal) {
+      Normal
+    }
+    else {
+      curr
+    }
+    MAXUsingSpecial(next)
+  }
+
+  private def UsingShield(state : SpecialExoSuitDefinition.Mode.Value) : SpecialExoSuitDefinition.Mode.Value = {
+    import SpecialExoSuitDefinition.Mode._
+    val curr = UsingSpecial
+    val next = if(curr == Normal) {
+      if(state == Shielded) {
+        state
+      }
+      else {
+        Normal
+      }
+    }
+    else if(state == Normal) {
+      Normal
+    }
+    else {
+      curr
+    }
+    MAXUsingSpecial(next)
+  }
+
+  private def DefaultGettingSpecial() : SpecialExoSuitDefinition.Mode.Value = SpecialExoSuitDefinition.Mode.Normal
+
+  private def MAXUsingSpecial(state : SpecialExoSuitDefinition.Mode.Value) : SpecialExoSuitDefinition.Mode.Value = exosuit match {
+    case obj : SpecialExoSuitDefinition =>
+      obj.UsingSpecial = state
+    case _ =>
+      SpecialExoSuitDefinition.Mode.Normal
+  }
+
+  private def MAXGettingSpecial() : SpecialExoSuitDefinition.Mode.Value = exosuit match {
+    case obj : SpecialExoSuitDefinition =>
+      obj.UsingSpecial
+    case _ =>
+      SpecialExoSuitDefinition.Mode.Normal
+  }
+
+  def isAnchored : Boolean = ExoSuit == ExoSuitType.MAX && Faction == PlanetSideEmpire.TR && UsingSpecial == SpecialExoSuitDefinition.Mode.Anchored
+
+  def isOverdrived : Boolean = ExoSuit == ExoSuitType.MAX && Faction == PlanetSideEmpire.TR && UsingSpecial == SpecialExoSuitDefinition.Mode.Overdrive
+
+  def isShielded : Boolean = ExoSuit == ExoSuitType.MAX && Faction == PlanetSideEmpire.NC && UsingSpecial == SpecialExoSuitDefinition.Mode.Shielded
 
   def AccessingBackpack : Option[PlanetSideGUID] = backpackAccess
 

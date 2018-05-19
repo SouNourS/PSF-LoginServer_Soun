@@ -18,6 +18,8 @@ class ToolDefinition(objectId : Int) extends EquipmentDefinition(objectId) {
   def ProjectileTypes : mutable.ListBuffer[ProjectileDefinition] = projectileTypes
 
   def FireModes : mutable.ListBuffer[FireModeDefinition] = fireModes
+
+  def NextFireModeIndex(index : Int) : Int = index + 1
 }
 
 object ToolDefinition {

@@ -11,15 +11,15 @@ import net.psforever.types.ExoSuitType
   * @param suitType the `Enumeration` corresponding to this exo-suit
   */
 class ExoSuitDefinition(private val suitType : ExoSuitType.Value) {
-  private var permission : Int = 0 //TODO certification type?
-  private var maxArmor : Int = 0
-  private var damageRadiationShielding : Float = 0f
-  private var damageResistanceAggravated : Int = 0
-  private var damageResistanceDirectHit : Int = 0
-  private var damageResistanceSplash : Int = 0
-  private val holsters : Array[EquipmentSize.Value] = Array.fill[EquipmentSize.Value](5)(EquipmentSize.Blocked)
-  private var inventoryScale : InventoryTile = InventoryTile.Tile11 //override with custom InventoryTile
-  private var inventoryOffset : Int = 0
+  protected  var permission : Int = 0 //TODO certification type?
+  protected  var maxArmor : Int = 0
+  protected  var damageRadiationShielding : Float = 0f
+  protected  var damageResistanceAggravated : Int = 0
+  protected  var damageResistanceDirectHit : Int = 0
+  protected  var damageResistanceSplash : Int = 0
+  protected  val holsters : Array[EquipmentSize.Value] = Array.fill[EquipmentSize.Value](5)(EquipmentSize.Blocked)
+  protected  var inventoryScale : InventoryTile = InventoryTile.Tile11 //override with custom InventoryTile
+  protected  var inventoryOffset : Int = 0
 
   def SuitType : ExoSuitType.Value = suitType
 
@@ -64,7 +64,7 @@ class ExoSuitDefinition(private val suitType : ExoSuitType.Value) {
   def InventoryOffset : Int = inventoryOffset
 
   def InventoryOffset_=(offset : Int) : Int = {
-    inventoryOffset = offset
+    inventoryOffset = math.min(math.max(0, offset), 65535)
     InventoryOffset
   }
 
@@ -87,6 +87,44 @@ class ExoSuitDefinition(private val suitType : ExoSuitType.Value) {
     else {
       EquipmentSize.Blocked
     }
+  }
+  def Use : ExoSuitDefinition = this
+}
+
+class SpecialExoSuitDefinition(private val suitType : ExoSuitType.Value) extends ExoSuitDefinition(suitType) {
+  private var activatedSpecial : SpecialExoSuitDefinition.Mode.Value = SpecialExoSuitDefinition.Mode.Normal
+
+  def UsingSpecial : SpecialExoSuitDefinition.Mode.Value = activatedSpecial
+
+  def UsingSpecial_=(state : SpecialExoSuitDefinition.Mode.Value) : SpecialExoSuitDefinition.Mode.Value = {
+    activatedSpecial = state
+    UsingSpecial
+  }
+
+  override def Use : ExoSuitDefinition = {
+    val obj = new SpecialExoSuitDefinition(SuitType)
+    obj.MaxArmor = MaxArmor
+    obj.InventoryScale = InventoryScale
+    obj.InventoryOffset = InventoryOffset
+    (0 until 5).foreach(index => { obj.Holster(index, Holster(index)) })
+    obj
+  }
+}
+
+object SpecialExoSuitDefinition {
+  def apply(suitType : ExoSuitType.Value) : SpecialExoSuitDefinition = {
+    new SpecialExoSuitDefinition(suitType)
+  }
+
+  object Mode extends Enumeration {
+    type Type = Value
+
+    val
+    Normal,
+    Anchored,
+    Overdrive,
+    Shielded
+    = Value
   }
 }
 
@@ -139,7 +177,7 @@ object ExoSuitDefinition {
   Infiltration.Holster(0, EquipmentSize.Pistol)
   Infiltration.Holster(4, EquipmentSize.Melee)
 
-  final val MAX = ExoSuitDefinition(ExoSuitType.MAX)
+  final val MAX = SpecialExoSuitDefinition(ExoSuitType.MAX)
   MAX.permission = 1
   MAX.MaxArmor = 650
   MAX.InventoryScale = InventoryTile.Tile1612
@@ -161,11 +199,11 @@ object ExoSuitDefinition {
     */
   def Select(suit : ExoSuitType.Value) : ExoSuitDefinition = {
     suit match {
-      case ExoSuitType.Agile => ExoSuitDefinition.Agile
-      case ExoSuitType.Infiltration => ExoSuitDefinition.Infiltration
-      case ExoSuitType.MAX => ExoSuitDefinition.MAX
-      case ExoSuitType.Reinforced => ExoSuitDefinition.Reinforced
-      case _ => ExoSuitDefinition.Standard
+      case ExoSuitType.Agile => ExoSuitDefinition.Agile.Use
+      case ExoSuitType.Infiltration => ExoSuitDefinition.Infiltration.Use
+      case ExoSuitType.MAX => ExoSuitDefinition.MAX.Use
+      case ExoSuitType.Reinforced => ExoSuitDefinition.Reinforced.Use
+      case _ => ExoSuitDefinition.Standard.Use
     }
   }
 }
