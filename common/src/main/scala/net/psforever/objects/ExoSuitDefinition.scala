@@ -169,7 +169,7 @@ object ExoSuitDefinition {
   Reinforced.DamageResistanceDirectHit = 10
   Reinforced.DamageResistanceSplash = 35
 
-  final val Infiltration = ExoSuitDefinition(ExoSuitType.Standard)
+  final val Infiltration = ExoSuitDefinition(ExoSuitType.Infiltration)
   Infiltration.permission = 1
   Infiltration.MaxArmor = 0
   Infiltration.InventoryScale = InventoryTile.Tile66

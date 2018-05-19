@@ -202,7 +202,7 @@ class CorpseRemovalActor extends Actor {
 }
 
 object CorpseRemovalActor {
-  final val time : Long = 180000000000L //3 min (180s)
+  final val time : Long = 30000000000L // 30s
 
   final case class AddCorpse(corpse : Player, zone : Zone, time : Long = CorpseRemovalActor.time)
 

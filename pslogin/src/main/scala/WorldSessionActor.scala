@@ -925,7 +925,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             val (dropHolsters, beforeHolsters) = clearHolsters(tplayer.Holsters().iterator).partition(dropPred)
             val (dropInventory, beforeInventory) = tplayer.Inventory.Clear().partition(dropPred)
             //change suit (clear inventory and change holster sizes; note: holsters must be empty before this point)
-            Player.SuitSetup(tplayer, exosuit)
+            tplayer.ExoSuit = exosuit
             tplayer.Armor = tplayer.MaxArmor
             //delete everything not dropped
             (beforeHolsters ++ beforeInventory).foreach({ elem =>
@@ -1058,7 +1058,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val (_, afterInventory) = inventory.partition(dropPred) //dropped items are lost
         val beforeFreeHand = tplayer.FreeHand.Equipment
           //change suit (clear inventory and change holster sizes; note: holsters must be empty before this point)
-          Player.SuitSetup(tplayer, exosuit)
+          tplayer.ExoSuit = exosuit
           tplayer.Armor = tplayer.MaxArmor
           //delete everything (not dropped)
           beforeHolsters.foreach({ elem =>
@@ -1602,7 +1602,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       LivePlayerList.Add(sessionId, avatar)
       traveler = new Traveler(self, continent.Id)
       //PropertyOverrideMessage
-      sendResponse(ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)) //CC on
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
       sendResponse(FriendsResponse(FriendAction.InitializeFriendList, 0, true, true, Nil))
@@ -1656,6 +1655,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val guid = tplayer.GUID
       StartBundlingPackets()
       sendResponse(SetCurrentAvatarMessage(guid,0,0))
+      sendResponse(ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)) //CC on
       sendResponse(PlayerStateShiftMessage(ShiftState(1, tplayer.Position, tplayer.Orientation.z)))
       if (spectator) {
         sendResponse(ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, false, "", "on", None))
