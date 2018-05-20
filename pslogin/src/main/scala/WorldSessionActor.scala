@@ -418,8 +418,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
         case AvatarResponse.DestroyDisplay(killer, victim) =>
           // guid = victim // killer = killer ;)
 
-          sendResponse(DestroyDisplayMessage(killer.Name, 30981173, killer.Faction, false, 121, victim.death_by,
-            victim.Name, 31035057, victim.Faction, false))
+          if (victim.death_by != -1) {
+            sendResponse(DestroyDisplayMessage(killer.Name, 30981173, killer.Faction, false, 121, victim.death_by,
+              victim.Name, 31035057, victim.Faction, false))
+          } else {
+            sendResponse(DestroyDisplayMessage("KickedByGM", 30981173, PlanetSideEmpire.NEUTRAL, false, 121, 0,
+              victim.Name, 31035057, victim.Faction, false))
+          }
 
           if (tplayer_guid == guid) {
             player.Die
@@ -430,9 +435,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
             PlayerActionsToCancel()
             CancelAllProximityUnits()
 
-            //            import scala.concurrent.duration._
-            //            import scala.concurrent.ExecutionContext.Implicits.global
-            //            reviveTimer = context.system.scheduler.scheduleOnce(30000 milliseconds, galaxy, Zone.Lattice.RequestSpawnPoint(Zones.SanctuaryZoneNumber(player.Faction), player, 7))
+            import scala.concurrent.duration._
+            import scala.concurrent.ExecutionContext.Implicits.global
+//            reviveTimer = context.system.scheduler.scheduleOnce(30000 milliseconds, galaxy, Zone.Lattice.RequestSpawnPoint(Zones.SanctuaryZoneNumber(player.Faction), player, 7))
+            reviveTimer = context.system.scheduler.scheduleOnce(30000 milliseconds, galaxy, Zone.Lattice.RequestSpawnPoint(continent.Number, player, 7))
 
             if (player.VehicleSeated.nonEmpty) {
               continent.GUID(player.VehicleSeated.get) match {
@@ -441,6 +447,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 case _ => ;
               }
               avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(guid, 29, 1)) //make player invisible (if not, the cadaver sticks out the side in a seated position)
+            }
+            if (player.death_by == -1) {
+//              sendResponse(DropCryptoSession())
+              sendResponse(DropSession(sessionId, "kick by GM"))
             }
           }
 
@@ -1384,6 +1394,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ListAccountCharacters =>
       val
       avatart1 = Avatar("You can create a character", PlanetSideEmpire.TR, CharacterGender.Male, 41, 1)
+//      avatart1 = Avatar("Create a character", PlanetSideEmpire.TR, CharacterGender.Male, 41, 1)
       val
       avatart2 = Avatar("with your own preferences and name", PlanetSideEmpire.NC, CharacterGender.Male, 41, 1)
       val
@@ -1421,6 +1432,22 @@ class WorldSessionActor extends Actor with MDCContextAware {
         RemoveCharacterSelectScreenGUID(playert2)
         sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 3, playert3.GUID, true, 6404428))
         RemoveCharacterSelectScreenGUID(playert3)
+//      if (avatar.name.indexOf("TestCharacter") >= 0) {
+//        //load characters
+//        val playert1 = new Player(avatart1)
+//        SetCharacterSelectScreenGUID(playert1, gen)
+//        val health = playert1.Health
+//        val stamina = playert1.Stamina
+//        val armor = playert1.Armor
+//        playert1.Spawn
+//        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert1.GUID, converter.DetailedConstructorData(playert1).get))
+//        if (health > 0) { //player can not be dead; stay spawned as alive
+//          playert1.Health = health
+//          playert1.Stamina = stamina
+//          playert1.Armor = armor
+//        }
+//        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 4, playert1.GUID, false, 6404428))
+//        RemoveCharacterSelectScreenGUID(playert1)
       } else {
         SetCharacterSelectScreenGUID(player, gen)
         val health = player.Health
@@ -1624,7 +1651,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       player = tplayer
       //LoadMapMessage will cause the client to send back a BeginZoningMessage packet (see below)
       sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, 3770441820L))
-      AvatarCreate() //important! the LoadMapMessage must be processed by the client before the avatar is created
 
     case PlayerLoaded(tplayer) =>
       log.info(s"Player ${tplayer.Name} will respawn")
@@ -1653,6 +1679,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case SetCurrentAvatar(tplayer) =>
       player = tplayer
       val guid = tplayer.GUID
+      AvatarCreate() //important! the LoadMapMessage must be processed by the client before the avatar is created
       StartBundlingPackets()
       sendResponse(SetCurrentAvatarMessage(guid,0,0))
       sendResponse(ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)) //CC on
@@ -1882,7 +1909,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       import scala.concurrent.ExecutionContext.Implicits.global
       clientKeepAlive.cancel
       clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
-      log.warn(PacketCoding.DecodePacket(hex"d2327e7b8a972b95113881003710").toString)
 
     case msg@CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
       log.info("Handling " + msg)
@@ -2314,6 +2340,26 @@ class WorldSessionActor extends Actor with MDCContextAware {
           galaxy ! Zone.Lattice.RequestSpawnPoint(continent.Number, player, 2)
         }
       }
+      else if (trimContents.equals("!list") && admin) {
+        StartBundlingPackets()
+        sendResponse(ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+          "\\#8ID / Name (faction) Cont-PosX/PosY/PosZ ROFattempt/PullHattempt", note_contents))
+        continent.LivePlayers.filterNot(_.GUID == player.GUID).foreach(char => {
+          sendResponse(ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+            "GUID / Name: " + char.GUID.guid + " / " + char.Name + " (" + char.Faction + ") " +
+              char.Continent + "-" + char.Position.x.toInt + "/" + char.Position.y.toInt + "/" + char.Position.z.toInt + " " +
+            char.attemptROF + "/" + char.attemptPullH, note_contents))
+        })
+        StopBundlingPackets()
+      }
+      else if (trimContents.contains("!kick") && admin) {
+        val GUID : Int = contents.drop(contents.indexOf(" ") + 1).toInt
+        continent.GUID(PlanetSideGUID(GUID)) match {
+          case Some(player: Player) =>
+            player.death_by = -1
+            KillPlayer(player)
+        }
+      }
       else if (messagetype == ChatMessageType.CMT_OPEN) {
         chatService ! ChatServiceMessage("local", ChatAction.Local(player.GUID, player.Name, continent, msg))
       }
@@ -2355,7 +2401,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
         sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_SPEED, has_wide_contents, recipient, contents, note_contents)))
       }
-      else if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
+      else if (messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE && admin) {
         if (trimContents.equals("on")) {
           spectator = true
           sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, has_wide_contents, recipient, contents, note_contents)))
@@ -2390,7 +2436,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case (false, _, _) => ;
         }
       }
-      else if (messagetype == ChatMessageType.CMT_WARP) {
+      else if (messagetype == ChatMessageType.CMT_WARP && admin) {
         CSRWarp.read(traveler, msg) match {
           case (true, pos) =>
             if(player.isAlive) {

@@ -50,6 +50,8 @@ class Player(private val core : Avatar) extends PlanetSideGameObject with Factio
   var lastShotSeq_time : Int = -1
   /** From PlanetsideAttributeMessage */
   var PlanetsideAttribute : Array[Long] = Array.ofDim(120)
+  var attemptROF : Int = 0
+  var attemptPullH : Int = 0
 
   Player.SuitSetup(this, exosuit)
 
