@@ -100,6 +100,27 @@ import scodec.codecs._
   *         44 : Assault Engineering<br>
   *         45 : Advanced Engineering (= Fortification Engineering + Assault Engineering) Must have Combat Engineering<br>
   * `25 - Forget certifications (same order as 24)`
+  * `28 - Visual/sound for Implant. Value :`<br>
+  *   0 - Regeneration (advanced_regen)<br>
+  *   1 - Regeneration (advanced_regen)<br>
+  *   2 - Enhanced Targeting (targeting)<br>
+  *   3 - Enhanced Targeting (targeting)<br>
+  *   4 - Audio Amplifier (audio_amplifier)<br>
+  *   5 - Audio Amplifier (audio_amplifier)<br>
+  *   6 - Darklight Vision (darklight_vision)<br>
+  *   7 - Darklight Vision (darklight_vision)<br>
+  *   8 - Melee Booster (melee_booster)<br>
+  *   9 - Melee Booster (melee_booster)<br>
+  *   10 - Personal Shield (personal_shield)<br>
+  *   11 - Personal Shield (personal_shield)<br>
+  *   12 - Range Magnifier (range_magnifier)<br>
+  *   13 - Range Magnifier (range_magnifier)<br>
+  *   14 - Second Wind `(na)`<br>
+  *   15 - Second Wind `(na)`<br>
+  *   16 - Sensor Shield (silent_run)<br>
+  *   17 - Sensor Shield (silent_run)<br>
+  *   18 - Surge (surge)
+  *   19 - Surge (surge)
   * `29 - Visible ?! That's not the cloaked effect, Maybe for spectator mode ?. Value is 0 to visible, 1 to invisible.`<br>
   * `31 - Info under avatar name : 0 = LFS, 1 = Looking For Squad Members`<br>
   * `32 - Info under avatar name : 0 = Looking For Squad Members, 1 = LFS`<br>

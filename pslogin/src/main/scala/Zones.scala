@@ -34,7 +34,7 @@ object Zones {
       Building(25).get.ModelId = 74
       Building(33).get.Faction = PlanetSideEmpire.TR //East Girru Gun Tower
       Building(33).get.ModelId = 62
-      Building(34).get.Faction = PlanetSideEmpire.VS //SE Hanish Gun Tower
+      Building(34).get.Faction = PlanetSideEmpire.TR //SE Hanish Gun Tower
       Building(34).get.ModelId = 60
       Building(35).get.Faction = PlanetSideEmpire.TR //Northeast Akkan Watch tower
       Building(35).get.ModelId = 69
