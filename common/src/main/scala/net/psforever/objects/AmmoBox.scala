@@ -40,7 +40,7 @@ object AmmoBox {
     * Accepting an `AmmoBox` object that has an uncertain amount of ammunition in it,
     * create multiple `AmmoBox` objects where none contain more than the maximum capacity for that ammunition type,
     * and the sum of all objects' capacities is the original object's capacity.
-    * * The first element in the returned value is always the same object as the input object.
+    * The first element in the returned value is always the same object as the input object.
     * Even if the original ammo object is not split, a list comprised of that same original object is returned.
     * @param box an `AmmoBox` object of unspecified capacity
     * @return a `List` of `AmmoBox` objects with correct capacities

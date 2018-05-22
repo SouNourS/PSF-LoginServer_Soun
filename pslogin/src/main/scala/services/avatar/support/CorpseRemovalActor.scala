@@ -81,7 +81,7 @@ class CorpseRemovalActor extends Actor {
         if (targets.size == 1) {
           log.debug(s"a target corpse submitted for early cleanup: ${targets.head}")
           //simple selection
-          CorpseRemovalActor.recursiveFindCorpse(corpses.iterator, targets.head) match {
+          CorpseRemovalActor.recursiveFindCorpse(corpses.iterator,  targets.head) match {
             case None => ;
             case Some(index) =>
               decomposition.cancel
@@ -103,11 +103,9 @@ class CorpseRemovalActor extends Actor {
             b <- corpses
             if b.corpse.HasGUID && a.HasGUID && SimilarCorpses(b.corpse, a)
           } yield b
-          if (locatedTargets.nonEmpty) {
+          if(locatedTargets.nonEmpty) {
             decomposition.cancel
-            locatedTargets.foreach {
-              BurialTask
-            }
+            locatedTargets.foreach { BurialTask }
             buriedCorpses = locatedTargets ++ buriedCorpses
             import scala.concurrent.ExecutionContext.Implicits.global
             decomposition = context.system.scheduler.scheduleOnce(500 milliseconds, self, CorpseRemovalActor.TryDelete())
@@ -118,9 +116,9 @@ class CorpseRemovalActor extends Actor {
               if b.corpse.HasGUID && a.corpse.HasGUID && !SimilarCorpses(b.corpse, a.corpse)
             } yield b).sortBy(_.timeAlive)
           }
-        }
-        RetimeFirstTask()
       }
+      RetimeFirstTask()
+    }
 
     case CorpseRemovalActor.StartDelete() =>
       burial.cancel

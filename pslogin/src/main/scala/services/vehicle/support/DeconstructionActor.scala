@@ -97,12 +97,11 @@ class DeconstructionActor extends Actor {
       val now : Long = System.nanoTime
       val (vehiclesToScrap, vehiclesRemain) = PartitionEntries(vehicles, now)
       vehicles = vehiclesRemain
+      vehicleScrapHeap = vehicleScrapHeap ++ vehiclesToScrap //may include existing entries
       vehiclesToScrap.foreach(entry => {
         val vehicle = entry.vehicle
         val zone = entry.zone
-        vehicle.Position = Vector3.Zero //somewhere it will not disturb anything
-        entry.zone.Transport ! Zone.Vehicle.Despawn(vehicle)
-        context.parent ! DeconstructionActor.DeleteVehicle(vehicle.GUID, zone.Id) //call up to the main event system
+        RetirementTask(entry)
         if(vehicle.Definition == GlobalDefinitions.ams) {
           import net.psforever.types.DriveState
           vehicle.DeploymentState = DriveState.Mobile //internally undeployed //TODO this should be temporary?
@@ -140,6 +139,7 @@ class DeconstructionActor extends Actor {
   def RetirementTask(entry : DeconstructionActor.VehicleEntry) : Unit = {
     val vehicle = entry.vehicle
     val zone = entry.zone
+    vehicle.Position = Vector3.Zero //somewhere it will not disturb anything
     zone.Transport ! Zone.Vehicle.Despawn(vehicle)
     context.parent ! DeconstructionActor.DeleteVehicle(vehicle.GUID, zone.Id) //call up to the main event system
   }
@@ -147,7 +147,6 @@ class DeconstructionActor extends Actor {
   def DestructionTask(entry : DeconstructionActor.VehicleEntry) : Unit = {
     val vehicle = entry.vehicle
     val zone = entry.zone
-    vehicle.Position = Vector3.Zero //somewhere it will not disturb anything
     taskResolver ! DeconstructionTask(vehicle, zone)
   }
 

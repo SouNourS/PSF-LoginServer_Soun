@@ -63,6 +63,7 @@ class DelayedDeconstructionActor extends Actor {
 
     case _ => ;
   }
+
   def RetimePeriodicTest() : Unit = {
     monitor.cancel
     vehicles.headOption match {
