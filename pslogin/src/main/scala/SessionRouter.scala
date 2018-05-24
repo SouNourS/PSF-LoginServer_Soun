@@ -1,4 +1,5 @@
 // Copyright (c) 2017 PSForever
+import java.io.FileWriter
 import java.net.InetSocketAddress
 
 import akka.actor._
@@ -49,6 +50,14 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
 
   var sessionId = 0L // this is a connection session, not an actual logged in session ID
   var inputRef : ActorRef = ActorRef.noSender
+
+  var xActiveSession = 0
+  var FileToWrite = "NoStatus.txt"
+  var isStatus = false
+  if (System.getProperty("os.name").contains("nux")) {
+    FileToWrite = "/www/status.htm"
+    isStatus = true
+  }
 
   override def supervisorStrategy = OneForOneStrategy() { case _ => Stop }
 
@@ -152,6 +161,15 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
 
     log.info(s"New session ID=${id} from " + address.toString)
 
+    if(role == "World" && isStatus) {
+      xActiveSession += 1
+      //      log.info("SessionRouter _ xActiveSession : " + xActiveSession)
+      val fw = new FileWriter(FileToWrite, false)
+      fw.write("<html><head></head><body><div class=\"servername\">PSForever Test Server</div><div class=\"location\">EU-France</div>" +
+        "<div class=\"playercount\">" + xActiveSession.toString + "</div><div class=\"status\">ON</div></body></html>")
+      fw.close()
+    }
+
     session
   }
 
@@ -172,6 +190,15 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
     // kill all session specific actors
     session.dropSession(graceful)
     log.info(s"Dropping session ID=${id} (reason: $reason)")
+
+    if(role == "World" && isStatus) {
+      xActiveSession -= 1
+      //      log.info("SessionRouter _ xActiveSession : " + xActiveSession)
+      val fw = new FileWriter(FileToWrite, false)
+      fw.write("<html><head></head><body><div class=\"servername\">PSForever Test Server</div><div class=\"location\">EU-France</div>" +
+        "<div class=\"playercount\">" + xActiveSession.toString + "</div><div class=\"status\">ON</div></body></html>")
+      fw.close()
+    }
   }
 
   def newSessionId = {
