@@ -1059,8 +1059,8 @@ object Maps {
       LocalObject(1960, Terminal.Constructor(order_terminal))
       LocalObject(1961, Terminal.Constructor(order_terminal))
       LocalObject(1962, Terminal.Constructor(order_terminal))
-      LocalObject(2690, SpawnTube.Constructor(respawn_tube_tower, Vector3(3022.711f, 5701.758f, 46.5625f), Vector3(0, 0, 90)))
-      LocalObject(2691, SpawnTube.Constructor(respawn_tube_tower, Vector3(3002.7188f, 5718.1562f, 46.5625f), Vector3(0, 0, 90)))
+      LocalObject(2690, SpawnTube.Constructor(respawn_tube_tower, Vector3(3022.711f, 5701.758f, 47f), Vector3(0, 0, 90)))
+      LocalObject(2691, SpawnTube.Constructor(respawn_tube_tower, Vector3(3002.7188f, 5718.1562f, 47f), Vector3(0, 0, 90)))
 
       ObjectToBuilding(2914, 65)
       ObjectToBuilding(2915, 65)
