@@ -10,7 +10,15 @@ object Zones {
 
   val z2 = new Zone("z2", Maps.map2, 2)
 
-  val z3 = new Zone("z3", Maps.map3, 3)
+  val z3 = new Zone("z3", Maps.map3, 3){
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+
+      import net.psforever.types.PlanetSideEmpire
+      Building(5).get.Faction = PlanetSideEmpire.NC //Ekera
+      Building(5).get.ModelId = 7
+    }
+  }
 
   val z4 = new Zone("z4", Maps.map4, 4) {
     override def Init(implicit context : ActorContext) : Unit = {

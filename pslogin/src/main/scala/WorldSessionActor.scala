@@ -428,28 +428,78 @@ class WorldSessionActor extends Actor with MDCContextAware {
       HandleCheckCargoMounting(vehicle_guid, cargo_vehicle_guid, cargo_mountpoint, iteration)
 
     case ListAccountCharacters =>
+      val avatart1 = Avatar("You can create a character", PlanetSideEmpire.TR, CharacterGender.Male, 41, CharacterVoice.Voice1)
+      val avatart2 = Avatar("with your own preferences and name", PlanetSideEmpire.NC, CharacterGender.Male, 41, CharacterVoice.Voice2)
+      val avatart3 = Avatar("or use these default characters", PlanetSideEmpire.VS, CharacterGender.Male, 41, CharacterVoice.Voice3)
+
+
       import net.psforever.objects.definition.converter.CharacterSelectConverter
       val gen : AtomicInteger = new AtomicInteger(1)
       val converter : CharacterSelectConverter = new CharacterSelectConverter
-      //load characters
-      SetCharacterSelectScreenGUID(player, gen)
-      val health = player.Health
-      val stamina = player.Stamina
-      val armor = player.Armor
-      player.Spawn
-      sendResponse(
-        ObjectCreateDetailedMessage(ObjectClass.avatar, player.GUID, converter.DetailedConstructorData(player).get)
-      )
-      if(health > 0) {
-        //player can not be dead; stay spawned as alive
-        player.Health = health
-        player.Stamina = stamina
-        player.Armor = armor
+
+      if (avatar.name.indexOf("TestCharacter") >= 0) {
+        //load characters
+        val playert1 = new Player(avatart1)
+        val playert2 = new Player(avatart2)
+        val playert3 = new Player(avatart3)
+        SetCharacterSelectScreenGUID(playert1, gen)
+        SetCharacterSelectScreenGUID(playert2, gen)
+        SetCharacterSelectScreenGUID(playert3, gen)
+        val health = playert1.Health
+        val stamina = playert1.Stamina
+        val armor = playert1.Armor
+        playert1.Spawn
+        playert2.Spawn
+        playert3.Spawn
+        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert1.GUID, converter.DetailedConstructorData(playert1).get))
+        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert2.GUID, converter.DetailedConstructorData(playert2).get))
+        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert3.GUID, converter.DetailedConstructorData(playert3).get))
+        if (health > 0) { //player can not be dead; stay spawned as alive
+          playert1.Health = health
+          playert1.Stamina = stamina
+          playert1.Armor = armor
+        }
+        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 1, playert1.GUID, false, 6404428))
+        RemoveCharacterSelectScreenGUID(playert1)
+        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 2, playert2.GUID, false, 6404428))
+        RemoveCharacterSelectScreenGUID(playert2)
+        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 3, playert3.GUID, true, 6404428))
+        RemoveCharacterSelectScreenGUID(playert3)
+        //      if (avatar.name.indexOf("TestCharacter") >= 0) {
+        //        //load characters
+        //        val playert1 = new Player(avatart1)
+        //        SetCharacterSelectScreenGUID(playert1, gen)
+        //        val health = playert1.Health
+        //        val stamina = playert1.Stamina
+        //        val armor = playert1.Armor
+        //        playert1.Spawn
+        //        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert1.GUID, converter.DetailedConstructorData(playert1).get))
+        //        if (health > 0) { //player can not be dead; stay spawned as alive
+        //          playert1.Health = health
+        //          playert1.Stamina = stamina
+        //          playert1.Armor = armor
+        //        }
+        //        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 4, playert1.GUID, false, 6404428))
+        //        RemoveCharacterSelectScreenGUID(playert1)
+      } else {
+        SetCharacterSelectScreenGUID(player, gen)
+        val health = player.Health
+        val stamina = player.Stamina
+        val armor = player.Armor
+        player.Spawn
+        sendResponse(
+          ObjectCreateDetailedMessage(ObjectClass.avatar, player.GUID, converter.DetailedConstructorData(player).get)
+        )
+        if (health > 0) { //player can not be dead; stay spawned as alive
+
+          player.Health = health
+          player.Stamina = stamina
+          player.Armor = armor
+        }
+        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 41605315, player.GUID, true, 6404428))
+        RemoveCharacterSelectScreenGUID(player)
       }
-      sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 41605313, player.GUID, false, 6404428))
-      RemoveCharacterSelectScreenGUID(player)
-      sendResponse(CharacterInfoMessage(0, PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0))
-      sendResponse(CharacterInfoMessage(0, PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0))
+    //      sendResponse(CharacterInfoMessage(0, PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
 
     case VehicleLoaded(_ /*vehicle*/) => ;
     //currently being handled by VehicleSpawnPad.LoadVehicle during testing phase
@@ -746,7 +796,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(FriendsResponse(FriendAction.InitializeIgnoreList, 0, true, true, Nil))
       avatarService ! Service.Join(avatar.name) //channel will be player.Name
       localService ! Service.Join(avatar.name) //channel will be player.Name
-      cluster ! InterstellarCluster.GetWorld("z6")
+      cluster ! InterstellarCluster.GetWorld("z4")
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
@@ -2333,64 +2383,64 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info(s"New world login to $server with Token:$token. $clientVersion")
       //TODO begin temp player character auto-loading; remove later
       import net.psforever.objects.GlobalDefinitions._
-      import net.psforever.types.CertificationType._
+//      import net.psforever.types.CertificationType._
       val avatar = Avatar(s"TestCharacter$sessionId", PlanetSideEmpire.VS, CharacterGender.Female, 41, CharacterVoice.Voice1)
-      avatar.Certifications += StandardAssault
-      avatar.Certifications += MediumAssault
-      avatar.Certifications += StandardExoSuit
-      avatar.Certifications += AgileExoSuit
-      avatar.Certifications += ReinforcedExoSuit
-      avatar.Certifications += ATV
-      avatar.Certifications += Harasser
-      //
-      avatar.Certifications += InfiltrationSuit
-      avatar.Certifications += Sniping
-      avatar.Certifications += AntiVehicular
-      avatar.Certifications += HeavyAssault
-      avatar.Certifications += SpecialAssault
-      avatar.Certifications += EliteAssault
-      avatar.Certifications += GroundSupport
-      avatar.Certifications += GroundTransport
-      avatar.Certifications += Flail
-      avatar.Certifications += Switchblade
-      avatar.Certifications += AssaultBuggy
-      avatar.Certifications += ArmoredAssault1
-      avatar.Certifications += ArmoredAssault2
-      avatar.Certifications += AirCavalryScout
-      avatar.Certifications += AirCavalryAssault
-      avatar.Certifications += AirCavalryInterceptor
-      avatar.Certifications += AirSupport
-      avatar.Certifications += GalaxyGunship
-      avatar.Certifications += Phantasm
-      avatar.Certifications += UniMAX
-      avatar.Certifications += Engineering
-      avatar.Certifications += CombatEngineering
-      avatar.Certifications += FortificationEngineering
-      avatar.Certifications += AssaultEngineering
-      avatar.Certifications += Hacking
-      avatar.Certifications += AdvancedHacking
+//      avatar.Certifications += StandardAssault
+//      avatar.Certifications += MediumAssault
+//      avatar.Certifications += StandardExoSuit
+//      avatar.Certifications += AgileExoSuit
+//      avatar.Certifications += ReinforcedExoSuit
+//      avatar.Certifications += ATV
+//      avatar.Certifications += Harasser
+//      //
+//      avatar.Certifications += InfiltrationSuit
+//      avatar.Certifications += Sniping
+//      avatar.Certifications += AntiVehicular
+//      avatar.Certifications += HeavyAssault
+//      avatar.Certifications += SpecialAssault
+//      avatar.Certifications += EliteAssault
+//      avatar.Certifications += GroundSupport
+//      avatar.Certifications += GroundTransport
+//      avatar.Certifications += Flail
+//      avatar.Certifications += Switchblade
+//      avatar.Certifications += AssaultBuggy
+//      avatar.Certifications += ArmoredAssault1
+//      avatar.Certifications += ArmoredAssault2
+//      avatar.Certifications += AirCavalryScout
+//      avatar.Certifications += AirCavalryAssault
+//      avatar.Certifications += AirCavalryInterceptor
+//      avatar.Certifications += AirSupport
+//      avatar.Certifications += GalaxyGunship
+//      avatar.Certifications += Phantasm
+//      avatar.Certifications += UniMAX
+//      avatar.Certifications += Engineering
+//      avatar.Certifications += CombatEngineering
+//      avatar.Certifications += FortificationEngineering
+//      avatar.Certifications += AssaultEngineering
+//      avatar.Certifications += Hacking
+//      avatar.Certifications += AdvancedHacking
       this.avatar = avatar
-
-      InitializeDeployableQuantities(avatar) //set deployables ui elements
-      AwardBattleExperiencePoints(avatar, 1000000L)
-      player = new Player(avatar)
-      //player.Position = Vector3(3561.0f, 2854.0f, 90.859375f) //home3, HART C
-      player.Position = Vector3(3940.3984f, 4343.625f, 266.45312f) //z6, Anguta
-//      player.Position = Vector3(3571.2266f, 3278.0938f, 119.0f) //ce test
-      player.Orientation = Vector3(0f, 0f, 90f)
-      //player.Position = Vector3(4262.211f ,4067.0625f ,262.35938f) //z6, Akna.tower
-      //player.Orientation = Vector3(0f, 0f, 132.1875f)
-//      player.ExoSuit = ExoSuitType.MAX //TODO strange issue; divide number above by 10 when uncommenting
-      player.Slot(0).Equipment = ConstructionItem(ace) //Tool(GlobalDefinitions.StandardPistol(player.Faction))
-      player.Slot(2).Equipment = ConstructionItem(advanced_ace) //punisher //suppressor
-      player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
-      player.Slot(6).Equipment = ConstructionItem(ace) //bullet_9mm
-      player.Slot(9).Equipment = ConstructionItem(ace) //bullet_9mm
-      player.Slot(12).Equipment = ConstructionItem(ace) //bullet_9mm
-      player.Slot(33).Equipment = Tool(suppressor) //AmmoBox(bullet_9mm_AP)
-      //player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
-      //player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
-      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+//
+//      InitializeDeployableQuantities(avatar) //set deployables ui elements
+//      AwardBattleExperiencePoints(avatar, 1000000L)
+//      player = new Player(avatar)
+//      //player.Position = Vector3(3561.0f, 2854.0f, 90.859375f) //home3, HART C
+//      player.Position = Vector3(3940.3984f, 4343.625f, 266.45312f) //z6, Anguta
+////      player.Position = Vector3(3571.2266f, 3278.0938f, 119.0f) //ce test
+//      player.Orientation = Vector3(0f, 0f, 90f)
+//      //player.Position = Vector3(4262.211f ,4067.0625f ,262.35938f) //z6, Akna.tower
+//      //player.Orientation = Vector3(0f, 0f, 132.1875f)
+////      player.ExoSuit = ExoSuitType.MAX //TODO strange issue; divide number above by 10 when uncommenting
+//      player.Slot(0).Equipment = ConstructionItem(ace) //Tool(GlobalDefinitions.StandardPistol(player.Faction))
+//      player.Slot(2).Equipment = ConstructionItem(advanced_ace) //punisher //suppressor
+//      player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
+//      player.Slot(6).Equipment = ConstructionItem(ace) //bullet_9mm
+//      player.Slot(9).Equipment = ConstructionItem(ace) //bullet_9mm
+//      player.Slot(12).Equipment = ConstructionItem(ace) //bullet_9mm
+//      player.Slot(33).Equipment = Tool(suppressor) //AmmoBox(bullet_9mm_AP)
+//      //player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
+//      //player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
+//      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
       //TODO end temp player character auto-loading
       self ! ListAccountCharacters
       import scala.concurrent.ExecutionContext.Implicits.global
@@ -2490,15 +2540,165 @@ class WorldSessionActor extends Actor with MDCContextAware {
       cargoMountTimer = context.system.scheduler.scheduleOnce(1 second, self, CheckCargoMounting(vehicle_guid, cargo_vehicle_guid, cargo_mountpoint, iteration = 0))
     case msg @ CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
       log.info("Handling " + msg)
-      sendResponse(ActionResultMessage.Pass)
-      self ! ListAccountCharacters
+//      sendResponse(ActionResultMessage.Pass)
+//      self ! ListAccountCharacters
+
+      var good: Boolean = true
+      LivePlayerList.WorldPopulation(_ => true).foreach(char => {
+        if (char.name.equalsIgnoreCase(name)) {
+          good = false
+        }
+      })
+      if (good) {
+        import net.psforever.objects.GlobalDefinitions._
+        import net.psforever.types.CertificationType._
+        val avatar = Avatar(name, empire, gender, head, voice)
+        var tempPos = Vector3(0f, 0f, 0f)
+        if (empire == PlanetSideEmpire.TR) {
+          tempPos = Vector3(3749f, 5470f, 79f)
+        } else if (empire == PlanetSideEmpire.NC) {
+          tempPos = Vector3(4405f, 5894f, 70f)
+        } else if (empire == PlanetSideEmpire.VS) {
+          tempPos = Vector3(4807f, 5208f, 56f)
+        }
+        avatar.Certifications += StandardAssault
+        avatar.Certifications += MediumAssault
+        avatar.Certifications += StandardExoSuit
+        avatar.Certifications += AgileExoSuit
+        avatar.Certifications += ReinforcedExoSuit
+        avatar.Certifications += ATV
+        //        avatar.Certifications += Harasser
+        avatar.Certifications += InfiltrationSuit
+        avatar.Certifications += UniMAX
+        avatar.Certifications += Medical
+        avatar.Certifications += Engineering
+        avatar.Certifications += CombatEngineering
+        avatar.Certifications += FortificationEngineering
+        avatar.Certifications += AssaultEngineering
+        avatar.Certifications += Hacking
+        avatar.Certifications += AdvancedHacking
+
+        avatar.Certifications += Sniping
+        avatar.Certifications += AntiVehicular
+        avatar.Certifications += HeavyAssault
+        avatar.Certifications += SpecialAssault
+        avatar.Certifications += EliteAssault
+        avatar.Certifications += GroundSupport
+        avatar.Certifications += GroundTransport
+        avatar.Certifications += Flail
+        avatar.Certifications += Switchblade
+        avatar.Certifications += AssaultBuggy
+        avatar.Certifications += ArmoredAssault1
+        avatar.Certifications += ArmoredAssault2
+        avatar.Certifications += AirCavalryScout
+        avatar.Certifications += AirCavalryAssault
+        avatar.Certifications += AirCavalryInterceptor
+        avatar.Certifications += AirSupport
+        avatar.Certifications += GalaxyGunship
+        avatar.Certifications += Phantasm
+        //        player.Certifications += BattleFrameRobotics
+        //        player.Certifications += BFRAntiInfantry
+        //        player.Certifications += BFRAntiAircraft
+        this.avatar = avatar
+        InitializeDeployableQuantities(avatar) //set deployables ui elements
+        AwardBattleExperiencePoints(avatar, 20000000L)
+        avatar.CEP = 600000
+        player = new Player(avatar)
+        player.Position = tempPos
+        player.Orientation = Vector3(0f, 0f, 90f)
+        player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
+        player.Slot(2).Equipment = Tool(suppressor)
+        player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
+        player.Slot(6).Equipment = AmmoBox(bullet_9mm)
+        player.Slot(9).Equipment = AmmoBox(bullet_9mm_AP)
+        player.Slot(12).Equipment = AmmoBox(shotgun_shell)
+        player.Slot(33).Equipment = AmmoBox(shotgun_shell_AP)
+        player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
+        player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
+        //        player.Slot(5).Equipment.get.asInstanceOf[LockerContainer].Inventory += 0 -> SimpleItem(remote_electronics_kit)
+        player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+
+//        avatar.Implants(0).Unlocked = true
+//        avatar.Implants(0).Implant = sample
+//        avatar.Implants(1).Unlocked = true
+//        avatar.Implants(1).Implant = sample2
+
+        sendResponse(ActionResultMessage(true, None))
+        self ! ListAccountCharacters
+      }
+      else if (!good) {
+        sendResponse(ActionResultMessage(false, Some(1)))
+      }
 
     case msg @ CharacterRequestMessage(charId, action) =>
       log.info("Handling " + msg)
       action match {
         case CharacterRequestAction.Delete =>
           sendResponse(ActionResultMessage.Fail(1))
+          self ! ListAccountCharacters
         case CharacterRequestAction.Select =>
+
+          import net.psforever.objects.GlobalDefinitions._
+          import net.psforever.types.CertificationType._
+          var tempEmpire = PlanetSideEmpire.NEUTRAL
+          var tempPos = Vector3(0f, 0f, 0f)
+          if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 1) {
+            tempEmpire = PlanetSideEmpire.TR
+            tempPos = Vector3(3749f, 5470f, 79f)
+          } else if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 2) {
+            tempEmpire = PlanetSideEmpire.NC
+            tempPos = Vector3(4405f, 5894f, 70f)
+          } else if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 3) {
+            tempEmpire = PlanetSideEmpire.VS
+            tempPos = Vector3(4807f, 5208f, 56f)
+          }
+          if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId <= 3) {
+            val avatar = Avatar("UnNamed" + sessionId.toString, tempEmpire, CharacterGender.Male, 41, CharacterVoice.Voice1)
+            //            player.Position = Vector3(3674.8438f, 2726.789f, 91.15625f)
+            //            player.Position = Vector3(3561.0f, 2854.0f, 90.859375f)
+
+            avatar.Certifications += StandardAssault
+            avatar.Certifications += MediumAssault
+            avatar.Certifications += StandardExoSuit
+            avatar.Certifications += AgileExoSuit
+            avatar.Certifications += ATV
+            //        avatar.Certifications += Harasser
+            avatar.Certifications += InfiltrationSuit
+            avatar.Certifications += Medical
+            avatar.Certifications += Engineering
+            avatar.Certifications += Hacking
+            //
+            avatar.Certifications += GroundSupport
+
+            this.avatar = avatar
+            InitializeDeployableQuantities(avatar) //set deployables ui elements
+
+            AwardBattleExperiencePoints(avatar, 197754L)
+            player = new Player(avatar)
+            player.Position = tempPos
+            player.Orientation = Vector3(0f, 0f, 90f)
+            player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
+            player.Slot(2).Equipment = Tool(suppressor)
+            player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
+            player.Slot(6).Equipment = AmmoBox(bullet_9mm)
+            player.Slot(9).Equipment = AmmoBox(bullet_9mm)
+            player.Slot(12).Equipment = AmmoBox(bullet_9mm)
+            player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
+            player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
+            player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
+            //            player.Slot(5).Equipment.get.asInstanceOf[LockerContainer].Inventory += 0 -> SimpleItem(remote_electronics_kit)
+            player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+            //            player.Implants(0).Unlocked = true
+            //            player.Implants(0).Implant = sample
+            //            //  player.Implants(0).Initialized = true
+            //            player.Implants(1).Unlocked = true
+            //            player.Implants(1).Implant = sample2
+            //            //  player.Implants(1).Initialized = true
+          }
+
+//          LivePlayerList.Add(sessionId, avatar)
+
+
           //TODO check if can spawn on last continent/location from player?
           //TODO if yes, get continent guid accessors
           //TODO if no, get sanctuary guid accessors and reset the player's expectations

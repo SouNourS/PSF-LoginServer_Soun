@@ -26,10 +26,16 @@ object Maps {
   }
 
   val map3 = new ZoneMap("map03") {
+    Building5()
+
+    def Building5() : Unit = { // Ekera (ID: 7)
+      LocalBuilding(5, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(5636f, 6621f, 70f)))) //todo ? change ?
+    }
     Projectiles(this)
   }
 
   val map4 = new ZoneMap("map04") {
+    Building2()
     Building5()
     Building9()
     Building10()
@@ -43,6 +49,10 @@ object Maps {
     Building56()
     Building59()
     Building65()
+
+    def Building2() : Unit = {
+      LocalBuilding(2, FoundationBuilder(WarpGate.Structure))
+    }
 
     def Building5() : Unit = { // Akkan Dropship Center, Ishundar (ID: 24)
       LocalBuilding(5, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(2698.6406f, 4336.914f, 52.046875f)))) //todo ? change ?
@@ -223,11 +233,46 @@ object Maps {
       LocalObject(1147, IFFLock.Constructor)
       LocalObject(1148, IFFLock.Constructor)
       LocalObject(1149, IFFLock.Constructor)
-      LocalObject(1517, Locker.Constructor) // TODO add other lockers !
+      LocalObject(1517, Locker.Constructor)
+      LocalObject(1518, Locker.Constructor)
+      LocalObject(1519, Locker.Constructor)
+      LocalObject(1520, Locker.Constructor)
+      LocalObject(1521, Locker.Constructor)
+      LocalObject(1522, Locker.Constructor)
+      LocalObject(1523, Locker.Constructor)
+      LocalObject(1524, Locker.Constructor)
+      LocalObject(1527, Locker.Constructor)
+      LocalObject(1530, Locker.Constructor)
+      LocalObject(1533, Locker.Constructor)
+      LocalObject(1538, Locker.Constructor)
+      LocalObject(1829, FacilityTurret.Constructor(manned_turret))
+      LocalObject(1830, FacilityTurret.Constructor(manned_turret))
+      LocalObject(1831, FacilityTurret.Constructor(manned_turret))
+      LocalObject(1834, FacilityTurret.Constructor(manned_turret))
+      LocalObject(1835, FacilityTurret.Constructor(manned_turret))
+      LocalObject(1836, FacilityTurret.Constructor(manned_turret))
+      LocalObject(1909, ProximityTerminal.Constructor(medical_terminal))
+      LocalObject(1910, ProximityTerminal.Constructor(medical_terminal))
       LocalObject(2014, Terminal.Constructor(order_terminal))
       LocalObject(2015, Terminal.Constructor(order_terminal))
       LocalObject(2016, Terminal.Constructor(order_terminal))
       LocalObject(2017, Terminal.Constructor(order_terminal))
+      LocalObject(2243, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2244, Terminal.Constructor(pad_landing))
+      LocalObject(2246, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2247, Terminal.Constructor(pad_landing))
+      LocalObject(2249, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2250, Terminal.Constructor(pad_landing))
+      LocalObject(2252, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2253, Terminal.Constructor(pad_landing))
+      LocalObject(2255, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2256, Terminal.Constructor(pad_landing))
+      LocalObject(2258, ProximityTerminal.Constructor(pad_landing))
+      LocalObject(2259, Terminal.Constructor(pad_landing))
+      LocalObject(2611, ProximityTerminal.Constructor(repair_silo))
+      LocalObject(2612, Terminal.Constructor(repair_silo))
+      LocalObject(2615, ProximityTerminal.Constructor(repair_silo))
+      LocalObject(2616, Terminal.Constructor(repair_silo))
       LocalObject(2658, ResourceSilo.Constructor)
       LocalObject(2724, SpawnTube.Constructor(Vector3(4396.7656f, 5888.258f, 71.15625f), Vector3(0, 0, 92)))
       LocalObject(2725, SpawnTube.Constructor(Vector3(4397.211f, 5895.547f, 71.15625f), Vector3(0, 0, 92)))
@@ -245,8 +290,6 @@ object Maps {
       LocalObject(177, Terminal.Constructor(air_vehicle_terminal))
       LocalObject(1890, VehicleSpawnPad.Constructor(Vector3(4407.0f, 5927.0f, 93.0f), Vector3(0f, 0f, 0f)))
 
-      //      LocalObject(1909, ProximityTerminal.Constructor(medical_terminal))
-      //      LocalObject(1910, ProximityTerminal.Constructor(medical_terminal))
 
       ObjectToBuilding(225, 9)
       ObjectToBuilding(513, 9)
@@ -297,12 +340,46 @@ object Maps {
       ObjectToBuilding(1148, 9)
       ObjectToBuilding(1149, 9)
       ObjectToBuilding(1517, 9)
-      //      ObjectToBuilding(1909, 9)
-      //      ObjectToBuilding(1910, 9)
+      ObjectToBuilding(1517, 9)
+      ObjectToBuilding(1518, 9)
+      ObjectToBuilding(1519, 9)
+      ObjectToBuilding(1520, 9)
+      ObjectToBuilding(1521, 9)
+      ObjectToBuilding(1522, 9)
+      ObjectToBuilding(1523, 9)
+      ObjectToBuilding(1524, 9)
+      ObjectToBuilding(1527, 9)
+      ObjectToBuilding(1530, 9)
+      ObjectToBuilding(1533, 9)
+      ObjectToBuilding(1538, 9)
+      ObjectToBuilding(1829, 9)
+      ObjectToBuilding(1830, 9)
+      ObjectToBuilding(1831, 9)
+      ObjectToBuilding(1834, 9)
+      ObjectToBuilding(1835, 9)
+      ObjectToBuilding(1836, 9)
+      ObjectToBuilding(1909, 9)
+      ObjectToBuilding(1910, 9)
       ObjectToBuilding(2014, 9)
       ObjectToBuilding(2015, 9)
       ObjectToBuilding(2016, 9)
       ObjectToBuilding(2017, 9)
+      ObjectToBuilding(2243, 9)
+      ObjectToBuilding(2244, 9)
+      ObjectToBuilding(2246, 9)
+      ObjectToBuilding(2247, 9)
+      ObjectToBuilding(2249, 9)
+      ObjectToBuilding(2250, 9)
+      ObjectToBuilding(2252, 9)
+      ObjectToBuilding(2253, 9)
+      ObjectToBuilding(2255, 9)
+      ObjectToBuilding(2256, 9)
+      ObjectToBuilding(2258, 9)
+      ObjectToBuilding(2259, 9)
+      ObjectToBuilding(2611, 9)
+      ObjectToBuilding(2612, 9)
+      ObjectToBuilding(2615, 9)
+      ObjectToBuilding(2616, 9)
       ObjectToBuilding(2658, 9)
       ObjectToBuilding(2724, 9)
       ObjectToBuilding(2725, 9)
@@ -1640,7 +1717,7 @@ object Maps {
 
     def Building2() : Unit = {
       //warpgate?
-      LocalBuilding(3, FoundationBuilder(WarpGate.Structure))
+      LocalBuilding(2, FoundationBuilder(WarpGate.Structure))
     }
 
     def Building3() : Unit = {
@@ -1673,7 +1750,7 @@ object Maps {
 
     def Building2() : Unit = {
       //warpgate?
-      LocalBuilding(3, FoundationBuilder(WarpGate.Structure))
+      LocalBuilding(2, FoundationBuilder(WarpGate.Structure))
     }
 
     def Building3() : Unit = {
