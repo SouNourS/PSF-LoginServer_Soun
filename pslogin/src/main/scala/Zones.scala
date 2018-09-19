@@ -2,6 +2,7 @@
 import akka.actor.ActorContext
 import net.psforever.objects.serverobject.pad.VehicleSpawnPad
 import net.psforever.objects.serverobject.pad.process._
+import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
 import net.psforever.objects.zones.Zone
 import net.psforever.types.PlanetSideEmpire
 
@@ -24,6 +25,14 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
+      var silo = GUID(2656).get.asInstanceOf[ResourceSilo]
+      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
+      silo = GUID(2658).get.asInstanceOf[ResourceSilo]
+      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
+      silo = GUID(2660).get.asInstanceOf[ResourceSilo]
+      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
+
+
       import net.psforever.types.PlanetSideEmpire
       Building(5).get.Faction = PlanetSideEmpire.NEUTRAL //Akkan
       Building(5).get.ModelId = 24
@@ -37,7 +46,8 @@ object Zones {
       Building(10).get.ModelId = 30
       Building(11).get.Faction = PlanetSideEmpire.VS //Irkalla
       Building(11).get.ModelId = 21
-      ////      Building(13).get.Faction = PlanetSideEmpire.VS //Lahar
+      Building(13).get.Faction = PlanetSideEmpire.VS //Lahar
+      Building(13).get.ModelId = 36
       Building(25).get.Faction = PlanetSideEmpire.VS //Gate Outpost Watch Tower (North of Forseral Warpgate)
       Building(25).get.ModelId = 74
       Building(33).get.Faction = PlanetSideEmpire.TR //East Girru Gun Tower
@@ -64,6 +74,9 @@ object Zones {
   val z6 = new Zone("z6", Maps.map6, 6) {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+
+      var silo = GUID(2094).get.asInstanceOf[ResourceSilo]
+      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
 
       import net.psforever.types.PlanetSideEmpire
       Building(2).get.Faction = PlanetSideEmpire.VS
@@ -139,7 +152,15 @@ object Zones {
 
   val c2 = new Zone("c2", Maps.ugd02, 24)
 
-  val c3 = new Zone("c3", Maps.ugd03, 25)
+  val c3 = new Zone("c3", Maps.ugd03, 25){
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+
+      import net.psforever.types.PlanetSideEmpire
+      Building(10359).get.Faction = PlanetSideEmpire.TR //Redoubt SE
+      Building(10359).get.ModelId = 104
+    }
+  }
 
   val c4 = new Zone("c4", Maps.ugd04, 26)
 

@@ -25,7 +25,7 @@ object Maps {
     Projectiles(this)
   }
 
-  val map3 = new ZoneMap("map03") {
+  val map3 = new ZoneMap("map03") { // Cyssor
     Building5()
 
     def Building5() : Unit = { // Ekera (ID: 7)
@@ -34,12 +34,13 @@ object Maps {
     Projectiles(this)
   }
 
-  val map4 = new ZoneMap("map04") {
+  val map4 = new ZoneMap("map04") { // Ishundar
     Building2()
     Building5()
     Building9()
     Building10()
     Building11()
+    Building13()
     Building25()
     Building33()
     Building34()
@@ -411,6 +412,13 @@ object Maps {
       TerminalToSpawnPad(176, 1889)
       TerminalToSpawnPad(177, 1890)
 
+      TurretToWeapon(1829, 5000)
+      TurretToWeapon(1830, 5001)
+      TurretToWeapon(1831, 5002)
+      TurretToWeapon(1834, 5003)
+      TurretToWeapon(1835, 5004)
+      TurretToWeapon(1836, 5005)
+
     }
 
     def Building10() : Unit = { // Hanish
@@ -507,6 +515,8 @@ object Maps {
 
       LocalObject(2599, ProximityTerminal.Constructor(repair_silo))
       LocalObject(2600, Terminal.Constructor(repair_silo))
+
+      LocalObject(2656, ResourceSilo.Constructor)
 
       LocalObject(3070, Terminal.Constructor(vehicle_terminal_combined))
       LocalObject(1886, VehicleSpawnPad.Constructor(Vector3(3675.0f, 5458.0f, 89.0f), Vector3(0f, 0f, 0f)))
@@ -608,6 +618,7 @@ object Maps {
       ObjectToBuilding(2596, 10)
       ObjectToBuilding(2599, 10)
       ObjectToBuilding(2600, 10)
+      ObjectToBuilding(2656, 10)
 
       ObjectToBuilding(3070, 10)
       ObjectToBuilding(1886, 10)
@@ -695,6 +706,7 @@ object Maps {
       LocalObject(2041, Terminal.Constructor(order_terminal))
       LocalObject(2042, Terminal.Constructor(order_terminal))
       LocalObject(2043, Terminal.Constructor(order_terminal))
+      LocalObject(2660, ResourceSilo.Constructor)
       LocalObject(2740, SpawnTube.Constructor(Vector3(4808.0234f, 5217.9375f, 57f), Vector3(0, 0, 227)))
       LocalObject(2741, SpawnTube.Constructor(Vector3(4812.992f, 5212.6016f, 57f), Vector3(0, 0, 227)))
       LocalObject(2742, SpawnTube.Constructor(Vector3(4818.047f, 5207.3125f, 57f), Vector3(0, 0, 227)))
@@ -775,6 +787,7 @@ object Maps {
       ObjectToBuilding(2041, 11)
       ObjectToBuilding(2042, 11)
       ObjectToBuilding(2043, 11)
+      ObjectToBuilding(2660, 11)
       ObjectToBuilding(2740, 11)
       ObjectToBuilding(2741, 11)
       ObjectToBuilding(2742, 11)
@@ -799,6 +812,10 @@ object Maps {
       DoorToLock(927, 975)
 
       TerminalToSpawnPad(3074, 1892)
+    }
+
+    def Building13() : Unit = { // Lahar (ID: 36)
+      LocalBuilding(13, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(7043f, 5313f, 70f)))) //todo ? change ?
     }
 
     def Building25() : Unit = { // Gate Outpost Watch Tower (North of Forseral Warpgate), Ishundar (ID: 74)
@@ -2085,6 +2102,11 @@ object Maps {
   }
 
   val ugd03 = new ZoneMap("ugd03") {
+    Building10359()
+
+    def Building10359() : Unit = { // Red SE (ID: 104)
+      LocalBuilding(10359, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(5636f, 6621f, 70f)))) //todo ? change ?
+    }
     Projectiles(this)
   }
 

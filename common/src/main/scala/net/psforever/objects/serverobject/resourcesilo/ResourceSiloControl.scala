@@ -5,6 +5,7 @@ import akka.actor.{Actor, ActorRef}
 import net.psforever.objects.serverobject.affinity.{FactionAffinity, FactionAffinityBehavior}
 import net.psforever.objects.serverobject.structures.Building
 import net.psforever.packet.game.PlanetSideGUID
+import net.psforever.types.PlanetSideEmpire
 import services.ServiceManager.Lookup
 import services._
 import services.avatar.{AvatarAction, AvatarServiceMessage}
@@ -31,7 +32,9 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
       log.info("ResourceSiloControl: Silo " + resourceSilo.GUID + " Got avatar service " + endpoint)
 
       // todo: This is just a temporary solution to drain NTU over time. When base object destruction is properly implemented NTU should be deducted when base objects repair themselves
-      context.system.scheduler.schedule(5 second, 5 second, self, ResourceSilo.UpdateChargeLevel(-1))
+      val r = new scala.util.Random
+      context.system.scheduler.schedule(5 + r.nextInt(5) second, 6 second, self, ResourceSilo.UpdateChargeLevel(-1))
+//      context.system.scheduler.schedule(1 second, 1 second, self, ResourceSilo.UpdateChargeLevel(-1))
       context.become(Processing)
 
     case _ => ;
@@ -75,6 +78,8 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
       if(resourceSilo.ChargeLevel == 0 && siloChargeBeforeChange > 0) {
         // Oops, someone let the base run out of power. Shut it all down.
         //todo: Make base neutral if silo hits zero NTU
+        avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id,
+          AvatarAction.SetEmpire(PlanetSideGUID(-1), PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), PlanetSideEmpire.NEUTRAL))
 
         //todo: temporarily disabled until warpgates can bring ANTs from sanctuary, otherwise we'd be stuck in a situation with an unpowered base and no way to get an ANT to refill it.
 //        avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id, AvatarAction.PlanetsideAttribute(PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), 48, 1))

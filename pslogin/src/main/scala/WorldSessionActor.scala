@@ -520,7 +520,27 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //CaptureFlagUpdateMessage()
       //VanuModuleUpdateMessage()
       //ModuleLimitsMessage()
-      sendResponse(ZoneInfoMessage(continentNumber, true, 0))
+      if (continentNumber == 23) {
+        sendResponse(ZoneInfoMessage(continentNumber, true, 18962954))
+      }
+      else if (continentNumber == 24) {
+        sendResponse(ZoneInfoMessage(continentNumber, false, 1831729038))
+      }
+      else if (continentNumber == 25) {
+        sendResponse(ZoneInfoMessage(continentNumber, true, 6362954))
+      }
+      else if (continentNumber == 26) {
+        sendResponse(ZoneInfoMessage(continentNumber, false, 31562954))
+      }
+      else if (continentNumber == 27) {
+        sendResponse(ZoneInfoMessage(continentNumber, false, 1831729038))
+      }
+      else if (continentNumber == 28) {
+        sendResponse(ZoneInfoMessage(continentNumber, false, 18962954))
+      }
+      else {
+        sendResponse(ZoneInfoMessage(continentNumber, true, 0))
+      }
       sendResponse(ZoneLockInfoMessage(continentNumber, false, true))
       sendResponse(ZoneForcedCavernConnectionsMessage(continentNumber, 0))
       sendResponse(HotSpotUpdateMessage(continentNumber, 1, Nil)) //normally set in bulk; should be fine doing per continent
@@ -542,9 +562,20 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case Zone.Lattice.SpawnPoint(zone_id, spawn_tube) =>
       var pos = spawn_tube.Position
       var ori = spawn_tube.Orientation
+      var time : Int = 10
       spawn_tube.Owner match {
         case building : Building =>
           log.info(s"Zone.Lattice.SpawnPoint: spawn point on $zone_id in building ${building.Id} selected")
+          building.Amenities.foreach(amenity => {
+            val amenityId = amenity.GUID
+            amenity.Definition match {
+              case GlobalDefinitions.resource_silo =>
+                // Synchronise warning light & silo capacity
+                val silo = amenity.asInstanceOf[ResourceSilo]
+                time = 5 + (silo.ChargeLevel/10 - 100) / (-7)
+              case _ => ;
+            }
+          })
         case vehicle : Vehicle =>
           //TODO replace this bad math with good math or no math
           //position the player alongside either of the AMS's terminals, facing away from it
@@ -575,7 +606,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         case owner =>
           log.warn(s"Zone.Lattice.SpawnPoint: spawn point on $zone_id at ${spawn_tube.Position} has unexpected owner $owner")
       }
-      LoadZonePhysicalSpawnPoint(zone_id, pos, ori, if(zone_id == continent.Id) 10
+      LoadZonePhysicalSpawnPoint(zone_id, pos, ori, if(zone_id == continent.Id) time
       else 0)
 
     case Zone.Lattice.NoValidSpawnPoint(zone_number, None) =>
@@ -813,6 +844,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       player = tplayer
       //LoadMapMessage will cause the client to send back a BeginZoningMessage packet (see below)
       sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, 3770441820L))
+      if(player.Faction == PlanetSideEmpire.VS) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(36), 38, 0))
       AvatarCreate() //important! the LoadMapMessage must be processed by the client before the avatar is created
 
     case PlayerLoaded(tplayer) =>
@@ -1305,6 +1337,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(PlanetsideAttributeMessage(obj_guid, 0, obj.Health))
         sendResponse(PlanetsideAttributeMessage(obj_guid, 68, 0)) //shield health
         sendResponse(PlanetsideAttributeMessage(obj_guid, 113, 0)) //capacitor
+        if(obj.Definition.ObjectId == 60){
+          sendResponse(PlanetsideAttributeMessage(obj_guid, 45, scala.math.round((obj.Capacitor.toFloat / obj.Definition.MaximumCapacitor.toFloat) * 10)))
+        }
         if(seat_num == 0) {
           //simplistic vehicle ownership management
           obj.Owner match {
@@ -1982,7 +2017,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction(DiagramActionCode.StartDrawing)))
               )
               sendResponse(
-                BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction.drawString(tube.Position.x, tube.Position.y, 3, 0, "AMS")))
+                BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction.drawString(tube.Position.x, tube.Position.y, 2, 0, "AMS")))
               )
               amsSpawnPoint = Some(tube)
             case None => ;
@@ -2338,7 +2373,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
     sendResponse(PlanetsideAttributeMessage(guid, 53, 1))
     sendResponse(AvatarSearchCriteriaMessage(guid, List(0, 0, 0, 0, 0, 0)))
     (1 to 73).foreach(i => {
-      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
+      if(player.Continent == "z4" && i == 21) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(21), 67, 1))
+      else if(player.Continent == "z4" && i == 30) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(30), 67, 1))
+      else if(player.Continent == "z4" && i == 48) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(48), 67, 1))
+      else sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
     })
     (0 to 30).foreach(i => {
       //TODO 30 for a new character only?
@@ -2727,6 +2765,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
       sendResponse(ContinentalLockUpdateMessage(13, PlanetSideEmpire.VS)) // "The VS have captured the VS Sanctuary."
+      sendResponse(ContinentalLockUpdateMessage(3, PlanetSideEmpire.NC))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1)) //common
       //(0 to 255).foreach(i => { sendResponse(SetEmpireMessage(PlanetSideGUID(i), PlanetSideEmpire.VS)) })
@@ -2767,7 +2806,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         )
         //seated players
         obj.asInstanceOf[Mountable].Seats.values
-          .map(_.Occupant) 
+          .map(_.Occupant)
           .collect {
             case Some(occupant) =>
               if(occupant.isAlive) {
@@ -3053,6 +3092,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       var makeReply : Boolean = true
       var echoContents : String = contents
       val trimContents = contents.trim
+      val trimRecipient = recipient.trim
       //TODO messy on/off strings may work
       if(messagetype == ChatMessageType.CMT_FLY) {
         if(trimContents.equals("on")) {
@@ -3146,6 +3186,47 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if(player.isBackpack) { //player is on deployment screen (either dead or deconstructed)
           cluster ! Zone.Lattice.RequestSpawnPoint(continent.Number, player, 2)
         }
+      }
+      else if(trimRecipient.equals("tr")) {
+        sendResponse(ZonePopulationUpdateMessage(4, 414, 138, contents.toInt, 138, contents.toInt / 2, 138, 0, 138, 0))
+      }
+      else if(trimRecipient.equals("nc")) {
+        sendResponse(ZonePopulationUpdateMessage(4, 414, 138, 0, 138, contents.toInt, 138, contents.toInt / 3, 138, 0))
+      }
+      else if(trimRecipient.equals("vs")) {
+        sendResponse(ZonePopulationUpdateMessage(4, 414, 138, contents.toInt * 2, 138, 0, 138, contents.toInt, 138, 0))
+      }
+      else if(trimRecipient.equals("bo")){
+        sendResponse(ZonePopulationUpdateMessage(4, 414, 138, 0, 138, 0, 138, 0, 138, contents.toInt))
+
+//          sendResponse(ZoneInfoMessage(contents.toInt, true, 25200000))
+//          sendResponse(ZoneInfoMessage(contents.toInt-1, false, 25200000))
+//          sendResponse(ChatMsg(ChatMessageType.UNK_229, false, "", "@cavern_switched^@c1~^@c5~", None))
+      }
+      else if(trimContents.startsWith("!sendResponse")) {
+        makeReply = false
+        val args = trimContents.split(" ")
+        if (args.length == 4) {
+          // args1 = guid
+          // args2 = attribute number
+          // args3 = attribute value
+          log.info(s"Sending sendResponse target: ${args(1)} attribute: ${args(2)} value: ${args(3)}")
+          sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(args(1).toInt), args(2).toInt, args(3).toInt))
+        } else if(args.length == 5){
+          for(i <- args(3).toInt to args(4).toInt){
+            if(i != 50 && i != 51 && i != 29) {
+              log.info(s"Sending sendResponse target: ${args(1)} attribute: ${i} value: ${args(2)}")
+              sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(args(1).toInt), i, args(2).toInt))
+            }
+          }
+        }
+        else {
+          log.info(s"sendResponse received but incorrect number of arguments.")
+        }
+      }
+      else if(trimRecipient.equals("ntu")){
+        var silo = continent.GUID(2658).get.asInstanceOf[ResourceSilo]
+        silo.Actor ! ResourceSilo.UpdateChargeLevel(-200)
       }
       // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
       // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
@@ -4229,6 +4310,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
         continent.GUID(vehicle_guid) match {
           case Some(obj : Vehicle) =>
             obj.Actor ! Deployment.TryDeploymentChange(deploy_state)
+            if (obj.Utility(0).isDefined) println(obj.Utility(0).get.GUID)
+            if (obj.Utility(1).isDefined) println(obj.Utility(1).get.GUID)
+            if (obj.Utility(2).isDefined) println(obj.Utility(2).get.GUID)
+            if (obj.Utility(3).isDefined) println(obj.Utility(3).get.GUID)
+            if (obj.Utility(4).isDefined) println(obj.Utility(4).get.GUID)
 
           case _ =>
             log.error(s"DeployRequest: can not find $vehicle_guid in scope")

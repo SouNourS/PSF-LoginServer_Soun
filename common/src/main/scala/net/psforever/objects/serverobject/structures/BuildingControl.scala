@@ -53,12 +53,17 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
       var is_hacked = false
       var hack_time_remaining_ms = 0L;
       var hacked_by_faction = PlanetSideEmpire.NEUTRAL
+      var spawnTubeActive = true
 
       // Get Ntu level from silo if it exists
       building.Amenities.filter(x => (x.Definition == GlobalDefinitions.resource_silo)).headOption.asInstanceOf[Option[ResourceSilo]] match {
         case Some(obj: ResourceSilo) =>
           ntuLevel = obj.CapacitorDisplay.toInt
+          if(ntuLevel == 0) {
+            building.Faction = PlanetSideEmpire.NEUTRAL
+          }
         case _ => ;
+          ntuLevel = 1
       }
 
       // Get hack status & time from control console if it exists
@@ -78,6 +83,9 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
         case _ => ;
       }
 
+      // Lahar PTS
+      if(building.Zone.Number == 4 && building.ModelId == 36) spawnTubeActive = false
+
       val msg = BuildingInfoUpdateMessage(
         continent_id = building.Zone.Number, //Zone
         building_id = building.Id, //Facility
@@ -89,10 +97,10 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
         unk1 = 0, //!! Field != 0 will cause malformed packet. See class def.
         unk1x = None,
         generator_state = PlanetSideGeneratorState.Normal,
-        spawn_tubes_normal = true,
+        spawn_tubes_normal = spawnTubeActive,
         force_dome_active = false,
-        lattice_benefit = 30,
-        cavern_benefit = 188, //!! Field > 0 will cause malformed packet. See class def.
+        lattice_benefit = 18,
+        cavern_benefit = 56, //!! Field > 0 will cause malformed packet. See class def.
         unk4 = Nil,
         unk5 = 0,
         unk6 = false,

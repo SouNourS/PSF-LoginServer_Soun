@@ -113,6 +113,7 @@ import scodec.codecs._
   * `32 - Info under avatar name : 0 = Looking For Squad Members, 1 = LFS`<br>
   * `35 - BR. Value is the BR`<br>
   * `36 - CR. Value is the CR`<br>
+  * `38 - Spawn active or not. MUST use base modelId not base GUID`<br>
   * `43 - Info on avatar name : 0 = Nothing, 1 = "(LD)" message`<br>
   * `45 - NTU charge bar 0-10, 5 = 50% full. Seems to apply to both ANT and NTU Silo (possibly siphons?)`<br>
   * `47 - Sets base NTU level to CRITICAL. MUST use base modelId not base GUID`<br>
