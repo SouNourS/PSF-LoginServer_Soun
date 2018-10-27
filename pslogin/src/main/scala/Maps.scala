@@ -46,6 +46,7 @@ object Maps {
     Building34()
     Building35()
     Building36()
+    Building51() // baal bunker
     Building55()
     Building56()
     Building59()
@@ -1046,6 +1047,16 @@ object Maps {
       DoorToLock(478, 1112)
       DoorToLock(479, 1109)
       DoorToLock(480, 1110)
+    }
+
+    def Building51() : Unit = { // Baal bunker (ID: 4)
+      LocalBuilding(51, FoundationBuilder(Building.Structure(StructureType.Bunker, Vector3(967.46094f, 5405.6484f, 75.34375f)))) //todo ? change ?
+
+      LocalObject(320, Door.Constructor)
+      LocalObject(324, Door.Constructor)
+
+      ObjectToBuilding(320, 4)
+      ObjectToBuilding(324, 4)
     }
 
     def Building55() : Unit = { // South Irkalla Air Tower, Ishundar (ID: 86)

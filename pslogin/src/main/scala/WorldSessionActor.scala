@@ -565,15 +565,25 @@ class WorldSessionActor extends Actor with MDCContextAware {
       var time : Int = 10
       spawn_tube.Owner match {
         case building : Building =>
-          log.info(s"Zone.Lattice.SpawnPoint: spawn point on $zone_id in building ${building.Id} selected")
+          log.info(s"Zone.Lattice.SpawnPoint: spawn point on $zone_id in building ${building.Id} selected (faction : ${building.Faction})")
           building.Amenities.foreach(amenity => {
-            val amenityId = amenity.GUID
             amenity.Definition match {
               case GlobalDefinitions.resource_silo =>
-                // Synchronise warning light & silo capacity
                 val silo = amenity.asInstanceOf[ResourceSilo]
-                time = 5 + (silo.ChargeLevel/10 - 100) / (-7)
+                // PTS v3
+                if(!player.FirstLoad) {
+                  time = 5 + (silo.ChargeLevel/10 - 100) / (-7)
+                }
+                else {
+                  time = 0
+                  player.FirstLoad = false
+                }
               case _ => ;
+                // PTS v3
+                if(player.FirstLoad) {
+                  time = 0
+                  player.FirstLoad = false
+                }
             }
           })
         case vehicle : Vehicle =>
@@ -620,6 +630,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(spawn_group == 2) {
         sendResponse(ChatMsg(ChatMessageType.CMT_OPEN, false, "", "No friendly AMS is deployed in this region.", None))
         cluster ! Zone.Lattice.RequestSpawnPoint(zone_number, player, 0)
+      }
+      else if(player.FirstLoad) {
+        player.FirstLoad = false
+        if(player.Faction==PlanetSideEmpire.NC) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4612f, 6752f, 32f), Vector3(0f, 357f, 227f), 0)} // NC
+        else if(player.Faction==PlanetSideEmpire.VS) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4780f, 6716f, 29f), Vector3(0f, 357f, 180f), 0)} // VS
+        else if(player.Faction==PlanetSideEmpire.TR) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4164f, 4418f, 66f), Vector3(0f, 345f, 326f), 0)} // TR
       }
       else {
         RequestSanctuaryZoneSpawn(player, zone_number)
@@ -1085,7 +1101,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
               (msg.is_jumping || time < 200)) ||
               ((msg.vel.isEmpty || Vector3.MagnitudeSquared(msg.vel.get).toInt == 0) && time > 2000) ||
               (time > 1000)) ||
+//            (distanceSq < 10000 && time > 450) ||
+//            (distanceSq <= 160000 && (msg.is_jumping ||
+//              (msg.vel.isDefined && time > 700) ||
+//              ((msg.vel.isEmpty || Vector3.MagnitudeSquared(msg.vel.get).toInt == 0) && time > 900))) ||
             (distanceSq > 160000 && time > 5000)) {
+//            println(time, distanceSq, Vector3.Distance(player.Position, msg.pos))
             sendResponse(
               PlayerStateMessage(
                 guid,
@@ -1338,7 +1359,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(PlanetsideAttributeMessage(obj_guid, 68, 0)) //shield health
         sendResponse(PlanetsideAttributeMessage(obj_guid, 113, 0)) //capacitor
         if(obj.Definition.ObjectId == 60){
-          sendResponse(PlanetsideAttributeMessage(obj_guid, 45, scala.math.round((obj.Capacitor.toFloat / obj.Definition.MaximumCapacitor.toFloat) * 10)))
+          sendResponse(PlanetsideAttributeMessage(obj_guid, 45, scala.math.ceil((obj.Capacitor.toFloat / obj.Definition.MaximumCapacitor.toFloat) * 10).toInt))
         }
         if(seat_num == 0) {
           //simplistic vehicle ownership management
@@ -2213,7 +2234,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     if(vehicle.Capacitor < vehicle.Definition.MaximumCapacitor) {
       // Charging
       vehicle.Capacitor += 100
-      sendResponse(PlanetsideAttributeMessage(vehicle.GUID, 45, scala.math.round((vehicle.Capacitor.toFloat / vehicle.Definition.MaximumCapacitor.toFloat) * 10))) // set ntu on vehicle UI
+      sendResponse(PlanetsideAttributeMessage(vehicle.GUID, 45, scala.math.ceil((vehicle.Capacitor.toFloat / vehicle.Definition.MaximumCapacitor.toFloat) * 10).toInt)) // set ntu on vehicle UI
       avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(vehicle.GUID, 52, 1L)) // panel glow on
       avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(vehicle.GUID, 49, 1L)) // orb particle effect on
 
@@ -2221,7 +2242,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     }
     else {
       // Fully charged
-      sendResponse(PlanetsideAttributeMessage(vehicle.GUID, 45, scala.math.round((vehicle.Capacitor.toFloat / vehicle.Definition.MaximumCapacitor.toFloat) * 10).toInt)) // set ntu on vehicle UI
+      sendResponse(PlanetsideAttributeMessage(vehicle.GUID, 45, scala.math.ceil((vehicle.Capacitor.toFloat / vehicle.Definition.MaximumCapacitor.toFloat) * 10).toInt)) // set ntu on vehicle UI
 
       // Turning off glow/orb effects on ANT doesn't seem to work when deployed. Try to undeploy ANT from server side
       context.system.scheduler.scheduleOnce(vehicle.UndeployTime milliseconds, vehicle.Actor, Deployment.TryUndeploy(DriveState.Undeploying))
@@ -2249,7 +2270,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         vehicle.Capacitor -= chargeToDeposit
         silo.Actor ! ResourceSilo.UpdateChargeLevel(chargeToDeposit)
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(silo_guid, 49, 1L)) // panel glow on & orb particles on
-        sendResponse(PlanetsideAttributeMessage(vehicle.GUID, 45, scala.math.round((vehicle.Capacitor.toFloat / vehicle.Definition.MaximumCapacitor.toFloat) * 10))) // set ntu on vehicle UI
+        sendResponse(PlanetsideAttributeMessage(vehicle.GUID, 45, scala.math.ceil((vehicle.Capacitor.toFloat / vehicle.Definition.MaximumCapacitor.toFloat) * 10).toInt)) // set ntu on vehicle UI
 
         //todo: grant BEP to user
         //todo: grant BEP to squad in range
@@ -2372,12 +2393,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     sendResponse(AvatarDeadStateMessage(DeadState.Alive, 0, 0, tplayer.Position, player.Faction, true))
     sendResponse(PlanetsideAttributeMessage(guid, 53, 1))
     sendResponse(AvatarSearchCriteriaMessage(guid, List(0, 0, 0, 0, 0, 0)))
-    (1 to 73).foreach(i => {
-      if(player.Continent == "z4" && i == 21) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(21), 67, 1))
-      else if(player.Continent == "z4" && i == 30) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(30), 67, 1))
-      else if(player.Continent == "z4" && i == 48) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(48), 67, 1))
-      else sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
-    })
+//    (1 to 73).foreach(i => {
+//      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
+//    })
     (0 to 30).foreach(i => {
       //TODO 30 for a new character only?
       sendResponse(AvatarStatisticsMessage(2, Statistics(0L)))
@@ -2660,6 +2678,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //        avatar.Implants(0).Implant = sample
 //        avatar.Implants(1).Unlocked = true
 //        avatar.Implants(1).Implant = sample2
+        player.FirstLoad = true
 
         sendResponse(ActionResultMessage(true, None))
         self ! ListAccountCharacters
@@ -2732,6 +2751,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             //            player.Implants(1).Unlocked = true
             //            player.Implants(1).Implant = sample2
             //            //  player.Implants(1).Initialized = true
+            player.FirstLoad = true
           }
 
 //          LivePlayerList.Add(sessionId, avatar)
@@ -3226,7 +3246,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
       else if(trimRecipient.equals("ntu")){
         var silo = continent.GUID(2658).get.asInstanceOf[ResourceSilo]
-        silo.Actor ! ResourceSilo.UpdateChargeLevel(-200)
+        silo.Actor ! ResourceSilo.UpdateChargeLevel(contents.toInt)
       }
       // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
       // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
@@ -4310,11 +4330,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         continent.GUID(vehicle_guid) match {
           case Some(obj : Vehicle) =>
             obj.Actor ! Deployment.TryDeploymentChange(deploy_state)
-            if (obj.Utility(0).isDefined) println(obj.Utility(0).get.GUID)
-            if (obj.Utility(1).isDefined) println(obj.Utility(1).get.GUID)
-            if (obj.Utility(2).isDefined) println(obj.Utility(2).get.GUID)
-            if (obj.Utility(3).isDefined) println(obj.Utility(3).get.GUID)
-            if (obj.Utility(4).isDefined) println(obj.Utility(4).get.GUID)
 
           case _ =>
             log.error(s"DeployRequest: can not find $vehicle_guid in scope")
@@ -5978,6 +5993,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def configZone(zone : Zone) : Unit = {
     zone.Buildings.values.foreach(building => {
       sendResponse(SetEmpireMessage(PlanetSideGUID(building.ModelId), building.Faction))
+
+      // PTS v3 or not
+//      if(building.Faction != PlanetSideEmpire.NEUTRAL &&
+//        (building.ModelId == 21 || building.ModelId == 30 || building.ModelId == 48)) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(building.ModelId), 67, 1))
+
       building.Amenities.foreach(amenity => {
         val amenityId = amenity.GUID
         sendResponse(PlanetsideAttributeMessage(amenityId, 50, 0))
@@ -6145,12 +6165,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def AvatarCreate() : Unit = {
     player.VehicleSeated = None //TODO temp, until vehicle gating; unseat player else constructor data is messed up
     player.Spawn
-    player.Health = 50 //TODO temp
-    player.Armor = 25
+    player.Health = player.MaxHealth //TODO temp
+    player.Armor = player.MaxArmor
     val packet = player.Definition.Packet
     val dcdata = packet.DetailedConstructorData(player).get
     val player_guid = player.GUID
-    sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, player_guid, dcdata))
+    // PTS v3
+    if (player.FirstLoad) {
+      cluster ! Zone.Lattice.RequestSpawnPoint(4, player, 0)
+//      player.FirstLoad = false
+    } else {
+      sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, player_guid, dcdata))
+    }
     continent.Population ! Zone.Population.Spawn(avatar, player)
     avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.LoadPlayer(player_guid, ObjectClass.avatar, player_guid, packet.ConstructorData(player).get, None))
     log.debug(s"ObjectCreateDetailedMessage: $dcdata")
@@ -6837,7 +6863,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * Additional effort is exerted to ensure that the requirements for the given ammunition are satisfied.
     * If no satisfactory combination is achieved, the original state will be restored.
     * @param obj the `ConstructionItem` object
-    * @param originalModeIndex the starting point ammunition type mode index
+    * @param originalAmmoIndex the starting point ammunition type mode index
     */
   def PerformConstructionItemAmmoChange(obj : ConstructionItem, originalAmmoIndex : Int) : Unit = {
     val certifications = player.Certifications

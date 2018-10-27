@@ -58,6 +58,8 @@ object Zones {
       Building(35).get.ModelId = 69
       Building(36).get.Faction = PlanetSideEmpire.VS //West Girru Air Tower
       Building(36).get.ModelId = 83
+      Building(51).get.Faction = PlanetSideEmpire.TR //Baal bunker
+      Building(51).get.ModelId = 4
       Building(55).get.Faction = PlanetSideEmpire.NC //South Irkalla Air Tower
       Building(55).get.ModelId = 86
       Building(56).get.Faction = PlanetSideEmpire.NC //Southwest Hanish Air Tower

@@ -79,6 +79,7 @@ class LoginSessionActor extends Actor with MDCContextAware {
   // TODO: move to global configuration or database lookup
   val serverName = "PSForever"
   val serverAddress = new InetSocketAddress(LoginConfig.serverIpAddress.getHostAddress, 51001)
+//  val serverAddress = new InetSocketAddress("62.210.250.199", 51401)
 
   // TESTING CODE FOR ACCOUNT LOOKUP
   def accountLookup(username : String, password : String) : Boolean = {

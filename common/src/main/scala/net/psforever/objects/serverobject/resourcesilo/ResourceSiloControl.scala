@@ -29,12 +29,12 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
 
     case ServiceManager.LookupResult("avatar", endpoint) =>
       avatarService = endpoint
-      log.info("ResourceSiloControl: Silo " + resourceSilo.GUID + " Got avatar service " + endpoint)
+//      log.info("ResourceSiloControl: Silo " + resourceSilo.GUID + " Got avatar service " + endpoint) // PTS v3
 
       // todo: This is just a temporary solution to drain NTU over time. When base object destruction is properly implemented NTU should be deducted when base objects repair themselves
       val r = new scala.util.Random
-      context.system.scheduler.schedule(5 + r.nextInt(5) second, 6 second, self, ResourceSilo.UpdateChargeLevel(-1))
-//      context.system.scheduler.schedule(1 second, 1 second, self, ResourceSilo.UpdateChargeLevel(-1))
+      context.system.scheduler.schedule(5 + r.nextInt(5) second, 12 second, self, ResourceSilo.UpdateChargeLevel(-1))
+//      context.system.scheduler.schedule(1 + r.nextInt(5) second, 0.5 second, self, ResourceSilo.UpdateChargeLevel(-1))
       context.become(Processing)
 
     case _ => ;
@@ -58,7 +58,7 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
       }
 
 
-      val ntuBarLevel = scala.math.round((resourceSilo.ChargeLevel.toFloat / resourceSilo.MaximumCharge.toFloat) * 10).toInt
+      val ntuBarLevel = scala.math.ceil((resourceSilo.ChargeLevel.toFloat / resourceSilo.MaximumCharge.toFloat) * 10).toInt
       // Only send updated capacitor display value to all clients if it has actually changed
       if(resourceSilo.CapacitorDisplay != ntuBarLevel) {
         log.trace(s"Silo ${resourceSilo.GUID} NTU bar level has changed from ${resourceSilo.CapacitorDisplay} to ${ntuBarLevel}")
@@ -80,6 +80,9 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
         //todo: Make base neutral if silo hits zero NTU
         avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id,
           AvatarAction.SetEmpire(PlanetSideGUID(-1), PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), PlanetSideEmpire.NEUTRAL))
+        // PTS v3 or not
+//        avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id,
+//          AvatarAction.PlanetsideAttribute(PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), 67, 0))
 
         //todo: temporarily disabled until warpgates can bring ANTs from sanctuary, otherwise we'd be stuck in a situation with an unpowered base and no way to get an ANT to refill it.
 //        avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id, AvatarAction.PlanetsideAttribute(PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), 48, 1))
