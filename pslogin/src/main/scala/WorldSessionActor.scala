@@ -49,6 +49,7 @@ import services.{RemoverActor, vehicle, _}
 import services.avatar.{AvatarAction, AvatarResponse, AvatarServiceMessage, AvatarServiceResponse}
 import services.galaxy.{GalaxyResponse, GalaxyServiceResponse}
 import services.local.{LocalAction, LocalResponse, LocalServiceMessage, LocalServiceResponse}
+import services.chat._
 import services.vehicle.support.TurretUpgrader
 import services.vehicle.{VehicleAction, VehicleResponse, VehicleServiceMessage, VehicleServiceResponse}
 
@@ -73,6 +74,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var rightRef : ActorRef = ActorRef.noSender
   var avatarService : ActorRef = ActorRef.noSender
   var localService : ActorRef = ActorRef.noSender
+  var chatService: ActorRef = ActorRef.noSender
   var vehicleService : ActorRef = ActorRef.noSender
   var galaxyService : ActorRef = ActorRef.noSender
   var taskResolver : ActorRef = Actor.noSender
@@ -124,6 +126,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     respawnTimer.cancel
     PlayerActionsToCancel()
     localService ! Service.Leave()
+    chatService ! Service.Leave()
     vehicleService ! Service.Leave()
     avatarService ! Service.Leave()
     galaxyService ! Service.Leave()
@@ -233,6 +236,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       context.become(Started)
       ServiceManager.serviceManager ! Lookup("avatar")
       ServiceManager.serviceManager ! Lookup("local")
+      ServiceManager.serviceManager ! Lookup("chat")
       ServiceManager.serviceManager ! Lookup("vehicle")
       ServiceManager.serviceManager ! Lookup("taskResolver")
       ServiceManager.serviceManager ! Lookup("cluster")
@@ -250,6 +254,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ServiceManager.LookupResult("local", endpoint) =>
       localService = endpoint
       log.info("ID: " + sessionId + " Got local service " + endpoint)
+    case ServiceManager.LookupResult("chat", endpoint) =>
+      chatService = endpoint
+      log.info("ID: " + sessionId + " Got chat service " + endpoint)
     case ServiceManager.LookupResult("vehicle", endpoint) =>
       vehicleService = endpoint
       log.info("ID: " + sessionId + " Got vehicle service " + endpoint)
@@ -286,6 +293,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case LocalServiceResponse(toChannel, guid, reply) =>
       HandleLocalServiceResponse(toChannel, guid, reply)
+
+    case ChatServiceResponse(toChannel, guid, avatar_name, cont, avatar_pos, avatar_faction, target, reply) =>
+      HandleChatServiceResponse(toChannel, guid, avatar_name, cont, avatar_pos, avatar_faction, target, reply)
 
     case Mountable.MountMessages(tplayer, reply) =>
       HandleMountMessages(tplayer, reply)
@@ -1395,6 +1405,74 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(TriggerSoundMessage(sound, pos, unk, volume))
 
       case _ => ;
+    }
+  }
+
+  /**
+    * na
+    * @param toChannel na
+    * @param avatar_guid      na
+    * @param target    na
+    * @param reply     na
+    */
+  def HandleChatServiceResponse(toChannel : String, avatar_guid : PlanetSideGUID, avatar_name : String, cont : Zone, avatar_pos : Vector3, avatar_faction : PlanetSideEmpire.Value, target : Int, reply : ChatMsg) : Unit = {
+    val tplayer_guid = if(player.HasGUID) player.GUID
+    else PlanetSideGUID(0)
+    target match {
+      case 0 => // for other(s) user(s)
+        if (player.GUID != avatar_guid) {
+          reply.messageType match {
+            case ChatMessageType.CMT_TELL =>
+              if (player.Name == reply.recipient) {
+                sendResponse(ChatMsg(reply.messageType, reply.wideContents, avatar_name, reply.contents, reply.note))
+              }
+            case ChatMessageType.CMT_SILENCE =>
+              val args = avatar_name.split(" ")
+              var silence_name : String = ""
+              var silence_time : Int = 5
+              if (args.length == 1) {
+                silence_name = args(0)
+              }
+              else if (args.length == 2) {
+                silence_name = args(0)
+                silence_time = args(1).toInt
+              }
+              if (player.Name == args(0)) {
+                if(!player.silenced) {
+                  sendResponse(ChatMsg(ChatMessageType.UNK_71, reply.wideContents, reply.recipient, "@silence_on", reply.note))
+                  player.silenced = true
+                  context.system.scheduler.scheduleOnce(silence_time minutes, chatService, ChatServiceMessage("gm", ChatAction.GM(PlanetSideGUID(0), player.Name, ChatMsg(ChatMessageType.CMT_SILENCE, true, "", player.Name, None))))
+                }
+                else {
+                  sendResponse(ChatMsg(ChatMessageType.UNK_71, reply.wideContents, reply.recipient, "@silence_off", reply.note))
+                  player.silenced = false
+                }
+              }
+            case _ =>
+              sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
+          }
+        }
+      case 1 => // for player
+        if (player.Name == avatar_name) {
+          if ((reply.contents.length > 1 && (reply.contents.dropRight(reply.contents.length - 1) != "!" || reply.contents.drop(1).dropRight(reply.contents.length - 2) == "!")) || reply.contents.length == 1) {
+            sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
+          }
+        }
+      case 2 => // both case
+        if ((reply.contents.length > 1 && (reply.contents.dropRight(reply.contents.length - 1) != "!" || reply.contents.drop(1).dropRight(reply.contents.length - 2) == "!")) || reply.contents.length == 1) {
+          reply.messageType match {
+            case ChatMessageType.CMT_OPEN =>
+              if (Vector3.Distance(player.Position, avatar_pos) < 25 && player.Faction == avatar_faction && player.Continent == cont.Id) {
+                sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
+              }
+            case ChatMessageType.CMT_SQUAD =>
+              if (player.Faction == avatar_faction) {
+                sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
+              }
+            case _ =>
+              sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
+          }
+        }
     }
   }
 
@@ -3087,6 +3165,35 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       })
       StopBundlingPackets()
+
+      chatService ! Service.Join("local")
+      chatService ! Service.Join("squad")
+      chatService ! Service.Join("voice")
+      chatService ! Service.Join("tell")
+      chatService ! Service.Join("broadcast")
+      chatService ! Service.Join("note")
+      chatService ! Service.Join("gm")
+
+
+      StartBundlingPackets()
+      // Welcome messages by Nick
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The combat test area is on Ishundar. Type \\#3/zone ishundar\\#6 if necessary.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#3Broadcast chat (/b)\\#6 is global to everyone, regardless of faction.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "   \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The \\#3!ams\\#6 command will respawn you at the nearest friendly AMS. The \\#3/who\\#6 command will show you how many characters are online for each faction.  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None)))
+      StopBundlingPackets()
+
+
       self ! SetCurrentAvatar(player)
 
     case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, yaw, pitch, yaw_upper, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
@@ -3196,12 +3303,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //log.info("SetChatFilters: " + msg)
 
     case msg @ ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
-      var makeReply : Boolean = true
+      var makeReply : Boolean = false
       var echoContents : String = contents
       val trimContents = contents.trim
       val trimRecipient = recipient.trim
       //TODO messy on/off strings may work
       if(messagetype == ChatMessageType.CMT_FLY) {
+        makeReply = true
         if(trimContents.equals("on")) {
           flying = true
         }
@@ -3210,6 +3318,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       else if(messagetype == ChatMessageType.CMT_SPEED) {
+        makeReply = true
         speed = {
           try {
             trimContents.toFloat
@@ -3222,6 +3331,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       else if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
+        makeReply = true
         if(trimContents.equals("on")) {
           spectator = true
         }
@@ -3267,6 +3377,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       if(messagetype == ChatMessageType.CMT_DESTROY) {
+        makeReply = true
         val guid = contents.toInt
         continent.Map.TerminalToSpawnPad.get(guid) match {
           case Some(padGUID) =>
@@ -3275,9 +3386,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
             self ! PacketCoding.CreateGamePacket(0, RequestDestroyMessage(PlanetSideGUID(guid)))
         }
       }
-      if(messagetype == ChatMessageType.CMT_VOICE) {
-        sendResponse(ChatMsg(ChatMessageType.CMT_VOICE, false, player.Name, contents, None))
-      }
       // TODO: handle this appropriately
       if(messagetype == ChatMessageType.CMT_QUIT) {
         sendResponse(DropCryptoSession())
@@ -3285,8 +3393,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
       //dev hack; consider bang-commands to complement slash-commands in future
       if(trimContents.equals("!loc")) {
+        makeReply = true
         echoContents = s"zone=${continent.Id} pos=${player.Position.x},${player.Position.y},${player.Position.z}; ori=${player.Orientation.x},${player.Orientation.y},${player.Orientation.z}"
         log.info(echoContents)
+      }
+      else if (trimContents.equals("!admin")) {
+        admin = true
       }
       else if(trimContents.equals("!ams")) {
         makeReply = false
@@ -3314,9 +3426,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         makeReply = false
         val args = trimContents.split(" ")
         if (args.length == 4) {
-          // args1 = guid
-          // args2 = attribute number
-          // args3 = attribute value
           log.info(s"Sending sendResponse target: ${args(1)} attribute: ${args(2)} value: ${args(3)}")
           sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(args(1).toInt), args(2).toInt, args(3).toInt))
         } else if(args.length == 5){
@@ -3339,6 +3448,42 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
       if(makeReply) {
         sendResponse(ChatMsg(messagetype, has_wide_contents, recipient, echoContents, note_contents))
+      }
+
+      if (messagetype == ChatMessageType.CMT_OPEN && !player.silenced) {
+        chatService ! ChatServiceMessage("local", ChatAction.Local(player.GUID, player.Name, continent, player.Position, player.Faction, msg))
+      }
+      else if (messagetype == ChatMessageType.CMT_VOICE) {
+        chatService ! ChatServiceMessage("voice", ChatAction.Voice(player.GUID, player.Name, continent, player.Position, player.Faction, msg))
+      }
+      else if (messagetype == ChatMessageType.CMT_TELL && !player.silenced) {
+        chatService ! ChatServiceMessage("tell", ChatAction.Tell(player.GUID, player.Name, msg))
+      }
+      else if (messagetype == ChatMessageType.CMT_BROADCAST && !player.silenced) {
+        chatService ! ChatServiceMessage("broadcast", ChatAction.Broadcast(player.GUID, player.Name, continent, player.Position, player.Faction, msg))
+      }
+      else if (messagetype == ChatMessageType.CMT_NOTE) {
+        chatService ! ChatServiceMessage("note", ChatAction.Note(player.GUID, player.Name, msg))
+      }
+      else if (messagetype == ChatMessageType.CMT_SILENCE && admin) {
+        chatService ! ChatServiceMessage("gm", ChatAction.GM(player.GUID, player.Name, msg))
+      }
+      else if (messagetype == ChatMessageType.CMT_SQUAD && !player.silenced) {
+        chatService ! ChatServiceMessage("squad", ChatAction.Squad(player.GUID, player.Name, continent, player.Position, player.Faction, msg))
+      }
+      else if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
+        messagetype == ChatMessageType.CMT_WHO_PLATOONLEADERS || messagetype == ChatMessageType.CMT_WHO_SQUADLEADERS || messagetype == ChatMessageType.CMT_WHO_TEAMS) {
+        val poplist = continent.Players
+        val popTR = poplist.count(_.faction == PlanetSideEmpire.TR)
+        val popNC = poplist.count(_.faction == PlanetSideEmpire.NC)
+        val popVS = poplist.count(_.faction == PlanetSideEmpire.VS)
+
+        StartBundlingPackets()
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now, but : ", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "NC online : " + popNC + " on Ishundar", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "TR online : " + popTR + " on Ishundar", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "VS online : " + popVS + " on Ishundar", None)))
+        StopBundlingPackets()
       }
 
     case msg @ VoiceHostRequest(unk, PlanetSideGUID(player_guid), data) =>

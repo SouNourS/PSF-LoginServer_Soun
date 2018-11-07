@@ -47,6 +47,7 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
 
   //SouNourS things
   // PTS v3
+  var silenced : Boolean = false
   var firstLoad : Boolean = false
   def FirstLoad : Boolean = firstLoad
   def FirstLoad_=(status : Boolean) : Boolean = {
