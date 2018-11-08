@@ -3212,9 +3212,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "   \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
+        "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The \\#3!ams\\#6 command will respawn you at the nearest friendly AMS. The \\#3/who\\#6 command will show you how many characters are online for each faction.  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None)))
+        "  \\#6The \\#3!ams\\#6 command will respawn you at the nearest friendly AMS.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None)))
       StopBundlingPackets()
 
 

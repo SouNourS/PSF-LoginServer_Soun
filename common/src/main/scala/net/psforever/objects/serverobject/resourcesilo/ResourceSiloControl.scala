@@ -29,7 +29,7 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
 
     case ServiceManager.LookupResult("avatar", endpoint) =>
       avatarService = endpoint
-//      log.info("ResourceSiloControl: Silo " + resourceSilo.GUID + " Got avatar service " + endpoint) // PTS v3
+      log.info("ResourceSiloControl: Silo " + resourceSilo.GUID + " Got avatar service " + endpoint)
 
       // todo: This is just a temporary solution to drain NTU over time. When base object destruction is properly implemented NTU should be deducted when base objects repair themselves
       val r = new scala.util.Random
