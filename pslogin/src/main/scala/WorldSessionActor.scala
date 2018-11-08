@@ -69,6 +69,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   import WorldSessionActor._
 
   private[this] val log = org.log4s.getLogger
+  private[this] val damageLog = org.log4s.getLogger("DamageResolution")
   var sessionId : Long = 0
   var leftRef : ActorRef = ActorRef.noSender
   var rightRef : ActorRef = ActorRef.noSender
@@ -83,7 +84,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var player : Player = null
   var avatar : Avatar = null
   var progressBarValue : Option[Float] = None
-  var shooting : Option[PlanetSideGUID] = None
+  var shooting : Option[PlanetSideGUID] = None //ChangeFireStateMessage_Start
+  var prefire : Option[PlanetSideGUID] = None //if WeaponFireMessage precedes ChangeFireStateMessage_Start
   var accessedContainer : Option[PlanetSideGameObject with Container] = None
   var flying : Boolean = false
   var speed : Float = 1.0f
@@ -116,8 +118,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * @param b `true` or `false` (or `null`)
     * @return 1 for `true`; 0 for `false`
     */
-  implicit def boolToInt(b : Boolean) : Int = if(b) 1
-  else 0
+  implicit def boolToInt(b : Boolean) : Int = if(b) 1 else 0
 
   override def postStop() = {
     //TODO normally, player avatar persists a minute or so after disconnect; we are subject to the SessionReaper
@@ -130,7 +131,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     vehicleService ! Service.Leave()
     avatarService ! Service.Leave()
     galaxyService ! Service.Leave()
-    cluster ! Service.Leave()
     LivePlayerList.Remove(sessionId)
     if(player != null && player.HasGUID) {
       val player_guid = player.GUID
@@ -387,7 +387,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case VehicleSpawnPad.ServerVehicleOverrideStart(vehicle, pad) =>
       val vdef = vehicle.Definition
       if(vehicle.Seats(0).isOccupied) {
-        sendResponse(ObjectDetachMessage(pad.GUID, vehicle.GUID, pad.Position + Vector3(0, 0, 0.5f), pad.Orientation.z))
+        sendResponse(ObjectDetachMessage(pad.GUID, vehicle.GUID, pad.Position + Vector3.z(0.5f), pad.Orientation.z))
       }
       ServerVehicleOverride(vehicle, vdef.AutoPilotSpeed1, GlobalDefinitions.isFlightVehicle(vdef) : Int)
 
@@ -1055,16 +1055,41 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       case AvatarResponse.DamageResolution(target, resolution_function) =>
         if(player.isAlive) {
+          val originalHealth = player.Health
+          val originalArmor = player.Armor
           resolution_function(target)
           val health = player.Health
           val armor = player.Armor
-          val playerGUID = player.GUID
-          sendResponse(PlanetsideAttributeMessage(playerGUID, 0, health))
-          sendResponse(PlanetsideAttributeMessage(playerGUID, 4, armor))
-          avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 0, health))
-          avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 4, armor))
-          if(health == 0 && player.isAlive) {
-            KillPlayer(player)
+          val damageToHealth = originalHealth - health
+          val damageToArmor = originalArmor - armor
+          damageLog.info(s"${player.Name}-infantry: BEFORE=$originalHealth/$originalArmor, AFTER=$health/$armor, CHANGE=$damageToHealth/$damageToArmor")
+          if(damageToHealth != 0 || damageToArmor != 0) {
+            val playerGUID = player.GUID
+            sendResponse(PlanetsideAttributeMessage(playerGUID, 0, health))
+            sendResponse(PlanetsideAttributeMessage(playerGUID, 4, armor))
+            avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 0, health))
+            avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 4, armor))
+            if(health == 0 && player.isAlive) {
+              KillPlayer(player)
+            }
+            else {
+              //first damage entry -> most recent damage source -> killing blow
+              target.History.find(p => p.isInstanceOf[DamagingActivity]) match {
+                case Some(data : DamageFromProjectile) =>
+                  data.data.projectile.owner match {
+                    case pSource : PlayerSource =>
+                      continent.LivePlayers.find(_.Name == pSource.Name) match {
+                        case Some(tplayer) =>
+                          sendResponse(HitHint(tplayer.GUID, player.GUID))
+                        case None => ;
+                      }
+                    case vSource : SourceEntry =>
+                      sendResponse(DamageWithPositionMessage(damageToHealth + damageToArmor, vSource.Position))
+                    case _ => ;
+                  }
+                case _ => ;
+              }
+            }
           }
         }
 
@@ -1086,11 +1111,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
       case AvatarResponse.HitHint(source_guid) =>
-        sendResponse(HitHint(source_guid, guid))
+        if(player.isAlive) {
+          sendResponse(HitHint(source_guid, guid))
+        }
 
       case AvatarResponse.KilledWhileInVehicle() =>
         if(player.isAlive && player.VehicleSeated.nonEmpty) {
-          (continent.GUID(player.VehicleSeated.get) match {
+          (continent.GUID(player.VehicleSeated) match {
             case Some(obj : Vehicle) =>
               if(obj.Health == 0) Some(obj)
               else None
@@ -1107,10 +1134,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
               obj.LastShot match {
                 case Some(cause) =>
                   player.History(cause)
+                  KillPlayer(player)
                 case None => ;
               }
-              KillPlayer(player)
-            case _ => ;
+            case _ =>
+              log.warn(s"${player.Name} was seated in a vehicle and should have been killed, but was not; suicidal fallback")
+              Suicide(player)
           }
         }
 
@@ -1588,131 +1617,114 @@ class WorldSessionActor extends Actor with MDCContextAware {
     */
   def HandleTerminalMessage(tplayer : Player, msg : ItemTransactionMessage, order : Terminal.Exchange) : Unit = {
     order match {
-      case Terminal.BuyExosuit(exosuit, subtype) => //refresh armor points
-        tplayer.History(HealFromExoSuitChange(PlayerSource(tplayer), exosuit))
-        if(tplayer.ExoSuit == exosuit) {
-          if(exosuit == ExoSuitType.MAX) {
-            //special MAX case - clear any special state
-            player.UsingSpecial = SpecialExoSuitDefinition.Mode.Normal
-            player.ExoSuit = exosuit
-            if(Loadout.DetermineSubtype(tplayer) != subtype) {
-              //special MAX case - suit switching to a different MAX suit; we need to change the main weapon
-              sendResponse(ArmorChangedMessage(tplayer.GUID, exosuit, subtype))
-              avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.ArmorChanged(tplayer.GUID, exosuit, subtype))
-              val arms = tplayer.Slot(0).Equipment.get
-              val putTask = PutEquipmentInSlot(tplayer, Tool(GlobalDefinitions.MAXArms(subtype, tplayer.Faction)), 0)
-              taskResolver ! DelayedObjectHeld(tplayer, 0, List(TaskResolver.GiveTask(putTask.task, putTask.subs :+ RemoveEquipmentFromSlot(tplayer, arms, 0))))
-            }
-          }
-          //outside of the MAX condition above, we should seldom reach this point through conventional methods
-          tplayer.Armor = tplayer.MaxArmor
-          sendResponse(PlanetsideAttributeMessage(tplayer.GUID, 4, tplayer.Armor))
-          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, tplayer.Armor))
-          sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, true))
+      case Terminal.BuyExosuit(exosuit, subtype) =>
+        val originalSuit = tplayer.ExoSuit
+        val originalArmor = tplayer.Armor
+        //load a complete new exo-suit and save the inventory before it gets cleared
+        val dropPred = DropPredicate(tplayer)
+        val beforeInventory = tplayer.Inventory.Clear()
+        val beforeHolsters = clearHolsters(tplayer.Holsters().iterator)
+        //change suit (clear inventory and change holster sizes; note: holsters must be empty before this point)
+        tplayer.ExoSuit = exosuit
+        val toMaxArmor = tplayer.MaxArmor
+        if((originalSuit != exosuit) || originalArmor > toMaxArmor) {
+          tplayer.Armor = toMaxArmor
+          sendResponse(PlanetsideAttributeMessage(tplayer.GUID, 4, toMaxArmor))
+          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, toMaxArmor))
         }
         else {
-          //load a complete new exo-suit and shuffle the inventory around
-          val originalSuit = tplayer.ExoSuit
-          //save inventory before it gets cleared (empty holsters)
-          val dropPred = DropPredicate(tplayer)
-          val (dropHolsters, beforeHolsters) = clearHolsters(tplayer.Holsters().iterator).partition(dropPred)
-          val (dropInventory, beforeInventory) = tplayer.Inventory.Clear().partition(dropPred)
-          //change suit (clear inventory and change holster sizes; note: holsters must be empty before this point)
-          tplayer.ExoSuit = exosuit
-          tplayer.Armor = tplayer.MaxArmor
-          //delete everything not dropped
-          (beforeHolsters ++ beforeInventory).foreach({ elem =>
-            sendResponse(ObjectDeleteMessage(elem.obj.GUID, 0))
-          })
-          beforeHolsters.foreach({ elem =>
-            avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.ObjectDelete(tplayer.GUID, elem.obj.GUID))
-          })
-          //report change
-          sendResponse(ArmorChangedMessage(tplayer.GUID, exosuit, subtype))
-          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.ArmorChanged(tplayer.GUID, exosuit, subtype))
-          sendResponse(PlanetsideAttributeMessage(tplayer.GUID, 4, tplayer.Armor))
-          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, tplayer.Armor))
-          val finalInventory = if(exosuit == ExoSuitType.MAX) {
-            //MAX weapon to be placed in first pistol slot; slot to be drawn
-            taskResolver ! DelayedObjectHeld(tplayer, 0, List(PutEquipmentInSlot(tplayer, Tool(GlobalDefinitions.MAXArms(subtype, tplayer.Faction)), 0)))
-            //fill melee slot
-            fillEmptyHolsters(List(tplayer.Slot(4)).iterator, beforeHolsters) ++ beforeInventory
+          tplayer.Armor = originalArmor
+        }
+        //delete everything not dropped
+        (beforeHolsters ++ beforeInventory).foreach({ elem =>
+          sendResponse(ObjectDeleteMessage(elem.obj.GUID, 0))
+        })
+        beforeHolsters.foreach({ elem =>
+          avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.ObjectDelete(tplayer.GUID, elem.obj.GUID))
+        })
+        //report change
+        sendResponse(ArmorChangedMessage(tplayer.GUID, exosuit, subtype))
+        avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.ArmorChanged(tplayer.GUID, exosuit, subtype))
+        val finalInventory = if(exosuit == ExoSuitType.MAX) {
+          //MAX weapon to be placed in first pistol slot; slot to be drawn
+          taskResolver ! DelayedObjectHeld(tplayer, 0, List(PutEquipmentInSlot(tplayer, Tool(GlobalDefinitions.MAXArms(subtype, tplayer.Faction)), 0)))
+          //fill melee slot
+          fillEmptyHolsters(List(tplayer.Slot(4)).iterator, beforeHolsters) ++ beforeInventory
+        }
+        else {
+          //remove potential MAX weapon
+          val normalWeapons = if(originalSuit == ExoSuitType.MAX) {
+            val (maxWeapons, normalWeapons) = beforeHolsters.partition(elem => elem.obj.Size == EquipmentSize.Max)
+            maxWeapons.foreach(entry => {
+              taskResolver ! GUIDTask.UnregisterEquipment(entry.obj)(continent.GUID)
+            })
+            normalWeapons
           }
           else {
-            //remove potential MAX weapon
-            val normalWeapons = if(originalSuit == ExoSuitType.MAX) {
-              val (maxWeapons, normalWeapons) = beforeHolsters.partition(elem => elem.obj.Size == EquipmentSize.Max)
-              maxWeapons.foreach(entry => {
-                taskResolver ! GUIDTask.UnregisterEquipment(entry.obj)(continent.GUID)
-              })
-              normalWeapons
-            }
-            else {
-              tplayer.DrawnSlot = Player.HandsDownSlot
-              sendResponse(ObjectHeldMessage(tplayer.GUID, Player.HandsDownSlot, true))
-              avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.ObjectHeld(tplayer.GUID, Player.HandsDownSlot))
-              beforeHolsters
-            }
-            //fill holsters
-            val (afterHolsters, toInventory) = normalWeapons.partition(elem => elem.obj.Size == tplayer.Slot(elem.start).Size)
-            afterHolsters.foreach({ elem => tplayer.Slot(elem.start).Equipment = elem.obj })
-            fillEmptyHolsters(tplayer.Holsters().iterator, toInventory ++ beforeInventory)
+            tplayer.DrawnSlot = Player.HandsDownSlot
+            sendResponse(ObjectHeldMessage(tplayer.GUID, Player.HandsDownSlot, true))
+            avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.ObjectHeld(tplayer.GUID, Player.HandsDownSlot))
+            beforeHolsters
           }
-          //draw holsters
-          tplayer.VisibleSlots.foreach({ index =>
-            tplayer.Slot(index).Equipment match {
-              case Some(obj) =>
-                val definition = obj.Definition
-                sendResponse(
-                  ObjectCreateDetailedMessage(
-                    definition.ObjectId,
-                    obj.GUID,
-                    ObjectCreateMessageParent(tplayer.GUID, index),
-                    definition.Packet.DetailedConstructorData(obj).get
-                  )
-                )
-                avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.EquipmentInHand(player.GUID, player.GUID, index, obj))
-              case None => ;
-            }
-          })
-          //re-draw equipment held in free hand
-          tplayer.FreeHand.Equipment match {
-            case Some(item) =>
-              val definition = item.Definition
+          //fill holsters
+          val (afterHolsters, toInventory) = normalWeapons.partition(elem => elem.obj.Size == tplayer.Slot(elem.start).Size)
+          afterHolsters.foreach({ elem => tplayer.Slot(elem.start).Equipment = elem.obj })
+          fillEmptyHolsters(tplayer.Holsters().iterator, toInventory ++ beforeInventory)
+        }
+        //draw holsters
+        tplayer.VisibleSlots.foreach({ index =>
+          tplayer.Slot(index).Equipment match {
+            case Some(obj) =>
+              val definition = obj.Definition
               sendResponse(
                 ObjectCreateDetailedMessage(
                   definition.ObjectId,
-                  item.GUID,
-                  ObjectCreateMessageParent(tplayer.GUID, Player.FreeHandSlot),
-                  definition.Packet.DetailedConstructorData(item).get
+                  obj.GUID,
+                  ObjectCreateMessageParent(tplayer.GUID, index),
+                  definition.Packet.DetailedConstructorData(obj).get
                 )
               )
+              avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.EquipmentInHand(player.GUID, player.GUID, index, obj))
             case None => ;
           }
-          //put items back into inventory
-          val (stow, drop) = GridInventory.recoverInventory(finalInventory, tplayer.Inventory)
-          stow.foreach(elem => {
-            tplayer.Inventory.Insert(elem.start, elem.obj)
-            val obj = elem.obj
-            val definition = obj.Definition
+        })
+        //re-draw equipment held in free hand
+        tplayer.FreeHand.Equipment match {
+          case Some(item) =>
+            val definition = item.Definition
             sendResponse(
               ObjectCreateDetailedMessage(
                 definition.ObjectId,
-                obj.GUID,
-                ObjectCreateMessageParent(tplayer.GUID, elem.start),
-                definition.Packet.DetailedConstructorData(obj).get
+                item.GUID,
+                ObjectCreateMessageParent(tplayer.GUID, Player.FreeHandSlot),
+                definition.Packet.DetailedConstructorData(item).get
               )
             )
-          })
-          //drop items on ground
-          val pos = tplayer.Position
-          val orient = Vector3(0, 0, tplayer.Orientation.z)
-          ((dropHolsters ++ dropInventory).map(_.obj) ++ drop).foreach(obj => {
-            //TODO make a sound when dropping stuff
-            continent.Ground ! Zone.Ground.DropItem(obj, pos, orient)
-          })
-          sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, true))
+          case None => ;
         }
+        //put items back into inventory
+        val (stow, drop) = GridInventory.recoverInventory(finalInventory, tplayer.Inventory)
+        stow.foreach(elem => {
+          tplayer.Inventory.Insert(elem.start, elem.obj)
+          val obj = elem.obj
+          val definition = obj.Definition
+          sendResponse(
+            ObjectCreateDetailedMessage(
+              definition.ObjectId,
+              obj.GUID,
+              ObjectCreateMessageParent(tplayer.GUID, elem.start),
+              definition.Packet.DetailedConstructorData(obj).get
+            )
+          )
+        })
+        //drop items on ground
+        val pos = tplayer.Position
+        val orient = Vector3.z(tplayer.Orientation.z)
+        drop.foreach(obj => {
+          //TODO make a sound when dropping stuff
+          continent.Ground ! Zone.Ground.DropItem(obj, pos, orient)
+        })
+        sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, true))
 
       case Terminal.BuyEquipment(item) =>
         tplayer.Fit(item) match {
@@ -1735,7 +1747,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
       case Terminal.InfantryLoadout(exosuit, subtype, holsters, inventory) =>
-        //TODO optimizations against replacing Equipment with the exact same Equipment and potentially for recycling existing Equipment
         log.info(s"$tplayer wants to change equipment loadout to their option #${msg.unk1 + 1}")
         sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Loadout, true))
         tplayer.History(HealFromExoSuitChange(PlayerSource(tplayer), exosuit))
@@ -1753,8 +1764,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
         //dropped items are lost
         val beforeFreeHand = tplayer.FreeHand.Equipment
         //change suit (clear inventory and change holster sizes; note: holsters must be empty before this point)
+        val originalSuit = player.ExoSuit
+        val originalArmor = player.Armor
         tplayer.ExoSuit = exosuit
-        tplayer.Armor = tplayer.MaxArmor
+        val toMaxArmor = tplayer.MaxArmor
+        if((originalSuit != exosuit) || originalArmor > toMaxArmor) {
+          tplayer.Armor = toMaxArmor
+          sendResponse(PlanetsideAttributeMessage(tplayer.GUID, 4, toMaxArmor))
+          avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, toMaxArmor))
+        }
+        else {
+          tplayer.Armor = originalArmor
+        }
         //delete everything (not dropped)
         beforeHolsters.foreach({ elem =>
           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.ObjectDelete(tplayer.GUID, elem.obj.GUID))
@@ -2078,7 +2099,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
       case VehicleResponse.HitHint(source_guid) =>
-        sendResponse(HitHint(source_guid, player.GUID))
+        if(player.isAlive) {
+          sendResponse(HitHint(source_guid, player.GUID))
+        }
 
       case VehicleResponse.InventoryState(obj, parent_guid, start, con_data) =>
         if(tplayer_guid != guid) {
@@ -2630,7 +2653,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      avatar.Certifications += Hacking
 //      avatar.Certifications += AdvancedHacking
       this.avatar = avatar
-//
+
 //      InitializeDeployableQuantities(avatar) //set deployables ui elements
 //      AwardBattleExperiencePoints(avatar, 1000000L)
 //      player = new Player(avatar)
@@ -2641,16 +2664,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      //player.Position = Vector3(4262.211f ,4067.0625f ,262.35938f) //z6, Akna.tower
 //      //player.Orientation = Vector3(0f, 0f, 132.1875f)
 ////      player.ExoSuit = ExoSuitType.MAX //TODO strange issue; divide number above by 10 when uncommenting
-//      player.Slot(0).Equipment = ConstructionItem(ace) //Tool(GlobalDefinitions.StandardPistol(player.Faction))
-//      player.Slot(2).Equipment = ConstructionItem(advanced_ace) //punisher //suppressor
+//      player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
+//      player.Slot(2).Equipment = Tool(suppressor)
 //      player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
-//      player.Slot(6).Equipment = ConstructionItem(ace) //bullet_9mm
-//      player.Slot(9).Equipment = ConstructionItem(ace) //bullet_9mm
-//      player.Slot(12).Equipment = ConstructionItem(ace) //bullet_9mm
-//      player.Slot(33).Equipment = Tool(suppressor) //AmmoBox(bullet_9mm_AP)
-//      //player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
-//      //player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
+//      player.Slot(6).Equipment = AmmoBox(bullet_9mm)
+//      player.Slot(9).Equipment = AmmoBox(bullet_9mm)
+//      player.Slot(12).Equipment = AmmoBox(bullet_9mm)
+//      player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
+//      player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
+//      player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
 //      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+
       //TODO end temp player character auto-loading
       self ! ListAccountCharacters
       import scala.concurrent.ExecutionContext.Implicits.global
@@ -3204,8 +3228,28 @@ class WorldSessionActor extends Actor with MDCContextAware {
         player.FacingYawUpper = yaw_upper
         player.Crouching = is_crouching
         player.Jumping = is_jumping
+
         if(vel.isDefined && usingMedicalTerminal.isDefined) {
           StopUsingProximityUnit(continent.GUID(usingMedicalTerminal.get).get.asInstanceOf[ProximityTerminal])
+        }
+        accessedContainer match {
+          case Some(veh : Vehicle) =>
+            if(vel.isDefined || Vector3.DistanceSquared(player.Position, veh.Position) > 100) {
+              val guid = player.GUID
+              sendResponse(UnuseItemMessage(guid, veh.GUID))
+              sendResponse(UnuseItemMessage(guid, guid))
+              veh.AccessingTrunk = None
+              UnAccessContents(veh)
+              accessedContainer = None
+            }
+          case Some(container) => //just in case
+            if(vel.isDefined || Vector3.DistanceSquared(player.Position, container.Position) > 25) {
+              val guid = player.GUID
+              sendResponse(UnuseItemMessage(guid, container.GUID))
+              sendResponse(UnuseItemMessage(guid, guid))
+              accessedContainer = None
+            }
+          case None => ;
         }
         val wepInHand : Boolean = player.Slot(player.DrawnSlot).Equipment match {
           case Some(item) => item.Definition == GlobalDefinitions.bolt_driver
@@ -3539,11 +3583,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(shooting.isEmpty) {
         FindEquipment match {
           case Some(tool : Tool) =>
-            if(tool.Magazine > 0) {
+            if(tool.Magazine > 0 || prefire.contains(item_guid)) {
+              prefire = None
               shooting = Some(item_guid)
               avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ChangeFireState_Start(player.GUID, item_guid))
             }
+            else {
+              log.warn(s"ChangeFireState_Start: ${tool.Definition.Name} magazine is empty before trying to shoot bullet")
+              EmptyMagazine(item_guid, tool)
+            }
           case Some(_) => //permissible, for now
+            prefire = None
             shooting = Some(item_guid)
             avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ChangeFireState_Start(player.GUID, item_guid))
           case None =>
@@ -3553,6 +3603,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ ChangeFireStateMessage_Stop(item_guid) =>
       log.info("ChangeFireState_Stop: " + msg)
+      prefire = None
       val weapon : Option[Equipment] = if(shooting.contains(item_guid)) {
         shooting = None
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ChangeFireState_Stop(player.GUID, item_guid))
@@ -4425,14 +4476,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
       FindContainedWeapon match {
         case (Some(obj), Some(tool : Tool)) =>
           if(tool.Magazine <= 0) { //safety: enforce ammunition depletion
-            tool.Magazine = 0
-            sendResponse(InventoryStateMessage(tool.AmmoSlot.Box.GUID, weapon_guid, 0))
-            sendResponse(ChangeFireStateMessage_Stop(weapon_guid))
-            avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ChangeFireState_Stop(player.GUID, weapon_guid))
-            sendResponse(WeaponDryFireMessage(weapon_guid))
-            avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.WeaponDryFire(player.GUID, weapon_guid))
+            prefire = None
+            EmptyMagazine(weapon_guid, tool)
           }
           else { //shooting
+            prefire = shooting.orElse(Some(weapon_guid))
             tool.Discharge
             val projectileIndex = projectile_guid.guid - Projectile.BaseUID
             val projectilePlace = projectiles(projectileIndex)
@@ -4440,7 +4488,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               case Some(projectile) => !projectile.isResolved
               case None => false
             }) {
-              log.warn(s"WeaponFireMessage: former projectile ${projectile_guid.guid} was not resolved properly; overwriting anyway")
+              log.trace(s"WeaponFireMessage: overwriting unresolved projectile ${projectile_guid.guid}")
             }
             val (angle, attribution) = obj match {
               case p : Player =>
@@ -4489,7 +4537,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info(s"Splash: $msg")
       continent.GUID(direct_victim_uid) match {
         case Some(target : PlanetSideGameObject with FactionAffinity with Vitality) =>
-          ResolveProjectileEntry(projectile_guid, ProjectileResolution.Hit, target, explosion_pos) match {
+          ResolveProjectileEntry(projectile_guid, ProjectileResolution.Splash, target, target.Position) match {
             case Some(projectile) =>
               HandleDealingDamage(target, projectile)
             case None => ;
@@ -4499,7 +4547,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       targets.foreach(elem => {
         continent.GUID(elem.uid) match {
           case Some(target : PlanetSideGameObject with FactionAffinity with Vitality) =>
-            ResolveProjectileEntry(projectile_guid, ProjectileResolution.Splash, target, target.Position) match {
+            ResolveProjectileEntry(projectile_guid, ProjectileResolution.Splash, target, explosion_pos) match {
               case Some(projectile) =>
                 HandleDealingDamage(target, projectile)
               case None => ;
@@ -4715,11 +4763,25 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ HitHint(source_guid, player_guid) =>
       log.info(s"HitHint: $msg")
-      continent.GUID(player_guid) match {
-        case Some(obj : Player) =>
-          avatarService ! AvatarServiceMessage(obj.Name, AvatarAction.HitHint(source_guid, player_guid))
-        case _ => ;
-      }
+//      val attributeToSource : PlanetSideGUID = continent.GUID(source_guid) match {
+//        case Some(obj : LocalProjectile) =>
+//          log.info(s"Projectiles: $projectiles")
+//          FindProjectileEntry(source_guid) match {
+//            case Some(obj) =>
+//              continent.LivePlayers.find(_.Name == obj.owner.Name).getOrElse(player).GUID
+//            case None =>
+//              player.GUID
+//          }
+//        case None =>
+//          PlanetSideGUID(0) //TODO what to do here
+//        case obj =>
+//          source_guid
+//      }
+//      continent.GUID(player_guid) match {
+//        case Some(obj : Player) =>
+//          avatarService ! AvatarServiceMessage(obj.Name, AvatarAction.HitHint(attributeToSource, player_guid))
+//        case _ => ;
+//      }
 
     case msg @ TargetingImplantRequest(list) =>
       log.info("TargetingImplantRequest: "+msg)
@@ -5784,8 +5846,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
               case obj : Vehicle =>
                 vehicleService ! VehicleServiceMessage(s"${obj.Actor}", VehicleAction.UnstowEquipment(player_guid, item2_guid))
               case obj : Player =>
-                if(obj.isBackpack || destination.VisibleSlots.contains(dest)) { //corpse being looted, or item was in hands
+                if(obj.isBackpack || destination.VisibleSlots.contains(dest)) { //corpse being looted, or item was accessible
                   avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ObjectDelete(player_guid, item2_guid))
+                  //put hand down locally
+                  if(dest == player.DrawnSlot) {
+                    player.DrawnSlot = Player.HandsDownSlot
+                  }
                 }
               case _ => ;
             }
@@ -6476,6 +6542,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       case Some(guid) =>
         sendResponse(ChangeFireStateMessage_Stop(guid))
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ChangeFireState_Stop(player.GUID, guid))
+        prefire = None
         shooting = None
       case None => ;
     }
@@ -7871,7 +7938,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val sguid = src.GUID
       val dguid = dest.GUID
       StartBundlingPackets()
-      sendResponse(PlayerStateShiftMessage(ShiftState(0, dest.Position, player.Orientation.z, player.Velocity)))
+      sendResponse(PlayerStateShiftMessage(ShiftState(0, dest.Position, player.Orientation.z)))
       UseRouterTelepadEffect(pguid, sguid, dguid)
       StopBundlingPackets()
 //      vehicleService ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(router), continent))
@@ -7923,6 +7990,33 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       case _ => ;
     }
+  }
+
+  /**
+    * For a certain weapon that cna load ammunition, enforce that its magazine is empty.
+    * @param weapon_guid the weapon
+    */
+  def EmptyMagazine(weapon_guid : PlanetSideGUID) : Unit = {
+    continent.GUID(weapon_guid) match {
+      case Some(tool : Tool) =>
+        EmptyMagazine(weapon_guid, tool)
+      case _ => ;
+    }
+  }
+
+  /**
+    * For a certain weapon that cna load ammunition, enforce that its magazine is empty.
+    * Punctuate that emptiness with a ceasation of weapons fire and a dry fire sound effect.
+    * @param weapon_guid the weapon (GUID)
+    * @param tool the weapon (object)
+    */
+  def EmptyMagazine(weapon_guid : PlanetSideGUID, tool : Tool) : Unit = {
+    tool.Magazine = 0
+    sendResponse(InventoryStateMessage(tool.AmmoSlot.Box.GUID, weapon_guid, 0))
+    sendResponse(ChangeFireStateMessage_Stop(weapon_guid))
+    avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ChangeFireState_Stop(player.GUID, weapon_guid))
+    sendResponse(WeaponDryFireMessage(weapon_guid))
+    avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.WeaponDryFire(player.GUID, weapon_guid))
   }
 
   def failWithError(error : String) = {

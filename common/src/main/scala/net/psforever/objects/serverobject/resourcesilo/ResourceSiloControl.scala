@@ -45,7 +45,7 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
       sender ! ResourceSilo.ResourceSiloMessage(player, msg, resourceSilo.Use(player, msg))
     case ResourceSilo.LowNtuWarning(enabled: Boolean) =>
       resourceSilo.LowNtuWarningOn = enabled
-      log.trace(s"LowNtuWarning: Silo ${resourceSilo.GUID} low ntu warning set to ${enabled}")
+      log.trace(s"LowNtuWarning: Silo ${resourceSilo.GUID} low ntu warning set to $enabled")
       avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id, AvatarAction.PlanetsideAttribute(PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), 47, if(resourceSilo.LowNtuWarningOn) 1 else 0))
 
     case ResourceSilo.UpdateChargeLevel(amount: Int) =>
@@ -61,7 +61,7 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
       val ntuBarLevel = scala.math.ceil((resourceSilo.ChargeLevel.toFloat / resourceSilo.MaximumCharge.toFloat) * 10).toInt
       // Only send updated capacitor display value to all clients if it has actually changed
       if(resourceSilo.CapacitorDisplay != ntuBarLevel) {
-        log.trace(s"Silo ${resourceSilo.GUID} NTU bar level has changed from ${resourceSilo.CapacitorDisplay} to ${ntuBarLevel}")
+        log.trace(s"Silo ${resourceSilo.GUID} NTU bar level has changed from ${resourceSilo.CapacitorDisplay} to $ntuBarLevel")
         resourceSilo.CapacitorDisplay = ntuBarLevel
         resourceSilo.Owner.Actor ! Building.SendMapUpdate(all_clients = true)
         avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id, AvatarAction.PlanetsideAttribute(resourceSilo.GUID, 45, resourceSilo.CapacitorDisplay))
