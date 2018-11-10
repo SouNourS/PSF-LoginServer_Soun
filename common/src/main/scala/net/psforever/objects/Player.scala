@@ -56,6 +56,7 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
   }
   /** Last medkituse. */
   var lastMedkit : Long = 0
+  var death_by : Int = 0
   var lastSeenStreamMessage : Array[Long] = Array.fill[Long](65535)(0L)
   var lastShotSeq_time : Int = -1
   /** From PlanetsideAttributeMessage */

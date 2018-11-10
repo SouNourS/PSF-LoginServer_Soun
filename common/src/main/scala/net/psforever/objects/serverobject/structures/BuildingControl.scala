@@ -59,9 +59,10 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
       building.Amenities.filter(x => (x.Definition == GlobalDefinitions.resource_silo)).headOption.asInstanceOf[Option[ResourceSilo]] match {
         case Some(obj: ResourceSilo) =>
           ntuLevel = obj.CapacitorDisplay.toInt
-          if(ntuLevel == 0) {
-            building.Faction = PlanetSideEmpire.NEUTRAL
-          }
+          // PTS v3
+//          if(ntuLevel == 0) {
+//            building.Faction = PlanetSideEmpire.NEUTRAL
+//          }
         case _ => ;
           ntuLevel = 1
       }
@@ -85,6 +86,8 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
 
       // Lahar PTS v3
       if(building.Zone.Number == 4 && building.ModelId == 36) spawnTubeActive = false
+
+//      println(building.Zone.Number, building.ModelId, building.Faction)
 
       val msg = BuildingInfoUpdateMessage(
         continent_id = building.Zone.Number, //Zone
