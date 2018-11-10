@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 PSForever
+// Copyright (c) 2017 PSForever
 import net.psforever.objects.zones.ZoneMap
 import net.psforever.objects.GlobalDefinitions._
 import net.psforever.objects.LocalProjectile
@@ -40,6 +40,9 @@ object Maps {
       LocalBuilding(5, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(2694f, 4324f, 39.29922f))))
       LocalObject(283, Terminal.Constructor(dropship_vehicle_terminal))
       LocalObject(282, VehicleSpawnPad.Constructor(Vector3(2762.414f, 4448.828f, 44.75f), Vector3(0.0f, 2.8125f, 0.0f)))
+      TerminalToSpawnPad(283, 282)
+      ObjectToBuilding(283, 5)
+      ObjectToBuilding(282, 5)
       LocalObject(3067, Terminal.Constructor(ground_vehicle_terminal))
       LocalObject(1881, VehicleSpawnPad.Constructor(Vector3(2711.3438f, 4418.4062f, 40.609375f), Vector3(0.0f, 351.5625f, 182.8125f)))
       TerminalToSpawnPad(3067, 1881)
