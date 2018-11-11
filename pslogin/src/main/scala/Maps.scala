@@ -22,15 +22,19 @@ object Maps {
   }
 
   val map2 = new ZoneMap("map02") {
+    Building10()
+    def Building10() : Unit = { // Chac -  - GUID 45
+      LocalBuilding(10, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(0f, 0f, 0f))))
+    }
     Projectiles(this)
   }
 
   val map3 = new ZoneMap("map03") { // Cyssor
-    Building5()
-
-    def Building5() : Unit = { // Ekera (ID: 7)
-      LocalBuilding(5, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(5636f, 6621f, 70f)))) //todo ? change ?
-    }
+//    Building5()
+//
+//    def Building5() : Unit = { // Ekera (ID: 7)
+//      LocalBuilding(5, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(5636f, 6621f, 70f)))) //todo ? change ?
+//    }
     Projectiles(this)
   }
 
@@ -212,10 +216,10 @@ object Maps {
       ObjectToBuilding(2686, 5)
       LocalObject(2687, SpawnTube.Constructor(Vector3(2730.233f, 4336.683f, 29.39923f), Vector3(0, 0, 232)))
       ObjectToBuilding(2687, 5)
-      LocalObject(1900, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1900, 5)
-      LocalObject(1901, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1901, 5)
+//      LocalObject(1900, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1900, 5)
+//      LocalObject(1901, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1901, 5)
       //      LocalObject(1780, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1780, 5)
       //      TurretToWeapon(1780, 5018)
@@ -367,12 +371,12 @@ object Maps {
       ObjectToBuilding(1266, 6)
       LocalObject(172, Terminal.Constructor(air_vehicle_terminal))
       ObjectToBuilding(172, 6)
-      LocalObject(1877, VehicleSpawnPad.Constructor(Vector3(924.1434f, 5472.034f, 84.932f), Vector3(0f, 0f, 0f)))
+      LocalObject(1877, VehicleSpawnPad.Constructor(Vector3(924.1434f, 5472.034f, 87.45804f), Vector3(0f, 0f, 0f)))
       TerminalToSpawnPad(172, 1877)
       ObjectToBuilding(1877, 6)
       LocalObject(173, Terminal.Constructor(air_vehicle_terminal))
       ObjectToBuilding(173, 6)
-      LocalObject(1878, VehicleSpawnPad.Constructor(Vector3(939.0054f, 5486.896f, 84.932f), Vector3(0f, 0f, 0f)))
+      LocalObject(1878, VehicleSpawnPad.Constructor(Vector3(939.0054f, 5486.896f, 87.45804f), Vector3(0f, 0f, 0f)))
       TerminalToSpawnPad(173, 1878)
       ObjectToBuilding(1878, 6)
       LocalObject(1917, Terminal.Constructor(order_terminal))
@@ -391,10 +395,10 @@ object Maps {
       ObjectToBuilding(2664, 6)
       LocalObject(2665, SpawnTube.Constructor(Vector3(913.0291f, 5495.671f, 64.95399f), Vector3(0, 0, 232)))
       ObjectToBuilding(2665, 6)
-      LocalObject(1897, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1897, 6)
-      LocalObject(1898, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1898, 6)
+//      LocalObject(1897, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1897, 6)
+//      LocalObject(1898, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1898, 6)
       //      LocalObject(1759, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1759, 6)
       //      TurretToWeapon(1759, 5046)
@@ -607,10 +611,10 @@ object Maps {
       ObjectToBuilding(2677, 7)
       LocalObject(2678, SpawnTube.Constructor(Vector3(1779.606f, 5733.468f, 29.73853f), Vector3(0, 0, 232)))
       ObjectToBuilding(2678, 7)
-      LocalObject(168, ProximityTerminal.Constructor(adv_med_terminal))
-      ObjectToBuilding(168, 7)
-      LocalObject(1899, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1899, 7)
+//      LocalObject(168, ProximityTerminal.Constructor(adv_med_terminal))
+//      ObjectToBuilding(168, 7)
+//      LocalObject(1899, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1899, 7)
       //      LocalObject(1769, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1769, 7)
       //      TurretToWeapon(1769, 5026)
@@ -792,10 +796,10 @@ object Maps {
       ObjectToBuilding(2704, 8)
       LocalObject(2705, SpawnTube.Constructor(Vector3(3339.872f, 3567.642f, 29.89054f), Vector3(0, 0, 232)))
       ObjectToBuilding(2705, 8)
-      LocalObject(1904, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1904, 8)
-      LocalObject(1905, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1905, 8)
+//      LocalObject(1904, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1904, 8)
+//      LocalObject(1905, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1905, 8)
       //      LocalObject(1796, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1796, 8)
       //      TurretToWeapon(1796, 5000)
@@ -940,12 +944,12 @@ object Maps {
       ObjectToBuilding(1538, 9)
       LocalObject(176, Terminal.Constructor(air_vehicle_terminal))
       ObjectToBuilding(176, 9)
-      LocalObject(1889, VehicleSpawnPad.Constructor(Vector3(4385.925f, 5927.835f, 90.10956f), Vector3(0f, 0f, 0f)))
+      LocalObject(1889, VehicleSpawnPad.Constructor(Vector3(4385.925f, 5927.835f, 92.6356f), Vector3(0f, 0f, 0f)))
       TerminalToSpawnPad(176, 1889)
       ObjectToBuilding(1889, 9)
       LocalObject(177, Terminal.Constructor(air_vehicle_terminal))
       ObjectToBuilding(177, 9)
-      LocalObject(1890, VehicleSpawnPad.Constructor(Vector3(4406.93f, 5927.102f, 90.10956f), Vector3(0f, 0f, 0f)))
+      LocalObject(1890, VehicleSpawnPad.Constructor(Vector3(4406.93f, 5927.102f, 92.6356f), Vector3(0f, 0f, 0f)))
       TerminalToSpawnPad(177, 1890)
       ObjectToBuilding(1890, 9)
       LocalObject(2014, Terminal.Constructor(order_terminal))
@@ -964,10 +968,10 @@ object Maps {
       ObjectToBuilding(2725, 9)
       LocalObject(2726, SpawnTube.Constructor(Vector3(4397.223f, 5902.853f, 70.13155f), Vector3(0, 0, 232)))
       ObjectToBuilding(2726, 9)
-      LocalObject(1909, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1909, 9)
-      LocalObject(1910, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1910, 9)
+//      LocalObject(1909, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1909, 9)
+//      LocalObject(1910, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1910, 9)
       //      LocalObject(1829, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1829, 9)
       //      TurretToWeapon(1829, 5058)
@@ -1180,10 +1184,10 @@ object Maps {
       ObjectToBuilding(2713, 10)
       LocalObject(2714, SpawnTube.Constructor(Vector3(3757.185f, 5477.432f, 78.62722f), Vector3(0, 0, 232)))
       ObjectToBuilding(2714, 10)
-      LocalObject(169, ProximityTerminal.Constructor(adv_med_terminal))
-      ObjectToBuilding(169, 10)
-      LocalObject(1906, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1906, 10)
+//      LocalObject(169, ProximityTerminal.Constructor(adv_med_terminal))
+//      ObjectToBuilding(169, 10)
+//      LocalObject(1906, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1906, 10)
       //      LocalObject(1812, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1812, 10)
       //      TurretToWeapon(1812, 5031)
@@ -1357,10 +1361,10 @@ object Maps {
       ObjectToBuilding(2741, 11)
       LocalObject(2742, SpawnTube.Constructor(Vector3(4818.093f, 5207.351f, 55.97693f), Vector3(0, 0, 232)))
       ObjectToBuilding(2742, 11)
-      LocalObject(1912, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1912, 11)
-      LocalObject(1913, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1913, 11)
+//      LocalObject(1912, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1912, 11)
+//      LocalObject(1913, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1913, 11)
       //      LocalObject(1843, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1843, 11)
       //      TurretToWeapon(1843, 5012)
@@ -1505,12 +1509,12 @@ object Maps {
       ObjectToBuilding(1677, 12)
       LocalObject(178, Terminal.Constructor(air_vehicle_terminal))
       ObjectToBuilding(178, 12)
-      LocalObject(1893, VehicleSpawnPad.Constructor(Vector3(6546.232f, 4590.508f, 58.17188f), Vector3(0f, 0f, 0f)))
+      LocalObject(1893, VehicleSpawnPad.Constructor(Vector3(6546.232f, 4590.508f, 60.69792f), Vector3(0f, 0f, 0f)))
       TerminalToSpawnPad(178, 1893)
       ObjectToBuilding(1893, 12)
       LocalObject(179, Terminal.Constructor(air_vehicle_terminal))
       ObjectToBuilding(179, 12)
-      LocalObject(1894, VehicleSpawnPad.Constructor(Vector3(6562.567f, 4577.281f, 58.17188f), Vector3(0f, 0f, 0f)))
+      LocalObject(1894, VehicleSpawnPad.Constructor(Vector3(6562.567f, 4577.281f, 60.69792f), Vector3(0f, 0f, 0f)))
       TerminalToSpawnPad(179, 1894)
       ObjectToBuilding(1894, 12)
       LocalObject(2068, Terminal.Constructor(order_terminal))
@@ -1529,10 +1533,10 @@ object Maps {
       ObjectToBuilding(2760, 12)
       LocalObject(2761, SpawnTube.Constructor(Vector3(6577.753f, 4615.362f, 38.19387f), Vector3(0, 0, 232)))
       ObjectToBuilding(2761, 12)
-      LocalObject(1914, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1914, 12)
-      LocalObject(1915, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1915, 12)
+//      LocalObject(1914, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1914, 12)
+//      LocalObject(1915, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1915, 12)
       //      LocalObject(1862, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1862, 12)
       //      TurretToWeapon(1862, 5064)
@@ -1745,10 +1749,10 @@ object Maps {
       ObjectToBuilding(2767, 13)
       LocalObject(2768, SpawnTube.Constructor(Vector3(7037.702f, 5313.572f, 27.85578f), Vector3(0, 0, 232)))
       ObjectToBuilding(2768, 13)
-      LocalObject(171, ProximityTerminal.Constructor(adv_med_terminal))
-      ObjectToBuilding(171, 13)
-      LocalObject(1916, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1916, 13)
+//      LocalObject(171, ProximityTerminal.Constructor(adv_med_terminal))
+//      ObjectToBuilding(171, 13)
+//      LocalObject(1916, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1916, 13)
       //      LocalObject(1870, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1870, 13)
       //      TurretToWeapon(1870, 5041)
@@ -1890,12 +1894,12 @@ object Maps {
       ObjectToBuilding(1399, 14)
       LocalObject(174, Terminal.Constructor(air_vehicle_terminal))
       ObjectToBuilding(174, 14)
-      LocalObject(1883, VehicleSpawnPad.Constructor(Vector3(3131.468f, 2212.988f, 83.09319f), Vector3(0f, 0f, 0f)))
+      LocalObject(1883, VehicleSpawnPad.Constructor(Vector3(3131.468f, 2212.988f, 85.61923f), Vector3(0f, 0f, 0f)))
       TerminalToSpawnPad(174, 1883)
       ObjectToBuilding(1883, 14)
       LocalObject(175, Terminal.Constructor(air_vehicle_terminal))
       ObjectToBuilding(175, 14)
-      LocalObject(1884, VehicleSpawnPad.Constructor(Vector3(3131.834f, 2234.003f, 83.09319f), Vector3(0f, 0f, 0f)))
+      LocalObject(1884, VehicleSpawnPad.Constructor(Vector3(3131.834f, 2234.003f, 85.61923f), Vector3(0f, 0f, 0f)))
       TerminalToSpawnPad(175, 1884)
       ObjectToBuilding(1884, 14)
       LocalObject(1963, Terminal.Constructor(order_terminal))
@@ -1914,10 +1918,10 @@ object Maps {
       ObjectToBuilding(2695, 14)
       LocalObject(2696, SpawnTube.Constructor(Vector3(3107.053f, 2222.271f, 63.11518f), Vector3(0, 0, 232)))
       ObjectToBuilding(2696, 14)
-      LocalObject(1902, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1902, 14)
-      LocalObject(1903, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1903, 14)
+//      LocalObject(1902, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1902, 14)
+//      LocalObject(1903, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1903, 14)
       //      LocalObject(1792, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1792, 14)
       //      TurretToWeapon(1792, 5052)
@@ -2094,10 +2098,10 @@ object Maps {
       ObjectToBuilding(2716, 15)
       LocalObject(2717, SpawnTube.Constructor(Vector3(4034.174f, 2491.768f, 70.14147f), Vector3(0, 0, 232)))
       ObjectToBuilding(2717, 15)
-      LocalObject(1907, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1907, 15)
-      LocalObject(1908, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1908, 15)
+//      LocalObject(1907, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1907, 15)
+//      LocalObject(1908, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1908, 15)
       //      LocalObject(1819, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1819, 15)
       //      TurretToWeapon(1819, 5006)
@@ -2310,10 +2314,10 @@ object Maps {
       ObjectToBuilding(2738, 16)
       LocalObject(2739, SpawnTube.Constructor(Vector3(4744.568f, 2147.185f, 64.54427f), Vector3(0, 0, 232)))
       ObjectToBuilding(2739, 16)
-      LocalObject(170, ProximityTerminal.Constructor(adv_med_terminal))
-      ObjectToBuilding(170, 16)
-      LocalObject(1911, ProximityTerminal.Constructor(medical_terminal))
-      ObjectToBuilding(1911, 16)
+//      LocalObject(170, ProximityTerminal.Constructor(adv_med_terminal))
+//      ObjectToBuilding(170, 16)
+//      LocalObject(1911, ProximityTerminal.Constructor(medical_terminal))
+//      ObjectToBuilding(1911, 16)
       //      LocalObject(1841, FacilityTurret.Constructor(manned_turret))
       //      ObjectToBuilding(1841, 16)
       //      TurretToWeapon(1841, 5036)
@@ -4694,6 +4698,10 @@ object Maps {
 
 
   val map5 = new ZoneMap("map05") {
+    Building12()
+    def Building12() : Unit = { // Bel -  - GUID 23
+      LocalBuilding(12, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(0f, 0f, 0f))))
+    }
     Projectiles(this)
   }
 
@@ -5132,6 +5140,10 @@ object Maps {
   }
 
   val map7 = new ZoneMap("map07") {
+    Building17()
+    def Building17() : Unit = { // Ran -  - GUID 34
+      LocalBuilding(17, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(0f, 0f, 0f))))
+    }
     Projectiles(this)
   }
 
@@ -5528,11 +5540,11 @@ object Maps {
   }
 
   val ugd03 = new ZoneMap("ugd03") {
-    Building10359()
-
-    def Building10359() : Unit = { // Red SE (ID: 104)
-      LocalBuilding(10359, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(5636f, 6621f, 70f)))) //todo ? change ?
-    }
+//    Building10359()
+//
+//    def Building10359() : Unit = { // Red SE (ID: 104)
+//      LocalBuilding(10359, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(5636f, 6621f, 70f)))) //todo ? change ?
+//    }
     Projectiles(this)
   }
 

@@ -9,74 +9,32 @@ import net.psforever.types.PlanetSideEmpire
 object Zones {
   val z1 = new Zone("z1", Maps.map1, 1)
 
-  val z2 = new Zone("z2", Maps.map2, 2)
+  val z2 = new Zone("z2", Maps.map2, 2){
+        override def Init(implicit context : ActorContext) : Unit = {
+          super.Init(context)
 
-  val z3 = new Zone("z3", Maps.map3, 3){
-    override def Init(implicit context : ActorContext) : Unit = {
-      super.Init(context)
+          import net.psforever.types.PlanetSideEmpire
+          Building(10).get.Faction = PlanetSideEmpire.TR //Chac
+          Building(10).get.ModelId = 45
+        }
+      }
 
-      import net.psforever.types.PlanetSideEmpire
-      Building(5).get.Faction = PlanetSideEmpire.NC //Ekera
-      Building(5).get.ModelId = 7
-    }
-  }
+  val z3 = new Zone("z3", Maps.map3, 3)//{
+//    override def Init(implicit context : ActorContext) : Unit = {
+//      super.Init(context)
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Building(5).get.Faction = PlanetSideEmpire.NC //Ekera
+//      Building(5).get.ModelId = 7
+//    }
+//  }
 
   val z4 = new Zone("z4", Maps.map4, 4) {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-//      var silo = GUID(2653).get.asInstanceOf[ResourceSilo]
-//      silo.Actor ! ResourceSilo.UpdateChargeLevel(800)
-//      silo = GUID(2651).get.asInstanceOf[ResourceSilo]
-//      silo.Actor ! ResourceSilo.UpdateChargeLevel(149)
-//      silo = GUID(2652).get.asInstanceOf[ResourceSilo]
-//      silo.Actor ! ResourceSilo.UpdateChargeLevel(900)
-//      silo = GUID(2655).get.asInstanceOf[ResourceSilo]
-//      silo.Actor ! ResourceSilo.UpdateChargeLevel(700)
-////      silo = GUID(2656).get.asInstanceOf[ResourceSilo]
-////      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
-////      silo = GUID(2658).get.asInstanceOf[ResourceSilo]
-////      silo.Actor ! ResourceSilo.UpdateChargeLevel(900)
-////      silo = GUID(2660).get.asInstanceOf[ResourceSilo]
-////      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
-
-
 
       import net.psforever.types.PlanetSideEmpire
-//      Building(5).get.Faction = PlanetSideEmpire.NEUTRAL //Akkan
-//      Building(5).get.ModelId = 24
-//      //      Building(6).get.Faction = PlanetSideEmpire.TR //Baal
-//      //      Building(6).get.ModelId = 42
-//      //      Building(7).get.Faction = PlanetSideEmpire.TR //Dagon
-//      //      Building(7).get.ModelId = 27
-//      Building(9).get.Faction = PlanetSideEmpire.NC //Girru
-//      Building(9).get.ModelId = 48
-//      Building(10).get.Faction = PlanetSideEmpire.TR //Hanish
-//      Building(10).get.ModelId = 30
-//      Building(11).get.Faction = PlanetSideEmpire.VS //Irkalla
-//      Building(11).get.ModelId = 21
-//      Building(13).get.Faction = PlanetSideEmpire.VS //Lahar
-//      Building(13).get.ModelId = 36
-//      Building(25).get.Faction = PlanetSideEmpire.VS //Gate Outpost Watch Tower (North of Forseral Warpgate)
-//      Building(25).get.ModelId = 74
-//      Building(33).get.Faction = PlanetSideEmpire.TR //East Girru Gun Tower
-//      Building(33).get.ModelId = 62
-//      Building(34).get.Faction = PlanetSideEmpire.TR //SE Hanish Gun Tower
-//      Building(34).get.ModelId = 60
-//      Building(35).get.Faction = PlanetSideEmpire.TR //Northeast Akkan Watch tower
-//      Building(35).get.ModelId = 69
-//      Building(36).get.Faction = PlanetSideEmpire.VS //West Girru Air Tower
-//      Building(36).get.ModelId = 83
-//      Building(51).get.Faction = PlanetSideEmpire.TR //Baal bunker
-//      Building(51).get.ModelId = 4
-//      Building(55).get.Faction = PlanetSideEmpire.NC //South Irkalla Air Tower
-//      Building(55).get.ModelId = 86
-//      Building(56).get.Faction = PlanetSideEmpire.NC //Southwest Hanish Air Tower
-//      Building(56).get.ModelId = 82
-//      Building(59).get.Faction = PlanetSideEmpire.NC //Gate Outpost Watch Tower (South of Cyssor Warpgate)
-//      Building(59).get.ModelId = 73
-//      Building(65).get.Faction = PlanetSideEmpire.TR //West Hanish Gun Tower
-//      Building(65).get.ModelId = 56
 
       Building(5).get.Faction = PlanetSideEmpire.TR //Akkan
       Building(6).get.Faction = PlanetSideEmpire.TR //Baal
@@ -205,7 +163,15 @@ object Zones {
     }
   }
 
-  val z5 = new Zone("z5", Maps.map5, 5)
+  val z5 = new Zone("z5", Maps.map5, 5){
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+
+      import net.psforever.types.PlanetSideEmpire
+      Building(12).get.Faction = PlanetSideEmpire.VS //Bel
+      Building(12).get.ModelId = 23
+    }
+  }
 
   val z6 = new Zone("z6", Maps.map6, 6) {
     override def Init(implicit context : ActorContext) : Unit = {
@@ -226,7 +192,15 @@ object Zones {
     }
   }
 
-  val z7 = new Zone("z7", Maps.map7, 7)
+  val z7 = new Zone("z7", Maps.map7, 7){
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+
+      import net.psforever.types.PlanetSideEmpire
+      Building(17).get.Faction = PlanetSideEmpire.TR //Ran
+      Building(17).get.ModelId = 34
+    }
+  }
 
   val z8 = new Zone("z8", Maps.map8, 8)
 
@@ -288,15 +262,15 @@ object Zones {
 
   val c2 = new Zone("c2", Maps.ugd02, 24)
 
-  val c3 = new Zone("c3", Maps.ugd03, 25){
-    override def Init(implicit context : ActorContext) : Unit = {
-      super.Init(context)
-
-      import net.psforever.types.PlanetSideEmpire
-      Building(10359).get.Faction = PlanetSideEmpire.TR //Redoubt SE
-      Building(10359).get.ModelId = 104
-    }
-  }
+  val c3 = new Zone("c3", Maps.ugd03, 25)//{
+//    override def Init(implicit context : ActorContext) : Unit = {
+//      super.Init(context)
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Building(10359).get.Faction = PlanetSideEmpire.TR //Redoubt SE
+//      Building(10359).get.ModelId = 104
+//    }
+//  }
 
   val c4 = new Zone("c4", Maps.ugd04, 26)
 

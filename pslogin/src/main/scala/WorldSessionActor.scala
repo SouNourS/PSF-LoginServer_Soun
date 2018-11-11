@@ -3239,6 +3239,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, yaw, pitch, yaw_upper, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
       if(player.isAlive) {
+        if (player.death_by == -1) {
+          sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "", "KICKED ! ", None))
+          Thread.sleep(300)
+          sendResponse(DropSession(sessionId, "kick by GM"))
+        }
         player.Position = pos
         player.Velocity = vel
         player.Orientation = Vector3(player.Orientation.x, pitch, yaw)
@@ -3369,7 +3374,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val trimContents = contents.trim
       val trimRecipient = recipient.trim
       //TODO messy on/off strings may work
-      if(messagetype == ChatMessageType.CMT_FLY) {
+      if(messagetype == ChatMessageType.CMT_FLY && admin) {
         makeReply = true
         if(trimContents.equals("on")) {
           flying = true
@@ -3378,7 +3383,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           flying = false
         }
       }
-      else if(messagetype == ChatMessageType.CMT_SPEED) {
+      else if(messagetype == ChatMessageType.CMT_SPEED && admin) {
         makeReply = true
         speed = {
           try {
@@ -3391,7 +3396,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         }
       }
-      else if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE) {
+      else if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE && admin) {
         makeReply = true
         if(trimContents.equals("on")) {
           spectator = true
@@ -3416,7 +3421,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       CSRWarp.read(traveler, msg) match {
         case (true, pos) =>
-          if(player.isAlive) {
+          if(player.isAlive && admin) {
             PlayerActionsToCancel()
             sendResponse(PlayerStateShiftMessage(ShiftState(0, pos, player.Orientation.z, None)))
             player.Position = pos
@@ -3465,6 +3470,28 @@ class WorldSessionActor extends Actor with MDCContextAware {
         makeReply = false
         if(player.isBackpack) { //player is on deployment screen (either dead or deconstructed)
           cluster ! Zone.Lattice.RequestSpawnPoint(continent.Number, player, 2)
+        }
+      }
+      else if (trimContents.equals("!list") && admin) {
+        StartBundlingPackets()
+        sendResponse(ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+          "\\#8ID / Name (faction) Cont-PosX/PosY/PosZ", note_contents))
+        continent.LivePlayers.filterNot(_.GUID == player.GUID).sortBy(_.Name).foreach(char => {
+          sendResponse(ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+            "GUID / Name: " + char.GUID.guid + " / " + char.Name + " (" + char.Faction + ") " +
+              char.Continent + "-" + char.Position.x.toInt + "/" + char.Position.y.toInt + "/" + char.Position.z.toInt, note_contents))
+        })
+        StopBundlingPackets()
+      }
+      else if (trimContents.contains("!kick") && admin) {
+        val GUID : Int = contents.drop(contents.indexOf(" ") + 1).toInt
+        continent.GUID(PlanetSideGUID(GUID)) match {
+          case Some(player: Player) =>
+            player.death_by = -1
+          case _ =>
+            log.info("It's only for the players, what else could you kick out?")
+            sendResponse(ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
+              "\\#8It's only for the players, what else could you kick out?", note_contents))
         }
       }
       else if(trimRecipient.equals("tr")) {
