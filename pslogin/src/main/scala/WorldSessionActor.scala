@@ -573,6 +573,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       spawn_tube.Owner match {
         case building : Building =>
           log.info(s"Zone.Lattice.SpawnPoint: spawn point on $zone_id in building ${building.Id} selected (faction : ${building.Faction})")
+          pos = pos + (Vector3(0, 0, 1.5f))
           building.Amenities.foreach(amenity => {
             amenity.Definition match {
               case GlobalDefinitions.resource_silo =>
