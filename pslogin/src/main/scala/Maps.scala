@@ -637,6 +637,12 @@ object Maps {
       LocalBuilding(8, FoundationBuilder(Building.Structure(StructureType.Facility, Vector3(3318f, 3574f, 37.19054f))))
       LocalObject(222, CaptureTerminal.Constructor(capture_terminal))
       ObjectToBuilding(222, 8)
+
+      LocalObject(180, Door.Constructor) // cc
+      ObjectToBuilding(180, 8)
+      LocalObject(181, Door.Constructor) // cc
+      ObjectToBuilding(181, 8)
+
       LocalObject(3069, Terminal.Constructor(vehicle_terminal_combined))
       LocalObject(1885, VehicleSpawnPad.Constructor(Vector3(3301.3281f, 3490.9219f, 37.8125f), Vector3(0.0f, 354.375f, 45.0f)))
       TerminalToSpawnPad(3069, 1885)

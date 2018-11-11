@@ -197,7 +197,7 @@ object Zones {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
-      Building(17).get.Faction = PlanetSideEmpire.TR //Ran
+      Building(17).get.Faction = PlanetSideEmpire.NC //Ran
       Building(17).get.ModelId = 34
     }
   }
