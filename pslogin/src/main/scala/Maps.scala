@@ -2403,7 +2403,7 @@ object Maps {
       //      ObjectToBuilding(1799, 17)
       //      TurretToWeapon(1799, 5077)
     }
-//
+
 //    Building18()
 //    def Building18() : Unit = { // W_Neti_Tower - tower_a - GUID 59
 //      LocalBuilding(18, FoundationBuilder(Building.Structure(StructureType.Tower, Vector3(4252f, 2648f, 108.6534f))))

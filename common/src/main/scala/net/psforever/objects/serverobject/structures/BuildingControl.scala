@@ -85,7 +85,7 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
       }
 
       // Lahar PTS v3
-      if(building.Zone.Number == 4 && building.ModelId == 36) spawnTubeActive = false
+//      if(building.Zone.Number == 4 && building.ModelId == 36) spawnTubeActive = false
 
 //      println(building.Zone.Number, building.ModelId, building.Faction)
 

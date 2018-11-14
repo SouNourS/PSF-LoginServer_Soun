@@ -905,7 +905,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //LoadMapMessage will cause the client to send back a BeginZoningMessage packet (see below)
       sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, 3770441820L))
       // PTS v3
-      if(player.Faction == PlanetSideEmpire.VS) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(36), 38, 0))
+//      if(player.Faction == PlanetSideEmpire.VS) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(36), 38, 0))
       AvatarCreate() //important! the LoadMapMessage must be processed by the client before the avatar is created
 
     case PlayerLoaded(tplayer) =>
@@ -3473,7 +3473,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       else if (trimContents.equals("!list") && admin) {
-        StartBundlingPackets()
+//        StartBundlingPackets()
         sendResponse(ChatMsg(ChatMessageType.CMT_TELL, has_wide_contents, "Server",
           "\\#8ID / Name (faction) Cont-PosX/PosY/PosZ", note_contents))
         continent.LivePlayers.filterNot(_.GUID == player.GUID).sortBy(_.Name).foreach(char => {
@@ -3481,7 +3481,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             "GUID / Name: " + char.GUID.guid + " / " + char.Name + " (" + char.Faction + ") " +
               char.Continent + "-" + char.Position.x.toInt + "/" + char.Position.y.toInt + "/" + char.Position.z.toInt, note_contents))
         })
-        StopBundlingPackets()
+//        StopBundlingPackets()
       }
       else if (trimContents.contains("!kick") && admin) {
         val GUID : Int = contents.drop(contents.indexOf(" ") + 1).toInt
@@ -3536,7 +3536,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               case GlobalDefinitions.resource_silo =>
                 val r = new scala.util.Random
                 val silo = amenity.asInstanceOf[ResourceSilo]
-                val ntu: Int = 500 + r.nextInt(500) - silo.ChargeLevel
+                val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
                 silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
 
               case _ => ;

@@ -33,7 +33,7 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
 
       // todo: This is just a temporary solution to drain NTU over time. When base object destruction is properly implemented NTU should be deducted when base objects repair themselves
       val r = new scala.util.Random
-      context.system.scheduler.schedule(5 + r.nextInt(5) second, 12 second, self, ResourceSilo.UpdateChargeLevel(-1))
+      context.system.scheduler.schedule(5 + r.nextInt(5) second, 60 second, self, ResourceSilo.UpdateChargeLevel(-1))
 //      context.system.scheduler.schedule(1 + r.nextInt(5) second, 0.5 second, self, ResourceSilo.UpdateChargeLevel(-1))
       context.become(Processing)
 
@@ -78,9 +78,9 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
       if(resourceSilo.ChargeLevel == 0 && siloChargeBeforeChange > 0) {
         // Oops, someone let the base run out of power. Shut it all down.
         //todo: Make base neutral if silo hits zero NTU
-        avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id,
-          AvatarAction.SetEmpire(PlanetSideGUID(-1), PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), PlanetSideEmpire.NEUTRAL))
         // PTS v3 or not
+//        avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id,
+//          AvatarAction.SetEmpire(PlanetSideGUID(-1), PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), PlanetSideEmpire.NEUTRAL))
 //        avatarService ! AvatarServiceMessage(resourceSilo.Owner.asInstanceOf[Building].Zone.Id,
 //          AvatarAction.PlanetsideAttribute(PlanetSideGUID(resourceSilo.Owner.asInstanceOf[Building].ModelId), 67, 0))
 
