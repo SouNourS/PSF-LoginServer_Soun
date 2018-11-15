@@ -645,7 +645,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         player.FirstLoad = false
         if(player.Faction==PlanetSideEmpire.NC) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4612f, 6752f, 32f), Vector3(0f, 357f, 227f), 0)} // NC
         else if(player.Faction==PlanetSideEmpire.VS) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4780f, 6716f, 29f), Vector3(0f, 357f, 180f), 0)} // VS
-        else if(player.Faction==PlanetSideEmpire.TR) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4164f, 4418f, 66f), Vector3(0f, 345f, 326f), 0)} // TR
+//        else if(player.Faction==PlanetSideEmpire.TR) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4164f, 4418f, 66f), Vector3(0f, 345f, 326f), 0)} // TR
+        else if(player.Faction==PlanetSideEmpire.TR) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(903f, 5508f, 88f), Vector3(0f, 354.375f, 157.5f), 0)} // TR
       }
       else {
         RequestSanctuaryZoneSpawn(player, zone_number)
@@ -2802,7 +2803,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val avatar = Avatar(name, empire, gender, head, voice)
         var tempPos = Vector3(0f, 0f, 0f)
         if (empire == PlanetSideEmpire.TR) {
-          tempPos = Vector3(3749f, 5470f, 79f)
+          tempPos = Vector3(903f, 5508f, 88f)
         } else if (empire == PlanetSideEmpire.NC) {
           tempPos = Vector3(4405f, 5894f, 70f)
         } else if (empire == PlanetSideEmpire.VS) {
@@ -2892,7 +2893,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           var tempPos = Vector3(0f, 0f, 0f)
           if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 1) {
             tempEmpire = PlanetSideEmpire.TR
-            tempPos = Vector3(3749f, 5470f, 79f)
+            tempPos = Vector3(903f, 5508f, 88f)
           } else if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 2) {
             tempEmpire = PlanetSideEmpire.NC
             tempPos = Vector3(4405f, 5894f, 70f)
