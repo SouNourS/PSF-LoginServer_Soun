@@ -176,14 +176,14 @@ class LocalService extends Actor {
                 ntuLevel = 1
             }
 
-            if(ntuLevel > 0) {
+//            if(ntuLevel > 0) { // PTS v3
               log.info(s"Setting base ${building.ModelId} as owned by $hackedByFaction")
 
               building.Faction = hackedByFaction
               self ! LocalServiceMessage(zone.Id, LocalAction.SetEmpire(PlanetSideGUID(building.ModelId), hackedByFaction))
-            } else {
-              log.info("Base hack completed, but base was out of NTU.")
-            }
+//            } else {
+//              log.info("Base hack completed, but base was out of NTU.")
+//            }
 
             // Reset CC back to normal operation
             self ! LocalServiceMessage(zone.Id, LocalAction.HackCaptureTerminal(PlanetSideGUID(-1), zone, terminal, 0, 8L, isResecured = true))

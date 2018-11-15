@@ -579,19 +579,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
               case GlobalDefinitions.resource_silo =>
                 val silo = amenity.asInstanceOf[ResourceSilo]
                 // PTS v3
-                if(!player.FirstLoad) {
-                  time = 2 + (silo.ChargeLevel/10 - 100) / (-7) // 2 is beta, 5 is better
-                }
-                else {
-                  time = 0
-                  player.FirstLoad = false
-                }
+                time = 2 + (silo.ChargeLevel/10 - 100) / (-7) // 2 is beta, 5 is better
               case _ => ;
-                // PTS v3
-                if(player.FirstLoad) {
-                  time = 0
-                  player.FirstLoad = false
-                }
             }
           })
         case vehicle : Vehicle =>
@@ -640,13 +629,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(spawn_group == 2) {
         sendResponse(ChatMsg(ChatMessageType.CMT_OPEN, false, "", "No friendly AMS is deployed in this region.", None))
         cluster ! Zone.Lattice.RequestSpawnPoint(zone_number, player, 0)
-      }
-      else if(player.FirstLoad) {
-        player.FirstLoad = false
-        if(player.Faction==PlanetSideEmpire.NC) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4612f, 6752f, 32f), Vector3(0f, 357f, 227f), 0)} // NC
-        else if(player.Faction==PlanetSideEmpire.VS) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4780f, 6716f, 29f), Vector3(0f, 357f, 180f), 0)} // VS
-//        else if(player.Faction==PlanetSideEmpire.TR) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(4164f, 4418f, 66f), Vector3(0f, 345f, 326f), 0)} // TR
-        else if(player.Faction==PlanetSideEmpire.TR) {LoadZonePhysicalSpawnPoint(player.Continent, Vector3(903f, 5508f, 88f), Vector3(0f, 354.375f, 157.5f), 0)} // TR
       }
       else {
         RequestSanctuaryZoneSpawn(player, zone_number)
@@ -2802,64 +2784,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
         import net.psforever.types.CertificationType._
         val avatar = Avatar(name, empire, gender, head, voice)
         var tempPos = Vector3(0f, 0f, 0f)
+        var tempOri = Vector3(0f, 0f, 0f)
         if (empire == PlanetSideEmpire.TR) {
           tempPos = Vector3(903f, 5508f, 88f)
+          tempOri = Vector3(0f, 354.375f, 157.5f)
         } else if (empire == PlanetSideEmpire.NC) {
-          tempPos = Vector3(0f, 0f, 70f)
+          tempPos = Vector3(3091f, 2222f, 86f)
+          tempOri = Vector3(0f, 0f, 129.375f)
         } else if (empire == PlanetSideEmpire.VS) {
-          tempPos = Vector3(4807f, 5208f, 56f)
+          tempPos = Vector3(6579f, 4616f, 61f)
+          tempOri = Vector3(0f, 354.375f, 264.375f)
         }
-
-
-        var posXTemp : Float = -1
-        var posYTemp : Float = -1
-        continent.LivePlayers
-          .filter(tplayer => { tplayer.Faction == player.Faction })
-          .foreach(char => {
-            println(char.Position)
-            if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
-            else posXTemp = char.Position.x
-            if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
-            else posYTemp = char.Position.y
-          })
-        println(posXTemp, posYTemp)
-        player.Position = Vector3(posXTemp, posYTemp, 0f)
-
-        //    if (player.FirstLoad) {
-        {
-          //facilities, towers, and buildings
-          val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
-          continent.SpawnGroups()
-            .filter({ case ((building, _)) =>
-              building.Faction == player.Faction &&
-                buildingTypeSet.contains(building.BuildingType)
-            })
-            .toSeq
-            .sortBy({ case ((building, _)) =>
-              Vector3.DistanceSquared(player.Position, building.Position.xy)
-            })
-            .headOption match {
-            case None | Some((_, Nil)) =>
-              None
-            case Some((_, tubes)) =>
-              Some(tubes)
-          }
-        } match {
-          case Some(List(tube)) =>
-            player.Position = tube.Position
-            player.Orientation = tube.Orientation
-
-          case Some(tubes) =>
-            player.Position = tubes.head.Position
-            player.Orientation = tubes.head.Orientation
-
-          case None =>
-            println("none")
-        }
-        player.FirstLoad = false
-        //    }
-
-
 
         avatar.Certifications += StandardAssault
         avatar.Certifications += MediumAssault
@@ -2903,9 +2838,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
         InitializeDeployableQuantities(avatar) //set deployables ui elements
         AwardBattleExperiencePoints(avatar, 20000000L)
         avatar.CEP = 600000
+
         player = new Player(avatar)
+
+
         player.Position = tempPos
-        player.Orientation = Vector3(0f, 0f, 90f)
+        player.Orientation = tempOri
         player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
         player.Slot(2).Equipment = Tool(suppressor)
         player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
@@ -2918,10 +2856,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         //        player.Slot(5).Equipment.get.asInstanceOf[LockerContainer].Inventory += 0 -> SimpleItem(remote_electronics_kit)
         player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
 
-//        avatar.Implants(0).Unlocked = true
-//        avatar.Implants(0).Implant = sample
-//        avatar.Implants(1).Unlocked = true
-//        avatar.Implants(1).Implant = sample2
+        //        avatar.Implants(0).Unlocked = true
+        //        avatar.Implants(0).Implant = sample
+        //        avatar.Implants(1).Unlocked = true
+        //        avatar.Implants(1).Implant = sample2
         player.FirstLoad = true
 
         sendResponse(ActionResultMessage(true, None))
@@ -2943,65 +2881,20 @@ class WorldSessionActor extends Actor with MDCContextAware {
           import net.psforever.types.CertificationType._
           var tempEmpire = PlanetSideEmpire.NEUTRAL
           var tempPos = Vector3(0f, 0f, 0f)
+          var tempOri = Vector3(0f, 0f, 0f)
           if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 1) {
             tempEmpire = PlanetSideEmpire.TR
             tempPos = Vector3(903f, 5508f, 88f)
+            tempOri = Vector3(0f, 354.375f, 157.5f)
           } else if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 2) {
             tempEmpire = PlanetSideEmpire.NC
-            tempPos = Vector3(0f, 0f, 70f)
+            tempPos = Vector3(3091f, 2222f, 86f)
+            tempOri = Vector3(0f, 0f, 129.375f)
           } else if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 3) {
             tempEmpire = PlanetSideEmpire.VS
-            tempPos = Vector3(4807f, 5208f, 56f)
+            tempPos = Vector3(6579f, 4616f, 61f)
+            tempOri = Vector3(0f, 354.375f, 264.375f)
           }
-
-          var posXTemp : Float = -1
-          var posYTemp : Float = -1
-          continent.LivePlayers
-            .filter(tplayer => { tplayer.Faction == player.Faction })
-            .foreach(char => {
-              println(char.Position)
-              if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
-              else posXTemp = char.Position.x
-              if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
-              else posYTemp = char.Position.y
-            })
-          println(posXTemp, posYTemp)
-          player.Position = Vector3(posXTemp, posYTemp, 0f)
-
-          //    if (player.FirstLoad) {
-          {
-            //facilities, towers, and buildings
-            val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
-            continent.SpawnGroups()
-              .filter({ case ((building, _)) =>
-                building.Faction == player.Faction &&
-                  buildingTypeSet.contains(building.BuildingType)
-              })
-              .toSeq
-              .sortBy({ case ((building, _)) =>
-                Vector3.DistanceSquared(player.Position, building.Position.xy)
-              })
-              .headOption match {
-              case None | Some((_, Nil)) =>
-                None
-              case Some((_, tubes)) =>
-                Some(tubes)
-            }
-          } match {
-            case Some(List(tube)) =>
-              player.Position = tube.Position
-              player.Orientation = tube.Orientation
-
-            case Some(tubes) =>
-              player.Position = tubes.head.Position
-              player.Orientation = tubes.head.Orientation
-
-            case None =>
-              println("none")
-          }
-          player.FirstLoad = false
-          //    }
-
 
 
           if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId <= 3) {
@@ -3013,22 +2906,47 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatar.Certifications += MediumAssault
             avatar.Certifications += StandardExoSuit
             avatar.Certifications += AgileExoSuit
+            avatar.Certifications += ReinforcedExoSuit
             avatar.Certifications += ATV
             //        avatar.Certifications += Harasser
             avatar.Certifications += InfiltrationSuit
+            avatar.Certifications += UniMAX
             avatar.Certifications += Medical
             avatar.Certifications += Engineering
+            avatar.Certifications += CombatEngineering
+            avatar.Certifications += FortificationEngineering
+            avatar.Certifications += AssaultEngineering
             avatar.Certifications += Hacking
-            //
+            avatar.Certifications += AdvancedHacking
+
+            avatar.Certifications += Sniping
+            avatar.Certifications += AntiVehicular
+            avatar.Certifications += HeavyAssault
+            avatar.Certifications += SpecialAssault
+            avatar.Certifications += EliteAssault
             avatar.Certifications += GroundSupport
+            avatar.Certifications += GroundTransport
+            avatar.Certifications += Flail
+            avatar.Certifications += Switchblade
+            avatar.Certifications += AssaultBuggy
+            avatar.Certifications += ArmoredAssault1
+            avatar.Certifications += ArmoredAssault2
+            avatar.Certifications += AirCavalryScout
+            avatar.Certifications += AirCavalryAssault
+            avatar.Certifications += AirCavalryInterceptor
+            avatar.Certifications += AirSupport
+            avatar.Certifications += GalaxyGunship
+            avatar.Certifications += Phantasm
 
             this.avatar = avatar
             InitializeDeployableQuantities(avatar) //set deployables ui elements
 
             AwardBattleExperiencePoints(avatar, 197754L)
             player = new Player(avatar)
+
+
             player.Position = tempPos
-            player.Orientation = Vector3(0f, 0f, 90f)
+            player.Orientation = tempOri
             player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
             player.Slot(2).Equipment = Tool(suppressor)
             player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
@@ -6805,6 +6723,53 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * It adds the `WSA`-current `Player` to the current zone and sends out the expected packets.
     */
   def AvatarCreate() : Unit = {
+    if (player.FirstLoad) {
+      var posXTemp : Float = -1
+      var posYTemp : Float = -1
+      continent.LivePlayers
+        .filter(tplayer => { tplayer.Faction == player.Faction })
+        .foreach(char => {
+          println(char.Position)
+          if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
+          else posXTemp = char.Position.x
+          if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
+          else posYTemp = char.Position.y
+        })
+      if(posXTemp != -1) player.Position = Vector3(posXTemp, posYTemp, 0f)
+
+      {
+        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+        continent.SpawnGroups()
+          .filter({ case ((building, _)) =>
+            building.Faction == player.Faction &&
+              buildingTypeSet.contains(building.BuildingType)
+          })
+          .toSeq
+          .sortBy({ case ((building, _)) =>
+            Vector3.DistanceSquared(player.Position, building.Position.xy)
+          })
+          .headOption match {
+          case None | Some((_, Nil)) =>
+            None
+          case Some((_, tubes)) =>
+            Some(tubes)
+        }
+      } match {
+        case Some(List(tube)) =>
+          player.Position = tube.Position + (Vector3(0, 0, 1.5f))
+          player.Orientation = tube.Orientation
+
+        case Some(tubes) =>
+          player.Position = tubes.head.Position + (Vector3(0, 0, 1.5f))
+          player.Orientation = tubes.head.Orientation
+
+        case None =>
+          log.info("WTF?!")
+      }
+      player.FirstLoad = false
+    }
+
+
     player.VehicleSeated = None //TODO temp, until vehicle gating; unseat player else constructor data is messed up
     player.Spawn
     player.Health = player.MaxHealth //TODO temp
@@ -6812,13 +6777,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     val packet = player.Definition.Packet
     val dcdata = packet.DetailedConstructorData(player).get
     val player_guid = player.GUID
-//    // PTS v3
-//    if (player.FirstLoad) {
-//      cluster ! Zone.Lattice.RequestSpawnPoint(4, player, 0)
-////      player.FirstLoad = false
-//    } else {
-      sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, player_guid, dcdata))
-//    }
+    sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, player_guid, dcdata))
     continent.Population ! Zone.Population.Spawn(avatar, player)
     avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.LoadPlayer(player_guid, ObjectClass.avatar, player_guid, packet.ConstructorData(player).get, None))
     log.debug(s"ObjectCreateDetailedMessage: $dcdata")

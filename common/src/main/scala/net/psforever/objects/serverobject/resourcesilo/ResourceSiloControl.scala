@@ -33,8 +33,8 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
 
       // todo: This is just a temporary solution to drain NTU over time. When base object destruction is properly implemented NTU should be deducted when base objects repair themselves
       val r = new scala.util.Random
-//      context.system.scheduler.schedule(5 + r.nextInt(5) second, 60 second, self, ResourceSilo.UpdateChargeLevel(-1))
-      context.system.scheduler.schedule(1 + r.nextInt(5) second, 0.5 second, self, ResourceSilo.UpdateChargeLevel(-1))
+      context.system.scheduler.schedule(5 + r.nextInt(5) second, 60 second, self, ResourceSilo.UpdateChargeLevel(-1))
+//      context.system.scheduler.schedule(1 + r.nextInt(5) second, 0.5 second, self, ResourceSilo.UpdateChargeLevel(-1))
       context.become(Processing)
 
     case _ => ;
