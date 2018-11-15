@@ -103,7 +103,7 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
         spawn_tubes_normal = spawnTubeActive,
         force_dome_active = false,
         lattice_benefit = 18,
-        cavern_benefit = 56, //!! Field > 0 will cause malformed packet. See class def.
+        cavern_benefit = 48, //!! Field > 0 will cause malformed packet. See class def.
         unk4 = Nil,
         unk5 = 0,
         unk6 = false,

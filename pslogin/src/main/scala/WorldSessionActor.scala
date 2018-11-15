@@ -520,8 +520,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val popNC = poplist.count(_.faction == PlanetSideEmpire.NC)
       val popVS = poplist.count(_.faction == PlanetSideEmpire.VS)
       // StopBundlingPackets() is called on ClientInitializationComplete
-      StartBundlingPackets()
+//      StartBundlingPackets()
       zone.Buildings.foreach({ case (id, building) => initBuilding(continentNumber, id, building) })
+//      StopBundlingPackets()
+      Thread.sleep(100)
+      StartBundlingPackets()
       sendResponse(ZonePopulationUpdateMessage(continentNumber, 414, 138, popTR, 138, popNC, 138, popVS, 138, popBO))
       sendResponse(ContinentalLockUpdateMessage(continentNumber, PlanetSideEmpire.NEUTRAL))
       //CaptureFlagUpdateMessage()
@@ -2550,6 +2553,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     //TODO if Medkit does not have shortcut, add to a free slot or write over slot 64
     sendResponse(CreateShortcutMessage(guid, 1, 0, true, Shortcut.MEDKIT))
     sendResponse(ChangeShortcutBankMessage(guid, 0))
+    StopBundlingPackets()
+    Thread.sleep(100)
+    StartBundlingPackets()
     //FavoritesMessage
     for (i : Int <- 0 to 14) {
       player.LoadLoadout(i) match {
@@ -2561,6 +2567,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         case _ => ;
       }
     }
+    StopBundlingPackets()
+    Thread.sleep(100)
+    StartBundlingPackets()
     sendResponse(SetChatFilterMessage(ChatChannel.Local, false, ChatChannel.values.toList)) //TODO will not always be "on" like this
     deadState = DeadState.Alive
     sendResponse(AvatarDeadStateMessage(DeadState.Alive, 0, 0, tplayer.Position, player.Faction, true))
@@ -2569,6 +2578,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //    (1 to 73).foreach(i => { PTS v3
 //      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
 //    })
+    StopBundlingPackets()
+    Thread.sleep(100)
+    StartBundlingPackets()
     (0 to 30).foreach(i => {
       //TODO 30 for a new character only?
       sendResponse(AvatarStatisticsMessage(2, Statistics(0L)))
@@ -2579,6 +2591,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     //MapObjectStateBlockMessage and ObjectCreateMessage?
     //TacticsMessage?
     //change the owner on our deployables (re-draw the icons for our deployables too)
+    StopBundlingPackets()
+    Thread.sleep(100)
+    StartBundlingPackets()
     val name = tplayer.Name
     val faction = tplayer.Faction
     continent.DeployableList
@@ -3076,6 +3091,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           )
         )
       })
+      StopBundlingPackets()
+      Thread.sleep(100)
+      StartBundlingPackets()
       //load active players in zone
       continent.LivePlayers
         .filterNot(tplayer => { tplayer.GUID == player.GUID || tplayer.VehicleSeated.nonEmpty })
@@ -6480,9 +6498,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def initBuilding(continentNumber : Int, buildingNumber : Int, building : Building) : Unit = {
     building.BuildingType match {
       case StructureType.WarpGate =>
+        StartBundlingPackets()
         initGate(continentNumber, buildingNumber, building)
+        StopBundlingPackets()
       case _ =>
+        StartBundlingPackets()
         initFacility(continentNumber, buildingNumber, building)
+        StopBundlingPackets()
     }
   }
 
@@ -6729,7 +6751,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       continent.LivePlayers
         .filter(tplayer => { tplayer.Faction == player.Faction })
         .foreach(char => {
-          println(char.Position)
           if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
           else posXTemp = char.Position.x
           if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
