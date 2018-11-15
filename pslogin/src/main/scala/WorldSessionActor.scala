@@ -2805,10 +2805,62 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if (empire == PlanetSideEmpire.TR) {
           tempPos = Vector3(903f, 5508f, 88f)
         } else if (empire == PlanetSideEmpire.NC) {
-          tempPos = Vector3(4405f, 5894f, 70f)
+          tempPos = Vector3(0f, 0f, 70f)
         } else if (empire == PlanetSideEmpire.VS) {
           tempPos = Vector3(4807f, 5208f, 56f)
         }
+
+
+        var posXTemp : Float = -1
+        var posYTemp : Float = -1
+        continent.LivePlayers
+          .filter(tplayer => { tplayer.Faction == player.Faction })
+          .foreach(char => {
+            println(char.Position)
+            if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
+            else posXTemp = char.Position.x
+            if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
+            else posYTemp = char.Position.y
+          })
+        println(posXTemp, posYTemp)
+        player.Position = Vector3(posXTemp, posYTemp, 0f)
+
+        //    if (player.FirstLoad) {
+        {
+          //facilities, towers, and buildings
+          val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+          continent.SpawnGroups()
+            .filter({ case ((building, _)) =>
+              building.Faction == player.Faction &&
+                buildingTypeSet.contains(building.BuildingType)
+            })
+            .toSeq
+            .sortBy({ case ((building, _)) =>
+              Vector3.DistanceSquared(player.Position, building.Position.xy)
+            })
+            .headOption match {
+            case None | Some((_, Nil)) =>
+              None
+            case Some((_, tubes)) =>
+              Some(tubes)
+          }
+        } match {
+          case Some(List(tube)) =>
+            player.Position = tube.Position
+            player.Orientation = tube.Orientation
+
+          case Some(tubes) =>
+            player.Position = tubes.head.Position
+            player.Orientation = tubes.head.Orientation
+
+          case None =>
+            println("none")
+        }
+        player.FirstLoad = false
+        //    }
+
+
+
         avatar.Certifications += StandardAssault
         avatar.Certifications += MediumAssault
         avatar.Certifications += StandardExoSuit
@@ -2896,11 +2948,62 @@ class WorldSessionActor extends Actor with MDCContextAware {
             tempPos = Vector3(903f, 5508f, 88f)
           } else if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 2) {
             tempEmpire = PlanetSideEmpire.NC
-            tempPos = Vector3(4405f, 5894f, 70f)
+            tempPos = Vector3(0f, 0f, 70f)
           } else if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId == 3) {
             tempEmpire = PlanetSideEmpire.VS
             tempPos = Vector3(4807f, 5208f, 56f)
           }
+
+          var posXTemp : Float = -1
+          var posYTemp : Float = -1
+          continent.LivePlayers
+            .filter(tplayer => { tplayer.Faction == player.Faction })
+            .foreach(char => {
+              println(char.Position)
+              if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
+              else posXTemp = char.Position.x
+              if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
+              else posYTemp = char.Position.y
+            })
+          println(posXTemp, posYTemp)
+          player.Position = Vector3(posXTemp, posYTemp, 0f)
+
+          //    if (player.FirstLoad) {
+          {
+            //facilities, towers, and buildings
+            val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+            continent.SpawnGroups()
+              .filter({ case ((building, _)) =>
+                building.Faction == player.Faction &&
+                  buildingTypeSet.contains(building.BuildingType)
+              })
+              .toSeq
+              .sortBy({ case ((building, _)) =>
+                Vector3.DistanceSquared(player.Position, building.Position.xy)
+              })
+              .headOption match {
+              case None | Some((_, Nil)) =>
+                None
+              case Some((_, tubes)) =>
+                Some(tubes)
+            }
+          } match {
+            case Some(List(tube)) =>
+              player.Position = tube.Position
+              player.Orientation = tube.Orientation
+
+            case Some(tubes) =>
+              player.Position = tubes.head.Position
+              player.Orientation = tubes.head.Orientation
+
+            case None =>
+              println("none")
+          }
+          player.FirstLoad = false
+          //    }
+
+
+
           if (this.avatar.name.indexOf("TestCharacter") >= 0 && charId <= 3) {
             val avatar = Avatar("UnNamed" + sessionId.toString, tempEmpire, CharacterGender.Male, 41, CharacterVoice.Voice1)
             //            player.Position = Vector3(3674.8438f, 2726.789f, 91.15625f)
@@ -6709,13 +6812,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
     val packet = player.Definition.Packet
     val dcdata = packet.DetailedConstructorData(player).get
     val player_guid = player.GUID
-    // PTS v3
-    if (player.FirstLoad) {
-      cluster ! Zone.Lattice.RequestSpawnPoint(4, player, 0)
-//      player.FirstLoad = false
-    } else {
+//    // PTS v3
+//    if (player.FirstLoad) {
+//      cluster ! Zone.Lattice.RequestSpawnPoint(4, player, 0)
+////      player.FirstLoad = false
+//    } else {
       sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, player_guid, dcdata))
-    }
+//    }
     continent.Population ! Zone.Population.Spawn(avatar, player)
     avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.LoadPlayer(player_guid, ObjectClass.avatar, player_guid, packet.ConstructorData(player).get, None))
     log.debug(s"ObjectCreateDetailedMessage: $dcdata")
