@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import akka.actor.{Actor, ActorRef, Cancellable, MDCContextAware}
 import net.psforever.packet._
 import net.psforever.packet.control._
-import net.psforever.packet.game.{BattleDiagramAction, ObjectDetachMessage, _}
+import net.psforever.packet.game._
 import scodec.Attempt.{Failure, Successful}
 import scodec.bits._
 import org.log4s.{Logger, MDC}
@@ -2185,24 +2185,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(msg)
 
       case VehicleResponse.UpdateAmsSpawnPoint(list) =>
-        if(player.isBackpack) {
-          //dismiss old ams spawn point
-          ClearCurrentAmsSpawnPoint()
-          //draw new ams spawn point
-          list
-            .filter(tube => tube.Faction == player.Faction)
-            .sortBy(tube => Vector3.DistanceSquared(tube.Position, player.Position))
-            .headOption match {
-            case Some(tube) =>
-              sendResponse(
-                BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction(DiagramActionCode.StartDrawing)))
-              )
-              sendResponse(
-                BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction.drawString(tube.Position.x, tube.Position.y, 2, 0, "AMS")))
-              )
-              amsSpawnPoint = Some(tube)
-            case None => ;
-          }
+        //dismiss old ams spawn point
+        ClearCurrentAmsSpawnPoint()
+        //draw new ams spawn point
+        list
+          .filter(tube => tube.Faction == player.Faction)
+          .sortBy(tube => Vector3.DistanceSquared(tube.Position, player.Position))
+          .headOption match {
+          case Some(tube) =>
+            sendResponse(BindPlayerMessage(BindStatus.Available, "@ams", true, false, SpawnGroup.AMS, continent.Number, 5, tube.Position))
+            amsSpawnPoint = Some(tube)
+          case None => ;
         }
 
       case _ => ;
@@ -3400,10 +3393,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           context.system.scheduler.scheduleOnce(50 milliseconds, self, UnregisterCorpseOnVehicleDisembark(player))
       }
 
-    case msg @ SpawnRequestMessage(u1, u2, u3, u4, u5) =>
+    case msg @ SpawnRequestMessage(u1, spawn_type, u3, u4, zone_number) =>
       log.info(s"SpawnRequestMessage: $msg")
-      //TODO just focus on u5 and u2 for now
-      cluster ! Zone.Lattice.RequestSpawnPoint(u5.toInt, player, u2.toInt)
+      cluster ! Zone.Lattice.RequestSpawnPoint(zone_number.toInt, player, spawn_type.id.toInt)
 
     case msg @ SetChatFilterMessage(send_channel, origin, whitelist) =>
       //log.info("SetChatFilters: " + msg)
@@ -4386,7 +4378,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if(owned) {
             if(tdef.isInstanceOf[MatrixTerminalDefinition]) {
               //TODO matrix spawn point; for now, just blindly bind to show work (and hope nothing breaks)
-              sendResponse(BindPlayerMessage(1, "@ams", true, true, 0, 0, 0, terminal.Position))
+              sendResponse(BindPlayerMessage(BindStatus.Bind, "", true, true, SpawnGroup.Sanctuary, 0, 0, terminal.Position))
             }
             else if(tdef.isInstanceOf[RepairRearmSiloDefinition]) {
               FindLocalVehicle match {
@@ -6480,10 +6472,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
   def ClearCurrentAmsSpawnPoint() : Unit = {
     amsSpawnPoint match {
-      case Some(_) =>
-        sendResponse(
-          BattleplanMessage(41378949, "ams", continent.Number, List(BattleDiagramAction(DiagramActionCode.StopDrawing)))
-        )
+      case Some(tube) =>
+        sendResponse(BindPlayerMessage(BindStatus.Unavailable, "@ams", true, false, SpawnGroup.AMS, continent.Number, 0, Vector3.Zero))
         amsSpawnPoint = None
       case None => ;
     }
