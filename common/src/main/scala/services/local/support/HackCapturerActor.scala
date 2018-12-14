@@ -71,7 +71,8 @@ class HackCaptureActor extends Actor {
           val time_left: Long = obj.duration.toNanos - (System.nanoTime - obj.hack_timestamp)
           sender ! time_left
         case _ =>
-          log.warn(s"Couldn't find capture terminal guid ${capture_console_guid} in hackedObjects list")
+          // PTS v3 (not a needed log)
+//          log.warn(s"Couldn't find capture terminal guid ${capture_console_guid} in hackedObjects list")
           sender ! 0L
       }
     case _ => ;
