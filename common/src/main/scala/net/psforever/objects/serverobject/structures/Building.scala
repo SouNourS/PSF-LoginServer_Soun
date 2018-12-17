@@ -14,6 +14,7 @@ class Building(private val mapId : Int, private val zone : Zone, private val bui
     * The modelId is the identifier number used in SetEmpireMessage / Facility hacking / PlanetSideAttributeMessage.
   */
   private var modelId : Option[Int] = None
+  private var name : Option[String] = None // PTS v3
   private var faction : PlanetSideEmpire.Value = PlanetSideEmpire.NEUTRAL
   private var amenities : List[Amenity] = List.empty
   GUID = PlanetSideGUID(0)
@@ -44,6 +45,14 @@ class Building(private val mapId : Int, private val zone : Zone, private val bui
   def ModelId_=(id : Option[Int]) : Int = {
     modelId = id
     ModelId
+  }
+
+  // PTS v3
+  def Name : Option[String] = name
+
+  def Name_=(nName : Option[String]) : Option[String] = {
+    name = nName
+    Name
   }
 
   def BuildingType : StructureType.Value = buildingType

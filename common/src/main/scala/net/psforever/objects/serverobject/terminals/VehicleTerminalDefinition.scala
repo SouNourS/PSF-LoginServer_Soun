@@ -41,8 +41,8 @@ abstract class VehicleTerminalDefinition(objId : Int) extends TerminalDefinition
     "apc_vs" -> MakeVehicle(apc_vs),
     "magrider" -> MakeVehicle(magrider),
     "flail" -> MakeVehicle(flail),
-    "switchblade" -> MakeVehicle(switchblade),
-    "router" -> MakeVehicle(router)
+    "switchblade" -> MakeVehicle(switchblade)//,
+//    "router" -> MakeVehicle(router) // PTS v3
   )
 
   /**

@@ -36,10 +36,24 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
 
+      // PTS v3
+      Building(5).get.Name = Some("Akkan")
+      Building(6).get.Name = Some("Baal")
+      Building(7).get.Name = Some("Dagon")
+      Building(8).get.Name = Some("Enkidu")
+      Building(9).get.Name = Some("Girru")
+      Building(10).get.Name = Some("Hanish")
+      Building(11).get.Name = Some("Irkalla")
+      Building(12).get.Name = Some("Kusag")
+      Building(13).get.Name = Some("Lahar")
+      Building(14).get.Name = Some("Marduk")
+      Building(15).get.Name = Some("Neti")
+      Building(16).get.Name = Some("Zaqar")
+
       Building(5).get.Faction = PlanetSideEmpire.TR //Akkan
       Building(6).get.Faction = PlanetSideEmpire.TR //Baal
       Building(7).get.Faction = PlanetSideEmpire.TR //Dagon
-      Building(8).get.Faction = PlanetSideEmpire.NC //enkidu
+      Building(8).get.Faction = PlanetSideEmpire.NC //Enkidu
       Building(9).get.Faction = PlanetSideEmpire.VS //Girru
       Building(10).get.Faction = PlanetSideEmpire.VS //Hanish
       Building(11).get.Faction = PlanetSideEmpire.VS //Irkalla
@@ -61,7 +75,7 @@ object Zones {
       //      Building(27).get.Faction = PlanetSideEmpire.VS //S_Irkalla_Tower
       Building(28).get.Faction = PlanetSideEmpire.TR //NE_Enkidu_Tower
       Building(29).get.Faction = PlanetSideEmpire.NC //SE_Akkan_Tower
-      Building(30).get.Faction = PlanetSideEmpire.NC //SW_Enkidu_Tower
+      Building(30).get.Faction = PlanetSideEmpire.VS //SW_Enkidu_Tower
       //      Building(31).get.Faction = PlanetSideEmpire.TR //E_Searhus_Warpgate_Tower
       //      Building(32).get.Faction = PlanetSideEmpire.TR //N_Searhus_Warpgate_Tower
       //      Building(33).get.Faction = PlanetSideEmpire.VS //E_Girru_Tower
