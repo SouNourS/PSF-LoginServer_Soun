@@ -872,7 +872,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
-      if (zoneId == "z4") player.FirstLoad = true // PTS v3
+      if (zoneId == "z4") { // PTS v3
+        player.FirstLoad = true
+        if (player.Faction == PlanetSideEmpire.TR) {
+          player.Position = Vector3(903f, 5508f, 88f)
+          player.Orientation = Vector3(0f, 354.375f, 157.5f)
+        } else if (player.Faction == PlanetSideEmpire.NC) {
+          player.Position = Vector3(3091f, 2222f, 86f)
+          player.Orientation = Vector3(0f, 0f, 129.375f)
+        } else if (player.Faction == PlanetSideEmpire.VS) {
+          player.Position = Vector3(6579f, 4616f, 61f)
+          player.Orientation = Vector3(0f, 354.375f, 264.375f)
+        }
+      }
       avatarService ! Service.Leave(Some(continent.Id))
       localService ! Service.Leave(Some(continent.Id))
       vehicleService ! Service.Leave(Some(continent.Id))
@@ -3681,6 +3693,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 log.info(s"Hack Base Name : ${args(1)} to empire : ${args(2)}")
                 building.Faction = hackFaction
                 building.Actor ! Building.SendMapUpdate(all_clients = true)
+                localService ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(PlanetSideGUID(building.ModelId), hackFaction))
               }
           })
         } else if (args.length == 2) {
@@ -3693,6 +3706,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 log.info(s"Hack Bases to empire : ${args(1)}")
                 building.Faction = hackFaction
                 building.Actor ! Building.SendMapUpdate(all_clients = true)
+                localService ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(PlanetSideGUID(building.ModelId), hackFaction))
               }
           })
         }
