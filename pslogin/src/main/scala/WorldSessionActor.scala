@@ -515,11 +515,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val popNC = poplist.count(_.faction == PlanetSideEmpire.NC)
       val popVS = poplist.count(_.faction == PlanetSideEmpire.VS)
       // StopBundlingPackets() is called on ClientInitializationComplete
-//      StartBundlingPackets()
-      zone.Buildings.foreach({ case (id, building) => initBuilding(continentNumber, id, building) })
-//      StopBundlingPackets()
-      Thread.sleep(100)
       StartBundlingPackets()
+      zone.Buildings.foreach({ case (id, building) => initBuilding(continentNumber, id, building) })
+
       sendResponse(ZonePopulationUpdateMessage(continentNumber, 414, 138, popTR, 138, popNC, 138, popVS, 138, popBO))
       sendResponse(ContinentalLockUpdateMessage(continentNumber, PlanetSideEmpire.NEUTRAL))
       //CaptureFlagUpdateMessage()
@@ -815,7 +813,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
               obj.Router = routerGUID //necessary; forwards link to the router
               DeployableBuildActivity(obj)
               CommonDestroyConstructionItem(tool, index)
-              StopBundlingPackets()
               //it takes 60s for the telepad to become properly active
               localService ! LocalServiceMessage.Telepads(RouterTelepadActivation.AddTask(obj, continent))
             }
@@ -2618,9 +2615,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     sendResponse(CreateShortcutMessage(guid, 2, 0, true, Shortcut.SURGE))
     sendResponse(CreateShortcutMessage(guid, 3, 0, true, Shortcut.DARKLIGHT_VISION))
     sendResponse(ChangeShortcutBankMessage(guid, 0))
-    StopBundlingPackets()
-    Thread.sleep(100)
-    StartBundlingPackets()
+
     //FavoritesMessage
     for (i : Int <- 0 to 14) {
       player.LoadLoadout(i) match {
@@ -2632,9 +2627,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         case _ => ;
       }
     }
-    StopBundlingPackets()
-    Thread.sleep(100)
-    StartBundlingPackets()
+
     sendResponse(SetChatFilterMessage(ChatChannel.Local, false, ChatChannel.values.toList)) //TODO will not always be "on" like this
     deadState = DeadState.Alive
     sendResponse(AvatarDeadStateMessage(DeadState.Alive, 0, 0, tplayer.Position, player.Faction, true))
@@ -2643,9 +2636,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //    (1 to 73).foreach(i => { PTS v3
 //      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
 //    })
-    StopBundlingPackets()
-    Thread.sleep(100)
-    StartBundlingPackets()
+
     (0 to 30).foreach(i => {
       //TODO 30 for a new character only?
       sendResponse(AvatarStatisticsMessage(2, Statistics(0L)))
@@ -2666,7 +2657,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     sendResponse(AvatarImplantMessage(PlanetSideGUID(tplayer.GUID.guid),ImplantAction.Initialization,1,1))
     sendResponse(AvatarImplantMessage(PlanetSideGUID(tplayer.GUID.guid),ImplantAction.Initialization,2,1))
 
-    Thread.sleep(100)
     StartBundlingPackets()
     val name = tplayer.Name
     val faction = tplayer.Faction
@@ -3043,7 +3033,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       traveler.zone = continentId
       val faction = player.Faction
       val factionOnContinentChannel = s"$continentId/$faction"
-      StartBundlingPackets()
+//      StartBundlingPackets()
       avatarService ! Service.Join(continentId)
       avatarService ! Service.Join(factionOnContinentChannel)
       localService ! Service.Join(continentId)
@@ -3051,6 +3041,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       vehicleService ! Service.Join(continentId)
       galaxyService ! Service.Join("galaxy")
       configZone(continent)
+      StartBundlingPackets()
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
       sendResponse(ContinentalLockUpdateMessage(13, PlanetSideEmpire.VS)) // "The VS have captured the VS Sanctuary."
@@ -3132,9 +3123,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
           )
         )
       })
-      StopBundlingPackets()
-      Thread.sleep(100)
-      StartBundlingPackets()
       //load active players in zone
       continent.LivePlayers
         .filterNot(tplayer => { tplayer.GUID == player.GUID || tplayer.VehicleSeated.nonEmpty })
@@ -4483,6 +4471,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 }
                 else if(ammo == Ammo.armor_canister && obj.Health < obj.MaxHealth) {
                   //repair turret
+                  // PTS v3
+                  obj.Health += 48
+                  if (obj.Health > obj.MaxHealth) obj.Health = obj.MaxHealth
+                  //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                  val RepairPercent: Int = obj.Health * 100 / obj.MaxHealth
+                  sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                  avatarService ! AvatarServiceMessage(obj.Continent, AvatarAction.PlanetsideAttribute(obj.GUID, 0, obj.Health))
                 }
               }
               else if(tool.Definition == GlobalDefinitions.trek) {
@@ -6669,13 +6664,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def initBuilding(continentNumber : Int, buildingNumber : Int, building : Building) : Unit = {
     building.BuildingType match {
       case StructureType.WarpGate =>
-        StartBundlingPackets()
         initGate(continentNumber, buildingNumber, building)
-        StopBundlingPackets()
       case _ =>
-        StartBundlingPackets()
         initFacility(continentNumber, buildingNumber, building)
-        StopBundlingPackets()
     }
   }
 
@@ -6752,8 +6743,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       building.Amenities.foreach(amenity => {
         val amenityId = amenity.GUID
+        StartBundlingPackets()
         sendResponse(PlanetsideAttributeMessage(amenityId, 50, 0))
         sendResponse(PlanetsideAttributeMessage(amenityId, 51, 0))
+        StopBundlingPackets()
 
         amenity.Definition match {
           case GlobalDefinitions.resource_silo =>
@@ -6940,7 +6933,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(posXTemp != -1) player.Position = Vector3(posXTemp, posYTemp, 0f)
 
       {
-        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+//        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+        val buildingTypeSet = Set(StructureType.Facility, StructureType.Building)
         continent.SpawnGroups()
           .filter({ case ((building, _)) =>
             building.Faction == player.Faction &&
