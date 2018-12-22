@@ -6778,6 +6778,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         }
       })
+      Thread.sleep(100) // PTS v3
 
 //      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
     })
