@@ -54,6 +54,13 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
       var hack_time_remaining_ms = 0L;
       var hacked_by_faction = PlanetSideEmpire.NEUTRAL
       var spawnTubeActive = true
+      var latticeBenefit = 0
+      var cavernBenefit = 0
+
+      if(building.BuildingType.id == 3){
+        latticeBenefit = 18
+        cavernBenefit = 48
+      }
 
       // Get Ntu level from silo if it exists
       building.Amenities.filter(x => (x.Definition == GlobalDefinitions.resource_silo)).headOption.asInstanceOf[Option[ResourceSilo]] match {
@@ -102,8 +109,8 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
         generator_state = PlanetSideGeneratorState.Normal,
         spawn_tubes_normal = spawnTubeActive,
         force_dome_active = false,
-        lattice_benefit = 18,
-        cavern_benefit = 48, //!! Field > 0 will cause malformed packet. See class def.
+        lattice_benefit = latticeBenefit,
+        cavern_benefit = cavernBenefit, //!! Field > 0 will cause malformed packet. See class def.
         unk4 = Nil,
         unk5 = 0,
         unk6 = false,
