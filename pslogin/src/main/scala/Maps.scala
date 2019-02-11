@@ -9,7 +9,6 @@ import net.psforever.objects.serverobject.locks.IFFLock
 import net.psforever.objects.serverobject.mblocker.Locker
 import net.psforever.objects.serverobject.pad.VehicleSpawnPad
 import net.psforever.objects.serverobject.structures.{Building, FoundationBuilder, StructureType, WarpGate}
-import net.psforever.objects.serverobject.terminals.{ProximityTerminal, Terminal}
 import net.psforever.objects.serverobject.terminals.{CaptureTerminal, ProximityTerminal, Terminal}
 import net.psforever.objects.serverobject.tube.SpawnTube
 import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
@@ -4799,7 +4798,7 @@ object Maps {
       LocalObject(1428, FacilityTurret.Constructor(manned_turret))
       LocalObject(1431, FacilityTurret.Constructor(manned_turret))
       LocalObject(1432, FacilityTurret.Constructor(manned_turret))
-      LocalObject(1492, ProximityTerminal.Constructor(medical_terminal)) //lobby
+      LocalObject(1492, ProximityTerminal.Constructor(medical_terminal, Vector3(3944.8672f, 4211.336f, 266.85938f))) //lobby
       LocalObject(1494, ProximityTerminal.Constructor(medical_terminal, Vector3(4008.3594f, 4269.25f, 249.35938f))) //kitchen
       LocalObject(1564, Terminal.Constructor(order_terminal))
       LocalObject(1568, Terminal.Constructor(order_terminal))
