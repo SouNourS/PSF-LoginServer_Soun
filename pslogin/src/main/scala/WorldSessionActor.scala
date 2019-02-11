@@ -3555,7 +3555,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
       // TODO: Prevents log spam, but should be handled correctly
-      if(messagetype != ChatMessageType.CMT_TOGGLE_GM) {
+      if(messagetype != ChatMessageType.CMT_TOGGLE_GM && !trimContents.contains("!admin")) {
         log.info("Chat: " + msg)
       }
       else {
