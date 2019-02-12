@@ -2655,10 +2655,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
 //    })
 
+    StartBundlingPackets() // PTS v3
     (0 to 30).foreach(i => {
       //TODO 30 for a new character only?
       sendResponse(AvatarStatisticsMessage(2, Statistics(0L)))
     })
+    StopBundlingPackets() // PTS v3
     //AvatarAwardMessage
     //DisplayAwardMessage
     //SquadDefinitionActionMessage and SquadDetailDefinitionUpdateMessage
@@ -7018,6 +7020,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         case None =>
           log.info("WTF?!")
+          if (player.Faction == PlanetSideEmpire.TR) {
+            player.Position = Vector3(903f, 5508f, 88f)
+            player.Orientation = Vector3(0f, 354.375f, 157.5f)
+          } else if (player.Faction == PlanetSideEmpire.NC) {
+            player.Position = Vector3(3091f, 2222f, 86f)
+            player.Orientation = Vector3(0f, 0f, 129.375f)
+          } else if (player.Faction == PlanetSideEmpire.VS) {
+            player.Position = Vector3(6579f, 4616f, 61f)
+            player.Orientation = Vector3(0f, 354.375f, 264.375f)
+          }
       }
       player.FirstLoad = false
     }
