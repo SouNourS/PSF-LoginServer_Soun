@@ -18,6 +18,7 @@ import org.slf4j
 import org.fusesource.jansi.Ansi._
 import org.fusesource.jansi.Ansi.Color._
 import services.ServiceManager
+import services.account.AccountIntermediaryService
 import services.avatar._
 import services.chat.ChatService
 import services.galaxy.GalaxyService
@@ -212,6 +213,7 @@ object PsLogin {
 
     val continentList = createContinents()
     val serviceManager = ServiceManager.boot
+    serviceManager ! ServiceManager.Register(Props[AccountIntermediaryService], "accountIntermediary")
     serviceManager ! ServiceManager.Register(RandomPool(50).props(Props[TaskResolver]), "taskResolver")
     serviceManager ! ServiceManager.Register(Props[AvatarService], "avatar")
     serviceManager ! ServiceManager.Register(Props[LocalService], "local")

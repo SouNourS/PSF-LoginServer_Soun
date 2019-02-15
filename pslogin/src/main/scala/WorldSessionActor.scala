@@ -10,6 +10,8 @@ import scodec.Attempt.{Failure, Successful}
 import scodec.bits._
 import org.log4s.{Logger, MDC}
 import MDCContextAware.Implicits._
+import com.github.mauricio.async.db.general.ArrayRowData
+import com.github.mauricio.async.db.{Connection, QueryResult}
 import csr.{CSRWarp, CSRZone, Traveler}
 import net.psforever.objects.GlobalDefinitions._
 import services.ServiceManager.Lookup
@@ -45,7 +47,8 @@ import net.psforever.objects.vital._
 import net.psforever.objects.zones.{InterstellarCluster, Zone}
 import net.psforever.packet.game.objectcreate._
 import net.psforever.types._
-import services.{RemoverActor, vehicle, _}
+import services._
+import services.account.{ReceiveAccountData, RetrieveAccountData}
 import services.avatar.{AvatarAction, AvatarResponse, AvatarServiceMessage, AvatarServiceResponse}
 import services.galaxy.{GalaxyResponse, GalaxyServiceResponse}
 import services.local.{LocalAction, LocalResponse, LocalServiceMessage, LocalServiceResponse}
@@ -57,7 +60,6 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.annotation.tailrec
 import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
 import scala.util.Success
 import akka.pattern.ask
 import net.psforever.objects.vehicles.Utility.InternalTelepad
@@ -73,6 +75,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var sessionId : Long = 0
   var leftRef : ActorRef = ActorRef.noSender
   var rightRef : ActorRef = ActorRef.noSender
+  var accountIntermediary : ActorRef = ActorRef.noSender
   var avatarService : ActorRef = ActorRef.noSender
   var localService : ActorRef = ActorRef.noSender
   var chatService: ActorRef = ActorRef.noSender
@@ -81,6 +84,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var taskResolver : ActorRef = Actor.noSender
   var cluster : ActorRef = Actor.noSender
   var continent : Zone = Zone.Nowhere
+  var account : Account = null
   var player : Player = null
   var avatar : Avatar = null
   var progressBarValue : Option[Float] = None
@@ -226,6 +230,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         rightRef = sender()
       }
       context.become(Started)
+      ServiceManager.serviceManager ! Lookup("accountIntermediary")
       ServiceManager.serviceManager ! Lookup("avatar")
       ServiceManager.serviceManager ! Lookup("local")
       ServiceManager.serviceManager ! Lookup("chat")
@@ -240,6 +245,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def Started : Receive = {
+    case ServiceManager.LookupResult("accountIntermediary", endpoint) =>
+      accountIntermediary = endpoint
+      log.info("ID: " + sessionId + " Got account intermediary service " + endpoint)
     case ServiceManager.LookupResult("avatar", endpoint) =>
       avatarService = endpoint
       log.info("ID: " + sessionId + " Got avatar service " + endpoint)
@@ -429,79 +437,91 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case CheckCargoMounting(vehicle_guid, cargo_vehicle_guid, cargo_mountpoint, iteration) =>
       HandleCheckCargoMounting(vehicle_guid, cargo_vehicle_guid, cargo_mountpoint, iteration)
 
-    case ListAccountCharacters =>
-      val avatart1 = Avatar("You can create a character", PlanetSideEmpire.TR, CharacterGender.Male, 41, CharacterVoice.Voice1)
-      val avatart2 = Avatar("with your own preferences and name", PlanetSideEmpire.NC, CharacterGender.Male, 41, CharacterVoice.Voice2)
-      val avatart3 = Avatar("or use these default characters", PlanetSideEmpire.VS, CharacterGender.Male, 41, CharacterVoice.Voice3)
+    case CreateCharacter(connection, name, head, voice, gender, empire) =>
+      log.info(s"Creating new character $name...")
+      val accountUserName : String = account.Username
 
-
-      import net.psforever.objects.definition.converter.CharacterSelectConverter
-      val gen : AtomicInteger = new AtomicInteger(1)
-      val converter : CharacterSelectConverter = new CharacterSelectConverter
-
-      if (avatar.name.indexOf("TestCharacter") >= 0) {
-        //load characters
-        val playert1 = new Player(avatart1)
-        val playert2 = new Player(avatart2)
-        val playert3 = new Player(avatart3)
-        SetCharacterSelectScreenGUID(playert1, gen)
-        SetCharacterSelectScreenGUID(playert2, gen)
-        SetCharacterSelectScreenGUID(playert3, gen)
-        val health = playert1.Health
-        val stamina = playert1.Stamina
-        val armor = playert1.Armor
-        playert1.Spawn
-        playert2.Spawn
-        playert3.Spawn
-        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert1.GUID, converter.DetailedConstructorData(playert1).get))
-        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert2.GUID, converter.DetailedConstructorData(playert2).get))
-        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert3.GUID, converter.DetailedConstructorData(playert3).get))
-        if (health > 0) { //player can not be dead; stay spawned as alive
-          playert1.Health = health
-          playert1.Stamina = stamina
-          playert1.Armor = armor
-        }
-        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 1, playert1.GUID, false, 6404428))
-        RemoveCharacterSelectScreenGUID(playert1)
-        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 2, playert2.GUID, false, 6404428))
-        RemoveCharacterSelectScreenGUID(playert2)
-        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 3, playert3.GUID, true, 6404428))
-        RemoveCharacterSelectScreenGUID(playert3)
-        //      if (avatar.name.indexOf("TestCharacter") >= 0) {
-        //        //load characters
-        //        val playert1 = new Player(avatart1)
-        //        SetCharacterSelectScreenGUID(playert1, gen)
-        //        val health = playert1.Health
-        //        val stamina = playert1.Stamina
-        //        val armor = playert1.Armor
-        //        playert1.Spawn
-        //        sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playert1.GUID, converter.DetailedConstructorData(playert1).get))
-        //        if (health > 0) { //player can not be dead; stay spawned as alive
-        //          playert1.Health = health
-        //          playert1.Stamina = stamina
-        //          playert1.Armor = armor
-        //        }
-        //        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 4, playert1.GUID, false, 6404428))
-        //        RemoveCharacterSelectScreenGUID(playert1)
-      } else {
-        SetCharacterSelectScreenGUID(player, gen)
-        val health = player.Health
-        val stamina = player.Stamina
-        val armor = player.Armor
-        player.Spawn
-        sendResponse(
-          ObjectCreateDetailedMessage(ObjectClass.avatar, player.GUID, converter.DetailedConstructorData(player).get)
+      connection.get.inTransaction {
+        c => c.sendPreparedStatement(
+          "INSERT INTO characters (name, account_id, faction_id, gender_id, head_id, voice_id) VALUES(?,?,?,?,?,?) RETURNING id",
+          Array(name, account.AccountId, empire.id, gender.id, head, voice.id)
         )
-        if (health > 0) { //player can not be dead; stay spawned as alive
-
-          player.Health = health
-          player.Stamina = stamina
-          player.Armor = armor
-        }
-        sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), 41605315, player.GUID, true, 6404428))
-        RemoveCharacterSelectScreenGUID(player)
+      }.onComplete {
+        case Success(insertResult) =>
+          insertResult match {
+            case result: QueryResult =>
+              if (result.rows.nonEmpty) {
+                log.info(s"Successfully created new character for $accountUserName")
+                sendResponse(ActionResultMessage.Pass)
+                self ! ListAccountCharacters(connection)
+              } else {
+                log.error(s"Error creating new character for $accountUserName")
+                sendResponse(ActionResultMessage.Fail(0))
+                self ! ListAccountCharacters(connection)
+              }
+            case _ =>
+              log.error(s"Error creating new character for $accountUserName")
+              sendResponse(ActionResultMessage.Fail(3))
+              self ! ListAccountCharacters(connection)
+          }
+        case _ => failWithError("Something to do ?")
       }
-    //      sendResponse(CharacterInfoMessage(0, PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0)))
+
+    case ListAccountCharacters(connection) =>
+      val accountUserName : String = account.Username
+
+      connection.get.sendPreparedStatement(
+          "SELECT id, name, faction_id, gender_id, head_id, voice_id, deleted FROM characters where account_id=?", Array(account.AccountId)
+        ).onComplete {
+        case Success(queryResult) =>
+          queryResult match {
+            case result: QueryResult =>
+              if (result.rows.nonEmpty) {
+                import net.psforever.objects.definition.converter.CharacterSelectConverter
+                val gen : AtomicInteger = new AtomicInteger(1)
+                val converter : CharacterSelectConverter = new CharacterSelectConverter
+
+                result.rows foreach{ row  =>
+                  var avatarArray:Array[Avatar] = Array.ofDim(row.length)
+                  var playerArray:Array[Player] = Array.ofDim(row.length)
+                  row.zipWithIndex.foreach{ case (value,i) =>
+                    val lName : String = value(1).asInstanceOf[String]
+                    val lFaction : PlanetSideEmpire.Value = PlanetSideEmpire(value(2).asInstanceOf[Int])
+                    val lGender : CharacterGender.Value = CharacterGender(value(3).asInstanceOf[Int])
+                    val lHead : Int = value(4).asInstanceOf[Int]
+                    val lVoice : CharacterVoice.Value = CharacterVoice(value(5).asInstanceOf[Int])
+                    val lDeleted : Boolean = value(6).asInstanceOf[Boolean]
+                    avatarArray(i) = Avatar(lName, lFaction, lGender, lHead, lVoice)
+                    playerArray(i) = new Player(avatarArray(i))
+                    SetCharacterSelectScreenGUID(playerArray(i), gen)
+                    val health = playerArray(i).Health
+                    val stamina = playerArray(i).Stamina
+                    val armor = playerArray(i).Armor
+                    playerArray(i).Spawn
+                    sendResponse(ObjectCreateDetailedMessage(ObjectClass.avatar, playerArray(i).GUID, converter.DetailedConstructorData(playerArray(i)).get))
+                    if (health > 0) { //player can not be dead; stay spawned as alive
+                      playerArray(i).Health = health
+                      playerArray(i).Stamina = stamina
+                      playerArray(i).Armor = armor
+                    }
+                    sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), value(0).asInstanceOf[Int], playerArray(i).GUID, false, 6404428))
+                    RemoveCharacterSelectScreenGUID(playerArray(i))
+                    if (i == row.length) {
+                      sendResponse(CharacterInfoMessage(0, PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0))
+                    }
+                  }
+                }
+              } else {
+                println("dunno")
+              }
+            case _ =>
+              log.error(s"Error listing character(s) for account $accountUserName")
+          }
+        case _ => failWithError("Something to do ?")
+      }
+      if(connection.nonEmpty) {
+        connection.get.disconnect
+      }
 
     case VehicleLoaded(_ /*vehicle*/) => ;
     //currently being handled by VehicleSpawnPad.LoadVehicle during testing phase
@@ -988,6 +1008,102 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ResponseToSelf(pkt) =>
       log.info(s"Received a direct message: $pkt")
       sendResponse(pkt)
+
+    case ReceiveAccountData(account) =>
+      log.info(s"Retrieved account data for accountId = ${account.AccountId}")
+      this.account = account
+
+      //TODO begin temp player character auto-loading; remove later
+      import net.psforever.objects.GlobalDefinitions._
+      //      import net.psforever.types.CertificationType._
+      val faction = PlanetSideEmpire.VS
+      val avatar = Avatar(s"TestCharacter$sessionId", faction, CharacterGender.Female, 41, CharacterVoice.Voice1)
+      //      avatar.Certifications += StandardAssault
+      //      avatar.Certifications += MediumAssault
+      //      avatar.Certifications += StandardExoSuit
+      //      avatar.Certifications += AgileExoSuit
+      //      avatar.Certifications += ReinforcedExoSuit
+      //      avatar.Certifications += ATV
+      //      avatar.Certifications += Harasser
+      //      //
+      //      avatar.Certifications += InfiltrationSuit
+      //      avatar.Certifications += Sniping
+      //      avatar.Certifications += AntiVehicular
+      //      avatar.Certifications += HeavyAssault
+      //      avatar.Certifications += SpecialAssault
+      //      avatar.Certifications += EliteAssault
+      //      avatar.Certifications += GroundSupport
+      //      avatar.Certifications += GroundTransport
+      //      avatar.Certifications += Flail
+      //      avatar.Certifications += Switchblade
+      //      avatar.Certifications += AssaultBuggy
+      //      avatar.Certifications += ArmoredAssault1
+      //      avatar.Certifications += ArmoredAssault2
+      //      avatar.Certifications += AirCavalryScout
+      //      avatar.Certifications += AirCavalryAssault
+      //      avatar.Certifications += AirCavalryInterceptor
+      //      avatar.Certifications += AirSupport
+      //      avatar.Certifications += GalaxyGunship
+      //      avatar.Certifications += Phantasm
+      //      avatar.Certifications += UniMAX
+      //      avatar.Certifications += Engineering
+      //      avatar.Certifications += CombatEngineering
+      //      avatar.Certifications += FortificationEngineering
+      //      avatar.Certifications += AssaultEngineering
+      //      avatar.Certifications += Hacking
+      //      avatar.Certifications += AdvancedHacking
+      this.avatar = avatar
+
+      //      InitializeDeployableQuantities(avatar) //set deployables ui elements
+      //      AwardBattleExperiencePoints(avatar, 1000000L)
+      //      player = new Player(avatar)
+      //      //player.Position = Vector3(3561.0f, 2854.0f, 90.859375f) //home3, HART C
+      //      player.Position = Vector3(3940.3984f, 4343.625f, 266.45312f) //z6, Anguta
+      ////      player.Position = Vector3(3571.2266f, 3278.0938f, 119.0f) //ce test
+      //      player.Orientation = Vector3(0f, 0f, 90f)
+      //      //player.Position = Vector3(4262.211f ,4067.0625f ,262.35938f) //z6, Akna.tower
+      //      //player.Orientation = Vector3(0f, 0f, 132.1875f)
+      ////      player.ExoSuit = ExoSuitType.MAX //TODO strange issue; divide number above by 10 when uncommenting
+      //      player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
+      //      player.Slot(2).Equipment = Tool(suppressor)
+      //      player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
+      //      player.Slot(6).Equipment = AmmoBox(bullet_9mm)
+      //      player.Slot(9).Equipment = AmmoBox(bullet_9mm)
+      //      player.Slot(12).Equipment = AmmoBox(bullet_9mm)
+      //      player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
+      //      player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
+      //      player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
+      //      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+      //      player.Inventory.Items.foreach { _.obj.Faction = faction }
+      //TODO end temp player character auto-loading
+//      self ! ListAccountCharacters
+
+      Database.getConnection.connect.onComplete {
+        case scala.util.Success(connection) =>
+          Database.query(connection.sendPreparedStatement(
+            "SELECT gm FROM accounts where id=?", Array(account.AccountId)
+          )).onComplete {
+            case scala.util.Success(queryResult) =>
+              queryResult match {
+                case row: ArrayRowData => // If we got a row from the database
+                  admin = row(0).asInstanceOf[Boolean]
+                  self ! ListAccountCharacters(Some(connection))
+                case _ => // If the account didn't exist in the database
+                  log.error(s"Issue retrieving result set from database for account $account")
+                  connection.disconnect
+                  sendResponse(DropSession(sessionId, "You should not exist !"))
+              }
+            case scala.util.Failure(e) =>
+              log.error("Is there a problem ? " + e.getMessage)
+              connection.disconnect
+          }
+        case scala.util.Failure(e) =>
+          log.error("Failed connecting to database for account lookup " + e.getMessage)
+      }
+
+      import scala.concurrent.ExecutionContext.Implicits.global
+      clientKeepAlive.cancel
+      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
 
     case default =>
       log.warn(s"Invalid packet class received: $default from $sender")
@@ -2727,73 +2843,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ConnectToWorldRequestMessage(server, token, majorVersion, minorVersion, revision, buildDate, unk) =>
       val clientVersion = s"Client Version: $majorVersion.$minorVersion.$revision, $buildDate"
       log.info(s"New world login to $server with Token:$token. $clientVersion")
-      //TODO begin temp player character auto-loading; remove later
-      import net.psforever.objects.GlobalDefinitions._
-//      import net.psforever.types.CertificationType._
-      val faction = PlanetSideEmpire.VS
-      val avatar = Avatar(s"TestCharacter$sessionId", faction, CharacterGender.Female, 41, CharacterVoice.Voice1)
-//      avatar.Certifications += StandardAssault
-//      avatar.Certifications += MediumAssault
-//      avatar.Certifications += StandardExoSuit
-//      avatar.Certifications += AgileExoSuit
-//      avatar.Certifications += ReinforcedExoSuit
-//      avatar.Certifications += ATV
-//      avatar.Certifications += Harasser
-//      //
-//      avatar.Certifications += InfiltrationSuit
-//      avatar.Certifications += Sniping
-//      avatar.Certifications += AntiVehicular
-//      avatar.Certifications += HeavyAssault
-//      avatar.Certifications += SpecialAssault
-//      avatar.Certifications += EliteAssault
-//      avatar.Certifications += GroundSupport
-//      avatar.Certifications += GroundTransport
-//      avatar.Certifications += Flail
-//      avatar.Certifications += Switchblade
-//      avatar.Certifications += AssaultBuggy
-//      avatar.Certifications += ArmoredAssault1
-//      avatar.Certifications += ArmoredAssault2
-//      avatar.Certifications += AirCavalryScout
-//      avatar.Certifications += AirCavalryAssault
-//      avatar.Certifications += AirCavalryInterceptor
-//      avatar.Certifications += AirSupport
-//      avatar.Certifications += GalaxyGunship
-//      avatar.Certifications += Phantasm
-//      avatar.Certifications += UniMAX
-//      avatar.Certifications += Engineering
-//      avatar.Certifications += CombatEngineering
-//      avatar.Certifications += FortificationEngineering
-//      avatar.Certifications += AssaultEngineering
-//      avatar.Certifications += Hacking
-//      avatar.Certifications += AdvancedHacking
-      this.avatar = avatar
 
-//      InitializeDeployableQuantities(avatar) //set deployables ui elements
-//      AwardBattleExperiencePoints(avatar, 1000000L)
-//      player = new Player(avatar)
-//      //player.Position = Vector3(3561.0f, 2854.0f, 90.859375f) //home3, HART C
-//      player.Position = Vector3(3940.3984f, 4343.625f, 266.45312f) //z6, Anguta
-////      player.Position = Vector3(3571.2266f, 3278.0938f, 119.0f) //ce test
-//      player.Orientation = Vector3(0f, 0f, 90f)
-//      //player.Position = Vector3(4262.211f ,4067.0625f ,262.35938f) //z6, Akna.tower
-//      //player.Orientation = Vector3(0f, 0f, 132.1875f)
-////      player.ExoSuit = ExoSuitType.MAX //TODO strange issue; divide number above by 10 when uncommenting
-//      player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
-//      player.Slot(2).Equipment = Tool(suppressor)
-//      player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
-//      player.Slot(6).Equipment = AmmoBox(bullet_9mm)
-//      player.Slot(9).Equipment = AmmoBox(bullet_9mm)
-//      player.Slot(12).Equipment = AmmoBox(bullet_9mm)
-//      player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
-//      player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
-//      player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
-//      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
-//      player.Inventory.Items.foreach { _.obj.Faction = faction }
-      //TODO end temp player character auto-loading
-      self ! ListAccountCharacters
-      import scala.concurrent.ExecutionContext.Implicits.global
-      clientKeepAlive.cancel
-      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
+      accountIntermediary ! RetrieveAccountData(token) // PTS v3
 
     case msg @ MountVehicleCargoMsg(player_guid, vehicle_guid, cargo_vehicle_guid, unk4) =>
       log.info(msg.toString)
@@ -2838,111 +2889,137 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      sendResponse(ActionResultMessage.Pass)
 //      self ! ListAccountCharacters
 
-      var good: Boolean = true
-      LivePlayerList.WorldPopulation(_ => true).foreach(char => {
-        if (char.name.equalsIgnoreCase(name)) {
-          good = false
-        }
-      })
-      if (good) {
-        import net.psforever.objects.GlobalDefinitions._
-        import net.psforever.types.CertificationType._
-        val avatar = Avatar(name, empire, gender, head, voice)
-        var tempPos = Vector3(0f, 0f, 0f)
-        var tempOri = Vector3(0f, 0f, 0f)
-        if (empire == PlanetSideEmpire.TR) {
-          tempPos = Vector3(903f, 5508f, 88f)
-          tempOri = Vector3(0f, 354.375f, 157.5f)
-        } else if (empire == PlanetSideEmpire.NC) {
-          tempPos = Vector3(3091f, 2222f, 86f)
-          tempOri = Vector3(0f, 0f, 129.375f)
-        } else if (empire == PlanetSideEmpire.VS) {
-          tempPos = Vector3(6579f, 4616f, 61f)
-          tempOri = Vector3(0f, 354.375f, 264.375f)
-        }
-
-        avatar.Certifications += StandardAssault
-        avatar.Certifications += MediumAssault
-        avatar.Certifications += StandardExoSuit
-        avatar.Certifications += AgileExoSuit
-        avatar.Certifications += ReinforcedExoSuit
-        avatar.Certifications += ATV
-        //        avatar.Certifications += Harasser
-        avatar.Certifications += InfiltrationSuit
-        avatar.Certifications += UniMAX
-        avatar.Certifications += Medical
-        avatar.Certifications += Engineering
-        avatar.Certifications += CombatEngineering
-        avatar.Certifications += FortificationEngineering
-        avatar.Certifications += AssaultEngineering
-        avatar.Certifications += Hacking
-        avatar.Certifications += AdvancedHacking
-
-        avatar.Certifications += Sniping
-        avatar.Certifications += AntiVehicular
-        avatar.Certifications += HeavyAssault
-        avatar.Certifications += SpecialAssault
-        avatar.Certifications += EliteAssault
-        avatar.Certifications += GroundSupport
-        avatar.Certifications += GroundTransport
-        avatar.Certifications += Flail
-        avatar.Certifications += Switchblade
-        avatar.Certifications += AssaultBuggy
-        avatar.Certifications += ArmoredAssault1
-        avatar.Certifications += ArmoredAssault2
-        avatar.Certifications += AirCavalryScout
-        avatar.Certifications += AirCavalryAssault
-        avatar.Certifications += AirCavalryInterceptor
-        avatar.Certifications += AirSupport
-        avatar.Certifications += GalaxyGunship
-        avatar.Certifications += Phantasm
-        //        player.Certifications += BattleFrameRobotics
-        //        player.Certifications += BFRAntiInfantry
-        //        player.Certifications += BFRAntiAircraft
-        this.avatar = avatar
-        InitializeDeployableQuantities(avatar) //set deployables ui elements
-        AwardBattleExperiencePoints(avatar, 20000000L)
-        avatar.CEP = 600000
-
-        player = new Player(avatar)
-
-
-        player.Position = tempPos
-        player.Orientation = tempOri
-        player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
-        player.Slot(2).Equipment = Tool(suppressor)
-        player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
-        player.Slot(6).Equipment = AmmoBox(bullet_9mm)
-        player.Slot(9).Equipment = AmmoBox(bullet_9mm_AP)
-        player.Slot(12).Equipment = AmmoBox(shotgun_shell)
-        player.Slot(33).Equipment = AmmoBox(shotgun_shell_AP)
-        player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
-        player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
-        //        player.Slot(5).Equipment.get.asInstanceOf[LockerContainer].Inventory += 0 -> SimpleItem(remote_electronics_kit)
-        player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
-        player.Inventory.Items.foreach { _.obj.Faction = empire }
-
-        // PTS v3
-        avatar.Implants(0).Unlocked = true
-        avatar.Implants(0).Implant = sample
-        avatar.Implants(1).Unlocked = true
-        avatar.Implants(1).Implant = sample2
-
-//        player.FirstLoad = true
-
-        sendResponse(ActionResultMessage(true, None))
-        self ! ListAccountCharacters
+      Database.getConnection.connect.onComplete {
+        case scala.util.Success(connection) =>
+          Database.query(connection.sendPreparedStatement(
+            "SELECT account_id FROM characters where name=?", Array(name)
+          )).onComplete {
+            case scala.util.Success(queryResult) =>
+              queryResult match {
+                case row: ArrayRowData => // If we got a row from the database
+                  if (row(0).asInstanceOf[Int] == account.AccountId) { // create char
+                    self ! CreateCharacter(Some(connection), name, head, voice, gender, empire)
+                  } else { // send "char already exist"
+                    sendResponse(ActionResultMessage.Fail(1))
+                    connection.disconnect
+                  }
+                case _ => // If the char name didn't exist in the database, create char
+                  self ! CreateCharacter(Some(connection), name, head, voice, gender, empire)
+              }
+            case scala.util.Failure(e) =>
+              sendResponse(ActionResultMessage.Fail(4))
+              self ! ListAccountCharacters(Some(connection))
+          }
+        case scala.util.Failure(e) =>
+          log.error("Failed connecting to database for account lookup " + e.getMessage)
+          sendResponse(ActionResultMessage.Fail(5))
       }
-      else if (!good) {
-        sendResponse(ActionResultMessage(false, Some(1)))
-      }
+
+//      var good: Boolean = true
+//      LivePlayerList.WorldPopulation(_ => true).foreach(char => {
+//        if (char.name.equalsIgnoreCase(name)) {
+//          good = false
+//        }
+//      })
+//      if (good) {
+//        import net.psforever.objects.GlobalDefinitions._
+//        import net.psforever.types.CertificationType._
+//        val avatar = Avatar(name, empire, gender, head, voice)
+//        var tempPos = Vector3(0f, 0f, 0f)
+//        var tempOri = Vector3(0f, 0f, 0f)
+//        if (empire == PlanetSideEmpire.TR) {
+//          tempPos = Vector3(903f, 5508f, 88f)
+//          tempOri = Vector3(0f, 354.375f, 157.5f)
+//        } else if (empire == PlanetSideEmpire.NC) {
+//          tempPos = Vector3(3091f, 2222f, 86f)
+//          tempOri = Vector3(0f, 0f, 129.375f)
+//        } else if (empire == PlanetSideEmpire.VS) {
+//          tempPos = Vector3(6579f, 4616f, 61f)
+//          tempOri = Vector3(0f, 354.375f, 264.375f)
+//        }
+//
+//        avatar.Certifications += StandardAssault
+//        avatar.Certifications += MediumAssault
+//        avatar.Certifications += StandardExoSuit
+//        avatar.Certifications += AgileExoSuit
+//        avatar.Certifications += ReinforcedExoSuit
+//        avatar.Certifications += ATV
+//        //        avatar.Certifications += Harasser
+//        avatar.Certifications += InfiltrationSuit
+//        avatar.Certifications += UniMAX
+//        avatar.Certifications += Medical
+//        avatar.Certifications += Engineering
+//        avatar.Certifications += CombatEngineering
+//        avatar.Certifications += FortificationEngineering
+//        avatar.Certifications += AssaultEngineering
+//        avatar.Certifications += Hacking
+//        avatar.Certifications += AdvancedHacking
+//
+//        avatar.Certifications += Sniping
+//        avatar.Certifications += AntiVehicular
+//        avatar.Certifications += HeavyAssault
+//        avatar.Certifications += SpecialAssault
+//        avatar.Certifications += EliteAssault
+//        avatar.Certifications += GroundSupport
+//        avatar.Certifications += GroundTransport
+//        avatar.Certifications += Flail
+//        avatar.Certifications += Switchblade
+//        avatar.Certifications += AssaultBuggy
+//        avatar.Certifications += ArmoredAssault1
+//        avatar.Certifications += ArmoredAssault2
+//        avatar.Certifications += AirCavalryScout
+//        avatar.Certifications += AirCavalryAssault
+//        avatar.Certifications += AirCavalryInterceptor
+//        avatar.Certifications += AirSupport
+//        avatar.Certifications += GalaxyGunship
+//        avatar.Certifications += Phantasm
+//        //        player.Certifications += BattleFrameRobotics
+//        //        player.Certifications += BFRAntiInfantry
+//        //        player.Certifications += BFRAntiAircraft
+//        this.avatar = avatar
+//        InitializeDeployableQuantities(avatar) //set deployables ui elements
+//        AwardBattleExperiencePoints(avatar, 20000000L)
+//        avatar.CEP = 600000
+//
+//        player = new Player(avatar)
+//
+//
+//        player.Position = tempPos
+//        player.Orientation = tempOri
+//        player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
+//        player.Slot(2).Equipment = Tool(suppressor)
+//        player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
+//        player.Slot(6).Equipment = AmmoBox(bullet_9mm)
+//        player.Slot(9).Equipment = AmmoBox(bullet_9mm_AP)
+//        player.Slot(12).Equipment = AmmoBox(shotgun_shell)
+//        player.Slot(33).Equipment = AmmoBox(shotgun_shell_AP)
+//        player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
+//        player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
+//        //        player.Slot(5).Equipment.get.asInstanceOf[LockerContainer].Inventory += 0 -> SimpleItem(remote_electronics_kit)
+//        player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+//        player.Inventory.Items.foreach { _.obj.Faction = empire }
+//
+//        // PTS v3
+//        avatar.Implants(0).Unlocked = true
+//        avatar.Implants(0).Implant = sample
+//        avatar.Implants(1).Unlocked = true
+//        avatar.Implants(1).Implant = sample2
+//
+////        player.FirstLoad = true
+//
+//        sendResponse(ActionResultMessage.Pass)
+//        self ! ListAccountCharacters
+//      }
+//      else if (!good) {
+//        sendResponse(ActionResultMessage(false, Some(1)))
+//      }
 
     case msg @ CharacterRequestMessage(charId, action) =>
       log.info("Handling " + msg)
       action match {
         case CharacterRequestAction.Delete =>
-          sendResponse(ActionResultMessage.Fail(1))
-          self ! ListAccountCharacters
+          sendResponse(ActionResultMessage.Pass)
+          self ! ListAccountCharacters(None)
         case CharacterRequestAction.Select =>
 
           import net.psforever.objects.GlobalDefinitions._
@@ -8707,7 +8784,8 @@ object WorldSessionActor {
   private final case class NewPlayerLoaded(tplayer : Player)
   private final case class PlayerLoaded(tplayer : Player)
   private final case class PlayerFailedToLoad(tplayer : Player)
-  private final case class ListAccountCharacters()
+  private final case class CreateCharacter(connection: Option[Connection], name : String, head : Int, voice : CharacterVoice.Value, gender : CharacterGender.Value, empire : PlanetSideEmpire.Value)
+  private final case class ListAccountCharacters(connection: Option[Connection])
   private final case class SetCurrentAvatar(tplayer : Player)
   private final case class VehicleLoaded(vehicle : Vehicle)
   private final case class UnregisterCorpseOnVehicleDisembark(corpse : Player)
