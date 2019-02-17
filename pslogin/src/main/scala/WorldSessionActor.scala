@@ -2941,10 +2941,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 "SELECT id, name, faction_id, gender_id, head_id, voice_id FROM characters where id=?", Array(charId)
               )).onComplete {
                 case Success(queryResult) =>
-                  println(queryResult.toString)
                   queryResult match {
                     case row: ArrayRowData =>
-//                      println(row(0), row(1), row(2), row(3), row(4), row(5))
                       val lName : String = row(1).asInstanceOf[String]
                       val lFaction : PlanetSideEmpire.Value = PlanetSideEmpire(row(2).asInstanceOf[Int])
                       val lGender : CharacterGender.Value = CharacterGender(row(3).asInstanceOf[Int])
@@ -3054,8 +3052,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       localService ! Service.Join(factionOnContinentChannel)
       vehicleService ! Service.Join(continentId)
       galaxyService ! Service.Join("galaxy")
-      configZone(continent)
-      StartBundlingPackets()
+//      configZone(continent) // PTS v3
+//      StartBundlingPackets() // PTS v3
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
       sendResponse(ContinentalLockUpdateMessage(13, PlanetSideEmpire.VS)) // "The VS have captured the VS Sanctuary."
@@ -3284,7 +3282,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case _ => ;
         }
       })
-      StopBundlingPackets()
+//      StopBundlingPackets() // PTS v3
 
       chatService ! Service.Join("local")
       chatService ! Service.Join("squad")
@@ -3310,13 +3308,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The \\#3!ams\\#6 command will respawn you at the nearest friendly AMS.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None)))
       StopBundlingPackets()
 
+      configZone(continent) // PTS v3
 
       self ! SetCurrentAvatar(player)
 
