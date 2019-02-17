@@ -95,6 +95,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var speed : Float = 1.0f
   var spectator : Boolean = false
   var admin : Boolean = false
+  var loadConfZone : Boolean = false
   var usingMedicalTerminal : Option[PlanetSideGUID] = None
   var controlled : Option[Int] = None
   //keep track of avatar's ServerVehicleOverride state
@@ -892,6 +893,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
+      loadConfZone = true
       if (zoneId == "z4") { // PTS v3
         player.FirstLoad = true
         if (player.Faction == PlanetSideEmpire.TR) {
@@ -1083,7 +1085,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       import scala.concurrent.ExecutionContext.Implicits.global
       clientKeepAlive.cancel
-      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
+      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1500 milliseconds, self, PokeClient())
 
       Database.getConnection.connect.onComplete {
         case scala.util.Success(connection) =>
@@ -2797,6 +2799,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       })
     StopBundlingPackets()
     drawDeloyableIcon = DontRedrawIcons
+
+    //PTS v3
+    if (loadConfZone) {
+      configZone(continent) // PTS v3
+      loadConfZone = false
+    }
+
   }
 
   def handleControlPkt(pkt : PlanetSideControlPacket) = {
@@ -3308,12 +3317,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The \\#3!config\\#6 command will refresh bases/twrs in case of problem.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None)))
+      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The \\#3!help\\#6 command will show that welcome message again.", None)))
       StopBundlingPackets()
 
-      configZone(continent) // PTS v3
 
       self ! SetCurrentAvatar(player)
 
@@ -3602,6 +3614,34 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      else if (trimContents.equals("!admin")) {
 //        admin = true
 //      }
+      else if(trimContents.equals("!config")){
+        configZone(continent) // PTS v3
+      }
+      else if(trimContents.equals("!help")){
+        StartBundlingPackets()
+        // Welcome messages by Nick
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The combat test area is on Ishundar. Type \\#3/zone ishundar\\#6 if necessary.", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Broadcast chat (/b)\\#6 is global to everyone, regardless of faction.", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The \\#3!config\\#6 command will refresh bases/twrs in case of problem.", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None)))
+        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The \\#3!help\\#6 command will show that welcome message again.", None)))
+        StopBundlingPackets()
+      }
       else if(trimContents.equals("!ams")) {
         makeReply = false
         if(player.isBackpack) { //player is on deployment screen (either dead or deconstructed)
