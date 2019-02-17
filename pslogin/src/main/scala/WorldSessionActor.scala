@@ -6822,6 +6822,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     */
   def configZone(zone : Zone) : Unit = {
     zone.Buildings.values.foreach(building => {
+      StartBundlingPackets()
       sendResponse(SetEmpireMessage(PlanetSideGUID(building.ModelId), building.Faction))
 
       // PTS v3 or not
@@ -6830,10 +6831,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       building.Amenities.foreach(amenity => {
         val amenityId = amenity.GUID
-        StartBundlingPackets()
+
         sendResponse(PlanetsideAttributeMessage(amenityId, 50, 0))
         sendResponse(PlanetsideAttributeMessage(amenityId, 51, 0))
-        StopBundlingPackets()
+
 
         amenity.Definition match {
           case GlobalDefinitions.resource_silo =>
@@ -6865,8 +6866,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         }
       })
-
+      StopBundlingPackets()
+      Thread.sleep(100)
 //      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
+
     })
   }
 
