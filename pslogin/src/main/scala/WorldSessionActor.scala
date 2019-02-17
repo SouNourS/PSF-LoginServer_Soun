@@ -3569,7 +3569,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
       // TODO: Prevents log spam, but should be handled correctly
-      if(messagetype != ChatMessageType.CMT_TOGGLE_GM && !trimContents.contains("!admin")) {
+//      if(messagetype != ChatMessageType.CMT_TOGGLE_GM && !trimContents.contains("!admin")) {
+      if(messagetype != ChatMessageType.CMT_TOGGLE_GM) {
         log.info("Chat: " + msg)
       }
       else {
@@ -3601,9 +3602,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         echoContents = s"zone=${continent.Id} pos=${player.Position.x},${player.Position.y},${player.Position.z}; ori=${player.Orientation.x},${player.Orientation.y},${player.Orientation.z}"
         log.info(echoContents)
       }
-      else if (trimContents.equals("!admin")) {
-        admin = true
-      }
+//      else if (trimContents.equals("!admin")) {
+//        admin = true
+//      }
       else if(trimContents.equals("!ams")) {
         makeReply = false
         if(player.isBackpack) { //player is on deployment screen (either dead or deconstructed)
