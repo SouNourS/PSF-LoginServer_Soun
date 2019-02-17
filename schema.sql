@@ -12,12 +12,13 @@ CREATE TABLE IF NOT EXISTS "accounts" (
   "passhash" VARCHAR(64) NOT NULL,
   "created" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "last_modified" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "inactive" BOOLEAN NOT NULL DEFAULT FALSE
+  "inactive" BOOLEAN NOT NULL DEFAULT FALSE,
+  "gm" BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE TABLE IF NOT EXISTS "players" (
+CREATE TABLE IF NOT EXISTS "characters" (
   "id" SERIAL PRIMARY KEY NOT NULL,
-  "name" VARCHAR(64) NOT NULL UNIQUE,
+  "name" VARCHAR(64) NOT NULL,
   "account_id" INT NOT NULL REFERENCES accounts (id),
   "faction_id" INT NOT NULL,
   "gender_id" INT NOT NULL,
@@ -50,8 +51,8 @@ BEFORE UPDATE ON accounts
 FOR EACH ROW
 EXECUTE PROCEDURE fn_set_last_modified_timestamp();
 
-DROP TRIGGER IF EXISTS trigger_players_set_last_modified on players;
+DROP TRIGGER IF EXISTS trigger_players_set_last_modified on characters;
 CREATE TRIGGER trigger_players_set_last_modified
-BEFORE UPDATE ON players
+BEFORE UPDATE ON characters
 FOR EACH ROW
 EXECUTE PROCEDURE fn_set_last_modified_timestamp();

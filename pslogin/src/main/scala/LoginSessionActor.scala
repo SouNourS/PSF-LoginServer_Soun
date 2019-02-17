@@ -131,13 +131,13 @@ class LoginSessionActor extends Actor with MDCContextAware {
             context.become(startAccountAuthentication)
             self ! StartAccountAuthentication(Some(connection), username, password, newToken, queryResult)
           case Failure(e) =>
-            println("Failed account lookup query " + e.getMessage)
+            log.error("Failed account lookup query " + e.getMessage)
             connection.disconnect
             context.become(finishAccountLogin)
             self ! FinishAccountLogin(Some(connection), username, newToken, false)
         }
       case Failure(e) =>
-        println("Failed connecting to database for account lookup " + e.getMessage)
+        log.error("Failed connecting to database for account lookup " + e.getMessage)
         context.become(finishAccountLogin)
         self ! FinishAccountLogin(None, username, newToken, false)
     }
