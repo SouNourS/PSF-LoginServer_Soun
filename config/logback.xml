@@ -21,7 +21,7 @@
   </appender>
 
   <appender name="FILE-TRACE" class="ch.qos.logback.core.FileAppender">
-    <file>logs/pslogin-trace_${bySecond}.log</file>
+    <file>logs-trace/pslogin-trace_${bySecond}.log</file>
     <encoder>
       <pattern>%date{ISO8601} [%thread] %5level "%X" %logger{35} - %msg%n</pattern>
     </encoder>

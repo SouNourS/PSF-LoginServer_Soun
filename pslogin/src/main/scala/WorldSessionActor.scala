@@ -1089,7 +1089,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       import scala.concurrent.ExecutionContext.Implicits.global
       clientKeepAlive.cancel
-      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1500 milliseconds, self, PokeClient())
+      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1250 milliseconds, self, PokeClient())
 
       Database.getConnection.connect.onComplete {
         case scala.util.Success(connection) =>
