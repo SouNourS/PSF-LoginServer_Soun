@@ -471,6 +471,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ListAccountCharacters(connection) =>
       val accountUserName : String = account.Username
 
+      StartBundlingPackets()
       connection.get.sendPreparedStatement(
           "SELECT id, name, faction_id, gender_id, head_id, voice_id, deleted FROM characters where account_id=?", Array(account.AccountId)
         ).onComplete {
@@ -525,11 +526,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         case _ => failWithError("Something to do ?")
       }
+      StopBundlingPackets()
 
     case VehicleLoaded(_ /*vehicle*/) => ;
     //currently being handled by VehicleSpawnPad.LoadVehicle during testing phase
 
     case Zone.ClientInitialization(zone) =>
+      Thread.sleep(50)
       val continentNumber = zone.Number
       val poplist = zone.Players
       val popBO = 0
@@ -537,10 +540,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val popTR = poplist.count(_.faction == PlanetSideEmpire.TR)
       val popNC = poplist.count(_.faction == PlanetSideEmpire.NC)
       val popVS = poplist.count(_.faction == PlanetSideEmpire.VS)
+
       // StopBundlingPackets() is called on ClientInitializationComplete
       StartBundlingPackets()
       zone.Buildings.foreach({ case (id, building) => initBuilding(continentNumber, id, building) })
-      StopBundlingPackets()
 
       sendResponse(ZonePopulationUpdateMessage(continentNumber, 414, 138, popTR, 138, popNC, 138, popVS, 138, popBO))
       sendResponse(ContinentalLockUpdateMessage(continentNumber, PlanetSideEmpire.NEUTRAL))
@@ -571,6 +574,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(ZoneLockInfoMessage(continentNumber, false, true))
       sendResponse(ZoneForcedCavernConnectionsMessage(continentNumber, 0))
       sendResponse(HotSpotUpdateMessage(continentNumber, 1, Nil)) //normally set in bulk; should be fine doing per continent
+      StopBundlingPackets()
 
     case Zone.Population.PlayerHasLeft(zone, None) =>
       log.info(s"$avatar does not have a body on ${zone.Id}")
@@ -1097,8 +1101,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 case row: ArrayRowData => // If we got a row from the database
                   log.info(s"Ready to load character list for ${account.Username}")
                   admin = row(0).asInstanceOf[Boolean]
-                  cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
                   self ! ListAccountCharacters(Some(connection))
+                  Thread.sleep(50)
+                  cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
                 case _ => // If the account didn't exist in the database
                   log.error(s"Issue retrieving result set from database for account $account")
                   connection.disconnect
@@ -2894,7 +2899,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       Database.getConnection.connect.onComplete {
         case scala.util.Success(connection) =>
           Database.query(connection.sendPreparedStatement(
-            "SELECT account_id FROM characters where name=? AND deleted = false", Array(name)
+            "SELECT account_id FROM characters where name ILIKE ? AND deleted = false", Array(name)
           )).onComplete {
             case scala.util.Success(queryResult) =>
               queryResult match {
