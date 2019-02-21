@@ -104,6 +104,7 @@ object PacketHelpers {
         val first = enum.values.firstKey.id
         val last = enum.maxId - 1
 
+//        println(enum(enumVal))
         if(enumVal >= first && enumVal <= last)
           Attempt.successful(enum(enumVal))
         else

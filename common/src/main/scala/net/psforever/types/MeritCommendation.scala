@@ -484,6 +484,35 @@ object MeritCommendation extends Enumeration {
       XmasSnowman,
       XmasSpirit
       = Value
+    val unk = Value(1459640672) // to have Xtoolspar working
+    val unk2 = Value(1610810616) // to have Xtoolspar working
+    val unk3 = Value(125356199) // to have Xtoolspar working
+    val unk4 = Value(504632884) // to have Xtoolspar working
+    val unl5 = Value(33554438) // to have Xtoolspar working
+    val unk6 = Value(321265122) // to have Xtoolspar working
+    val unk7 = Value(872389823) // to have Xtoolspar working
+    val unk8 = Value(226533378) // to have Xtoolspar working
+    val unk9 = Value(1828215359) // to have Xtoolspar working
+    val unk10 = Value(198713608) // to have Xtoolspar working
+    val unk11 = Value(170675181) // to have Xtoolspar working
+    val unk12 = Value(1963204115) // to have Xtoolspar working
+    val unk13 = Value(2097349632) // to have Xtoolspar working
+    val unk14 = Value(2070316934) // to have Xtoolspar working
+    val unk15 = Value(425180) // to have Xtoolspar working
+    val unk16 = Value(265325499) // to have Xtoolspar working
+    val unk17 = Value(20988772) // to have Xtoolspar working
+    val unk18 = Value(1541965725) // to have Xtoolspar working
+    val unk19 = Value(100721251) // to have Xtoolspar working
+    val unk20 = Value(2075690642) // to have Xtoolspar working
+    val unk21 = Value(392551223) // to have Xtoolspar working
+    val unk22 = Value(1528464541) // to have Xtoolspar working
+    val unk23 = Value(6300268) // to have Xtoolspar working
+    val unk24 = Value(1635983738) // to have Xtoolspar working
+    val unk25 = Value(257566486) // to have Xtoolspar working
+    val unk26 = Value(1593922561) // to have Xtoolspar working
+    val unk27 = Value(1088930566) // to have Xtoolspar working
+    val unk28 = Value(1920924127) // to have Xtoolspar working
+    val unk29 = Value(1602208363) // to have Xtoolspar working
 
   /*
   The value None requires special consideration.

@@ -197,7 +197,7 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
     }
     else {
       val slot = iter.next
-      if(slot.Equipment.isEmpty && slot.Size.equals(objSize)) {
+      if((slot.Equipment.isEmpty && slot.Size.equals(objSize)) || (index == 4 && slot.Size.equals(objSize))) { // PTS v3
         Some(index)
       }
       else {

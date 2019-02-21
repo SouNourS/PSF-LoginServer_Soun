@@ -12,9 +12,9 @@ object Database {
 
   // TODO Will probably want to use the ConnectionPool, although I don't know the implications for multithreaded apps
   def getConnection = new PostgreSQLConnection(Configuration(
-    "PSForever",
-    "localhost",
-    5432,
+    "PSForever", // user
+    "localhost", // host
+    5432, // port
     Some("PSFDB"), // password
     Some("psforever")  // database
   ))

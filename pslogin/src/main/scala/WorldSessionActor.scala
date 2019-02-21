@@ -91,6 +91,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var shooting : Option[PlanetSideGUID] = None //ChangeFireStateMessage_Start
   var prefire : Option[PlanetSideGUID] = None //if WeaponFireMessage precedes ChangeFireStateMessage_Start
   var accessedContainer : Option[PlanetSideGameObject with Container] = None
+  var connectionState : Int = 400
   var flying : Boolean = false
   var speed : Float = 1.0f
   var spectator : Boolean = false
@@ -102,6 +103,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var traveler : Traveler = null
   var deadState : DeadState.Value = DeadState.Dead
   var whenUsedLastKit : Long = 0
+  var whenUsedLastSMKit : Long = 0
+  var whenUsedLastSAKit : Long = 0
+  var whenUsedLastSSKit : Long = 0
   val projectiles : Array[Option[Projectile]] = Array.fill[Option[Projectile]](Projectile.RangeUID - Projectile.BaseUID)(None)
   var drawDeloyableIcon : PlanetSideGameObject with Deployable => Unit = RedrawDeployableIcons
   var recentTeleportAttempt : Long = 0
@@ -532,7 +536,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     //currently being handled by VehicleSpawnPad.LoadVehicle during testing phase
 
     case Zone.ClientInitialization(zone) =>
-      Thread.sleep(50)
+      Thread.sleep(connectionState/10)
       val continentNumber = zone.Number
       val poplist = zone.Players
       val popBO = 0
@@ -887,6 +891,45 @@ class WorldSessionActor extends Actor with MDCContextAware {
       LivePlayerList.Add(sessionId, avatar)
       traveler = new Traveler(self, continent.Id)
       //PropertyOverrideMessage
+      sendResponse(PropertyOverrideMessage(List(GamePropertyScope(0, List(
+        GamePropertyTarget(343,List(
+          "purchase_exempt_vs" -> "colossus_gunner", "purchase_exempt_vs" -> "colossus_flight", "purchase_exempt_vs" -> "colossus_ntu_siphon",
+          "purchase_exempt_tr" -> "",
+          "purchase_exempt_nc" -> "")),
+        GamePropertyTarget(ObjectClass.magrider, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.prowler, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.vanguard, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.mini_chaingun, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.r_shotgun, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.lasher, "purchase_empire" -> "all"),
+//        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
+        GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
+        GamePropertyTarget(ObjectClass.super_medkit, "requirement_award0" -> "false"),
+        GamePropertyTarget(ObjectClass.super_staminakit, "requirement_award0" -> "false"),
+        GamePropertyTarget(ObjectClass.super_armorkit, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.super_medkit, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.super_staminakit, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_winchester_ammo" -> "ordertype_equipment"),
+        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
+        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
+        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_winchester_ammo" -> "ordertype_equipment"),
+        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
+        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
+        GamePropertyTarget(ObjectClass.winchester, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.pellet_gun, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.six_shooter, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.dynomite, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.winchester_ammo, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.pellet_gun_ammo, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.six_shooter_ammo, "allowed" -> "true"))))))
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
       sendResponse(FriendsResponse(FriendAction.InitializeFriendList, 0, true, true, Nil))
@@ -1089,7 +1132,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       import scala.concurrent.ExecutionContext.Implicits.global
       clientKeepAlive.cancel
-      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1250 milliseconds, self, PokeClient())
+      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1000 milliseconds, self, PokeClient())
 
       Database.getConnection.connect.onComplete {
         case scala.util.Success(connection) =>
@@ -1101,9 +1144,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 case row: ArrayRowData => // If we got a row from the database
                   log.info(s"Ready to load character list for ${account.Username}")
                   admin = row(0).asInstanceOf[Boolean]
-                  self ! ListAccountCharacters(Some(connection))
-                  Thread.sleep(50)
                   cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
+                  Thread.sleep(connectionState)
+                  self ! ListAccountCharacters(Some(connection))
                 case _ => // If the account didn't exist in the database
                   log.error(s"Issue retrieving result set from database for account $account")
                   connection.disconnect
@@ -2805,8 +2848,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
     StopBundlingPackets()
     drawDeloyableIcon = DontRedrawIcons
 
-    //PTS v3
-    if (loadConfZone) {
+    // PTS v3
+    if (loadConfZone && connectionState != 80) {
       configZone(continent) // PTS v3
       loadConfZone = false
     }
@@ -2850,6 +2893,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ConnectToWorldRequestMessage(server, token, majorVersion, minorVersion, revision, buildDate, unk) =>
       val clientVersion = s"Client Version: $majorVersion.$minorVersion.$revision, $buildDate"
       log.info(s"New world login to $server with Token:$token. $clientVersion")
+
+      sendResponse(ChatMsg(ChatMessageType.CMT_CULLWATERMARK, false, "", "", None))
+
+      Thread.sleep(40)
 
       accountIntermediary ! RetrieveAccountData(token) // PTS v3
 
@@ -3008,16 +3055,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
                       player = new Player(avatar)
 
-                      player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
+                      player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
                       player.Slot(2).Equipment = Tool(suppressor)
-                      player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
+                      player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
                       player.Slot(6).Equipment = AmmoBox(bullet_9mm)
-                      player.Slot(9).Equipment = AmmoBox(bullet_9mm_AP)
-                      player.Slot(12).Equipment = AmmoBox(shotgun_shell)
-                      player.Slot(33).Equipment = AmmoBox(shotgun_shell_AP)
-                      player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
+                      player.Slot(9).Equipment = AmmoBox(bullet_9mm)
+                      player.Slot(12).Equipment = AmmoBox(bullet_9mm)
+                      player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
+                      player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
                       player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
-                      //        player.Slot(5).Equipment.get.asInstanceOf[LockerContainer].Inventory += 0 -> SimpleItem(remote_electronics_kit)
                       player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
                       player.Inventory.Items.foreach { _.obj.Faction = lFaction }
 
@@ -3066,7 +3112,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       localService ! Service.Join(factionOnContinentChannel)
       vehicleService ! Service.Join(continentId)
       galaxyService ! Service.Join("galaxy")
-//      configZone(continent) // PTS v3
+      if(connectionState == 80) configZone(continent) // PTS v3
 //      StartBundlingPackets() // PTS v3
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
@@ -3321,8 +3367,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The \\#3!config\\#6 command will refresh bases/twrs in case of problem.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
       sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -3588,12 +3632,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
         log.info("Chat: " + msg)
       }
       else {
+        log.info("Chat: " + msg)
         makeReply = false
       }
       if(messagetype == ChatMessageType.CMT_SUICIDE) {
         if(player.isAlive && deadState != DeadState.Release) {
           Suicide(player)
         }
+      }
+      if(messagetype == ChatMessageType.CMT_CULLWATERMARK) {
+        if(trimContents.contains("40 80")) connectionState = 1000
+        else if(trimContents.contains("120 200")) connectionState = 80
+        else connectionState = 400
       }
       if(messagetype == ChatMessageType.CMT_DESTROY) {
         makeReply = true
@@ -3619,9 +3669,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      else if (trimContents.equals("!admin")) {
 //        admin = true
 //      }
-      else if(trimContents.equals("!config")){
-        configZone(continent) // PTS v3
-      }
+//      else if (trimContents.equals("!test")) {
+//        val info : String = contents.drop(contents.indexOf(" ") + 1)
+//      }
       else if(trimContents.equals("!help")){
         StartBundlingPackets()
         // Welcome messages by Nick
@@ -3637,8 +3687,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
           "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None)))
         sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
           "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6The \\#3!config\\#6 command will refresh bases/twrs in case of problem.", None)))
         sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
           "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
         sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -3729,32 +3777,43 @@ class WorldSessionActor extends Actor with MDCContextAware {
         var hackFaction = PlanetSideEmpire.NEUTRAL
         val args = trimContents.split(" ")
         if (args.length == 3) {
+          var badFaction : Boolean = false
+          var badBuilding : Boolean = false
           continent.Buildings.foreach({
             case (id, building) =>
               if(args(2).equalsIgnoreCase("tr")) hackFaction = PlanetSideEmpire.TR
               else if(args(2).equalsIgnoreCase("nc")) hackFaction = PlanetSideEmpire.NC
               else if(args(2).equalsIgnoreCase("vs")) hackFaction = PlanetSideEmpire.VS
-              if(building.Name.isDefined && args(1).equalsIgnoreCase(building.Name.get)) {
+              else if(args(2).equalsIgnoreCase("bo")) hackFaction = PlanetSideEmpire.NEUTRAL
+              else badFaction = true
+              if(building.Name.isDefined && args(1).equalsIgnoreCase(building.Name.get) && !badFaction) {
                 log.info(s"Hack Base Name : ${args(1)} to empire : ${args(2)}")
                 building.Faction = hackFaction
                 building.Actor ! Building.SendMapUpdate(all_clients = true)
                 localService ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(PlanetSideGUID(building.ModelId), hackFaction))
+              } else if(building.Name.isDefined && !args(1).equalsIgnoreCase(building.Name.get)) {
+                badBuilding = true
               }
           })
+          if(badBuilding || badFaction) sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
         } else if (args.length == 2) {
+          var bad : Boolean = false
           continent.Buildings.foreach({
             case (id, building) =>
               if(args(1).equalsIgnoreCase("tr")) hackFaction = PlanetSideEmpire.TR
               else if(args(1).equalsIgnoreCase("nc")) hackFaction = PlanetSideEmpire.NC
               else if(args(1).equalsIgnoreCase("vs")) hackFaction = PlanetSideEmpire.VS
-              if(building.Name.isDefined) {
+              else if(args(1).equalsIgnoreCase("bo")) hackFaction = PlanetSideEmpire.NEUTRAL
+              else bad = true
+              if(building.Name.isDefined && !bad) {
                 log.info(s"Hack Bases to empire : ${args(1)}")
                 building.Faction = hackFaction
                 building.Actor ! Building.SendMapUpdate(all_clients = true)
                 localService ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(PlanetSideGUID(building.ModelId), hackFaction))
               }
           })
-        }
+          if(bad) sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
+        } else sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
       }
       // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
       // TODO: Just replays the packet straight back to sender; actually needs to be routed to recipients!
@@ -4360,6 +4419,76 @@ class WorldSessionActor extends Actor with MDCContextAware {
                             player.Health = player.Health + 25
                             sendResponse(PlanetsideAttributeMessage(avatar_guid, 0, player.Health))
                             avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(avatar_guid, 0, player.Health))
+                          case None =>
+                            log.error(s"UseItem: anticipated a $kit, but can't find it")
+                        }
+                      }
+                    }
+                    else if(kit.Definition == GlobalDefinitions.super_medkit) {
+                      if(player.Health == player.MaxHealth) {
+                        sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", "@HealComplete", None))
+                      }
+                      else if(System.currentTimeMillis - whenUsedLastSMKit < 1200000) {
+                        sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", s"@TimeUntilNextUse^${1200 - (System.currentTimeMillis - whenUsedLastSMKit) / 1000}~", None))
+                      }
+                      else {
+                        player.Find(kit) match {
+                          case Some(index) =>
+                            whenUsedLastSMKit = System.currentTimeMillis
+                            player.Slot(index).Equipment = None //remove from slot immediately; must exist on client for next packet
+                            sendResponse(UseItemMessage(avatar_guid, item_used_guid, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
+                            sendResponse(ObjectDeleteMessage(kit.GUID, 0))
+                            taskResolver ! GUIDTask.UnregisterEquipment(kit)(continent.GUID)
+                            player.History(HealFromKit(PlayerSource(player), 100, kit.Definition))
+                            player.Health = player.Health + 100
+                            sendResponse(PlanetsideAttributeMessage(avatar_guid, 0, player.Health))
+                            avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(avatar_guid, 0, player.Health))
+                          case None =>
+                            log.error(s"UseItem: anticipated a $kit, but can't find it")
+                        }
+                      }
+                    }
+                    else if(kit.Definition == GlobalDefinitions.super_armorkit) {
+                      if(player.Armor == player.MaxArmor) {
+                        sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", "Armor at maximum - No repairing required.", None))
+                      }
+                      else if(System.currentTimeMillis - whenUsedLastSAKit < 1200000) {
+                        sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", s"@TimeUntilNextUse^${1200 - (System.currentTimeMillis - whenUsedLastSAKit) / 1000}~", None))
+                      }
+                      else {
+                        player.Find(kit) match {
+                          case Some(index) =>
+                            whenUsedLastSAKit = System.currentTimeMillis
+                            player.Slot(index).Equipment = None //remove from slot immediately; must exist on client for next packet
+                            sendResponse(UseItemMessage(avatar_guid, item_used_guid, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
+                            sendResponse(ObjectDeleteMessage(kit.GUID, 0))
+                            taskResolver ! GUIDTask.UnregisterEquipment(kit)(continent.GUID)
+                            player.History(RepairFromKit(PlayerSource(player), 200, kit.Definition))
+                            player.Armor = player.Armor + 200
+                            sendResponse(PlanetsideAttributeMessage(avatar_guid, 4, player.Armor))
+                            avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(avatar_guid, 4, player.Armor))
+                          case None =>
+                            log.error(s"UseItem: anticipated a $kit, but can't find it")
+                        }
+                      }
+                    }
+                    else if(kit.Definition == GlobalDefinitions.super_staminakit) {
+                      if(player.Stamina == player.MaxStamina) {
+                        sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", "Stamina at maximum - No recharge required.", None))
+                      }
+                      else if(System.currentTimeMillis - whenUsedLastSSKit < 1200000) {
+                        sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", s"@TimeUntilNextUse^${1200 - (System.currentTimeMillis - whenUsedLastSSKit) / 1000}~", None))
+                      }
+                      else {
+                        player.Find(kit) match {
+                          case Some(index) =>
+                            whenUsedLastSSKit = System.currentTimeMillis
+                            player.Slot(index).Equipment = None //remove from slot immediately; must exist on client for next packet
+                            sendResponse(UseItemMessage(avatar_guid, item_used_guid, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
+                            sendResponse(ObjectDeleteMessage(kit.GUID, 0))
+                            taskResolver ! GUIDTask.UnregisterEquipment(kit)(continent.GUID)
+                            player.Stamina = player.Stamina + 100
+                            sendResponse(PlanetsideAttributeMessage(avatar_guid, 2, player.Stamina))
                           case None =>
                             log.error(s"UseItem: anticipated a $kit, but can't find it")
                         }
@@ -5310,6 +5439,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
         private val localObject = obj
         private val localAnnounce = self
         private val localService = avatarService
+
+        // PTS v3
+        if (index == 4) {
+          target.Slot(4).Equipment match {
+            case None => ;
+            case Some(knife) =>
+              target.Slot(4).Equipment = None
+              taskResolver ! RemoveEquipmentFromSlot(target, knife, 4)
+          }
+        }
 
         override def isComplete : Task.Resolution.Value = {
           if(localTarget.Slot(localIndex).Equipment.contains(localObject)) {
@@ -6830,10 +6969,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       StartBundlingPackets()
       sendResponse(SetEmpireMessage(PlanetSideGUID(building.ModelId), building.Faction))
 
-      // PTS v3 or not
-//      if(building.Faction != PlanetSideEmpire.NEUTRAL &&
-//        (building.ModelId == 21 || building.ModelId == 30 || building.ModelId == 48)) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(building.ModelId), 67, 1))
-
       building.Amenities.foreach(amenity => {
         val amenityId = amenity.GUID
 
@@ -6872,7 +7007,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       })
       StopBundlingPackets()
-      Thread.sleep(120)
+      Thread.sleep(connectionState)
 //      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
 
     })

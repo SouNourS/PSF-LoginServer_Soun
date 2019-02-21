@@ -325,6 +325,7 @@ class PacketCodingActor extends Actor with MDCContextAware {
     */
   def sendResponseRight(cont : PlanetSidePacketContainer) : Unit = {
     log.trace("PACKET SEND, RIGHT: " + cont)
+//    println("PACKET SEND, RIGHT: " + cont)
     MDC("sessionId") = sessionId.toString
     rightRef !> cont
   }

@@ -461,6 +461,12 @@ object GlobalDefinitions {
 
   val flamethrower_ammo = AmmoBoxDefinition(Ammo.flamethrower_ammo)
 
+  val winchester_ammo = AmmoBoxDefinition(Ammo.winchester_ammo)
+
+  val pellet_gun_ammo = AmmoBoxDefinition(Ammo.pellet_gun_ammo)
+
+  val six_shooter_ammo = AmmoBoxDefinition(Ammo.six_shooter_ammo)
+
   val dualcycler_ammo = AmmoBoxDefinition(Ammo.dualcycler_ammo)
 
   val pounder_ammo = AmmoBoxDefinition(Ammo.pounder_ammo)
@@ -649,6 +655,14 @@ object GlobalDefinitions {
   val oicw = ToolDefinition(ObjectClass.oicw)
 
   val flamethrower = ToolDefinition(ObjectClass.flamethrower)
+
+  val winchester = ToolDefinition(ObjectClass.winchester)
+
+  val pellet_gun = ToolDefinition(ObjectClass.pellet_gun)
+
+  val six_shooter = ToolDefinition(ObjectClass.six_shooter)
+
+  val dynomite = ToolDefinition(ObjectClass.dynomite)
 
   val trhev_dualcycler = new ToolDefinition(ObjectClass.trhev_dualcycler) {
     override def NextFireModeIndex(index : Int) : Int = index
@@ -1248,7 +1262,7 @@ object GlobalDefinitions {
     */
   def isGrenade(edef : EquipmentDefinition) : Boolean = {
     edef match {
-      case `frag_grenade` | `jammer_grenade` | `plasma_grenade` =>
+      case `frag_grenade` | `jammer_grenade` | `plasma_grenade` | `dynomite` =>
         true
       case _ =>
         false
@@ -1562,6 +1576,18 @@ object GlobalDefinitions {
     flamethrower_ammo.Name = "flamethrower_ammo"
     flamethrower_ammo.Capacity = 100
     flamethrower_ammo.Tile = InventoryTile.Tile44
+
+    winchester_ammo.Name = "winchester_ammo"
+    winchester_ammo.Capacity = 10
+    winchester_ammo.Tile = InventoryTile.Tile33
+
+    pellet_gun_ammo.Name = "pellet_gun_ammo"
+    pellet_gun_ammo.Capacity = 8
+    pellet_gun_ammo.Tile = InventoryTile.Tile33
+
+    six_shooter_ammo.Name = "six_shooter_ammo"
+    six_shooter_ammo.Capacity = 12
+    six_shooter_ammo.Tile = InventoryTile.Tile33
 
     dualcycler_ammo.Name = "dualcycler_ammo"
     dualcycler_ammo.Capacity = 100
@@ -3990,6 +4016,47 @@ object GlobalDefinitions {
     flamethrower.FireModes(1).Magazine = 100
     flamethrower.FireModes(1).Rounds = 50
     flamethrower.Tile = InventoryTile.Tile63
+
+    winchester.Name = "winchester"
+    winchester.Size = EquipmentSize.Rifle
+    winchester.AmmoTypes += winchester_ammo
+    winchester.ProjectileTypes += winchester_projectile
+    winchester.FireModes += new FireModeDefinition
+    winchester.FireModes.head.AmmoTypeIndices += 0
+    winchester.FireModes.head.AmmoSlotIndex = 0
+    winchester.FireModes.head.Magazine = 1
+    winchester.Tile = InventoryTile.Tile93
+
+    pellet_gun.Name = "pellet_gun"
+    pellet_gun.Size = EquipmentSize.Rifle
+    pellet_gun.AmmoTypes += pellet_gun_ammo
+    pellet_gun.ProjectileTypes += pellet_gun_projectile
+    pellet_gun.FireModes += new PelletFireModeDefinition
+    pellet_gun.FireModes.head.AmmoTypeIndices += 0
+    pellet_gun.FireModes.head.AmmoSlotIndex = 0
+    pellet_gun.FireModes.head.Magazine = 1
+    pellet_gun.FireModes.head.Chamber = 8 //1 shells * 8 pellets = 8
+    pellet_gun.Tile = InventoryTile.Tile63
+
+    six_shooter.Name = "six_shooter"
+    six_shooter.Size = EquipmentSize.Pistol
+    six_shooter.AmmoTypes += six_shooter_ammo
+    six_shooter.ProjectileTypes += six_shooter_projectile
+    six_shooter.FireModes += new FireModeDefinition
+    six_shooter.FireModes.head.AmmoTypeIndices += 0
+    six_shooter.FireModes.head.AmmoSlotIndex = 0
+    six_shooter.FireModes.head.Magazine = 6
+    six_shooter.Tile = InventoryTile.Tile33
+
+    dynomite.Name = "dynomite"
+    dynomite.Size = EquipmentSize.Pistol
+    dynomite.AmmoTypes += frag_grenade_ammo
+    dynomite.ProjectileTypes += dynomite_projectile
+    dynomite.FireModes += new FireModeDefinition
+    dynomite.FireModes.head.AmmoTypeIndices += 0
+    dynomite.FireModes.head.AmmoSlotIndex = 0
+    dynomite.FireModes.head.Magazine = 1
+    dynomite.Tile = InventoryTile.Tile22
 
     trhev_dualcycler.Name = "trhev_dualcycler"
     trhev_dualcycler.Size = EquipmentSize.Max
