@@ -600,7 +600,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       var time : Int = 10
       spawn_tube.Owner match {
         case building : Building =>
-          log.info(s"Zone.Lattice.SpawnPoint: spawn point on $zone_id in building ${building.Id} selected")
+          log.info(s"Zone.Lattice.SpawnPoint: spawn point on $zone_id in building ${building.MapId} selected")
           pos = pos + (Vector3(0, 0, 1.5f))
           building.Amenities.foreach(amenity => {
             amenity.Definition match {
@@ -3790,7 +3790,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 log.info(s"Hack Base Name : ${args(1)} to empire : ${args(2)}")
                 building.Faction = hackFaction
                 building.Actor ! Building.SendMapUpdate(all_clients = true)
-                localService ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(PlanetSideGUID(building.ModelId), hackFaction))
+                localService ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(building.GUID, hackFaction))
               } else if(building.Name.isDefined && !args(1).equalsIgnoreCase(building.Name.get)) {
                 badBuilding = true
               }
@@ -3809,7 +3809,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 log.info(s"Hack Bases to empire : ${args(1)}")
                 building.Faction = hackFaction
                 building.Actor ! Building.SendMapUpdate(all_clients = true)
-                localService ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(PlanetSideGUID(building.ModelId), hackFaction))
+                localService ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(building.GUID, hackFaction))
               }
           })
           if(bad) sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
@@ -4329,7 +4329,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       // TODO: Not all incoming UseItemMessage's respond with another UseItemMessage (i.e. doors only send out GenericObjectStateMsg)
       continent.GUID(object_guid) match {
         case Some(door : Door) =>
-          if(player.Faction == door.Faction || ((continent.Map.DoorToLock.get(object_guid.guid) match {
+          if(player.Faction == door.Faction || (continent.Map.DoorToLock.get(object_guid.guid) match {
             case Some(lock_guid) =>
               val lock = continent.GUID(lock_guid).get.asInstanceOf[IFFLock]
 
@@ -4340,11 +4340,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 case None => ;
               }
 
-              // If the IFF lock has been hacked OR the base is neutral OR the base linked to the lock is hacked then open the door
-              lock.HackedBy.isDefined || baseIsHacked || lock.Faction == PlanetSideEmpire.NEUTRAL
-            case None => !door.isOpen
-          }) || Vector3.ScalarProjection(door.Outwards, player.Position - door.Position) < 0f)) {
-            // We're on the inside of the door - open the door
+              val playerIsOnInside = Vector3.ScalarProjection(lock.Outwards, player.Position - door.Position) < 0f
+
+              // If an IFF lock exists and the IFF lock faction doesn't match the current player and one of the following conditions are met open the door:
+              // A base is neutral
+              // A base is hacked
+              // The lock is hacked
+              // The player is on the inside of the door, determined by the lock orientation
+              lock.HackedBy.isDefined || baseIsHacked || lock.Faction == PlanetSideEmpire.NEUTRAL || playerIsOnInside
+            case None => !door.isOpen // If there's no linked IFF lock just open the door if it's closed.
+          })) {
             door.Actor ! Door.Use(player, msg)
           }
           else if(door.isOpen) {
@@ -6967,14 +6972,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def configZone(zone : Zone) : Unit = {
     zone.Buildings.values.foreach(building => {
       StartBundlingPackets()
-      sendResponse(SetEmpireMessage(PlanetSideGUID(building.ModelId), building.Faction))
-
+      sendResponse(SetEmpireMessage(building.GUID, building.Faction))
       building.Amenities.foreach(amenity => {
         val amenityId = amenity.GUID
-
         sendResponse(PlanetsideAttributeMessage(amenityId, 50, 0))
         sendResponse(PlanetsideAttributeMessage(amenityId, 51, 0))
-
 
         amenity.Definition match {
           case GlobalDefinitions.resource_silo =>
