@@ -902,6 +902,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.mini_chaingun, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.r_shotgun, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.lasher, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.vulture, "requirement_award0" -> "false"),
 //        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
         GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
         GamePropertyTarget(ObjectClass.super_medkit, "requirement_award0" -> "false"),
