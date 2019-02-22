@@ -517,6 +517,7 @@ object MeritCommendation extends Enumeration {
     val unk31 = Value(5142770) // to have Xtoolspar working
     val unk32 = Value(660742760) // to have Xtoolspar working
     val unk33 = Value(320880384) // to have Xtoolspar working
+    val unk34 = Value(687931568) // to have Xtoolspar working
 
   /*
   The value None requires special consideration.
