@@ -5839,7 +5839,7 @@ object GlobalDefinitions {
     ground_vehicle_terminal.Tab += 4 -> OrderTerminalDefinition.VehicleLoadoutPage()
 
     air_vehicle_terminal.Name = "air_vehicle_terminal"
-    air_vehicle_terminal.Tab += 46769 -> OrderTerminalDefinition.VehiclePage(VehicleTerminalDefinition.flight1Vehicles, VehicleTerminalDefinition.trunk)
+    air_vehicle_terminal.Tab += 46769 -> OrderTerminalDefinition.VehiclePage(VehicleTerminalDefinition.flight1Vehicles ++ VehicleTerminalDefinition.flight2Vehicles, VehicleTerminalDefinition.trunk) // PTS v3
     air_vehicle_terminal.Tab += 4 -> OrderTerminalDefinition.VehicleLoadoutPage()
 
     dropship_vehicle_terminal.Name = "dropship_vehicle_terminal"
@@ -5847,7 +5847,7 @@ object GlobalDefinitions {
     dropship_vehicle_terminal.Tab += 4 -> OrderTerminalDefinition.VehicleLoadoutPage()
 
     vehicle_terminal_combined.Name = "vehicle_terminal_combined"
-    vehicle_terminal_combined.Tab += 46769 -> OrderTerminalDefinition.VehiclePage(VehicleTerminalDefinition.flight1Vehicles ++ VehicleTerminalDefinition.groundVehicles, VehicleTerminalDefinition.trunk)
+    vehicle_terminal_combined.Tab += 46769 -> OrderTerminalDefinition.VehiclePage(VehicleTerminalDefinition.flight1Vehicles ++ VehicleTerminalDefinition.flight2Vehicles ++ VehicleTerminalDefinition.groundVehicles, VehicleTerminalDefinition.trunk) // PTS v3
     vehicle_terminal_combined.Tab += 4 -> OrderTerminalDefinition.VehicleLoadoutPage()
 
     bfr_terminal.Name = "bfr_terminal"

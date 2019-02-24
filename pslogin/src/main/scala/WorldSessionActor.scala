@@ -601,7 +601,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       spawn_tube.Owner match {
         case building : Building =>
           log.info(s"Zone.Lattice.SpawnPoint: spawn point on $zone_id in building ${building.MapId} selected")
-          pos = pos + (Vector3(0, 0, 1.5f))
+          pos = pos + Vector3(0, 0, 1.5f)
           building.Amenities.foreach(amenity => {
             amenity.Definition match {
               case GlobalDefinitions.resource_silo =>
@@ -903,6 +903,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.r_shotgun, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.lasher, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.vulture, "requirement_award0" -> "false"),
+        GamePropertyTarget(390, "purchase_ams" -> "true"),
+        GamePropertyTarget(952, "forsale_dropship" -> "true"),
+        GamePropertyTarget(43, "forsale_dropship" -> "true"),
+        GamePropertyTarget(ObjectClass.dropship, "cargomountzone1_acceptedvehicles" -> "ams fury two_man_assault_buggy twomanhoverbuggy quadassault threemanheavybuggy twomanheavybuggy quadstealth ant lightning skyguard switchblade"),
 //        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
         GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
         GamePropertyTarget(ObjectClass.super_medkit, "requirement_award0" -> "false"),
@@ -910,6 +914,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.super_armorkit, "allowed" -> "true"),
         GamePropertyTarget(ObjectClass.super_medkit, "allowed" -> "true"),
         GamePropertyTarget(ObjectClass.super_staminakit, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.super_armorkit, "nodrop" -> "false"),
+        GamePropertyTarget(ObjectClass.super_medkit, "nodrop" -> "false"),
+        GamePropertyTarget(ObjectClass.super_staminakit, "nodrop" -> "false"),
         GamePropertyTarget(ObjectClass.order_terminal, "forsale_winchester" -> "ordertype_weapon"),
         GamePropertyTarget(ObjectClass.order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
         GamePropertyTarget(ObjectClass.order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
@@ -3670,9 +3677,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      else if (trimContents.equals("!admin")) {
 //        admin = true
 //      }
-//      else if (trimContents.equals("!test")) {
-//        val info : String = contents.drop(contents.indexOf(" ") + 1)
-//      }
+      else if (trimContents.equals("!test")) {
+        val info : String = contents.drop(contents.indexOf(" ") + 1)
+      }
       else if(trimContents.equals("!help")){
         StartBundlingPackets()
         // Welcome messages by Nick
@@ -7185,11 +7192,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       } match {
         case Some(List(tube)) =>
-          player.Position = tube.Position + (Vector3(0, 0, 1.5f))
+          player.Position = tube.Position + Vector3(0, 0, 1.5f)
           player.Orientation = tube.Orientation
 
         case Some(tubes) =>
-          player.Position = tubes.head.Position + (Vector3(0, 0, 1.5f))
+          player.Position = tubes.head.Position + Vector3(0, 0, 1.5f)
           player.Orientation = tubes.head.Orientation
 
         case None =>
