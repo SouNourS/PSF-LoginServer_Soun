@@ -12,6 +12,9 @@ import akka.actor.MDCContextAware.MdcMsg
 import akka.actor.SupervisorStrategy.Stop
 import net.psforever.packet.PacketCoding
 import net.psforever.packet.control.ConnectionClose
+import services.ServiceManager
+import services.ServiceManager.Lookup
+import services.account.{IPAddress, StoreIPAddress}
 
 import scala.concurrent.duration._
 
@@ -47,6 +50,7 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
   val sessionById = mutable.Map[Long, Session]()
   val sessionByActor = mutable.Map[ActorRef, Session]()
   val closePacket = PacketCoding.EncodePacket(ConnectionClose()).require.bytes
+  var accountIntermediary : ActorRef = Actor.noSender
 
   var sessionId = 0L // this is a connection session, not an actual logged in session ID
   var inputRef : ActorRef = ActorRef.noSender
@@ -71,6 +75,7 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
     case Hello() =>
       inputRef = sender()
       context.become(started)
+      ServiceManager.serviceManager ! Lookup("accountIntermediary")
     case default =>
       log.error(s"Unknown message $default. Stopping...")
       context.stop(self)
@@ -81,6 +86,8 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
   }
 
   def started : Receive = {
+    case ServiceManager.LookupResult("accountIntermediary", endpoint) =>
+      accountIntermediary = endpoint
     case recv @ ReceivedPacket(msg, from) =>
       var session : Session = null
 
@@ -160,6 +167,10 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
     }
 
     log.info(s"New session ID=${id} from " + address.toString)
+
+    if(role == "Login") {
+      accountIntermediary ! StoreIPAddress(id, new IPAddress(address))
+    }
 
     if(role == "World" && isStatus) {
       xActiveSession += 1

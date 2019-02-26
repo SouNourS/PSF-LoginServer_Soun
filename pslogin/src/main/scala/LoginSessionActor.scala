@@ -15,9 +15,10 @@ import net.psforever.objects.DefaultCancellable
 import net.psforever.types.PlanetSideEmpire
 import services.ServiceManager
 import services.ServiceManager.Lookup
-import services.account.StoreAccountData
+import services.account.{ReceiveIPAddress, RetrieveIPAddress, StoreAccountData}
 import com.github.t3hnar.bcrypt._
 import net.psforever.packet.game.LoginRespMessage.{LoginError, StationError, StationSubscriptionStatus}
+
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -38,6 +39,11 @@ class LoginSessionActor extends Actor with MDCContextAware {
   var accountIntermediary : ActorRef = Actor.noSender
 
   var updateServerListTask : Cancellable = DefaultCancellable.obj
+
+  var ipAddress : String = ""
+  var hostName : String = ""
+  var canonicalHostName : String = ""
+  var port : Int = 0
 
   private val numBcryptPasses = 4
 
@@ -69,6 +75,11 @@ class LoginSessionActor extends Actor with MDCContextAware {
   def Started : Receive = {
     case ServiceManager.LookupResult("accountIntermediary", endpoint) =>
       accountIntermediary = endpoint
+    case ReceiveIPAddress(address) =>
+      ipAddress = address.Address
+      hostName = address.HostName
+      canonicalHostName = address.CanonicalHostName
+      port = address.Port
     case UpdateServerList() =>
       updateServerList()
     case ControlPacket(_, ctrl) =>
@@ -103,6 +114,8 @@ class LoginSessionActor extends Actor with MDCContextAware {
 
       val clientVersion = s"Client Version: $majorVersion.$minorVersion.$revision, $buildDate"
 
+      accountIntermediary ! RetrieveIPAddress(sessionId)
+
       if(token.isDefined)
         log.info(s"New login UN:$username Token:${token.get}. $clientVersion")
       else {
@@ -127,7 +140,7 @@ class LoginSessionActor extends Actor with MDCContextAware {
     Database.getConnection.connect.onComplete {
       case Success(connection) =>
         Database.query(connection.sendPreparedStatement(
-          "SELECT id, passhash, inactive FROM accounts where username=?", Array(username)
+          "SELECT id, passhash, inactive, gm FROM accounts where username=?", Array(username)
         )).onComplete {
           case Success(queryResult) =>
             context.become(startAccountAuthentication)
@@ -220,8 +233,8 @@ class LoginSessionActor extends Actor with MDCContextAware {
     case LogTheLoginOccurrence(connection, username, newToken, isSuccessfulLogin, accountId) =>
       connection.get.inTransaction {
         c => c.sendPreparedStatement(
-          "INSERT INTO logins (account_id, login_time) VALUES(?,?)",
-          Array(accountId, new java.sql.Timestamp(System.currentTimeMillis))
+          "INSERT INTO logins (account_id, login_time, ip_address, canonical_hostName, hostname, port) VALUES(?,?,?,?,?,?)",
+          Array(accountId, new java.sql.Timestamp(System.currentTimeMillis), ipAddress, canonicalHostName, hostName, port)
         )
       }.onComplete {
         case _ =>
@@ -257,11 +270,12 @@ class LoginSessionActor extends Actor with MDCContextAware {
     val accountId : Int = row(0).asInstanceOf[Int]
     val dbPassHash : String = row(1).asInstanceOf[String]
     val inactive : Boolean = row(2).asInstanceOf[Boolean]
+    val gm : Boolean = row(3).asInstanceOf[Boolean]
 
     if (password.isBcrypted(dbPassHash)) {
       if (!inactive) {
         log.info(s"Account password correct for $username!")
-        accountIntermediary ! StoreAccountData(newToken, new Account(accountId, username))
+        accountIntermediary ! StoreAccountData(newToken, new Account(accountId, username, gm))
         return (true, accountId)
       } else {
         log.info(s"Account password correct for $username but account inactive !")

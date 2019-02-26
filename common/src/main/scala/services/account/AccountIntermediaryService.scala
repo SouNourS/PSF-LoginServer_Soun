@@ -22,6 +22,7 @@ import net.psforever.objects.Account
 
 class AccountIntermediaryService extends Actor {
   private val accountsByToken = mutable.Map[String, Account]()
+  private val IPAddressBySessionID = mutable.Map[Long, IPAddress]()
   private [this] val log = org.log4s.getLogger
 
   override def preStart = {
@@ -42,6 +43,19 @@ class AccountIntermediaryService extends Actor {
         log.info(s"Retrieving intermediary account data for ${account.get.AccountId}")
       } else {
         log.error(s"Unable to retrieve intermediary account data for ${account.get.AccountId}")
+      }
+
+    case StoreIPAddress(sessionID, address) =>
+      IPAddressBySessionID += (sessionID -> address)
+      log.info(s"Storing IP address (${address.Address}) for sessionID : $sessionID")
+
+    case RetrieveIPAddress(sessionID) =>
+      val address : Option[IPAddress] = IPAddressBySessionID.remove(sessionID)
+      if(address.nonEmpty) {
+        sender() ! ReceiveIPAddress(address.get)
+        log.info(s"Retrieving IP address data for sessionID : ${sessionID}")
+      } else {
+        log.error(s"Unable to retrieve IP address data for sessionID : ${sessionID}")
       }
 
     case msg =>

@@ -33,7 +33,11 @@ CREATE TABLE IF NOT EXISTS "characters" (
 CREATE TABLE IF NOT EXISTS "logins" (
   "id" SERIAL PRIMARY KEY NOT NULL,
   "account_id" INT NOT NULL REFERENCES accounts (id),
-  "login_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "login_time" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "ip_address" VARCHAR(32) NOT NULL,
+  "canonical_hostName" VARCHAR(132) NOT NULL,
+  "hostname" VARCHAR(132) NOT NULL,
+  "port" INT NOT NULL
 );
 
 --These triggers update the last_modified timestamp column when a table is updated
