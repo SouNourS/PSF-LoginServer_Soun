@@ -36,8 +36,6 @@ object Loadout {
     * @return an `InfantryLoadout` object populated with appropriate information about the current state of the player
     */
   def Create(player : Player, label : String) : Loadout = {
-    println(player.Holsters().length)
-    println(player.Holsters().toList)
     InfantryLoadout(
       label,
       packageSimplifications(player.Holsters()),
@@ -177,7 +175,6 @@ object Loadout {
       val entry = iter.next
       entry.Equipment match {
         case Some(obj) =>
-          println(SimplifiedEntry(buildSimplification(obj), index).item.getClass, obj.Definition.ObjectId)
           recursiveHolsterSimplifications(iter, index + 1, list :+ SimplifiedEntry(buildSimplification(obj), index))
         case None =>
           recursiveHolsterSimplifications(iter, index + 1, list)

@@ -3744,56 +3744,56 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //        admin = true
 //      }
       else if (trimContents.equals("!test")) {
-        val info : String = contents.drop(contents.indexOf(" ") + 1)
-
-        var megaList : String = ""
-        (0 until 5).foreach(index => {
-          var localType : String = ""
-          if(player.Slot(index).Equipment.isDefined) {
-            player.Slot(index).Equipment.get match {
-              case test : Tool =>
-                localType = "Tool"
-              case test : AmmoBox =>
-                localType = "AmmoBox"
-              case test : ConstructionItem =>
-                localType = "ConstructionItem"
-              case test : BoomerTrigger =>
-                localType = "BoomerTrigger"
-              case test : SimpleItem =>
-                localType = "SimpleItem"
-              case test : Kit =>
-                localType = "Kit"
-              case _ =>
-                localType = ""
-            }
-            println(player.Slot(index).Equipment.get.Definition.ObjectId, index)
-          }
-        })
-        player.Inventory.Items.foreach(test => {
-          println(test.obj.Definition.getClass, test.start)
-          test.obj match {
-            case test : Tool =>
-              println("Tool ")
-            case test : AmmoBox =>
-              println("AmmoBox")
-            case test : ConstructionItem =>
-              println("ConstructionItem")
-            case test : BoomerTrigger =>
-              println("BoomerTrigger")
-            case test : SimpleItem =>
-              println("SimpleItem")
-            case test : Kit =>
-              println("Kit")
-            case _ =>
-              println("heu")
-          }
-        })
-        player.Inventory.Items
-          .map(item => {
-            val equip : Equipment = item.obj
-            println(InternalSlot(equip.Definition.ObjectId, equip.GUID, item.start, equip.Definition.Packet.DetailedConstructorData(equip).get))
-          })
-        println("next")
+//        val info : String = contents.drop(contents.indexOf(" ") + 1)
+//
+//        var megaList : String = ""
+//        (0 until 5).foreach(index => {
+//          var localType : String = ""
+//          if(player.Slot(index).Equipment.isDefined) {
+//            player.Slot(index).Equipment.get match {
+//              case test : Tool =>
+//                localType = "Tool"
+//              case test : AmmoBox =>
+//                localType = "AmmoBox"
+//              case test : ConstructionItem =>
+//                localType = "ConstructionItem"
+//              case test : BoomerTrigger =>
+//                localType = "BoomerTrigger"
+//              case test : SimpleItem =>
+//                localType = "SimpleItem"
+//              case test : Kit =>
+//                localType = "Kit"
+//              case _ =>
+//                localType = ""
+//            }
+//            println(player.Slot(index).Equipment.get.Definition.ObjectId, index)
+//          }
+//        })
+//        player.Inventory.Items.foreach(test => {
+//          println(test.obj.Definition.getClass, test.start)
+//          test.obj match {
+//            case test : Tool =>
+//              println("Tool ")
+//            case test : AmmoBox =>
+//              println("AmmoBox")
+//            case test : ConstructionItem =>
+//              println("ConstructionItem")
+//            case test : BoomerTrigger =>
+//              println("BoomerTrigger")
+//            case test : SimpleItem =>
+//              println("SimpleItem")
+//            case test : Kit =>
+//              println("Kit")
+//            case _ =>
+//              println("heu")
+//          }
+//        })
+//        player.Inventory.Items
+//          .map(item => {
+//            val equip : Equipment = item.obj
+//            println(InternalSlot(equip.Definition.ObjectId, equip.GUID, item.start, equip.Definition.Packet.DetailedConstructorData(equip).get))
+//          })
+//        println("next")
       }
       else if(trimContents.equals("!help")){
         StartBundlingPackets()

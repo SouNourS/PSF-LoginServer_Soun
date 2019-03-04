@@ -190,7 +190,7 @@ object Zones {
 
   val tzshtr = new Zone("tzshtr", Maps.map14, 14)
 
-  val tzdrtr = new Zone("tzsdrtr", Maps.map15, 15)
+  val tzdrtr = new Zone("tzdrtr", Maps.map15, 15)
 
   val tzcotr = new Zone("tzcotr", Maps.map16, 16)
 
