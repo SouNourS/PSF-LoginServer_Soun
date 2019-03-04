@@ -44,6 +44,7 @@ object LoginRespMessage extends Marshallable[LoginRespMessage] {
   object LoginError extends Enumeration {
     type Type = Value
     val Success = Value(0)
+    val unk1 = Value(1)
     val BadUsernameOrPassword = Value(5)
     val BadVersion = Value(0xf)
 
@@ -62,6 +63,7 @@ object LoginRespMessage extends Marshallable[LoginRespMessage] {
     type Type = Value
     val None = Value(1) // "You do not have a PlanetSide subscription"
     val Active = Value(2) /// Not sure about this one (guessing) (no ingame error message)
+    val unk3 = Value(3)
     val Closed = Value(4) // "Your PlanetSide subscription is currently closed"
     val Trial = Value(5) /// Not sure about this one either (no ingame error message)
     val TrialExpired = Value(6) // "Your trial PlanetSide subscription has expired"

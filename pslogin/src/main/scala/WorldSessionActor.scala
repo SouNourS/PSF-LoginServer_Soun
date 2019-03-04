@@ -500,8 +500,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     val lDeleted : Boolean = value(6).asInstanceOf[Boolean]
                     if (!lDeleted) {
                       avatarArray(i) = Avatar(lName, lFaction, lGender, lHead, lVoice)
-                      AwardBattleExperiencePoints(avatarArray(i), 197754L)
+                      AwardBattleExperiencePoints(avatarArray(i), 20000000L)
+                      avatarArray(i).CEP = 600000
                       playerArray(i) = new Player(avatarArray(i))
+                      playerArray(i).ExoSuit = ExoSuitType.Reinforced
+                      playerArray(i).Slot(0).Equipment = Tool(StandardPistol(playerArray(i).Faction))
+                      playerArray(i).Slot(1).Equipment = Tool(MediumPistol(playerArray(i).Faction))
+                      playerArray(i).Slot(2).Equipment = Tool(HeavyRifle(playerArray(i).Faction))
+                      playerArray(i).Slot(3).Equipment = Tool(AntiVehicularLauncher(playerArray(i).Faction))
+                      playerArray(i).Slot(4).Equipment = Tool(katana)
                       SetCharacterSelectScreenGUID(playerArray(i), gen)
                       val health = playerArray(i).Health
                       val stamina = playerArray(i).Stamina
@@ -513,7 +520,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                         playerArray(i).Stamina = stamina
                         playerArray(i).Armor = armor
                       }
-                      sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(10000), value(0).asInstanceOf[Int], playerArray(i).GUID, false, 6404428))
+                      sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(4), value(0).asInstanceOf[Int], playerArray(i).GUID, false, 6404428))
                       RemoveCharacterSelectScreenGUID(playerArray(i))
                     }
                   }
@@ -921,6 +928,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.orbital_shuttle, "flightmaxheight" -> "500"),
         GamePropertyTarget(ObjectClass.phantasm, "flightmaxheight" -> "500"),
         GamePropertyTarget(ObjectClass.vulture, "flightmaxheight" -> "500"),
+        GamePropertyTarget(ObjectClass.wasp, "flightmaxheight" -> "500"),
 //        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
         GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
         GamePropertyTarget(ObjectClass.super_medkit, "requirement_award0" -> "false"),
@@ -3085,7 +3093,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       player = new Player(avatar)
 
                       player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
-                      player.Slot(2).Equipment = Tool(suppressor)
+                      player.Slot(2).Equipment = Tool(mini_chaingun)
                       player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
                       player.Slot(6).Equipment = AmmoBox(bullet_9mm)
                       player.Slot(9).Equipment = AmmoBox(bullet_9mm)
@@ -3094,6 +3102,43 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
                       player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
                       player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+
+                      avatar.SaveLoadout(player, "test", 0)
+
+                      (0 until 4).foreach( index => {
+                       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+                      })
+                      player.Inventory.Clear()
+
+                      player.ExoSuit = ExoSuitType.Reinforced
+                      player.Slot(0).Equipment = Tool(spiker)
+                      player.Slot(1).Equipment = SimpleItem(remote_electronics_kit)
+                      player.Slot(2).Equipment = Tool(flechette)
+                      player.Slot(3).Equipment = Tool(cycler)
+                      player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+                      player.Slot(6).Equipment = Kit(medkit)
+                      player.Slot(12).Equipment = AmmoBox(pellet_gun_ammo)
+
+                      avatar.SaveLoadout(player, "d sdf sdfsd ", 2)
+
+                      (0 until 4).foreach( index => {
+                        if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+                      })
+                      player.Inventory.Clear()
+
+                      Thread.sleep(50)
+
+                      player.ExoSuit = ExoSuitType.Standard
+                      player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
+                      val toto : String = "suppressor"
+                      player.Slot(2).Equipment = Tool(suppressor)
+                      player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+                      player.Slot(6).Equipment = AmmoBox(bullet_9mm)
+                      player.Slot(9).Equipment = AmmoBox(bullet_9mm)
+                      player.Slot(12).Equipment = AmmoBox(bullet_9mm)
+                      player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
+                      player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
+                      player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
                       player.Inventory.Items.foreach { _.obj.Faction = lFaction }
 
                       // PTS v3
@@ -3700,6 +3745,55 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      }
       else if (trimContents.equals("!test")) {
         val info : String = contents.drop(contents.indexOf(" ") + 1)
+
+        var megaList : String = ""
+        (0 until 5).foreach(index => {
+          var localType : String = ""
+          if(player.Slot(index).Equipment.isDefined) {
+            player.Slot(index).Equipment.get match {
+              case test : Tool =>
+                localType = "Tool"
+              case test : AmmoBox =>
+                localType = "AmmoBox"
+              case test : ConstructionItem =>
+                localType = "ConstructionItem"
+              case test : BoomerTrigger =>
+                localType = "BoomerTrigger"
+              case test : SimpleItem =>
+                localType = "SimpleItem"
+              case test : Kit =>
+                localType = "Kit"
+              case _ =>
+                localType = ""
+            }
+            println(player.Slot(index).Equipment.get.Definition.ObjectId, index)
+          }
+        })
+        player.Inventory.Items.foreach(test => {
+          println(test.obj.Definition.getClass, test.start)
+          test.obj match {
+            case test : Tool =>
+              println("Tool ")
+            case test : AmmoBox =>
+              println("AmmoBox")
+            case test : ConstructionItem =>
+              println("ConstructionItem")
+            case test : BoomerTrigger =>
+              println("BoomerTrigger")
+            case test : SimpleItem =>
+              println("SimpleItem")
+            case test : Kit =>
+              println("Kit")
+            case _ =>
+              println("heu")
+          }
+        })
+        player.Inventory.Items
+          .map(item => {
+            val equip : Equipment = item.obj
+            println(InternalSlot(equip.Definition.ObjectId, equip.GUID, item.start, equip.Definition.Packet.DetailedConstructorData(equip).get))
+          })
+        println("next")
       }
       else if(trimContents.equals("!help")){
         StartBundlingPackets()

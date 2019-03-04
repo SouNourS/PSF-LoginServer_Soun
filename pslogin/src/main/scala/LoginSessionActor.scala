@@ -250,10 +250,12 @@ class LoginSessionActor extends Actor with MDCContextAware {
         loginSuccessfulResponse(username, newToken)
         updateServerListTask = context.system.scheduler.schedule(0 seconds, 2 seconds, self, UpdateServerList())
       } else {
-        if (!isInactive) { // Bad Password
+        if (!isInactive && connection.nonEmpty) { // Bad Password
           loginPwdFailureResponse(username, newToken)
-        } else { // Account inactive
+        } else if (connection.nonEmpty) { // Account inactive
           loginAccountFailureResponse(username, newToken)
+        } else {
+          loginFailureResponse(username, newToken)
         }
       }
       if(connection.nonEmpty) {
@@ -299,6 +301,14 @@ class LoginSessionActor extends Actor with MDCContextAware {
     log.info(s"Failed login to account $username")
     sendResponse(PacketCoding.CreateGamePacket(0, LoginRespMessage(
       newToken, LoginError.BadUsernameOrPassword, StationError.AccountActive,
+      StationSubscriptionStatus.Active, 685276011, username, 10001
+    )))
+  }
+
+  def loginFailureResponse(username: String, newToken: String) = {
+    log.info("DB problem")
+    sendResponse(PacketCoding.CreateGamePacket(0, LoginRespMessage(
+      newToken, LoginError.unk1, StationError.AccountActive,
       StationSubscriptionStatus.Active, 685276011, username, 10001
     )))
   }
