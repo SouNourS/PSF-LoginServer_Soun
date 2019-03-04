@@ -1164,9 +1164,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //TODO end temp player character auto-loading
 //      self ! ListAccountCharacters
 
-      import scala.concurrent.ExecutionContext.Implicits.global
-      clientKeepAlive.cancel
-      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1000 milliseconds, self, PokeClient())
+//      import scala.concurrent.ExecutionContext.Implicits.global
+//      clientKeepAlive.cancel
+//      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1000 milliseconds, self, PokeClient())
 
       admin = account.GM
 
@@ -2934,6 +2934,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(ChatMsg(ChatMessageType.CMT_CULLWATERMARK, false, "", "", None))
 
       Thread.sleep(40)
+
+      import scala.concurrent.ExecutionContext.Implicits.global
+      clientKeepAlive.cancel
+      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1000 milliseconds, self, PokeClient())
 
       accountIntermediary ! RetrieveAccountData(token) // PTS v3
 
