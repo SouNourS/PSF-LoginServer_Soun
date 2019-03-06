@@ -1130,6 +1130,21 @@ object GlobalDefinitions {
       case PlanetSideEmpire.NEUTRAL => bullet_9mm
     }
   }
+  /**
+    * For a given faction, provide the AP ammunition for the medium assault rifle.
+    * The ammunition value here must work with the result of obtaining the rifle using the faction.
+    * @param faction the faction
+    * @return thr `AmmoBoxDefinition` for the rifle's ammo
+    * @see `GlobalDefinitions.MediumRifle`
+    */
+  def MediumRifleAPAmmo(faction : PlanetSideEmpire.Value) : AmmoBoxDefinition = {
+    faction match {
+      case PlanetSideEmpire.TR => bullet_9mm_AP
+      case PlanetSideEmpire.NC => bullet_9mm_AP
+      case PlanetSideEmpire.VS => energy_cell
+      case PlanetSideEmpire.NEUTRAL => bullet_9mm_AP
+    }
+  }
 
   /**
     * For a given faction, provide the heavy assault rifle.
@@ -1159,6 +1174,22 @@ object GlobalDefinitions {
       case PlanetSideEmpire.NC => shotgun_shell
       case PlanetSideEmpire.VS => energy_cell
       case PlanetSideEmpire.NEUTRAL => bullet_9mm
+    }
+  }
+
+  /**
+    * For a given faction, provide the AP ammunition for the heavy assault rifle.
+    * The ammunition value here must work with the result of obtaining the rifle using the faction.
+    * @param faction the faction
+    * @return thr `AmmoBoxDefinition` for the rifle's ammo
+    * @see `GlobalDefinitions.HeavyRifle`
+    */
+  def HeavyRifleAPAmmo(faction : PlanetSideEmpire.Value) : AmmoBoxDefinition = {
+    faction match {
+      case PlanetSideEmpire.TR => bullet_9mm_AP
+      case PlanetSideEmpire.NC => shotgun_shell_AP
+      case PlanetSideEmpire.VS => energy_cell
+      case PlanetSideEmpire.NEUTRAL => bullet_9mm_AP
     }
   }
 
@@ -1194,13 +1225,13 @@ object GlobalDefinitions {
 
   def MAXArms(subtype : Int, faction : PlanetSideEmpire.Value) : ToolDefinition = {
     if(subtype == 1) {
-      AIMAX(faction)
+      AI_MAX(faction)
     }
     else if(subtype == 2) {
-      AVMAX(faction)
+      AV_MAX(faction)
     }
     else if(subtype == 3) {
-      AAMAX(faction)
+      AA_MAX(faction)
     }
     else {
       suppressor //there are no common pool MAX arms
@@ -1218,7 +1249,7 @@ object GlobalDefinitions {
     }
   }
 
-  def AIMAX(faction : PlanetSideEmpire.Value) : ToolDefinition = {
+  def AI_MAX(faction : PlanetSideEmpire.Value) : ToolDefinition = {
     faction match {
       case PlanetSideEmpire.TR => trhev_dualcycler
       case PlanetSideEmpire.NC => nchev_scattercannon
@@ -1227,7 +1258,16 @@ object GlobalDefinitions {
     }
   }
 
-  def AVMAX(faction : PlanetSideEmpire.Value) : ToolDefinition = {
+  def AI_MAXAmmo(faction : PlanetSideEmpire.Value) : AmmoBoxDefinition = {
+    faction match {
+      case PlanetSideEmpire.TR => dualcycler_ammo
+      case PlanetSideEmpire.NC => scattercannon_ammo
+      case PlanetSideEmpire.VS => quasar_ammo
+      case PlanetSideEmpire.NEUTRAL => bullet_9mm //there are no common pool MAX arms
+    }
+  }
+
+  def AV_MAX(faction : PlanetSideEmpire.Value) : ToolDefinition = {
     faction match {
       case PlanetSideEmpire.TR => trhev_pounder
       case PlanetSideEmpire.NC => nchev_falcon
@@ -1236,12 +1276,30 @@ object GlobalDefinitions {
     }
   }
 
-  def AAMAX(faction : PlanetSideEmpire.Value) : ToolDefinition = {
+  def AV_MAXAmmo(faction : PlanetSideEmpire.Value) : AmmoBoxDefinition = {
+    faction match {
+      case PlanetSideEmpire.TR => pounder_ammo
+      case PlanetSideEmpire.NC => falcon_ammo
+      case PlanetSideEmpire.VS => comet_ammo
+      case PlanetSideEmpire.NEUTRAL => bullet_9mm //there are no common pool MAX arms
+    }
+  }
+
+  def AA_MAX(faction : PlanetSideEmpire.Value) : ToolDefinition = {
     faction match {
       case PlanetSideEmpire.TR => trhev_burster
       case PlanetSideEmpire.NC => nchev_sparrow
       case PlanetSideEmpire.VS => vshev_starfire
       case PlanetSideEmpire.NEUTRAL => suppressor //there are no common pool MAX arms
+    }
+  }
+
+  def AA_MAXAmmo(faction : PlanetSideEmpire.Value) : AmmoBoxDefinition = {
+    faction match {
+      case PlanetSideEmpire.TR => burster_ammo
+      case PlanetSideEmpire.NC => sparrow_ammo
+      case PlanetSideEmpire.VS => starfire_ammo
+      case PlanetSideEmpire.NEUTRAL => bullet_9mm //there are no common pool MAX arms
     }
   }
 

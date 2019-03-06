@@ -902,20 +902,34 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //PropertyOverrideMessage
       sendResponse(PropertyOverrideMessage(List(GamePropertyScope(0, List(
         GamePropertyTarget(343,List(
-          "purchase_exempt_vs" -> "colossus_gunner", "purchase_exempt_vs" -> "colossus_flight", "purchase_exempt_vs" -> "colossus_ntu_siphon",
-          "purchase_exempt_tr" -> "",
-          "purchase_exempt_nc" -> "",
           "broadcast_spam_count" -> "5",
           "broadcast_spam_seconds" -> "20",
-          "voice_macro_spam_count" -> "5")),
+          "voice_macro_spam_count" -> "5",
+          "purchase_exempt_vs" -> "",
+          "purchase_exempt_tr" -> "",
+          "purchase_exempt_nc" -> "")),
         GamePropertyTarget(ObjectClass.magrider, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.prowler, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.vanguard, "purchase_empire" -> "all"),
-        GamePropertyTarget(ObjectClass.mini_chaingun, "purchase_empire" -> "all"),
-        GamePropertyTarget(ObjectClass.r_shotgun, "purchase_empire" -> "all"),
-        GamePropertyTarget(ObjectClass.lasher, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.apc_nc, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.apc_tr, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.apc_vs, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.thunderer, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.twomanheavybuggy, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.battlewagon, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.threemanheavybuggy, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.aurora, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.twomanhoverbuggy, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.firebird_missile, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.flux_cannon_thresher_battery, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.fluxpod_ammo, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.heavy_rail_beam_battery, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.pulse_battery, "purchase_empire" -> "all"),
+//        GamePropertyTarget(ObjectClass.mini_chaingun, "purchase_empire" -> "all"),
+//        GamePropertyTarget(ObjectClass.r_shotgun, "purchase_empire" -> "all"),
+//        GamePropertyTarget(ObjectClass.lasher, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.vulture, "requirement_award0" -> "false"),
-        GamePropertyTarget(390, "purchase_ams" -> "true"),
+//        GamePropertyTarget(390, "purchase_ams" -> "true"),
         GamePropertyTarget(952, "forsale_dropship" -> "true"),
         GamePropertyTarget(43, "forsale_dropship" -> "true"),
         GamePropertyTarget(ObjectClass.dropship, "cargomountzone1_acceptedvehicles" -> "ams fury two_man_assault_buggy twomanhoverbuggy quadassault threemanheavybuggy twomanheavybuggy quadstealth ant lightning skyguard switchblade"),
@@ -930,40 +944,46 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.vulture, "flightmaxheight" -> "500"),
         GamePropertyTarget(ObjectClass.wasp, "flightmaxheight" -> "500"),
 //        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
-        GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
-        GamePropertyTarget(ObjectClass.super_medkit, "requirement_award0" -> "false"),
-        GamePropertyTarget(ObjectClass.super_staminakit, "requirement_award0" -> "false"),
-        GamePropertyTarget(ObjectClass.super_armorkit, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.super_medkit, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.super_staminakit, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.super_armorkit, "nodrop" -> "false"),
-        GamePropertyTarget(ObjectClass.super_medkit, "nodrop" -> "false"),
-        GamePropertyTarget(ObjectClass.super_staminakit, "nodrop" -> "false"),
-        GamePropertyTarget(ObjectClass.order_terminal, "forsale_winchester" -> "ordertype_weapon"),
-        GamePropertyTarget(ObjectClass.order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
-        GamePropertyTarget(ObjectClass.order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
-        GamePropertyTarget(ObjectClass.order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
-        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_winchester" -> "ordertype_weapon"),
-        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
-        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
-        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
-        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_winchester_ammo" -> "ordertype_equipment"),
-        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
-        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
-        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_winchester_ammo" -> "ordertype_equipment"),
-        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
-        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
-        GamePropertyTarget(ObjectClass.winchester, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.pellet_gun, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.six_shooter, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.dynomite, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.winchester_ammo, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.pellet_gun_ammo, "allowed" -> "true"),
-        GamePropertyTarget(ObjectClass.six_shooter_ammo, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
+//        GamePropertyTarget(ObjectClass.super_medkit, "requirement_award0" -> "false"),
+//        GamePropertyTarget(ObjectClass.super_staminakit, "requirement_award0" -> "false"),
+//        GamePropertyTarget(ObjectClass.super_armorkit, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.super_medkit, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.super_staminakit, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.super_armorkit, "nodrop" -> "false"),
+//        GamePropertyTarget(ObjectClass.super_medkit, "nodrop" -> "false"),
+//        GamePropertyTarget(ObjectClass.super_staminakit, "nodrop" -> "false"),
+//        GamePropertyTarget(ObjectClass.order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+//        GamePropertyTarget(ObjectClass.order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
+//        GamePropertyTarget(ObjectClass.order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
+//        GamePropertyTarget(ObjectClass.order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
+//        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+//        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
+//        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
+//        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
+//        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_winchester_ammo" -> "ordertype_equipment"),
+//        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
+//        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
+//        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_winchester_ammo" -> "ordertype_equipment"),
+//        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
+//        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
+//        GamePropertyTarget(ObjectClass.winchester, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.pellet_gun, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.six_shooter, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.dynomite, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.winchester_ammo, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.pellet_gun_ammo, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.six_shooter_ammo, "allowed" -> "true"),
+        //Causes Medical Applicator to work in No PvP areas
+        GamePropertyTarget(ObjectClass.medicalapplicator, "works_nopvp" -> "true"),
+        //Causes BANK to work in No PvP areas
+        GamePropertyTarget(ObjectClass.bank, "works_nopvp" -> "true"),
+        //Causes Laze Pointer to work in No PvP areas
+        GamePropertyTarget(ObjectClass.flail_targeting_laser, "works_nopvp" -> "true"),
+        //Causes Nano Dispenser to work in No PvP areas
+        GamePropertyTarget(ObjectClass.nano_dispenser, "works_nopvp" -> "true"),
         GamePropertyTarget(431, "lasher_projectile_ap" -> "false"),
-        GamePropertyTarget(431, "lasher_projectile" -> "true"),
-        GamePropertyTarget(ObjectClass.trhev_dualcycler, "can_pickup" -> "true"),
-        GamePropertyTarget(ObjectClass.trhev_pounder, "can_pickup" -> "true"))))))
+        GamePropertyTarget(431, "lasher_projectile" -> "true"))))))
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
       sendResponse(FriendsResponse(FriendAction.InitializeFriendList, 0, true, true, Nil))
@@ -1166,7 +1186,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
 //      import scala.concurrent.ExecutionContext.Implicits.global
 //      clientKeepAlive.cancel
-//      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1000 milliseconds, self, PokeClient())
+//      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 750 milliseconds, self, PokeClient())
 
       admin = account.GM
 
@@ -2938,7 +2958,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       import scala.concurrent.ExecutionContext.Implicits.global
       clientKeepAlive.cancel
-      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 1000 milliseconds, self, PokeClient())
+      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 750 milliseconds, self, PokeClient())
 
       accountIntermediary ! RetrieveAccountData(token) // PTS v3
 
@@ -3097,46 +3117,26 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
                       player = new Player(avatar)
 
-                      player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
-                      player.Slot(2).Equipment = Tool(mini_chaingun)
-                      player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
-                      player.Slot(6).Equipment = AmmoBox(bullet_9mm)
-                      player.Slot(9).Equipment = AmmoBox(bullet_9mm)
-                      player.Slot(12).Equipment = AmmoBox(bullet_9mm)
-                      player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
-                      player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
-                      player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
-                      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+//                      playerArray(i).Slot(0).Equipment = Tool(StandardPistol(playerArray(i).Faction))
+//                      playerArray(i).Slot(1).Equipment = Tool(MediumPistol(playerArray(i).Faction))
+//                      playerArray(i).Slot(2).Equipment = Tool(HeavyRifle(playerArray(i).Faction))
+//                      playerArray(i).Slot(3).Equipment = Tool(AntiVehicularLauncher(playerArray(i).Faction))
 
-                      avatar.SaveLoadout(player, "test", 0)
-
-                      (0 until 4).foreach( index => {
-                       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
-                      })
-                      player.Inventory.Clear()
-
-                      player.ExoSuit = ExoSuitType.Reinforced
-                      player.Slot(0).Equipment = Tool(spiker)
-                      player.Slot(1).Equipment = SimpleItem(remote_electronics_kit)
-                      player.Slot(2).Equipment = Tool(flechette)
-                      player.Slot(3).Equipment = Tool(cycler)
-                      player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
-                      player.Slot(6).Equipment = Kit(medkit)
-                      player.Slot(12).Equipment = AmmoBox(pellet_gun_ammo)
-
-                      avatar.SaveLoadout(player, "d sdf sdfsd ", 2)
-
-                      (0 until 4).foreach( index => {
-                        if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
-                      })
-                      player.Inventory.Clear()
+                      LoadDefaultLoadouts()
 
                       Thread.sleep(50)
 
                       player.ExoSuit = ExoSuitType.Standard
                       player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
-                      val toto : String = "suppressor"
-                      player.Slot(2).Equipment = Tool(suppressor)
+//                      player.Slot(2).Equipment = Tool(suppressor)
+                      player.Slot(2).Equipment = Tool(GetToolDefFromObjectID(845).asInstanceOf[ToolDefinition])
+//                      println(suppressor)
+//                      println(player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.AmmoType.id)
+//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].NextAmmoType
+//                      //                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.AmmoTypeIndex = 1
+//                      println(player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.AmmoType.id)
+//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.Box = AmmoBox(AmmoBoxDefinition(player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.AmmoType.id))
+//                      println(player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.Box.AmmoType.id)
                       player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
                       player.Slot(6).Equipment = AmmoBox(bullet_9mm)
                       player.Slot(9).Equipment = AmmoBox(bullet_9mm)
@@ -3145,6 +3145,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
                       player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
                       player.Inventory.Items.foreach { _.obj.Faction = lFaction }
+
+//                      println(avatar.Loadouts.length)
+//                      avatar.Loadouts.foreach({ case (int, loadout : InfantryLoadout) =>
+//                        println(s"Loadout : $int")
+//                        loadout.visible_slots.foreach(toto => {
+//                          println(toto.index)
+//                          println(toto.item.definition)
+//                        })
+//                        loadout.inventory.foreach(toto => {
+//                          println(toto.index)
+//                          println(toto.item.definition)
+//                        })
+//                      })
 
                       // PTS v3
                       avatar.Implants(0).Unlocked = true
@@ -3162,6 +3175,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       //TODO if no, get sanctuary guid accessors and reset the player's expectations
 //                      cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
                       self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
+                      if(connection.isConnected) {
+                        connection.disconnect
+                      }
                   }
                 case _ =>
                   println("toto tata")
@@ -3434,24 +3450,24 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       StartBundlingPackets()
       // Welcome messages by Nick
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The combat test area is on Ishundar. Type \\#3/zone ishundar\\#6 if necessary.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#3Broadcast chat (/b)\\#6 is global to everyone, regardless of faction.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None)))
-      sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The \\#3!help\\#6 command will show that welcome message again.", None)))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The combat test area is on Ishundar. Type \\#3/zone ishundar\\#6 if necessary.", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#3Broadcast chat (/b)\\#6 is global to everyone, regardless of faction.", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#6The \\#3!help\\#6 command will show that welcome message again.", None))
       StopBundlingPackets()
 
 
@@ -3803,24 +3819,24 @@ class WorldSessionActor extends Actor with MDCContextAware {
       else if(trimContents.equals("!help")){
         StartBundlingPackets()
         // Welcome messages by Nick
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6The combat test area is on Ishundar. Type \\#3/zone ishundar\\#6 if necessary.", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#3Broadcast chat (/b)\\#6 is global to everyone, regardless of faction.", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6The \\#3!help\\#6 command will show that welcome message again.", None)))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The combat test area is on Ishundar. Type \\#3/zone ishundar\\#6 if necessary.", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Broadcast chat (/b)\\#6 is global to everyone, regardless of faction.", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#6The \\#3!help\\#6 command will show that welcome message again.", None))
         StopBundlingPackets()
       }
       else if(trimContents.equals("!ams")) {
@@ -3867,22 +3883,33 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //          sendResponse(ZoneInfoMessage(contents.toInt-1, false, 25200000))
 //          sendResponse(ChatMsg(ChatMessageType.UNK_229, false, "", "@cavern_switched^@c1~^@c5~", None))
       }
-      else if(trimContents.startsWith("!sendResponse")) {
+      else if(trimContents.startsWith("!pam")) {
         makeReply = false
         val args = trimContents.split(" ")
         if (args.length == 4) {
-          log.info(s"Sending sendResponse target: ${args(1)} attribute: ${args(2)} value: ${args(3)}")
+          log.info(s"Sending PlanetsideAttributeMessage target: ${args(1)} attribute: ${args(2)} value: ${args(3)}")
           sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(args(1).toInt), args(2).toInt, args(3).toInt))
         } else if(args.length == 5){
           for(i <- args(3).toInt to args(4).toInt){
             if(i != 50 && i != 51 && i != 29) {
-              log.info(s"Sending sendResponse target: ${args(1)} attribute: ${i} value: ${args(2)}")
+              log.info(s"Sending PlanetsideAttributeMessage target: ${args(1)} attribute: ${i} value: ${args(2)}")
               sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(args(1).toInt), i, args(2).toInt))
             }
           }
         }
         else {
-          log.info(s"sendResponse received but incorrect number of arguments.")
+          log.info(s"PlanetsideAttributeMessage received but incorrect number of arguments.")
+        }
+      }
+      else if(trimContents.startsWith("!goam")) {
+        makeReply = false
+        val args = trimContents.split(" ")
+        if (args.length == 3) {
+          log.info(s"Sending GenericObjectActionMessage target: ${args(1)} code: ${args(2)}")
+          sendResponse(GenericObjectActionMessage(PlanetSideGUID(args(1).toInt), args(2).toInt))
+        }
+        else {
+          log.info(s"GenericObjectActionMessage received but incorrect number of arguments.")
         }
       }
       else if(trimContents.startsWith("!ntu") && admin){
@@ -3978,10 +4005,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val popVS = poplist.count(_.faction == PlanetSideEmpire.VS)
 
         StartBundlingPackets()
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now, but : ", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "NC online : " + popNC + " on Ishundar", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "TR online : " + popTR + " on Ishundar", None)))
-        sendResponse(PacketCoding.CreateGamePacket(0, ChatMsg(ChatMessageType.CMT_WHO, true, "", "VS online : " + popVS + " on Ishundar", None)))
+        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now, but : ", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "NC online : " + popNC + " on Ishundar", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "TR online : " + popTR + " on Ishundar", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "VS online : " + popVS + " on Ishundar", None))
         StopBundlingPackets()
       }
 
@@ -4650,32 +4677,32 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       if (player.GUID != tplayer.GUID && player.Velocity.isEmpty && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction) {
                         if (tplayer.MaxArmor - tplayer.Armor <= 15) {
                           tplayer.Armor = tplayer.MaxArmor
-                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
                           val RepairPercent: Int = tplayer.Armor * 100 / tplayer.MaxArmor
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                          sendResponse(RepairMessage(object_guid, RepairPercent))
                           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttributeSelf(tplayer.GUID, 4, tplayer.Armor))
                           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, tplayer.Armor))
                         }
                         if (tplayer.MaxArmor - tplayer.Armor > 15) {
                           tplayer.Armor += 15
-                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
                           val RepairPercent: Int = tplayer.Armor * 100 / tplayer.MaxArmor
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                          sendResponse(RepairMessage(object_guid, RepairPercent))
                           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttributeSelf(tplayer.GUID, 4, tplayer.Armor))
                           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 4, tplayer.Armor))
                         }
                       } else if (player.GUID == object_guid && player.Velocity.isEmpty) {
                         if (player.MaxArmor - player.Armor <= 15) {
                           player.Armor = player.MaxArmor
-                          //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-//                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Armor))) // Todo is that needed ?
+                          //              sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
+//                          sendResponse(RepairMessage(object_guid, player.Armor)) // Todo is that needed ?
                           sendResponse(PlanetsideAttributeMessage(player.GUID, 4, player.Armor))
                           avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
                         }
                         if (player.MaxArmor - player.Armor > 15) {
                           player.Armor += 15
-                          //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-//                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Armor))) // Todo is that needed ?
+                          //              sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
+//                          sendResponse(RepairMessage(object_guid, player.Armor)) // Todo is that needed ?
                           sendResponse(PlanetsideAttributeMessage(player.GUID, 4, player.Armor))
                           avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
                         }
@@ -4689,17 +4716,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       if (player.GUID != tplayer.GUID && player.Velocity.isEmpty && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction) {
                         if (tplayer.MaxHealth - tplayer.Health <= 10) {
                           tplayer.Health = tplayer.MaxHealth
-                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
                           val RepairPercent: Int = tplayer.Health * 100 / tplayer.MaxHealth
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                          sendResponse(RepairMessage(object_guid, RepairPercent))
                           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttributeSelf(tplayer.GUID, 0, tplayer.Health))
                           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 0, tplayer.Health))
                         }
                         if (tplayer.MaxHealth - tplayer.Health > 10) {
                           tplayer.Health += 10
-                          //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                          //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
                           val RepairPercent: Int = tplayer.Health * 100 / tplayer.MaxHealth
-                          sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                          sendResponse(RepairMessage(object_guid, RepairPercent))
                           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttributeSelf(tplayer.GUID, 0, tplayer.Health))
                           avatarService ! AvatarServiceMessage(tplayer.Continent, AvatarAction.PlanetsideAttribute(tplayer.GUID, 0, tplayer.Health))
                         }
@@ -4709,15 +4736,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   if (player.GUID == object_guid && player.Velocity.isEmpty) {
                     if (player.MaxHealth - player.Health <= 10) {
                       player.Health = player.MaxHealth
-                      //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-//                      sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Health))) // Todo is that needed ?
+                      //              sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
+//                      sendResponse(RepairMessage(object_guid, player.Health)) // Todo is that needed ?
                       sendResponse(PlanetsideAttributeMessage(player.GUID, 0, player.Health))
                       avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
                     }
                     if (player.MaxHealth - player.Health > 10) {
                       player.Health += 10
-                      //              sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
-//                      sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, player.Health))) // Todo is that needed ?
+                      //              sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
+//                      sendResponse(RepairMessage(object_guid, player.Health)) // Todo is that needed ?
                       sendResponse(PlanetsideAttributeMessage(player.GUID, 0, player.Health))
                       avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
                     }
@@ -4793,9 +4820,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   // PTS v3
                   obj.Health += 48
                   if (obj.Health > obj.MaxHealth) obj.Health = obj.MaxHealth
-                  //                sendResponse(PacketCoding.CreateGamePacket(0, QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left)))
+                  //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
                   val RepairPercent: Int = obj.Health * 100 / obj.MaxHealth
-                  sendResponse(PacketCoding.CreateGamePacket(0, RepairMessage(object_guid, RepairPercent)))
+                  sendResponse(RepairMessage(object_guid, RepairPercent))
                   avatarService ! AvatarServiceMessage(obj.Continent, AvatarAction.PlanetsideAttribute(obj.GUID, 0, obj.Health))
                 }
               }
@@ -4832,6 +4859,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
               equipment.get.Definition match {
                 case GlobalDefinitions.nano_dispenser =>
                   //TODO repairing behavior
+                  if (player.Velocity.isEmpty && Vector3.Distance(player.Position, obj.Position) < 5) {
+                    if (obj.Health < obj.MaxHealth) {
+                      obj.Health += 48
+                      //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
+                      val RepairPercent: Int = obj.Health * 100 / obj.MaxHealth
+                      sendResponse(RepairMessage(object_guid, RepairPercent))
+                      avatarService ! AvatarServiceMessage(obj.Continent, AvatarAction.PlanetsideAttribute(obj.GUID, 0, obj.Health))
+                    }
+                  }
 
                 case _ => ;
               }
@@ -9106,6 +9142,473 @@ class WorldSessionActor extends Actor with MDCContextAware {
       1
     } else {
       0
+    }
+  }
+
+  def LoadDefaultLoadouts() = {
+    // 1
+    player.ExoSuit = ExoSuitType.Agile
+    player.Slot(0).Equipment = Tool(frag_grenade)
+    player.Slot(1).Equipment = Tool(bank)
+    player.Slot(2).Equipment = Tool(HeavyRifle(player.Faction))
+    player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+    player.Slot(6).Equipment = Tool(medicalapplicator)
+    player.Slot(9).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(12).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(33).Equipment = Tool(phoenix)
+    player.Slot(60).Equipment = SimpleItem(remote_electronics_kit)
+    player.Slot(72).Equipment = Tool(jammer_grenade)
+    player.Slot(74).Equipment = Kit(medkit)
+    player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+    avatar.SaveLoadout(player, "Agile HA/Deci", 0)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 2
+    player.ExoSuit = ExoSuitType.Agile
+    player.Slot(0).Equipment = Tool(frag_grenade)
+    player.Slot(1).Equipment = Tool(frag_grenade)
+    player.Slot(2).Equipment = Tool(HeavyRifle(player.Faction))
+    player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(9).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(12).Equipment = SimpleItem(remote_electronics_kit)
+    player.Slot(33).Equipment = Tool(medicalapplicator)
+    player.Slot(36).Equipment = Tool(frag_grenade)
+    player.Slot(38).Equipment = Kit(medkit)
+    player.Slot(54).Equipment = Tool(frag_grenade)
+    player.Slot(56).Equipment = Kit(medkit)
+    player.Slot(60).Equipment = Tool(bank)
+    player.Slot(72).Equipment = Tool(jammer_grenade)
+    player.Slot(74).Equipment = Kit(medkit)
+    avatar.SaveLoadout(player, "Agile HA", 1)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 3
+    player.ExoSuit = ExoSuitType.Reinforced
+    player.Slot(0).Equipment = Tool(medicalapplicator)
+    player.Slot(1).Equipment = SimpleItem(remote_electronics_kit)
+    player.Slot(2).Equipment = Tool(HeavyRifle(player.Faction))
+    player.Slot(3).Equipment = Tool(phoenix)
+    player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(9).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(12).Equipment = Kit(medkit)
+    player.Slot(16).Equipment = Tool(frag_grenade)
+    player.Slot(36).Equipment = Kit(medkit)
+    player.Slot(40).Equipment = Tool(frag_grenade)
+    player.Slot(42).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(45).Equipment = AmmoBox(HeavyRifleAPAmmo(player.Faction))
+    player.Slot(60).Equipment = Kit(medkit)
+    player.Slot(64).Equipment = Tool(jammer_grenade)
+    player.Slot(78).Equipment = Tool(phoenix)
+    player.Slot(87).Equipment = Tool(bank)
+    avatar.SaveLoadout(player, "Rexo HA/Deci", 2)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 4
+    player.ExoSuit = ExoSuitType.Reinforced
+    player.Slot(0).Equipment = Tool(medicalapplicator)
+    player.Slot(1).Equipment = SimpleItem(remote_electronics_kit)
+    player.Slot(2).Equipment = Tool(MediumRifle(player.Faction))
+    player.Slot(3).Equipment = Tool(AntiVehicularLauncher(player.Faction))
+    player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(MediumRifleAmmo(player.Faction))
+    player.Slot(9).Equipment = AmmoBox(MediumRifleAmmo(player.Faction))
+    player.Slot(12).Equipment = AmmoBox(MediumRifleAmmo(player.Faction))
+    player.Slot(15).Equipment = Tool(bank)
+    player.Slot(42).Equipment = Tool(frag_grenade)
+    player.Slot(44).Equipment = Tool(jammer_grenade)
+    player.Slot(46).Equipment = Kit(medkit)
+    player.Slot(50).Equipment = Kit(medkit)
+    player.Slot(66).Equipment = AmmoBox(AntiVehicularAmmo(player.Faction))
+    player.Slot(70).Equipment = AmmoBox(AntiVehicularAmmo(player.Faction))
+    player.Slot(74).Equipment = AmmoBox(AntiVehicularAmmo(player.Faction))
+    avatar.SaveLoadout(player, "Rexo MA/AV", 3)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 5
+    player.ExoSuit = ExoSuitType.Reinforced
+    player.Slot(0).Equipment = Tool(medicalapplicator)
+    player.Slot(1).Equipment = SimpleItem(remote_electronics_kit)
+    player.Slot(2).Equipment = Tool(HeavyRifle(player.Faction))
+    player.Slot(3).Equipment = Tool(thumper)
+    player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(9).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(12).Equipment = Kit(medkit)
+    player.Slot(16).Equipment = Tool(frag_grenade)
+    player.Slot(36).Equipment = Kit(medkit)
+    player.Slot(40).Equipment = Tool(frag_grenade)
+    player.Slot(42).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(45).Equipment = AmmoBox(HeavyRifleAPAmmo(player.Faction))
+    player.Slot(60).Equipment = Kit(medkit)
+    player.Slot(64).Equipment = Tool(jammer_grenade)
+    player.Slot(78).Equipment = Tool(bank)
+    player.Slot(81).Equipment = AmmoBox(frag_cartridge)
+    player.Slot(84).Equipment = AmmoBox(frag_cartridge)
+    player.Slot(87).Equipment = AmmoBox(frag_cartridge)
+    avatar.SaveLoadout(player, "Rexo HA/Thumper", 4)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 6
+    player.ExoSuit = ExoSuitType.Reinforced
+    player.Slot(0).Equipment = Tool(medicalapplicator)
+    player.Slot(1).Equipment = SimpleItem(remote_electronics_kit)
+    player.Slot(2).Equipment = Tool(HeavyRifle(player.Faction))
+    player.Slot(3).Equipment = Tool(rocklet)
+    player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(9).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(12).Equipment = Kit(medkit)
+    player.Slot(16).Equipment = Tool(frag_grenade)
+    player.Slot(36).Equipment = Kit(medkit)
+    player.Slot(40).Equipment = Tool(frag_grenade)
+    player.Slot(42).Equipment = AmmoBox(HeavyRifleAmmo(player.Faction))
+    player.Slot(45).Equipment = AmmoBox(HeavyRifleAPAmmo(player.Faction))
+    player.Slot(60).Equipment = Kit(medkit)
+    player.Slot(64).Equipment = Tool(jammer_grenade)
+    player.Slot(78).Equipment = Tool(bank)
+    player.Slot(81).Equipment = AmmoBox(rocket)
+    player.Slot(84).Equipment = AmmoBox(rocket)
+    player.Slot(87).Equipment = AmmoBox(frag_cartridge)
+    avatar.SaveLoadout(player, "Rexo HA/Rocklet", 5)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 7
+    player.ExoSuit = ExoSuitType.Reinforced
+    player.Slot(0).Equipment = Tool(medicalapplicator)
+    player.Slot(1).Equipment = SimpleItem(remote_electronics_kit)
+    player.Slot(2).Equipment = Tool(MediumRifle(player.Faction))
+    player.Slot(3).Equipment = Tool(bolt_driver)
+    player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(MediumRifleAmmo(player.Faction))
+    player.Slot(9).Equipment = AmmoBox(MediumRifleAmmo(player.Faction))
+    player.Slot(12).Equipment = Kit(medkit)
+    player.Slot(16).Equipment = Tool(frag_grenade)
+    player.Slot(36).Equipment = Kit(medkit)
+    player.Slot(40).Equipment = Tool(frag_grenade)
+    player.Slot(42).Equipment = AmmoBox(MediumRifleAmmo(player.Faction))
+    player.Slot(45).Equipment = AmmoBox(MediumRifleAPAmmo(player.Faction))
+    player.Slot(60).Equipment = Kit(medkit)
+    player.Slot(64).Equipment = Tool(jammer_grenade)
+    player.Slot(78).Equipment = Tool(bank)
+    player.Slot(81).Equipment = AmmoBox(bolt)
+    player.Slot(84).Equipment = AmmoBox(bolt)
+    player.Slot(87).Equipment = AmmoBox(bolt)
+    avatar.SaveLoadout(player, "Rexo MA/Sniper", 6)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 8
+    player.ExoSuit = ExoSuitType.Reinforced
+    player.Slot(0).Equipment = Tool(medicalapplicator)
+    player.Slot(1).Equipment = SimpleItem(remote_electronics_kit)
+    player.Slot(2).Equipment = Tool(flechette)
+    player.Slot(3).Equipment = Tool(phoenix)
+    player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(shotgun_shell)
+    player.Slot(9).Equipment = AmmoBox(shotgun_shell)
+    player.Slot(12).Equipment = Kit(medkit)
+    player.Slot(16).Equipment = Tool(frag_grenade)
+    player.Slot(36).Equipment = Kit(medkit)
+    player.Slot(40).Equipment = Tool(frag_grenade)
+    player.Slot(42).Equipment = AmmoBox(shotgun_shell)
+    player.Slot(45).Equipment = AmmoBox(shotgun_shell_AP)
+    player.Slot(60).Equipment = Kit(medkit)
+    player.Slot(64).Equipment = Tool(jammer_grenade)
+    player.Slot(78).Equipment = Tool(phoenix)
+    player.Slot(87).Equipment = Tool(bank)
+    avatar.SaveLoadout(player, "Rexo Sweeper/Deci", 7)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 9
+    player.ExoSuit = ExoSuitType.MAX
+    player.Slot(0).Equipment = Tool(AI_MAX(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(AI_MAXAmmo(player.Faction))
+    player.Slot(10).Equipment = AmmoBox(AI_MAXAmmo(player.Faction))
+    player.Slot(14).Equipment = AmmoBox(AI_MAXAmmo(player.Faction))
+    player.Slot(18).Equipment = AmmoBox(AI_MAXAmmo(player.Faction))
+    player.Slot(70).Equipment = AmmoBox(AI_MAXAmmo(player.Faction))
+    player.Slot(74).Equipment = AmmoBox(AI_MAXAmmo(player.Faction))
+    player.Slot(78).Equipment = Kit(medkit)
+    player.Slot(98).Equipment = AmmoBox(health_canister)
+    player.Slot(100).Equipment = AmmoBox(armor_canister)
+    player.Slot(110).Equipment = Kit(medkit)
+    player.Slot(134).Equipment = Kit(medkit)
+    player.Slot(138).Equipment = Kit(medkit)
+    player.Slot(142).Equipment = Kit(medkit)
+    player.Slot(146).Equipment = Kit(medkit)
+    player.Slot(166).Equipment = Kit(medkit)
+    player.Slot(170).Equipment = Kit(medkit)
+    player.Slot(174).Equipment = Kit(medkit)
+    player.Slot(178).Equipment = Kit(medkit)
+    avatar.SaveLoadout(player, "AI MAX", 8)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+
+    // 10
+    player.ExoSuit = ExoSuitType.MAX
+    player.Slot(0).Equipment = Tool(AV_MAX(player.Faction))
+    player.Slot(6).Equipment = AmmoBox(AV_MAXAmmo(player.Faction))
+    player.Slot(10).Equipment = AmmoBox(AV_MAXAmmo(player.Faction))
+    player.Slot(14).Equipment = AmmoBox(AV_MAXAmmo(player.Faction))
+    player.Slot(18).Equipment = AmmoBox(AV_MAXAmmo(player.Faction))
+    player.Slot(70).Equipment = AmmoBox(AV_MAXAmmo(player.Faction))
+    player.Slot(74).Equipment = AmmoBox(AV_MAXAmmo(player.Faction))
+    player.Slot(78).Equipment = Kit(medkit)
+    player.Slot(98).Equipment = AmmoBox(health_canister)
+    player.Slot(100).Equipment = AmmoBox(armor_canister)
+    player.Slot(110).Equipment = Kit(medkit)
+    player.Slot(134).Equipment = Kit(medkit)
+    player.Slot(138).Equipment = Kit(medkit)
+    player.Slot(142).Equipment = Kit(medkit)
+    player.Slot(146).Equipment = Kit(medkit)
+    player.Slot(166).Equipment = Kit(medkit)
+    player.Slot(170).Equipment = Kit(medkit)
+    player.Slot(174).Equipment = Kit(medkit)
+    player.Slot(178).Equipment = Kit(medkit)
+    avatar.SaveLoadout(player, "AV MAX", 9)
+    (0 until 4).foreach( index => {
+      if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+    })
+    player.Inventory.Clear()
+  }
+
+  def GetToolDefFromObjectID(objectID : Int) : Any = {
+    objectID match {
+      //ammunition
+      case 0 => bullet_105mm
+      case 3 => bullet_12mm
+      case 6 => bullet_150mm
+      case 9 => bullet_15mm
+      case 16 => bullet_20mm
+      case 19 => bullet_25mm
+      case 21 => bullet_35mm
+      case 25 => bullet_75mm
+      case 28 => bullet_9mm
+      case 29 => bullet_9mm_AP
+      case 50 => ancient_ammo_combo
+      case 51 => ancient_ammo_vehicle
+      case 54 => anniversary_ammo
+      case 86 => aphelion_immolation_cannon_ammo
+      case 89 => aphelion_laser_ammo
+      case 97 => aphelion_plasma_rocket_ammo
+      case 101 => aphelion_ppa_ammo
+      case 106 => aphelion_starfire_ammo
+      case 111 => armor_canister
+      case 145 => bolt
+      case 154 => burster_ammo
+      case 180 => colossus_100mm_cannon_ammo
+      case 186 => colossus_burster_ammo
+      case 191 => colossus_chaingun_ammo
+      case 195 => colossus_cluster_bomb_ammo
+      case 205 => colossus_tank_cannon_ammo
+      case 209 => comet_ammo
+      case 265 => dualcycler_ammo
+      case 272 => energy_cell
+      case 275 => energy_gun_ammo
+      case 285 => falcon_ammo
+      case 287 => firebird_missile
+      case 300 => flamethrower_ammo
+      case 307 => flux_cannon_thresher_battery
+      case 310 => fluxpod_ammo
+      case 327 => frag_cartridge
+      case 331 => frag_grenade_ammo
+      case 347 => gauss_cannon_ammo
+      case 389 => health_canister
+      case 391 => heavy_grenade_mortar
+      case 393 => heavy_rail_beam_battery
+      case 399 => hellfire_ammo
+      case 403 => hunter_seeker_missile
+      case 413 => jammer_cartridge
+      case 417 => jammer_grenade_ammo
+      case 426 => lancer_cartridge
+      case 434 => liberator_bomb
+      case 463 => maelstrom_ammo
+      case 540 => melee_ammo
+      case 600 => oicw_ammo
+      case 630 => pellet_gun_ammo
+      case 637 => peregrine_dual_machine_gun_ammo
+      case 645 => peregrine_mechhammer_ammo
+      case 653 => peregrine_particle_cannon_ammo
+      case 656 => peregrine_rocket_pod_ammo
+      case 659 => peregrine_sparrow_ammo
+      case 664 => phalanx_ammo
+      case 674 => phoenix_missile
+      case 677 => plasma_cartridge
+      case 681 => plasma_grenade_ammo
+      case 693 => pounder_ammo
+      case 704 => pulse_battery
+      case 712 => quasar_ammo
+      case 722 => reaver_rocket
+      case 734 => rocket
+      case 745 => scattercannon_ammo
+      case 755 => shotgun_shell
+      case 756 => shotgun_shell_AP
+      case 762 => six_shooter_ammo
+      case 786 => skyguard_flak_cannon_ammo
+      case 791 => sparrow_ammo
+      case 820 => spitfire_aa_ammo
+      case 823 => spitfire_ammo
+      case 830 => starfire_ammo
+      case 839 => striker_missile_ammo
+      case 877 => trek_ammo
+      case 922 => upgrade_canister
+      case 998 => wasp_gun_ammo
+      case 1000 => wasp_rocket_ammo
+      case 1004 => winchester_ammo
+      //weapons
+      case 14 => cannon_dropship_20mm
+      case 40 => advanced_missile_launcher_t
+      case 55 => anniversary_gun
+      case 56 => anniversary_guna
+      case 57 => anniversary_gunb
+      case 63 => apc_ballgun_l
+      case 64 => apc_ballgun_r
+      case 69 => apc_weapon_systema
+      case 70 => apc_weapon_systemb
+      case 72 => apc_weapon_systemc_nc
+      case 73 => apc_weapon_systemc_tr
+      case 74 => apc_weapon_systemc_vs
+      case 76 => apc_weapon_systemd_nc
+      case 77 => apc_weapon_systemd_tr
+      case 78 => apc_weapon_systemd_vs
+      case 119 => aurora_weapon_systema
+      case 120 => aurora_weapon_systemb
+      case 136 => battlewagon_weapon_systema
+      case 137 => battlewagon_weapon_systemb
+      case 138 => battlewagon_weapon_systemc
+      case 139 => battlewagon_weapon_systemd
+      case 140 => beamer
+      case 146 => bolt_driver
+      case 175 => chainblade
+      case 177 => chaingun_p
+      case 233 => cycler
+      case 262 => dropship_rear_turret
+      case 274 => energy_gun
+      case 276 => energy_gun_nc
+      case 278 => energy_gun_tr
+      case 280 => energy_gun_vs
+      case 298 => flail_weapon
+      case 299 => flamethrower
+      case 304 => flechette
+      case 306 => flux_cannon_thresher
+      case 324 => forceblade
+      case 336 => fury_weapon_systema
+      case 339 => galaxy_gunship_cannon
+      case 340 => galaxy_gunship_gun
+      case 342 => galaxy_gunship_tailgun
+      case 345 => gauss
+      case 371 => grenade_launcher_marauder
+      case 394 => heavy_rail_beam_magrider
+      case 396 => heavy_sniper
+      case 406 => hunterseeker
+      case 407 => ilc9
+      case 411 => isp
+      case 421 => katana
+      case 425 => lancer
+      case 429 => lasher
+      case 433 => liberator_25mm_cannon
+      case 435 => liberator_bomb_bay
+      case 440 => liberator_weapon_system
+      case 445 => lightgunship_weapon_system
+      case 448 => lightning_weapon_system
+      case 462 => maelstrom
+      case 468 => magcutter
+      case 534 => mediumtransport_weapon_systemA
+      case 535 => mediumtransport_weapon_systemB
+      case 556 => mini_chaingun
+      case 587 => nchev_falcon
+      case 588 => nchev_scattercannon
+      case 589 => nchev_sparrow
+      case 599 => oicw
+      case 628 => particle_beam_magrider
+      case 629 => pellet_gun
+      case 666 => phalanx_avcombo
+      case 668 => phalanx_flakcombo
+      case 670 => phalanx_sgl_hevgatcan
+      case 673 => phoenix
+      case 699 => prowler_weapon_systemA
+      case 700 => prowler_weapon_systemB
+      case 701 => pulsar
+      case 706 => punisher
+      case 709 => quadassault_weapon_system
+      case 714 => r_shotgun
+      case 716 => radiator
+      case 730 => repeater
+      case 737 => rocklet
+      case 740 => rotarychaingun_mosquito
+      case 747 => scythe
+      case 761 => six_shooter
+      case 788 => skyguard_weapon_system
+      case 817 => spiker
+      case 822 => spitfire_aa_weapon
+      case 827 => spitfire_weapon
+      case 838 => striker
+      case 845 => suppressor
+      case 864 => thumper
+      case 866 => thunderer_weapon_systema
+      case 867 => thunderer_weapon_systemb
+      case 888 => trhev_burster
+      case 889 => trhev_dualcycler
+      case 890 => trhev_pounder
+      case 927 => vanguard_weapon_system
+      case 968 => vshev_comet
+      case 969 => vshev_quasar
+      case 970 => vshev_starfire
+      case 987 => vulture_bomb_bay
+      case 990 => vulture_nose_weapon_system
+      case 992 => vulture_tail_cannon
+      case 1002 => wasp_weapon_system
+      case 1003 => winchester
+      case 267 => dynomite
+      case 330 => frag_grenade
+      case 416 => jammer_grenade
+      case 680 => plasma_grenade
+      //medkits
+      case 536 => medkit
+      case 842 => super_armorkit
+      case 843 => super_medkit
+      case 844 => super_staminakit
+      //tools
+      case 728 => remote_electronics_kit
+      case 876 => trek
+      case 531 => medicalapplicator
+      case 132 => bank
+      case 577 => nano_dispenser
+      case 213 => command_detonater
+      case 297 => flail_targeting_laser
+      //deployables
+      case 32 => ace
+      case 39 => advanced_ace
+      case 148 => boomer
+      case 149 => boomer_trigger
+      case _ => frag_grenade
     }
   }
 

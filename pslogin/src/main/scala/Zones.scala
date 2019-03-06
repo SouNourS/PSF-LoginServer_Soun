@@ -146,6 +146,7 @@ object Zones {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
+      BuildingByMapId(7).Faction = PlanetSideEmpire.TR //Eisa
       BuildingByMapId(17).Faction = PlanetSideEmpire.NC //Ran
     }
   }
