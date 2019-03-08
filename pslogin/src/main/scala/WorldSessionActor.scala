@@ -1191,30 +1191,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
       admin = account.GM
 
       Database.getConnection.connect.onComplete { // TODO remove that DB access.
-        case scala.util.Success(connection) =>
-          Database.query(connection.sendPreparedStatement(
-            "SELECT gm FROM accounts where id=?", Array(account.AccountId)
-          )).onComplete {
-            case scala.util.Success(queryResult) =>
-              queryResult match {
-                case row: ArrayRowData => // If we got a row from the database
-                  log.info(s"Ready to load character list for ${account.Username}")
-//                  admin = row(0).asInstanceOf[Boolean]
-                  cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
-                  Thread.sleep(connectionState)
-                  self ! ListAccountCharacters(Some(connection))
-                case _ => // If the account didn't exist in the database
-                  log.error(s"Issue retrieving result set from database for account $account")
-                  connection.disconnect
-                  sendResponse(DropSession(sessionId, "You should not exist !"))
-              }
-            case scala.util.Failure(e) =>
-              log.error("Is there a problem ? " + e.getMessage)
-              connection.disconnect
-          }
-        case scala.util.Failure(e) =>
-          log.error("Failed connecting to database for account lookup " + e.getMessage)
-      }
+      case scala.util.Success(connection) =>
+        Database.query(connection.sendPreparedStatement(
+          "SELECT gm FROM accounts where id=?", Array(account.AccountId)
+        )).onComplete {
+          case scala.util.Success(queryResult) =>
+            queryResult match {
+              case row: ArrayRowData => // If we got a row from the database
+                log.info(s"Ready to load character list for ${account.Username}")
+                //                  admin = row(0).asInstanceOf[Boolean]
+                cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
+                Thread.sleep(connectionState)
+                self ! ListAccountCharacters(Some(connection))
+              case _ => // If the account didn't exist in the database
+                log.error(s"Issue retrieving result set from database for account $account")
+                connection.disconnect
+                sendResponse(DropSession(sessionId, "You should not exist !"))
+            }
+          case scala.util.Failure(e) =>
+            log.error("Is there a problem ? " + e.getMessage)
+            connection.disconnect
+        }
+      case scala.util.Failure(e) =>
+        log.error("Failed connecting to database for account lookup " + e.getMessage)
+    }
 
     case default =>
       log.warn(s"Invalid packet class received: $default from $sender")
@@ -3072,6 +3072,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       val lHead : Int = row(4).asInstanceOf[Int]
                       val lVoice : CharacterVoice.Value = CharacterVoice(row(5).asInstanceOf[Int])
                       val avatar : Avatar = Avatar(lName, lFaction, lGender, lHead, lVoice)
+                      avatar.CharId = charId
                       avatar.Certifications += StandardAssault
                       avatar.Certifications += MediumAssault
                       avatar.Certifications += StandardExoSuit
@@ -3117,12 +3118,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
                       player = new Player(avatar)
 
-//                      playerArray(i).Slot(0).Equipment = Tool(StandardPistol(playerArray(i).Faction))
-//                      playerArray(i).Slot(1).Equipment = Tool(MediumPistol(playerArray(i).Faction))
-//                      playerArray(i).Slot(2).Equipment = Tool(HeavyRifle(playerArray(i).Faction))
-//                      playerArray(i).Slot(3).Equipment = Tool(AntiVehicularLauncher(playerArray(i).Faction))
+                      Database.getConnection.connect.onComplete {
+                        case scala.util.Success(connection) =>
+                          LoadDataBaseLoadouts(player, Some(connection))
+                          Thread.sleep(60)
+                          connection.disconnect
+                      }
 
-                      LoadDefaultLoadouts()
+//                      LoadDataBaseLoadouts(player)
 
                       Thread.sleep(50)
 
@@ -3130,13 +3133,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
 //                      player.Slot(2).Equipment = Tool(suppressor)
                       player.Slot(2).Equipment = Tool(GetToolDefFromObjectID(845).asInstanceOf[ToolDefinition])
-//                      println(suppressor)
-//                      println(player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.AmmoType.id)
-//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].NextAmmoType
-//                      //                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.AmmoTypeIndex = 1
-//                      println(player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.AmmoType.id)
-//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.Box = AmmoBox(AmmoBoxDefinition(player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.AmmoType.id))
-//                      println(player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlot.Box.AmmoType.id)
                       player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
                       player.Slot(6).Equipment = AmmoBox(bullet_9mm)
                       player.Slot(9).Equipment = AmmoBox(bullet_9mm)
@@ -3145,19 +3141,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
                       player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
                       player.Inventory.Items.foreach { _.obj.Faction = lFaction }
-
-//                      println(avatar.Loadouts.length)
-//                      avatar.Loadouts.foreach({ case (int, loadout : InfantryLoadout) =>
-//                        println(s"Loadout : $int")
-//                        loadout.visible_slots.foreach(toto => {
-//                          println(toto.index)
-//                          println(toto.item.definition)
-//                        })
-//                        loadout.inventory.foreach(toto => {
-//                          println(toto.index)
-//                          println(toto.item.definition)
-//                        })
-//                      })
 
                       // PTS v3
                       avatar.Implants(0).Unlocked = true
@@ -3765,56 +3748,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //        admin = true
 //      }
       else if (trimContents.equals("!test")) {
-//        val info : String = contents.drop(contents.indexOf(" ") + 1)
-//
-//        var megaList : String = ""
-//        (0 until 5).foreach(index => {
-//          var localType : String = ""
-//          if(player.Slot(index).Equipment.isDefined) {
-//            player.Slot(index).Equipment.get match {
-//              case test : Tool =>
-//                localType = "Tool"
-//              case test : AmmoBox =>
-//                localType = "AmmoBox"
-//              case test : ConstructionItem =>
-//                localType = "ConstructionItem"
-//              case test : BoomerTrigger =>
-//                localType = "BoomerTrigger"
-//              case test : SimpleItem =>
-//                localType = "SimpleItem"
-//              case test : Kit =>
-//                localType = "Kit"
-//              case _ =>
-//                localType = ""
-//            }
-//            println(player.Slot(index).Equipment.get.Definition.ObjectId, index)
-//          }
-//        })
-//        player.Inventory.Items.foreach(test => {
-//          println(test.obj.Definition.getClass, test.start)
-//          test.obj match {
-//            case test : Tool =>
-//              println("Tool ")
-//            case test : AmmoBox =>
-//              println("AmmoBox")
-//            case test : ConstructionItem =>
-//              println("ConstructionItem")
-//            case test : BoomerTrigger =>
-//              println("BoomerTrigger")
-//            case test : SimpleItem =>
-//              println("SimpleItem")
-//            case test : Kit =>
-//              println("Kit")
-//            case _ =>
-//              println("heu")
-//          }
-//        })
-//        player.Inventory.Items
-//          .map(item => {
-//            val equip : Equipment = item.obj
-//            println(InternalSlot(equip.Definition.ObjectId, equip.GUID, item.start, equip.Definition.Packet.DetailedConstructorData(equip).get))
-//          })
-//        println("next")
+        println(player.CharId)
       }
       else if(trimContents.equals("!help")){
         StartBundlingPackets()
@@ -5124,6 +5058,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             }) match {
               case Some(owner : Player) => //InfantryLoadout
                 avatar.SaveLoadout(owner, name, lineno)
+                SaveLoadoutToDB(owner, name, lineno)
                 import InfantryLoadout._
                 sendResponse(FavoritesMessage(list, player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player))))
               case Some(owner : Vehicle) => //VehicleLoadout
@@ -7679,6 +7614,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     */
   def TurnPlayerIntoCorpse(tplayer : Player) : Unit = {
     val guid = tplayer.GUID
+    log.info(s"Load the corpse from : $tplayer")
     sendResponse(
       ObjectCreateDetailedMessage(ObjectClass.avatar, guid, CorpseConverter.converter.DetailedConstructorData(tplayer).get)
     )
@@ -8124,12 +8060,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
     */
   def DestroyDisplayMessage(killer : SourceEntry, victim : SourceEntry, method : Int, unk : Int = 121) : DestroyDisplayMessage = {
     //TODO charId should reflect the player more properly
-    val killerCharId = math.abs(killer.Name.hashCode)
-    var victimCharId = math.abs(victim.Name.hashCode)
-    if(killerCharId == victimCharId && !killer.Name.equals(victim.Name)) {
-      //odds of hash collision in a populated zone should be close to odds of being struck by lightning
-      victimCharId = Int.MaxValue - victimCharId + 1
-    }
+    val killerCharId = killer.CharId
+    var victimCharId = victim.CharId
+//    if(killerCharId == victimCharId && !killer.Name.equals(victim.Name)) {
+//      //odds of hash collision in a populated zone should be close to odds of being struck by lightning
+//      victimCharId = Int.MaxValue - victimCharId + 1
+//    }
     val killer_seated = killer match {
       case obj : PlayerSource => obj.Seated
       case _ => false
@@ -9142,6 +9078,139 @@ class WorldSessionActor extends Actor with MDCContextAware {
       1
     } else {
       0
+    }
+  }
+
+  def SaveLoadoutToDB(owner : Player, label : String, line : Int) = {
+    var megaList : String = ""
+    var localType : String = ""
+    var ammoInfo : String = ""
+    (0 until 5).foreach(index => {
+      if(owner.Slot(index).Equipment.isDefined) {
+        owner.Slot(index).Equipment.get match {
+          case test : Tool =>
+            localType = "Tool"
+          case test : AmmoBox =>
+            localType = "AmmoBox"
+          case test : ConstructionItem =>
+            localType = "ConstructionItem"
+          case test : BoomerTrigger =>
+            localType = "BoomerTrigger"
+          case test : SimpleItem =>
+            localType = "SimpleItem"
+          case test : Kit =>
+            localType = "Kit"
+          case _ =>
+            localType = ""
+        }
+        if(localType == "Tool") {
+          owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots.indices.foreach(index2 => {
+            if (owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex != 0) {
+              ammoInfo = ammoInfo+"|"+index2+"-"+owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex+"-"+owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoType.id
+            }
+          })
+        }
+        megaList = megaList + "/" + localType + "," + index + "," + owner.Slot(index).Equipment.get.Definition.ObjectId + ammoInfo
+        ammoInfo = ""
+      }
+    })
+    owner.Inventory.Items.foreach(test => {
+      test.obj match {
+        case test : Tool =>
+          localType = "Tool"
+        case test : AmmoBox =>
+          localType = "AmmoBox"
+        case test : ConstructionItem =>
+          localType = "ConstructionItem"
+        case test : BoomerTrigger =>
+          localType = "BoomerTrigger"
+        case test : SimpleItem =>
+          localType = "SimpleItem"
+        case test : Kit =>
+          localType = "Kit"
+        case _ =>
+          localType = ""
+      }
+      if(localType == "Tool") {
+        owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots.indices.foreach(index2 => {
+          if (owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex != 0) {
+            ammoInfo = ammoInfo+"|"+index2+"-"+owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex+"-"+owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoType.id
+          }
+        })
+      }
+      megaList = megaList + "/" + localType + "," + test.start + "," + owner.Slot(test.start).Equipment.get.Definition.ObjectId + ammoInfo
+      ammoInfo = ""
+    })
+
+    Database.getConnection.connect.onComplete {
+      case scala.util.Success(connection) =>
+        Database.query(connection.sendPreparedStatement(
+          "SELECT id, exosuit_id, name, items FROM loadouts where characters_id = ? AND loadout_number = ?", Array(owner.CharId, line)
+        )).onComplete {
+          case scala.util.Success(queryResult) =>
+            queryResult match {
+              case row: ArrayRowData => // Update
+                connection.sendPreparedStatement(
+                  "UPDATE loadouts SET exosuit_id=?, name=?, items=? where id=?", Array(owner.ExoSuit.id, label, megaList.drop(1), row(0))
+                ) // Todo maybe add a .onComplete ?
+                connection.disconnect
+              case _ => // Save
+                connection.sendPreparedStatement(
+                  "INSERT INTO loadouts (characters_id, loadout_number, exosuit_id, name, items) VALUES(?,?,?,?,?) RETURNING id",
+                  Array(owner.CharId, line, owner.ExoSuit.id, label, megaList.drop(1))
+                ) // Todo maybe add a .onComplete ?
+                connection.disconnect
+            }
+          case scala.util.Failure(e) =>
+            log.error("Failed to execute the query " + e.getMessage)
+        }
+      case scala.util.Failure(e) =>
+        log.error("Failed connecting to database " + e.getMessage)
+    }
+  }
+
+  def LoadDataBaseLoadouts(owner : Player, connection: Option[Connection]) = {
+
+
+    connection.get.sendPreparedStatement(
+      "SELECT id, loadout_number, exosuit_id, name, items FROM loadouts where characters_id = ?", Array(owner.CharId)
+    ).onComplete {
+      case Success(queryResult) =>
+        queryResult match {
+              case result: QueryResult =>
+                if (result.rows.nonEmpty) {
+                  result.rows foreach{ row  =>
+                    log.info(s"loadout list : ${row.toString()}")
+                    row.zipWithIndex.foreach{ case (value,i) =>
+                      log.info(s"loadout name : ${value(3).asInstanceOf[String]}")
+                      val lLoadoutNumber : Int = value(1).asInstanceOf[Int]
+                      val lExosuitId : Int = value(2).asInstanceOf[Int]
+                      val lName : String = value(3).asInstanceOf[String]
+                      val lItems : String = value(4).asInstanceOf[String]
+                      println(lLoadoutNumber, lExosuitId, lName, lItems)
+
+//                      player.Slot(2).Equipment = Tool(punisher)
+//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlots.head.AmmoTypeIndex = 1
+//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlots.head.Box = AmmoBox(AmmoBoxDefinition(29))
+//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlots(1).AmmoTypeIndex = 3
+//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlots(1).Box = AmmoBox(AmmoBoxDefinition(677))
+
+                    }
+                    // something to do at end of loading ?
+                    LoadDefaultLoadouts
+                  }
+                  if(connection.get.isConnected) {
+                    connection.get.disconnect
+                  }
+                } else {
+                  LoadDefaultLoadouts
+                }
+              case _ =>
+                log.error(s"Error listing loadout(s) for character ID : ${owner.CharId}")
+          case _ => failWithError("Something to do ?")
+        }
+      case scala.util.Failure(e) =>
+        log.error("Failed connecting to database " + e.getMessage)
     }
   }
 

@@ -57,8 +57,6 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
     firstLoad = status
     FirstLoad
   }
-  /** Last medkituse. */
-  var lastMedkit : Long = 0
   var death_by : Int = 0
   var lastSeenStreamMessage : Array[Long] = Array.fill[Long](65535)(0L)
   var lastShotSeq_time : Int = -1
@@ -80,6 +78,8 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
   def isAlive : Boolean = alive
 
   def isBackpack : Boolean = backpack
+
+  def CharId : Long = core.CharId
 
   def Spawn : Boolean = {
     if(!isAlive && !isBackpack) {

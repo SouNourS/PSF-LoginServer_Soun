@@ -40,6 +40,21 @@ CREATE TABLE IF NOT EXISTS "logins" (
   "port" INT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS "loadouts" (
+  "id" SERIAL PRIMARY KEY NOT NULL,
+  "characters_id" INT NOT NULL REFERENCES characters (id),
+  "loadout_number" INT NOT NULL,
+  "exosuit_id" INT NOT NULL,
+  "name" VARCHAR(36) NOT NULL,
+  "items" TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "lockers" (
+  "id" SERIAL PRIMARY KEY NOT NULL,
+  "characters_id" INT NOT NULL REFERENCES characters (id),
+  "items" TEXT NOT NULL
+);
+
 --These triggers update the last_modified timestamp column when a table is updated
 CREATE OR REPLACE FUNCTION fn_set_last_modified_timestamp()
 RETURNS TRIGGER AS $$
