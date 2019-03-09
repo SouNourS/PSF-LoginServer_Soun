@@ -3118,21 +3118,29 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
                       player = new Player(avatar)
 
+                      (0 until 4).foreach( index => {
+                        if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+                      })
+                      player.Inventory.Clear()
+
                       Database.getConnection.connect.onComplete {
                         case scala.util.Success(connection) =>
                           LoadDataBaseLoadouts(player, Some(connection))
-                          Thread.sleep(60)
-                          connection.disconnect
+                        case scala.util.Failure(e) =>
+                          println(s"shit : ${e.getMessage}")
                       }
-
-//                      LoadDataBaseLoadouts(player)
 
                       Thread.sleep(50)
 
+                      (0 until 4).foreach( index => {
+                        if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+                      })
+                      player.Inventory.Clear()
+
                       player.ExoSuit = ExoSuitType.Standard
                       player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
-//                      player.Slot(2).Equipment = Tool(suppressor)
-                      player.Slot(2).Equipment = Tool(GetToolDefFromObjectID(845).asInstanceOf[ToolDefinition])
+                      player.Slot(2).Equipment = Tool(suppressor)
+//                      player.Slot(2).Equipment = Tool(GetToolDefFromObjectID(845).asInstanceOf[ToolDefinition])
                       player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
                       player.Slot(6).Equipment = AmmoBox(bullet_9mm)
                       player.Slot(9).Equipment = AmmoBox(bullet_9mm)
@@ -3141,6 +3149,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
                       player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
                       player.Inventory.Items.foreach { _.obj.Faction = lFaction }
+                      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
 
                       // PTS v3
                       avatar.Implants(0).Unlocked = true
@@ -9106,11 +9115,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if(localType == "Tool") {
           owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots.indices.foreach(index2 => {
             if (owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex != 0) {
-              ammoInfo = ammoInfo+"|"+index2+"-"+owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex+"-"+owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoType.id
+              ammoInfo = ammoInfo+"_"+index2+"-"+owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex+"-"+owner.Slot(index).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoType.id
             }
           })
         }
-        megaList = megaList + "/" + localType + "," + index + "," + owner.Slot(index).Equipment.get.Definition.ObjectId + ammoInfo
+        megaList = megaList + "/" + localType + "," + index + "," + owner.Slot(index).Equipment.get.Definition.ObjectId + ","  + ammoInfo
         ammoInfo = ""
       }
     })
@@ -9134,11 +9143,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(localType == "Tool") {
         owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots.indices.foreach(index2 => {
           if (owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex != 0) {
-            ammoInfo = ammoInfo+"|"+index2+"-"+owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex+"-"+owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoType.id
+            ammoInfo = ammoInfo+"_"+index2+"-"+owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoTypeIndex+"-"+owner.Slot(test.start).Equipment.get.asInstanceOf[Tool].AmmoSlots(index2).AmmoType.id
           }
         })
       }
-      megaList = megaList + "/" + localType + "," + test.start + "," + owner.Slot(test.start).Equipment.get.Definition.ObjectId + ammoInfo
+      megaList = megaList + "/" + localType + "," + test.start + "," + owner.Slot(test.start).Equipment.get.Definition.ObjectId + ","  + ammoInfo
       ammoInfo = ""
     })
 
@@ -9170,44 +9179,79 @@ class WorldSessionActor extends Actor with MDCContextAware {
   }
 
   def LoadDataBaseLoadouts(owner : Player, connection: Option[Connection]) = {
-
-
     connection.get.sendPreparedStatement(
       "SELECT id, loadout_number, exosuit_id, name, items FROM loadouts where characters_id = ?", Array(owner.CharId)
     ).onComplete {
       case Success(queryResult) =>
         queryResult match {
-              case result: QueryResult =>
-                if (result.rows.nonEmpty) {
-                  result.rows foreach{ row  =>
-                    log.info(s"loadout list : ${row.toString()}")
-                    row.zipWithIndex.foreach{ case (value,i) =>
-                      log.info(s"loadout name : ${value(3).asInstanceOf[String]}")
-                      val lLoadoutNumber : Int = value(1).asInstanceOf[Int]
-                      val lExosuitId : Int = value(2).asInstanceOf[Int]
-                      val lName : String = value(3).asInstanceOf[String]
-                      val lItems : String = value(4).asInstanceOf[String]
-                      println(lLoadoutNumber, lExosuitId, lName, lItems)
+          case result: QueryResult =>
+            if (result.rows.nonEmpty) {
+              result.rows foreach{ row  =>
+                row.zipWithIndex.foreach{ case (value,i) =>
+                  log.info(s"loadout name : ${value(3).asInstanceOf[String]}")
+                  val lLoadoutNumber : Int = value(1).asInstanceOf[Int]
+                  val lExosuitId : Int = value(2).asInstanceOf[Int]
+                  val lName : String = value(3).asInstanceOf[String]
+                  val lItems : String = value(4).asInstanceOf[String]
 
-//                      player.Slot(2).Equipment = Tool(punisher)
-//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlots.head.AmmoTypeIndex = 1
-//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlots.head.Box = AmmoBox(AmmoBoxDefinition(29))
-//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlots(1).AmmoTypeIndex = 3
-//                      player.Slot(2).Equipment.get.asInstanceOf[Tool].AmmoSlots(1).Box = AmmoBox(AmmoBoxDefinition(677))
+                  log.info(s"Set exosuit ID : $lExosuitId to player : ${owner.Name}")
+                  owner.ExoSuit = ExoSuitType(lExosuitId)
 
+                  val args = lItems.split("/")
+                  args.indices.foreach(i => {
+                    val args2 = args(i).split(",")
+                    val lType = args2(0)
+                    val lIndex : Int = args2(1).toInt
+                    val lObjectId : Int = args2(2).toInt
+
+                    lType match {
+                      case "Tool" =>
+                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
+                        owner.Slot(lIndex).Equipment = Tool(GetToolDefFromObjectID(lObjectId).asInstanceOf[ToolDefinition])
+                      case "AmmoBox" =>
+                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
+                        owner.Slot(lIndex).Equipment = AmmoBox(GetToolDefFromObjectID(lObjectId).asInstanceOf[AmmoBoxDefinition])
+                      case "ConstructionItem" =>
+                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
+                        owner.Slot(lIndex).Equipment = ConstructionItem(GetToolDefFromObjectID(lObjectId).asInstanceOf[ConstructionItemDefinition])
+                      case "BoomerTrigger" =>
+                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
+                        log.error("Found a BoomerTrigger in a loadout ?!")
+                      case "SimpleItem" =>
+                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
+                        owner.Slot(lIndex).Equipment = SimpleItem(GetToolDefFromObjectID(lObjectId).asInstanceOf[SimpleItemDefinition])
+                      case "Kit" =>
+                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
+                        owner.Slot(lIndex).Equipment = Kit(GetToolDefFromObjectID(lObjectId).asInstanceOf[KitDefinition])
+                      case _ =>
+                        log.error("What's that item in the loadout ?!")
                     }
-                    // something to do at end of loading ?
-                    LoadDefaultLoadouts
-                  }
-                  if(connection.get.isConnected) {
-                    connection.get.disconnect
-                  }
-                } else {
-                  LoadDefaultLoadouts
+                    if (args2.length == 4) {
+                      val args3 = args2(3).split("_")
+                      (1 until args3.length).foreach(j => {
+                        val args4 = args3(j).split("-")
+                          val lAmmoSlots = args4(0).toInt
+                          val lAmmoTypeIndex = args4(1).toInt
+                          val lAmmoBoxDefinition = args4(2).toInt
+                          log.info(s"Changing ammo on object ID : $lObjectId")
+                          owner.Slot(lIndex).Equipment.get.asInstanceOf[Tool].AmmoSlots(lAmmoSlots).AmmoTypeIndex = lAmmoTypeIndex
+                          owner.Slot(lIndex).Equipment.get.asInstanceOf[Tool].AmmoSlots(lAmmoSlots).Box = AmmoBox(AmmoBoxDefinition(lAmmoBoxDefinition))
+                      })
+                    }
+                  })
+                  log.info(s"Loadout : $lName to player : ${owner.Name}, on slot $lLoadoutNumber")
+                  avatar.SaveLoadout(owner, lName, lLoadoutNumber)
+                  (0 until 4).foreach( index => {
+                    if (owner.Slot(index).Equipment.isDefined) owner.Slot(index).Equipment = None
+                  })
+                  owner.Inventory.Clear()
                 }
-              case _ =>
-                log.error(s"Error listing loadout(s) for character ID : ${owner.CharId}")
-          case _ => failWithError("Something to do ?")
+                // something to do at end of loading ?
+              }
+            }
+            connection.get.disconnect
+          case _ =>
+            log.error(s"No saved loadout(s) for character ID : ${owner.CharId}")
         }
       case scala.util.Failure(e) =>
         log.error("Failed connecting to database " + e.getMessage)
@@ -9228,7 +9272,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(60).Equipment = SimpleItem(remote_electronics_kit)
     player.Slot(72).Equipment = Tool(jammer_grenade)
     player.Slot(74).Equipment = Kit(medkit)
-    player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
     avatar.SaveLoadout(player, "Agile HA/Deci", 0)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
