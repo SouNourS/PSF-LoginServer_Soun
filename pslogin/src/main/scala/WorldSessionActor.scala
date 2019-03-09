@@ -990,7 +990,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(FriendsResponse(FriendAction.InitializeIgnoreList, 0, true, true, Nil))
       avatarService ! Service.Join(avatar.name) //channel will be player.Name
       localService ! Service.Join(avatar.name) //channel will be player.Name
-      cluster ! InterstellarCluster.GetWorld("z4")
+//      cluster ! InterstellarCluster.GetWorld("z4")
+      cluster ! InterstellarCluster.GetWorld("z8")
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
@@ -1006,6 +1007,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
         } else if (player.Faction == PlanetSideEmpire.VS) {
           player.Position = Vector3(6579f, 4616f, 61f)
           player.Orientation = Vector3(0f, 354.375f, 264.375f)
+        }
+      }
+      if (zoneId == "z8") { // PTS v3
+        player.FirstLoad = true
+        if (player.Faction == PlanetSideEmpire.TR) {
+          player.Position = Vector3(2285f, 3403f, 68f)
+          player.Orientation = Vector3(0f, 357.375f, 50.5f)
+        } else if (player.Faction == PlanetSideEmpire.NC) {
+          player.Position = Vector3(4719f, 5413f, 69f)
+          player.Orientation = Vector3(0f, 357f, 177.375f)
+        } else if (player.Faction == PlanetSideEmpire.VS) {
+          player.Position = Vector3(3989f, 2241f, 72f)
+          player.Orientation = Vector3(0f, 348.375f, 101.375f)
         }
       }
       avatarService ! Service.Leave(Some(continent.Id))
@@ -3689,6 +3703,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       CSRZone.read(traveler, msg) match {
         case (true, zone, pos) =>
             if (msg.contents.equalsIgnoreCase("ishundar") && player.Continent == "z4") { // PTS v3
+              log.info("No Warp via /Zone")
+            } else if (msg.contents.equalsIgnoreCase("oshur") && player.Continent == "z8") { // PTS v3
               log.info("No Warp via /Zone")
             } else {
               if(player.isAlive) {
@@ -7526,15 +7542,25 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         case None =>
           log.info("WTF?!")
+//          if (player.Faction == PlanetSideEmpire.TR) {
+//            player.Position = Vector3(903f, 5508f, 88f)
+//            player.Orientation = Vector3(0f, 354.375f, 157.5f)
+//          } else if (player.Faction == PlanetSideEmpire.NC) {
+//            player.Position = Vector3(3091f, 2222f, 86f)
+//            player.Orientation = Vector3(0f, 0f, 129.375f)
+//          } else if (player.Faction == PlanetSideEmpire.VS) {
+//            player.Position = Vector3(6579f, 4616f, 61f)
+//            player.Orientation = Vector3(0f, 354.375f, 264.375f)
+//          }
           if (player.Faction == PlanetSideEmpire.TR) {
-            player.Position = Vector3(903f, 5508f, 88f)
-            player.Orientation = Vector3(0f, 354.375f, 157.5f)
+            player.Position = Vector3(2285f, 3403f, 68f)
+            player.Orientation = Vector3(0f, 357.375f, 50.5f)
           } else if (player.Faction == PlanetSideEmpire.NC) {
-            player.Position = Vector3(3091f, 2222f, 86f)
-            player.Orientation = Vector3(0f, 0f, 129.375f)
+            player.Position = Vector3(4719f, 5413f, 69f)
+            player.Orientation = Vector3(0f, 357f, 177.375f)
           } else if (player.Faction == PlanetSideEmpire.VS) {
-            player.Position = Vector3(6579f, 4616f, 61f)
-            player.Orientation = Vector3(0f, 354.375f, 264.375f)
+            player.Position = Vector3(3989f, 2241f, 72f)
+            player.Orientation = Vector3(0f, 348.375f, 101.375f)
           }
       }
       player.FirstLoad = false

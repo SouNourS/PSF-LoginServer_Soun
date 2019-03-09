@@ -152,6 +152,33 @@ object Zones {
   }
 
   val z8 = new Zone("z8", Maps.map8, 8)
+  {
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+
+      import net.psforever.types.PlanetSideEmpire
+
+      BuildingByMapId(5).Name = Some("Atar")
+      BuildingByMapId(6).Name = Some("Dahaka")
+      BuildingByMapId(7).Name = Some("Hvar")
+      BuildingByMapId(8).Name = Some("Izha")
+      BuildingByMapId(9).Name = Some("Jamshid")
+      BuildingByMapId(10).Name = Some("Mithra")
+      BuildingByMapId(11).Name = Some("Rashnu")
+      BuildingByMapId(12).Name = Some("Yazata")
+      BuildingByMapId(13).Name = Some("Zal")
+
+      BuildingByMapId(5).Faction = PlanetSideEmpire.VS //Atar
+      BuildingByMapId(6).Faction = PlanetSideEmpire.NC //Dahaka
+      BuildingByMapId(7).Faction = PlanetSideEmpire.NC //Hvar
+      BuildingByMapId(8).Faction = PlanetSideEmpire.NC //Izha
+      BuildingByMapId(9).Faction = PlanetSideEmpire.TR //Jamshid
+      BuildingByMapId(10).Faction = PlanetSideEmpire.TR //Mithra
+      BuildingByMapId(11).Faction = PlanetSideEmpire.TR //Rashnu
+      BuildingByMapId(12).Faction = PlanetSideEmpire.VS //Yazata
+      BuildingByMapId(13).Faction = PlanetSideEmpire.VS //Zal
+    }
+  }
 
   val z9 = new Zone("z9", Maps.map9, 9)
 
