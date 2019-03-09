@@ -1200,7 +1200,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
 //      import scala.concurrent.ExecutionContext.Implicits.global
 //      clientKeepAlive.cancel
-//      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 750 milliseconds, self, PokeClient())
+//      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
 
       admin = account.GM
 
@@ -1214,9 +1214,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
               case row: ArrayRowData => // If we got a row from the database
                 log.info(s"Ready to load character list for ${account.Username}")
                 //                  admin = row(0).asInstanceOf[Boolean]
-                cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
-                Thread.sleep(connectionState)
                 self ! ListAccountCharacters(Some(connection))
+                Thread.sleep(connectionState/10)
               case _ => // If the account didn't exist in the database
                 log.error(s"Issue retrieving result set from database for account $account")
                 connection.disconnect
@@ -2921,7 +2920,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     drawDeloyableIcon = DontRedrawIcons
 
     // PTS v3
-    if (loadConfZone && connectionState != 80) {
+    if (loadConfZone && connectionState == 1000) {
       configZone(continent) // PTS v3
       loadConfZone = false
     }
@@ -2972,7 +2971,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       import scala.concurrent.ExecutionContext.Implicits.global
       clientKeepAlive.cancel
-      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 750 milliseconds, self, PokeClient())
+      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
 
       accountIntermediary ! RetrieveAccountData(token) // PTS v3
 
@@ -3179,8 +3178,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       //TODO check if can spawn on last continent/location from player?
                       //TODO if yes, get continent guid accessors
                       //TODO if no, get sanctuary guid accessors and reset the player's expectations
-//                      cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
-                      self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
+                      cluster ! InterstellarCluster.RequestClientInitialization()
                       if(connection.isConnected) {
                         connection.disconnect
                       }
@@ -3213,7 +3211,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       localService ! Service.Join(factionOnContinentChannel)
       vehicleService ! Service.Join(continentId)
       galaxyService ! Service.Join("galaxy")
-      if(connectionState == 80) configZone(continent) // PTS v3
+      if(connectionState != 1000) configZone(continent) // PTS v3
 //      StartBundlingPackets() // PTS v3
       sendResponse(TimeOfDayMessage(1191182336))
       //custom

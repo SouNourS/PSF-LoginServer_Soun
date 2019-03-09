@@ -37,10 +37,10 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
   def receive : Receive = checkBehavior.orElse {
     case ServiceManager.LookupResult("galaxy", endpoint) =>
       galaxyService = endpoint
-      log.info("BuildingControl: Building " + building.GUID + " Got galaxy service " + endpoint)
+      log.debug("BuildingControl: Building " + building.GUID + " Got galaxy service " + endpoint)
     case ServiceManager.LookupResult("local", endpoint) =>
       localService = endpoint
-      log.info("BuildingControl: Building " + building.GUID + " Got local service " + endpoint)
+      log.debug("BuildingControl: Building " + building.GUID + " Got local service " + endpoint)
     case FactionAffinity.ConvertFactionAffinity(faction) =>
       val originalAffinity = building.Faction
       if(originalAffinity != (building.Faction = faction)) {
@@ -48,7 +48,7 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
       }
       sender ! FactionAffinity.AssertFactionAffinity(building, faction)
     case Building.SendMapUpdate(all_clients: Boolean) =>
-      log.info(s"Sending BuildingInfoUpdateMessage update. Zone: ${building.Zone.Number} - Building: ${building.GUID} / MapId: ${building.MapId}")
+      log.debug(s"Sending BuildingInfoUpdateMessage update. Zone: ${building.Zone.Number} - Building: ${building.GUID} / MapId: ${building.MapId}")
       var ntuLevel = 0
       var is_hacked = false
       var hack_time_remaining_ms = 0L;
