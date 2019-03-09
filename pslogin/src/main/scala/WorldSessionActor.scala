@@ -1215,7 +1215,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 log.info(s"Ready to load character list for ${account.Username}")
                 //                  admin = row(0).asInstanceOf[Boolean]
                 self ! ListAccountCharacters(Some(connection))
-                Thread.sleep(connectionState/10)
+                Thread.sleep(connectionState)
+                cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
               case _ => // If the account didn't exist in the database
                 log.error(s"Issue retrieving result set from database for account $account")
                 connection.disconnect
@@ -3178,7 +3179,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       //TODO check if can spawn on last continent/location from player?
                       //TODO if yes, get continent guid accessors
                       //TODO if no, get sanctuary guid accessors and reset the player's expectations
-                      cluster ! InterstellarCluster.RequestClientInitialization()
+//                      cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
+                      self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
                       if(connection.isConnected) {
                         connection.disconnect
                       }

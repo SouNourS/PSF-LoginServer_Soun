@@ -50,7 +50,7 @@ class InterstellarCluster(zones : List[Zone]) extends Actor {
 
     case InterstellarCluster.RequestClientInitialization() =>
       zones.foreach(zone => { sender ! Zone.ClientInitialization(zone.ClientInitialization()) })
-      sender ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones
+//      sender ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
 
     case msg @ Zone.Lattice.RequestSpawnPoint(zone_number, _, _) =>
       recursiveFindWorldInCluster(zones.iterator, _.Number == zone_number) match {
