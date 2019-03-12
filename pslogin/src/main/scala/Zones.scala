@@ -7,28 +7,35 @@ import net.psforever.objects.zones.Zone
 import net.psforever.types.PlanetSideEmpire
 
 object Zones {
-  val z1 = new Zone("z1", Maps.map1, 1)
+  val z1 = new Zone("z1", Maps.map1, 1){ // Solsar
+  override def Init(implicit context : ActorContext) : Unit = {
+    super.Init(context)
 
-  val z2 = new Zone("z2", Maps.map2, 2){
+    import net.psforever.types.PlanetSideEmpire
+    Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
+  }
+  }
+
+  val z2 = new Zone("z2", Maps.map2, 2){ // Hossin
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
-      BuildingByMapId(10).Faction = PlanetSideEmpire.TR //Chac
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
     }
   }
 
-  val z3 = new Zone("z3", Maps.map3, 3)//{
-  //    override def Init(implicit context : ActorContext) : Unit = {
-  //      super.Init(context)
-  //
-  //      import net.psforever.types.PlanetSideEmpire
-  //      BuildingByMapId(5).Faction = PlanetSideEmpire.NC //Ekera
-  //      BuildingByMapId(5).ModelId = 7
-  //    }
-  //  }
+  val z3 = new Zone("z3", Maps.map3, 3){ // Cyssor
+  override def Init(implicit context : ActorContext) : Unit = {
+    super.Init(context)
 
-  val z4 = new Zone("z4", Maps.map4, 4) {
+    import net.psforever.types.PlanetSideEmpire
+    Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
+
+  }
+  }
+
+  val z4 = new Zone("z4", Maps.map4, 4) { // Ishundar
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
@@ -113,16 +120,16 @@ object Zones {
     }
   }
 
-  val z5 = new Zone("z5", Maps.map5, 5){
+  val z5 = new Zone("z5", Maps.map5, 5){ // Forseral
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
-      BuildingByMapId(12).Faction = PlanetSideEmpire.VS //Bel
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
     }
   }
 
-  val z6 = new Zone("z6", Maps.map6, 6) {
+  val z6 = new Zone("z6", Maps.map6, 6) { // Ceryshen
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
@@ -130,6 +137,7 @@ object Zones {
 //      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
 
       import net.psforever.types.PlanetSideEmpire
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
 //      BuildingByMapId(2).Faction = PlanetSideEmpire.VS
 //      BuildingByMapId(2).ModelId = 20
 //      BuildingByMapId(38).ModelId = 0
@@ -141,18 +149,19 @@ object Zones {
     }
   }
 
-  val z7 = new Zone("z7", Maps.map7, 7){
+  val z7 = new Zone("z7", Maps.map7, 7){ // Esamir
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
+
       BuildingByMapId(7).Faction = PlanetSideEmpire.TR //Eisa
-      BuildingByMapId(17).Faction = PlanetSideEmpire.NC //Ran
+
     }
   }
 
-  val z8 = new Zone("z8", Maps.map8, 8)
-  {
+  val z8 = new Zone("z8", Maps.map8, 8) { // Oshur
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
@@ -180,9 +189,40 @@ object Zones {
     }
   }
 
-  val z9 = new Zone("z9", Maps.map9, 9)
+  val z9 = new Zone("z9", Maps.map9, 9) { // Searhus
+  override def Init(implicit context : ActorContext) : Unit = {
+    super.Init(context)
 
-  val z10 = new Zone("z10", Maps.map10, 10)
+    import net.psforever.types.PlanetSideEmpire
+
+    Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
+
+  }
+  }
+
+  val z10 = new Zone("z10", Maps.map10, 10) { // Amerish
+  override def Init(implicit context : ActorContext) : Unit = {
+    super.Init(context)
+
+    import net.psforever.types.PlanetSideEmpire
+
+    BuildingByMapId(5).Name = Some("Azeban")
+    BuildingByMapId(6).Name = Some("Cetan")
+    BuildingByMapId(7).Name = Some("Heyoka")
+    BuildingByMapId(8).Name = Some("Ikanam")
+    BuildingByMapId(9).Name = Some("Kyoi")
+    BuildingByMapId(10).Name = Some("Mekala")
+    BuildingByMapId(11).Name = Some("Onatha")
+    BuildingByMapId(12).Name = Some("Qumu")
+    BuildingByMapId(13).Name = Some("Sungrey")
+    BuildingByMapId(14).Name = Some("Tumas")
+    BuildingByMapId(15).Name = Some("Xelas")
+    BuildingByMapId(49).Name = Some("Verica")
+
+    Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
+
+  }
+  }
 
   val home1 = new Zone("home1", Maps.map11, 11){
     override def Init(implicit context : ActorContext) : Unit = {

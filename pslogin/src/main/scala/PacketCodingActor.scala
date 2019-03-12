@@ -55,7 +55,7 @@ class PacketCodingActor extends Actor with MDCContextAware {
   private var relatedABufferTimeout : Cancellable = DefaultCancellable.obj
 
   def AddSlottedPacketToLog(subslot: Int, packet : ByteVector): Unit = {
-    val log_limit = 100 // Number of SlottedMetaPackets to keep in history
+    val log_limit = 500 // Number of SlottedMetaPackets to keep in history
     if(slottedPacketLog.size > log_limit) {
       slottedPacketLog = slottedPacketLog.drop(slottedPacketLog.size - log_limit)
     }

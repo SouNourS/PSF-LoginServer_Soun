@@ -478,7 +478,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       StartBundlingPackets()
       connection.get.sendPreparedStatement(
-          "SELECT id, name, faction_id, gender_id, head_id, voice_id, deleted FROM characters where account_id=?", Array(account.AccountId)
+          "SELECT id, name, faction_id, gender_id, head_id, voice_id, deleted, last_login FROM characters where account_id=? ORDER BY last_login", Array(account.AccountId)
         ).onComplete {
         case Success(queryResult) =>
           queryResult match {
@@ -490,6 +490,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
                 result.rows foreach{ row  =>
                   log.info(s"char list : ${row.toString()}")
+                  val nowTimeInSeconds = System.currentTimeMillis()/1000
                   var avatarArray:Array[Avatar] = Array.ofDim(row.length)
                   var playerArray:Array[Player] = Array.ofDim(row.length)
                   row.zipWithIndex.foreach{ case (value,i) =>
@@ -499,6 +500,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     val lHead : Int = value(4).asInstanceOf[Int]
                     val lVoice : CharacterVoice.Value = CharacterVoice(value(5).asInstanceOf[Int])
                     val lDeleted : Boolean = value(6).asInstanceOf[Boolean]
+                    val lTime = value(7).asInstanceOf[org.joda.time.LocalDateTime].toDateTime().getMillis()/1000
+                    val secondsSinceLastLogin = nowTimeInSeconds - lTime
                     if (!lDeleted) {
                       avatarArray(i) = Avatar(lName, lFaction, lGender, lHead, lVoice)
                       AwardBattleExperiencePoints(avatarArray(i), 20000000L)
@@ -521,15 +524,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
                         playerArray(i).Stamina = stamina
                         playerArray(i).Armor = armor
                       }
-                      sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(4), value(0).asInstanceOf[Int], playerArray(i).GUID, false, 6404428))
+                      sendResponse(CharacterInfoMessage(15, PlanetSideZoneID(4), value(0).asInstanceOf[Int], playerArray(i).GUID, false, secondsSinceLastLogin))
                       RemoveCharacterSelectScreenGUID(playerArray(i))
                     }
                   }
                   sendResponse(CharacterInfoMessage(0, PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0))
                 }
-                if(connection.nonEmpty) {
-                  connection.get.disconnect
-                }
+                Thread.sleep(5)
+                if(connection.nonEmpty) connection.get.disconnect
               } else {
                 println("dunno")
               }
@@ -544,7 +546,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     //currently being handled by VehicleSpawnPad.LoadVehicle during testing phase
 
     case Zone.ClientInitialization(zone) =>
-      Thread.sleep(connectionState/10)
+//      Thread.sleep(connectionState/10)
       val continentNumber = zone.Number
       val poplist = zone.Players
       val popBO = 0
@@ -586,7 +588,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(ZoneLockInfoMessage(continentNumber, false, true))
       sendResponse(ZoneForcedCavernConnectionsMessage(continentNumber, 0))
       sendResponse(HotSpotUpdateMessage(continentNumber, 1, Nil)) //normally set in bulk; should be fine doing per continent
-      StopBundlingPackets()
+//      StopBundlingPackets()
 
     case Zone.Population.PlayerHasLeft(zone, None) =>
       log.info(s"$avatar does not have a body on ${zone.Id}")
@@ -896,7 +898,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       taskResolver ! GUIDTask.UnregisterObjectTask(obj)(continent.GUID)
 
     case InterstellarCluster.ClientInitializationComplete() =>
-//      StopBundlingPackets()
       log.info("ClientInitializationComplete")
       LivePlayerList.Add(sessionId, avatar)
       traveler = new Traveler(self, continent.Id)
@@ -986,9 +987,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(431, "lasher_projectile_ap" -> "false"),
         GamePropertyTarget(431, "lasher_projectile" -> "true"))))))
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1))
+//      sendResponse(WeatherMessage(List(CloudInfo(0,Vector3(-2.6748898f,-1.025668f,0.0f),Vector3(0.9573444f,-0.09207539f,0.0f))),List(StormInfo(Vector3(0.5852982f,0.7721373f,0.0f),122,64), StormInfo(Vector3(0.95833915f,0.7752719f,0.0f),67,102), StormInfo(Vector3(0.03514052f,0.7752719f,0.0f),62,107), StormInfo(Vector3(0.82354355f,0.9978426f,0.0f),77,41), StormInfo(Vector3(0.6871782f,0.3771526f,0.0f),40,97), StormInfo(Vector3(0.34391987f,0.13890885f,0.0f),30,34), StormInfo(Vector3(0.24830915f,0.8379686f,0.0f),62,25), StormInfo(Vector3(0.94736725f,0.28937906f,0.0f),3,21), StormInfo(Vector3(0.43639442f,0.72668326f,0.0f),89,194), StormInfo(Vector3(0.43169186f,0.5699438f,0.0f),202,50), StormInfo(Vector3(0.19501628f,0.994708f,0.0f),23,73))))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
       sendResponse(FriendsResponse(FriendAction.InitializeFriendList, 0, true, true, Nil))
       sendResponse(FriendsResponse(FriendAction.InitializeIgnoreList, 0, true, true, Nil))
+
+      StopBundlingPackets()
+
       avatarService ! Service.Join(avatar.name) //channel will be player.Name
       localService ! Service.Join(avatar.name) //channel will be player.Name
 //      cluster ! InterstellarCluster.GetWorld("z4")
@@ -1216,16 +1221,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 log.info(s"Ready to load character list for ${account.Username}")
                 //                  admin = row(0).asInstanceOf[Boolean]
                 self ! ListAccountCharacters(Some(connection))
-                Thread.sleep(connectionState)
-                cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
+//                Thread.sleep(connectionState)
+//                cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3 or not
               case _ => // If the account didn't exist in the database
                 log.error(s"Issue retrieving result set from database for account $account")
-                connection.disconnect
+                Thread.sleep(5)
+                if (connection.isConnected) connection.disconnect
                 sendResponse(DropSession(sessionId, "You should not exist !"))
             }
           case scala.util.Failure(e) =>
             log.error("Is there a problem ? " + e.getMessage)
-            connection.disconnect
+            Thread.sleep(5)
+            if (connection.isConnected) connection.disconnect
         }
       case scala.util.Failure(e) =>
         log.error("Failed connecting to database for account lookup " + e.getMessage)
@@ -2833,7 +2840,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def HandleSetCurrentAvatar(tplayer : Player) : Unit = {
     player = tplayer
     val guid = tplayer.GUID
-//    StartBundlingPackets() // PTS v3
+    StartBundlingPackets()
     InitializeDeployableUIElements(avatar)
     sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 75, 0))
     sendResponse(SetCurrentAvatarMessage(guid, 0, 0))
@@ -2865,6 +2872,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
     // PTS v3
     sendResponse(CreateShortcutMessage(guid, 2, 0, true, Shortcut.SURGE))
     sendResponse(CreateShortcutMessage(guid, 3, 0, true, Shortcut.DARKLIGHT_VISION))
+    sendResponse(CreateShortcutMessage(guid, 7, 0, true, Shortcut.MACRO("Col",
+      "Use '\\ #x' (without space & with x = \\#0 0\\#1 1\\#2 2\\#3 3\\#4 4\\#5 5\\#6 6\\#7 7\\#8 8\\#9 9\\#0 0\\#a a\\#b b\\#c c\\#d d\\#e e\\#f f\\#0)")))
+    sendResponse(CreateShortcutMessage(guid, 8, 0, true, Shortcut.MACRO("SOS", "!help")))
+    if (admin) {
+      sendResponse(CreateShortcutMessage(guid, 9, 0, true, Shortcut.MACRO("Fly", "/fly")))
+      sendResponse(CreateShortcutMessage(guid, 10, 0, true, Shortcut.MACRO("Spe", "/spectator")))
+      sendResponse(CreateShortcutMessage(guid, 11, 0, true, Shortcut.MACRO("Sp1", "/speed 1")))
+      sendResponse(CreateShortcutMessage(guid, 12, 0, true, Shortcut.MACRO("Sp5", "/speed 5")))
+    }
     sendResponse(ChangeShortcutBankMessage(guid, 0))
 
     //Favorites lists
@@ -2877,7 +2893,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       case (index, loadout : VehicleLoadout) =>
         sendResponse(FavoritesMessage(LoadoutType.Vehicle, guid, index - 10, loadout.label))
     }
-    sendResponse(SetChatFilterMessage(ChatChannel.Local, false, ChatChannel.values.toList)) //TODO will not always be "on" like this
+    sendResponse(SetChatFilterMessage(ChatChannel.Broadcast, false, ChatChannel.values.toList)) //TODO will not always be "on" like this
     deadState = DeadState.Alive
     sendResponse(AvatarDeadStateMessage(DeadState.Alive, 0, 0, tplayer.Position, player.Faction, true))
     sendResponse(PlanetsideAttributeMessage(guid, 53, 1))
@@ -2886,19 +2902,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
 //    })
 
-    StartBundlingPackets() // PTS v3
     (0 to 30).foreach(i => {
       //TODO 30 for a new character only?
       sendResponse(AvatarStatisticsMessage(2, Statistics(0L)))
     })
-    StopBundlingPackets() // PTS v3
     //AvatarAwardMessage
     //DisplayAwardMessage
     //SquadDefinitionActionMessage and SquadDetailDefinitionUpdateMessage
     //MapObjectStateBlockMessage and ObjectCreateMessage?
     //TacticsMessage?
     //change the owner on our deployables (re-draw the icons for our deployables too)
-//    StopBundlingPackets() // PTS v3
+    StopBundlingPackets()
 
     // PTS v3
     avatar.Implants(0).Initialized = true
@@ -3030,10 +3044,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   if (row(0).asInstanceOf[Int] == account.AccountId) { // create char
 //                    self ! CreateCharacter(Some(connection), name, head, voice, gender, empire)
                     sendResponse(ActionResultMessage.Fail(1))
-                    connection.disconnect
+                    Thread.sleep(5)
+                    if (connection.isConnected) connection.disconnect
                   } else { // send "char already exist"
                     sendResponse(ActionResultMessage.Fail(1))
-                    connection.disconnect
+                    Thread.sleep(5)
+                    if (connection.isConnected) connection.disconnect
                   }
                 case _ => // If the char name didn't exist in the database, create char
                   self ! CreateCharacter(Some(connection), name, head, voice, gender, empire)
@@ -3062,7 +3078,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   self ! ListAccountCharacters(Some(connection))
                 case scala.util.Failure(e) =>
                   sendResponse(ActionResultMessage.Fail(6))
-                  connection.disconnect
+                  Thread.sleep(5)
+                  if (connection.isConnected) connection.disconnect
               }
             case scala.util.Failure(e) =>
               log.error("Failed connecting to database for account lookup " + e.getMessage)
@@ -3144,7 +3161,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                           println(s"shit : ${e.getMessage}")
                       }
 
-                      Thread.sleep(50)
+                      Thread.sleep(100)
 
                       (0 until 4).foreach( index => {
                         if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
@@ -3179,16 +3196,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       //TODO check if can spawn on last continent/location from player?
                       //TODO if yes, get continent guid accessors
                       //TODO if no, get sanctuary guid accessors and reset the player's expectations
-//                      cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3
-                      self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
-                      if(connection.isConnected) {
-                        connection.disconnect
-                      }
+                      cluster ! InterstellarCluster.RequestClientInitialization()
+//                      self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3 or not
                   }
                 case _ =>
                   println("toto tata")
               }
-//              connection.disconnect
+              Thread.sleep(20)
+              Database.query(connection.sendPreparedStatement(
+                "UPDATE characters SET last_login = ? where id=?", Array(new java.sql.Timestamp(System.currentTimeMillis), charId)
+              ))
+              Thread.sleep(5)
+              if(connection.isConnected) connection.disconnect
             case scala.util.Failure(e) =>
               log.error("Failed connecting to database for account lookup " + e.getMessage)
           }
@@ -3206,244 +3225,244 @@ class WorldSessionActor extends Actor with MDCContextAware {
       traveler.zone = continentId
       val faction = player.Faction
       val factionOnContinentChannel = s"$continentId/$faction"
-//      StartBundlingPackets()
+      StartBundlingPackets()
       avatarService ! Service.Join(continentId)
       avatarService ! Service.Join(factionOnContinentChannel)
       localService ! Service.Join(continentId)
       localService ! Service.Join(factionOnContinentChannel)
       vehicleService ! Service.Join(continentId)
       galaxyService ! Service.Join("galaxy")
-      if(connectionState != 1000) configZone(continent) // PTS v3
-//      StartBundlingPackets() // PTS v3
+      configZone(continent) // PTS v3 if(connectionState != 1000)
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
+      sendResponse(ContinentalLockUpdateMessage(11, PlanetSideEmpire.NC)) // "The NC have captured the NC Sanctuary."
+      sendResponse(ContinentalLockUpdateMessage(12, PlanetSideEmpire.TR)) // "The TR have captured the TR Sanctuary."
       sendResponse(ContinentalLockUpdateMessage(13, PlanetSideEmpire.VS)) // "The VS have captured the VS Sanctuary."
-      sendResponse(ContinentalLockUpdateMessage(3, PlanetSideEmpire.NC))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1)) //common
       //(0 to 255).foreach(i => { sendResponse(SetEmpireMessage(PlanetSideGUID(i), PlanetSideEmpire.VS)) })
 
-//      //find and reclaim own deployables, if any
-//      val guid = player.GUID
-//      val foundDeployables = continent.DeployableList.filter(obj => obj.OwnerName.contains(player.Name) && obj.Health > 0)
-//      localService ! LocalServiceMessage.Deployables(RemoverActor.ClearSpecific(foundDeployables, continent))
-//      foundDeployables.foreach(obj => {
-//        if(avatar.Deployables.Add(obj)) {
-//          obj.Owner = guid
-//          log.info(s"Found a ${obj.Definition.Name} of ours while loading the zone")
-//        }
-//      })
-//      //render deployable objects
-//      val (turrets, normal) = continent.DeployableList.partition(obj =>
-//        DeployableToolbox.UnifiedType(obj.Definition.Item) == DeployedItem.portable_manned_turret
-//      )
-//      normal.foreach(obj => {
-//        val definition = obj.Definition
-//        sendResponse(
-//          ObjectCreateMessage(
-//            definition.ObjectId,
-//            obj.GUID,
-//            definition.Packet.ConstructorData(obj).get
-//          )
-//        )
-//      })
-//      turrets.foreach(obj => {
-//        val objGUID = obj.GUID
-//        val definition = obj.Definition
-//        sendResponse(
-//          ObjectCreateMessage(
-//            definition.ObjectId,
-//            objGUID,
-//            definition.Packet.ConstructorData(obj).get
-//          )
-//        )
-//        //seated players
-//        obj.asInstanceOf[Mountable].Seats.values
-//          .map(_.Occupant)
-//          .collect {
-//            case Some(occupant) =>
-//              if(occupant.isAlive) {
-//                val tdefintion = occupant.Definition
-//                sendResponse(
-//                  ObjectCreateMessage(
-//                    tdefintion.ObjectId,
-//                    occupant.GUID,
-//                    ObjectCreateMessageParent(objGUID, 0),
-//                    tdefintion.Packet.ConstructorData(occupant).get
-//                  )
-//                )
-//              }
-//          }
-//      })
-//      normal
-//        .filter(_.Definition.DeployCategory == DeployableCategory.Sensors)
-//        .foreach(obj => { sendResponse(TriggerEffectMessage(obj.GUID, "on", true, 1000)) })
-//      //draw our faction's deployables on the map
-//      continent.DeployableList
-//        .filter(obj => obj.Faction == faction && obj.Health > 0)
-//        .foreach(obj => {
-//          val deployInfo = DeployableInfo(obj.GUID, Deployable.Icon(obj.Definition.Item), obj.Position, obj.Owner.getOrElse(PlanetSideGUID(0)))
-//          sendResponse(DeployableObjectsInfoMessage(DeploymentAction.Build, deployInfo))
-//        })
-//      //render Equipment that was dropped into zone before the player arrived
-//      continent.EquipmentOnGround.foreach(item => {
-//        val definition = item.Definition
-//        sendResponse(
-//          ObjectCreateMessage(
-//            definition.ObjectId,
-//            item.GUID,
-//            DroppedItemData(PlacementData(item.Position, item.Orientation), definition.Packet.ConstructorData(item).get)
-//          )
-//        )
-//      })
-//      //load active players in zone
-//      continent.LivePlayers
-//        .filterNot(tplayer => { tplayer.GUID == player.GUID || tplayer.VehicleSeated.nonEmpty })
-//        .foreach(char => {
-//          val tdefintion = char.Definition
-//          sendResponse(ObjectCreateMessage(tdefintion.ObjectId, char.GUID, char.Definition.Packet.ConstructorData(char).get))
-//          if(char.UsingSpecial == SpecialExoSuitDefinition.Mode.Anchored) {
-//            sendResponse(PlanetsideAttributeMessage(char.GUID, 19, 1))
-//          }
-//        })
-//      //load corpses in zone
-//      continent.Corpses.foreach {
-//        TurnPlayerIntoCorpse
-//      }
-//      //load vehicles in zone
-//      val (wreckages, vehicles) = continent.Vehicles.partition(vehicle => { vehicle.Health == 0 && vehicle.Definition.DestroyedModel.nonEmpty })
-//      //active vehicles (and some wreckage)
-//      vehicles.foreach(vehicle => {
-//        val vehicle_guid = vehicle.GUID
-//        val vdefinition = vehicle.Definition
-//        sendResponse(ObjectCreateMessage(vdefinition.ObjectId, vehicle_guid, vdefinition.Packet.ConstructorData(vehicle).get))
-//        //occupants other than driver
-//        vehicle.Seats
-//          .filter({ case(index, seat) => seat.isOccupied && index > 0 })
-//          .foreach({ case(index, seat) =>
-//            val tplayer = seat.Occupant.get
-//            val tdefintion = tplayer.Definition
-//            sendResponse(
-//              ObjectCreateMessage(
-//                tdefintion.ObjectId,
-//                tplayer.GUID,
-//                ObjectCreateMessageParent(vehicle_guid, index),
-//                tdefintion.Packet.ConstructorData(tplayer).get
-//              )
-//            )
-//          })
-//        ReloadVehicleAccessPermissions(vehicle)
-//      })
-//      //vehicle wreckages
-//      wreckages.foreach(vehicle => {
-//        sendResponse(
-//          ObjectCreateMessage(
-//            vehicle.Definition.DestroyedModel.get.id,
-//            vehicle.GUID,
-//            DestroyedVehicleConverter.converter.ConstructorData(vehicle).get
-//          )
-//        )
-//      })
-//      //Loop over vehicles again to add cargohold occupants after all vehicles have been created on the local client
-//      vehicles.filter(_.CargoHolds.nonEmpty).foreach(vehicle => {
-//          vehicle.CargoHolds.foreach({ case (cargo_num, cargo) => {
-//            cargo.Occupant match {
-//              case Some(cargo_vehicle) =>
-//                if(cargo_vehicle.HasGUID) {
-//                  sendResponse(ObjectAttachMessage(cargo_vehicle.GUID, vehicle.GUID, cargo_num))
-//                  //todo: attaching the vehicle seems to work, but setting the mount point status doesn't?
-//                  sendResponse(CargoMountPointStatusMessage(cargo_vehicle.GUID, vehicle.GUID, vehicle.GUID, PlanetSideGUID(0), cargo_num, CargoStatus.Occupied, 0))
-//                }
-//              case None => ; // No vehicle in cargo
-//            }
-//        }})
-//      })
-//      //special deploy states
-//      val deployedVehicles = vehicles.filter(_.DeploymentState == DriveState.Deployed)
-//      deployedVehicles.filter(_.Definition == GlobalDefinitions.ams).foreach(obj => {
-//        sendResponse(PlanetsideAttributeMessage(obj.GUID, 81, 1))
-//      })
-//      deployedVehicles.filter(_.Definition == GlobalDefinitions.router).foreach(obj => {
-//        sendResponse(DeployRequestMessage(player.GUID, obj.GUID, DriveState.Deploying, 0, false, Vector3.Zero))
-//        sendResponse(DeployRequestMessage(player.GUID, obj.GUID, DriveState.Deployed, 0, false, Vector3.Zero))
-//        ToggleTeleportSystem(obj, TelepadLike.AppraiseTeleportationSystem(obj, continent))
-//      })
-//
-//      //implant terminals
-//      continent.Map.TerminalToInterface.foreach({ case ((terminal_guid, interface_guid)) =>
-//        val parent_guid = PlanetSideGUID(terminal_guid)
-//        continent.GUID(interface_guid) match {
-//          case Some(obj : Terminal) =>
-//            val objDef = obj.Definition
-//            sendResponse(
-//              ObjectCreateMessage(
-//                objDef.ObjectId,
-//                PlanetSideGUID(interface_guid),
-//                ObjectCreateMessageParent(parent_guid, 1),
-//                objDef.Packet.ConstructorData(obj).get
-//              )
-//            )
-//          case _ => ;
-//        }
-//        //seat terminal occupants
-//        continent.GUID(terminal_guid) match {
-//          case Some(obj : Mountable) =>
-//            obj.Seats(0).Occupant match {
-//              case Some(tplayer) =>
-//                val tdefintion = tplayer.Definition
-//                sendResponse(
-//                  ObjectCreateMessage(
-//                    tdefintion.ObjectId,
-//                    tplayer.GUID,
-//                    ObjectCreateMessageParent(parent_guid, 0),
-//                    tdefintion.Packet.ConstructorData(tplayer).get
-//                  )
-//                )
-//              case None => ;
-//            }
-//          case _ => ;
-//        }
-//      })
-//
-//      //base turrets
-//      continent.Map.TurretToWeapon.foreach({ case((turret_guid, weapon_guid)) =>
-//        val parent_guid = PlanetSideGUID(turret_guid)
-//        continent.GUID(turret_guid) match {
-//          case Some(turret : FacilityTurret) =>
-//            //attached weapon
-//            turret.ControlledWeapon(1) match {
-//              case Some(obj : Tool) =>
-//                val objDef = obj.Definition
-//                sendResponse(
-//                  ObjectCreateMessage(
-//                    objDef.ObjectId,
-//                    obj.GUID,
-//                    ObjectCreateMessageParent(parent_guid, 1),
-//                    objDef.Packet.ConstructorData(obj).get
-//                  )
-//                )
-//              case _ => ;
-//            }
-//            //reserved ammunition?
-//            //TODO need to register if it exists
-//            //seat turret occupant
-//            turret.Seats(0).Occupant match {
-//              case Some(tplayer) =>
-//                val tdefintion = tplayer.Definition
-//                sendResponse(
-//                  ObjectCreateMessage(
-//                    tdefintion.ObjectId,
-//                    tplayer.GUID,
-//                    ObjectCreateMessageParent(parent_guid, 0),
-//                    tdefintion.Packet.ConstructorData(tplayer).get
-//                  )
-//                )
-//              case None => ;
-//            }
-//          case _ => ;
-//        }
-//      })
-//      StopBundlingPackets() // PTS v3
+      //find and reclaim own deployables, if any
+      val guid = player.GUID
+      val foundDeployables = continent.DeployableList.filter(obj => obj.OwnerName.contains(player.Name) && obj.Health > 0)
+      localService ! LocalServiceMessage.Deployables(RemoverActor.ClearSpecific(foundDeployables, continent))
+      foundDeployables.foreach(obj => {
+        if(avatar.Deployables.Add(obj)) {
+          obj.Owner = guid
+          log.info(s"Found a ${obj.Definition.Name} of ours while loading the zone")
+        }
+      })
+      //render deployable objects
+      val (turrets, normal) = continent.DeployableList.partition(obj =>
+        DeployableToolbox.UnifiedType(obj.Definition.Item) == DeployedItem.portable_manned_turret
+      )
+      normal.foreach(obj => {
+        val definition = obj.Definition
+        sendResponse(
+          ObjectCreateMessage(
+            definition.ObjectId,
+            obj.GUID,
+            definition.Packet.ConstructorData(obj).get
+          )
+        )
+      })
+      turrets.foreach(obj => {
+        val objGUID = obj.GUID
+        val definition = obj.Definition
+        sendResponse(
+          ObjectCreateMessage(
+            definition.ObjectId,
+            objGUID,
+            definition.Packet.ConstructorData(obj).get
+          )
+        )
+        //seated players
+        obj.asInstanceOf[Mountable].Seats.values
+          .map(_.Occupant)
+          .collect {
+            case Some(occupant) =>
+              if(occupant.isAlive) {
+                val tdefintion = occupant.Definition
+                sendResponse(
+                  ObjectCreateMessage(
+                    tdefintion.ObjectId,
+                    occupant.GUID,
+                    ObjectCreateMessageParent(objGUID, 0),
+                    tdefintion.Packet.ConstructorData(occupant).get
+                  )
+                )
+              }
+          }
+      })
+      normal
+        .filter(_.Definition.DeployCategory == DeployableCategory.Sensors)
+        .foreach(obj => { sendResponse(TriggerEffectMessage(obj.GUID, "on", true, 1000)) })
+      //draw our faction's deployables on the map
+      continent.DeployableList
+        .filter(obj => obj.Faction == faction && obj.Health > 0)
+        .foreach(obj => {
+          val deployInfo = DeployableInfo(obj.GUID, Deployable.Icon(obj.Definition.Item), obj.Position, obj.Owner.getOrElse(PlanetSideGUID(0)))
+          sendResponse(DeployableObjectsInfoMessage(DeploymentAction.Build, deployInfo))
+        })
+      //render Equipment that was dropped into zone before the player arrived
+      continent.EquipmentOnGround.foreach(item => {
+        val definition = item.Definition
+        sendResponse(
+          ObjectCreateMessage(
+            definition.ObjectId,
+            item.GUID,
+            DroppedItemData(PlacementData(item.Position, item.Orientation), definition.Packet.ConstructorData(item).get)
+          )
+        )
+      })
+      //load active players in zone
+      continent.LivePlayers
+        .filterNot(tplayer => { tplayer.GUID == player.GUID || tplayer.VehicleSeated.nonEmpty })
+        .foreach(char => {
+          val tdefintion = char.Definition
+          sendResponse(ObjectCreateMessage(tdefintion.ObjectId, char.GUID, char.Definition.Packet.ConstructorData(char).get))
+          if(char.UsingSpecial == SpecialExoSuitDefinition.Mode.Anchored) {
+            sendResponse(PlanetsideAttributeMessage(char.GUID, 19, 1))
+          }
+        })
+      //load corpses in zone
+      continent.Corpses.foreach {
+        TurnPlayerIntoCorpse
+      }
+      //load vehicles in zone
+      val (wreckages, vehicles) = continent.Vehicles.partition(vehicle => { vehicle.Health == 0 && vehicle.Definition.DestroyedModel.nonEmpty })
+      //active vehicles (and some wreckage)
+      vehicles.foreach(vehicle => {
+        val vehicle_guid = vehicle.GUID
+        val vdefinition = vehicle.Definition
+        sendResponse(ObjectCreateMessage(vdefinition.ObjectId, vehicle_guid, vdefinition.Packet.ConstructorData(vehicle).get))
+        //occupants other than driver
+        vehicle.Seats
+          .filter({ case(index, seat) => seat.isOccupied && index > 0 })
+          .foreach({ case(index, seat) =>
+            val tplayer = seat.Occupant.get
+            val tdefintion = tplayer.Definition
+            sendResponse(
+              ObjectCreateMessage(
+                tdefintion.ObjectId,
+                tplayer.GUID,
+                ObjectCreateMessageParent(vehicle_guid, index),
+                tdefintion.Packet.ConstructorData(tplayer).get
+              )
+            )
+          })
+        ReloadVehicleAccessPermissions(vehicle)
+      })
+      //vehicle wreckages
+      wreckages.foreach(vehicle => {
+        sendResponse(
+          ObjectCreateMessage(
+            vehicle.Definition.DestroyedModel.get.id,
+            vehicle.GUID,
+            DestroyedVehicleConverter.converter.ConstructorData(vehicle).get
+          )
+        )
+      })
+      //Loop over vehicles again to add cargohold occupants after all vehicles have been created on the local client
+      vehicles.filter(_.CargoHolds.nonEmpty).foreach(vehicle => {
+          vehicle.CargoHolds.foreach({ case (cargo_num, cargo) => {
+            cargo.Occupant match {
+              case Some(cargo_vehicle) =>
+                if(cargo_vehicle.HasGUID) {
+                  sendResponse(ObjectAttachMessage(cargo_vehicle.GUID, vehicle.GUID, cargo_num))
+                  //todo: attaching the vehicle seems to work, but setting the mount point status doesn't?
+                  sendResponse(CargoMountPointStatusMessage(cargo_vehicle.GUID, vehicle.GUID, vehicle.GUID, PlanetSideGUID(0), cargo_num, CargoStatus.Occupied, 0))
+                }
+              case None => ; // No vehicle in cargo
+            }
+        }})
+      })
+      //special deploy states
+      val deployedVehicles = vehicles.filter(_.DeploymentState == DriveState.Deployed)
+      deployedVehicles.filter(_.Definition == GlobalDefinitions.ams).foreach(obj => {
+        sendResponse(PlanetsideAttributeMessage(obj.GUID, 81, 1))
+      })
+      deployedVehicles.filter(_.Definition == GlobalDefinitions.router).foreach(obj => {
+        sendResponse(DeployRequestMessage(player.GUID, obj.GUID, DriveState.Deploying, 0, false, Vector3.Zero))
+        sendResponse(DeployRequestMessage(player.GUID, obj.GUID, DriveState.Deployed, 0, false, Vector3.Zero))
+        ToggleTeleportSystem(obj, TelepadLike.AppraiseTeleportationSystem(obj, continent))
+      })
+
+      //implant terminals
+      continent.Map.TerminalToInterface.foreach({ case ((terminal_guid, interface_guid)) =>
+        val parent_guid = PlanetSideGUID(terminal_guid)
+        continent.GUID(interface_guid) match {
+          case Some(obj : Terminal) =>
+            val objDef = obj.Definition
+            sendResponse(
+              ObjectCreateMessage(
+                objDef.ObjectId,
+                PlanetSideGUID(interface_guid),
+                ObjectCreateMessageParent(parent_guid, 1),
+                objDef.Packet.ConstructorData(obj).get
+              )
+            )
+          case _ => ;
+        }
+        //seat terminal occupants
+        continent.GUID(terminal_guid) match {
+          case Some(obj : Mountable) =>
+            obj.Seats(0).Occupant match {
+              case Some(tplayer) =>
+                val tdefintion = tplayer.Definition
+                sendResponse(
+                  ObjectCreateMessage(
+                    tdefintion.ObjectId,
+                    tplayer.GUID,
+                    ObjectCreateMessageParent(parent_guid, 0),
+                    tdefintion.Packet.ConstructorData(tplayer).get
+                  )
+                )
+              case None => ;
+            }
+          case _ => ;
+        }
+      })
+
+      //base turrets
+      continent.Map.TurretToWeapon.foreach({ case((turret_guid, weapon_guid)) =>
+        val parent_guid = PlanetSideGUID(turret_guid)
+        continent.GUID(turret_guid) match {
+          case Some(turret : FacilityTurret) =>
+            //attached weapon
+            turret.ControlledWeapon(1) match {
+              case Some(obj : Tool) =>
+                val objDef = obj.Definition
+                sendResponse(
+                  ObjectCreateMessage(
+                    objDef.ObjectId,
+                    obj.GUID,
+                    ObjectCreateMessageParent(parent_guid, 1),
+                    objDef.Packet.ConstructorData(obj).get
+                  )
+                )
+              case _ => ;
+            }
+            //reserved ammunition?
+            //TODO need to register if it exists
+            //seat turret occupant
+            turret.Seats(0).Occupant match {
+              case Some(tplayer) =>
+                val tdefintion = tplayer.Definition
+                sendResponse(
+                  ObjectCreateMessage(
+                    tdefintion.ObjectId,
+                    tplayer.GUID,
+                    ObjectCreateMessageParent(parent_guid, 0),
+                    tdefintion.Packet.ConstructorData(tplayer).get
+                  )
+                )
+              case None => ;
+            }
+          case _ => ;
+        }
+      })
+      StopBundlingPackets()
 
       chatService ! Service.Join("local")
       chatService ! Service.Join("squad")
@@ -3660,7 +3679,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       cluster ! Zone.Lattice.RequestSpawnPoint(zone_number.toInt, player, spawn_type.id.toInt)
 
     case msg @ SetChatFilterMessage(send_channel, origin, whitelist) =>
-      //log.info("SetChatFilters: " + msg)
+//      log.info("SetChatFilters: " + msg)
 
     case msg @ ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       var makeReply : Boolean = false
@@ -3669,12 +3688,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val trimRecipient = recipient.trim
       //TODO messy on/off strings may work
       if(messagetype == ChatMessageType.CMT_FLY && admin) {
-        makeReply = true
-        if(trimContents.equals("on")) {
+        makeReply = false
+        if(!flying) {
           flying = true
-        }
-        else if(trimContents.equals("off")) {
+          sendResponse(ChatMsg(ChatMessageType.CMT_FLY, msg.wideContents, msg.recipient, "on", msg.note))
+        } else {
           flying = false
+          sendResponse(ChatMsg(ChatMessageType.CMT_FLY, msg.wideContents, msg.recipient, "off", msg.note))
         }
       }
       else if(messagetype == ChatMessageType.CMT_SPEED && admin) {
@@ -3691,12 +3711,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       else if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE && admin) {
-        makeReply = true
-        if(trimContents.equals("on")) {
+        makeReply = false
+        if(!spectator) {
           spectator = true
-        }
-        else if(contents.trim.equals("off")) {
+          sendResponse(ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, msg.wideContents, msg.recipient, "on", msg.note))
+        } else {
           spectator = false
+          sendResponse(ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, msg.wideContents, msg.recipient, "off", msg.note))
         }
       }
 
@@ -3730,7 +3751,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
       // TODO: Prevents log spam, but should be handled correctly
-//      if(messagetype != ChatMessageType.CMT_TOGGLE_GM && !trimContents.contains("!admin")) {
       if(messagetype != ChatMessageType.CMT_TOGGLE_GM) {
         log.info("Chat: " + msg)
       }
@@ -3742,13 +3762,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if(player.isAlive && deadState != DeadState.Release) {
           Suicide(player)
         }
-      }
-      if(messagetype == ChatMessageType.CMT_CULLWATERMARK) {
+      } else if(messagetype == ChatMessageType.CMT_CULLWATERMARK) {
         if(trimContents.contains("40 80")) connectionState = 1000
         else if(trimContents.contains("120 200")) connectionState = 80
         else connectionState = 400
-      }
-      if(messagetype == ChatMessageType.CMT_DESTROY) {
+      } else if(messagetype == ChatMessageType.CMT_DESTROY) {
         makeReply = true
         val guid = contents.toInt
         continent.Map.TerminalToSpawnPad.get(guid) match {
@@ -3757,9 +3775,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case None =>
             self ! PacketCoding.CreateGamePacket(0, RequestDestroyMessage(PlanetSideGUID(guid)))
         }
-      }
-      // TODO: handle this appropriately
-      if(messagetype == ChatMessageType.CMT_QUIT) {
+      } else if(messagetype == ChatMessageType.CMT_QUIT) { // TODO: handle this appropriately
         sendResponse(DropCryptoSession())
         sendResponse(DropSession(sessionId, "user quit"))
       }
@@ -3769,19 +3785,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         echoContents = s"zone=${continent.Id} pos=${player.Position.x},${player.Position.y},${player.Position.z}; ori=${player.Orientation.x},${player.Orientation.y},${player.Orientation.z}"
         log.info(echoContents)
       }
-//      else if (trimContents.equals("!admin")) {
-//        admin = true
-//      }
       else if (trimContents.equals("!test")) {
-        println(player.CharId)
-      }
+        sendResponse(WeatherMessage(List(CloudInfo(0,Vector3(-2.6748898f,-1.025668f,0.0f),Vector3(0.9573444f,-0.09207539f,0.0f))),List(StormInfo(Vector3(0.5852982f,0.7721373f,0.0f),122,100), StormInfo(Vector3(0.95833915f,0.7752719f,0.0f),67,102), StormInfo(Vector3(0.03514052f,0.7752719f,0.0f),62,107), StormInfo(Vector3(0.82354355f,0.9978426f,0.0f),77,41), StormInfo(Vector3(0.6871782f,0.3771526f,0.0f),40,97), StormInfo(Vector3(0.34391987f,0.13890885f,0.0f),30,34), StormInfo(Vector3(0.24830915f,0.8379686f,0.0f),62,25), StormInfo(Vector3(0.94736725f,0.28937906f,0.0f),80,100), StormInfo(Vector3(0.43639442f,0.72668326f,0.0f),100,194), StormInfo(Vector3(0.43169186f,0.5699438f,0.0f),202,100), StormInfo(Vector3(0.19501628f,0.994708f,0.0f),200,73))))      }
       else if(trimContents.equals("!help")){
         StartBundlingPackets()
-        // Welcome messages by Nick
-        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
-        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6The combat test area is on Ishundar. Type \\#3/zone ishundar\\#6 if necessary.", None))
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
           "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -3791,18 +3798,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
           "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None))
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction.", None))
+          "  \\#6The \\#3/who\\#6 command will show you how many characters are online for each faction in your continent.", None))
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
           "  \\#6The \\#3/suicide\\#6 command will allow you to kill yourself and respawn if you have any issues or wish to respawn elsewhere.", None))
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
           "  \\#6The \\#3!help\\#6 command will show that welcome message again.", None))
         StopBundlingPackets()
-      }
-      else if(trimContents.equals("!ams")) {
-        makeReply = false
-        if(player.isBackpack) { //player is on deployment screen (either dead or deconstructed)
-          cluster ! Zone.Lattice.RequestSpawnPoint(continent.Number, player, 2)
-        }
       }
       else if (trimContents.equals("!list") && admin) {
 //        StartBundlingPackets()
@@ -3872,7 +3873,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       else if(trimContents.startsWith("!ntu") && admin){
-
         continent.Buildings.values.foreach(building =>
           building.Amenities.foreach(amenity =>
             amenity.Definition match {
@@ -3962,12 +3962,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val popTR = poplist.count(_.faction == PlanetSideEmpire.TR)
         val popNC = poplist.count(_.faction == PlanetSideEmpire.NC)
         val popVS = poplist.count(_.faction == PlanetSideEmpire.VS)
+        val contName = continent.Map.Name
 
         StartBundlingPackets()
         sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "That command doesn't work for now, but : ", None))
-        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "NC online : " + popNC + " on Ishundar", None))
-        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "TR online : " + popTR + " on Ishundar", None))
-        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "VS online : " + popVS + " on Ishundar", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "NC online : " + popNC + " on " + contName, None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "TR online : " + popTR + " on " + contName, None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_WHO, true, "", "VS online : " + popVS + " on " + contName, None))
         StopBundlingPackets()
       }
 
@@ -5361,8 +5362,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         case Some(player: Player) =>
           log.info("Something to do for player : " + player.Name)
-          if (player.Health >= 5 && !flying) player.Health -= 5
-          if (player.Armor >= 5 && !flying) player.Armor -= 5
+          if (player.Health >= 5 && !flying && speed == 1) player.Health -= 5
+          if (player.Armor >= 5 && !flying && speed == 1) player.Armor -= 5
           sendResponse(PlanetsideAttributeMessage(player.GUID, 0, player.Health))
           sendResponse(PlanetsideAttributeMessage(player.GUID, 4, player.Armor))
           avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
@@ -7112,7 +7113,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     */
   def configZone(zone : Zone) : Unit = {
     zone.Buildings.values.foreach(building => {
-      StartBundlingPackets()
       sendResponse(SetEmpireMessage(building.GUID, building.Faction))
       building.Amenities.foreach(amenity => {
         val amenityId = amenity.GUID
@@ -7149,235 +7149,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         }
       })
-      StopBundlingPackets()
-      Thread.sleep(connectionState/2)
+//      Thread.sleep(connectionState/2)
 //      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
 
-    })
-    // PTS v3
-    val continentId = continent.Id
-    val faction = player.Faction
-    val factionOnContinentChannel = s"$continentId/$faction"
-
-    //find and reclaim own deployables, if any
-    val guid = player.GUID
-    val foundDeployables = continent.DeployableList.filter(obj => obj.OwnerName.contains(player.Name) && obj.Health > 0)
-    localService ! LocalServiceMessage.Deployables(RemoverActor.ClearSpecific(foundDeployables, continent))
-    foundDeployables.foreach(obj => {
-      if(avatar.Deployables.Add(obj)) {
-        obj.Owner = guid
-        log.info(s"Found a ${obj.Definition.Name} of ours while loading the zone")
-      }
-    })
-    //render deployable objects
-    val (turrets, normal) = continent.DeployableList.partition(obj =>
-      DeployableToolbox.UnifiedType(obj.Definition.Item) == DeployedItem.portable_manned_turret
-    )
-    normal.foreach(obj => {
-      val definition = obj.Definition
-      sendResponse(
-        ObjectCreateMessage(
-          definition.ObjectId,
-          obj.GUID,
-          definition.Packet.ConstructorData(obj).get
-        )
-      )
-    })
-    turrets.foreach(obj => {
-      val objGUID = obj.GUID
-      val definition = obj.Definition
-      sendResponse(
-        ObjectCreateMessage(
-          definition.ObjectId,
-          objGUID,
-          definition.Packet.ConstructorData(obj).get
-        )
-      )
-      //seated players
-      obj.asInstanceOf[Mountable].Seats.values
-        .map(_.Occupant)
-        .collect {
-          case Some(occupant) =>
-            if(occupant.isAlive) {
-              val tdefintion = occupant.Definition
-              sendResponse(
-                ObjectCreateMessage(
-                  tdefintion.ObjectId,
-                  occupant.GUID,
-                  ObjectCreateMessageParent(objGUID, 0),
-                  tdefintion.Packet.ConstructorData(occupant).get
-                )
-              )
-            }
-        }
-    })
-    normal
-      .filter(_.Definition.DeployCategory == DeployableCategory.Sensors)
-      .foreach(obj => { sendResponse(TriggerEffectMessage(obj.GUID, "on", true, 1000)) })
-    //draw our faction's deployables on the map
-    continent.DeployableList
-      .filter(obj => obj.Faction == faction && obj.Health > 0)
-      .foreach(obj => {
-        val deployInfo = DeployableInfo(obj.GUID, Deployable.Icon(obj.Definition.Item), obj.Position, obj.Owner.getOrElse(PlanetSideGUID(0)))
-        sendResponse(DeployableObjectsInfoMessage(DeploymentAction.Build, deployInfo))
-      })
-    //render Equipment that was dropped into zone before the player arrived
-    continent.EquipmentOnGround.foreach(item => {
-      val definition = item.Definition
-      sendResponse(
-        ObjectCreateMessage(
-          definition.ObjectId,
-          item.GUID,
-          DroppedItemData(PlacementData(item.Position, item.Orientation), definition.Packet.ConstructorData(item).get)
-        )
-      )
-    })
-    //load active players in zone
-    continent.LivePlayers
-      .filterNot(tplayer => { tplayer.GUID == player.GUID || tplayer.VehicleSeated.nonEmpty })
-      .foreach(char => {
-        val tdefintion = char.Definition
-        sendResponse(ObjectCreateMessage(tdefintion.ObjectId, char.GUID, char.Definition.Packet.ConstructorData(char).get))
-        if(char.UsingSpecial == SpecialExoSuitDefinition.Mode.Anchored) {
-          sendResponse(PlanetsideAttributeMessage(char.GUID, 19, 1))
-        }
-      })
-    //load corpses in zone
-    continent.Corpses.foreach {
-      TurnPlayerIntoCorpse
-    }
-    //load vehicles in zone
-    val (wreckages, vehicles) = continent.Vehicles.partition(vehicle => { vehicle.Health == 0 && vehicle.Definition.DestroyedModel.nonEmpty })
-    //active vehicles (and some wreckage)
-    vehicles.foreach(vehicle => {
-      val vehicle_guid = vehicle.GUID
-      val vdefinition = vehicle.Definition
-      sendResponse(ObjectCreateMessage(vdefinition.ObjectId, vehicle_guid, vdefinition.Packet.ConstructorData(vehicle).get))
-      //occupants other than driver
-      vehicle.Seats
-        .filter({ case(index, seat) => seat.isOccupied && index > 0 })
-        .foreach({ case(index, seat) =>
-          val tplayer = seat.Occupant.get
-          val tdefintion = tplayer.Definition
-          sendResponse(
-            ObjectCreateMessage(
-              tdefintion.ObjectId,
-              tplayer.GUID,
-              ObjectCreateMessageParent(vehicle_guid, index),
-              tdefintion.Packet.ConstructorData(tplayer).get
-            )
-          )
-        })
-      ReloadVehicleAccessPermissions(vehicle)
-    })
-    //vehicle wreckages
-    wreckages.foreach(vehicle => {
-      sendResponse(
-        ObjectCreateMessage(
-          vehicle.Definition.DestroyedModel.get.id,
-          vehicle.GUID,
-          DestroyedVehicleConverter.converter.ConstructorData(vehicle).get
-        )
-      )
-    })
-    //Loop over vehicles again to add cargohold occupants after all vehicles have been created on the local client
-    vehicles.filter(_.CargoHolds.nonEmpty).foreach(vehicle => {
-      vehicle.CargoHolds.foreach({ case (cargo_num, cargo) => {
-        cargo.Occupant match {
-          case Some(cargo_vehicle) =>
-            if(cargo_vehicle.HasGUID) {
-              sendResponse(ObjectAttachMessage(cargo_vehicle.GUID, vehicle.GUID, cargo_num))
-              //todo: attaching the vehicle seems to work, but setting the mount point status doesn't?
-              sendResponse(CargoMountPointStatusMessage(cargo_vehicle.GUID, vehicle.GUID, vehicle.GUID, PlanetSideGUID(0), cargo_num, CargoStatus.Occupied, 0))
-            }
-          case None => ; // No vehicle in cargo
-        }
-      }})
-    })
-    //special deploy states
-    val deployedVehicles = vehicles.filter(_.DeploymentState == DriveState.Deployed)
-    deployedVehicles.filter(_.Definition == GlobalDefinitions.ams).foreach(obj => {
-      sendResponse(PlanetsideAttributeMessage(obj.GUID, 81, 1))
-    })
-    deployedVehicles.filter(_.Definition == GlobalDefinitions.router).foreach(obj => {
-      sendResponse(DeployRequestMessage(player.GUID, obj.GUID, DriveState.Deploying, 0, false, Vector3.Zero))
-      sendResponse(DeployRequestMessage(player.GUID, obj.GUID, DriveState.Deployed, 0, false, Vector3.Zero))
-      ToggleTeleportSystem(obj, TelepadLike.AppraiseTeleportationSystem(obj, continent))
-    })
-
-    //implant terminals
-    continent.Map.TerminalToInterface.foreach({ case ((terminal_guid, interface_guid)) =>
-      val parent_guid = PlanetSideGUID(terminal_guid)
-      continent.GUID(interface_guid) match {
-        case Some(obj : Terminal) =>
-          val objDef = obj.Definition
-          sendResponse(
-            ObjectCreateMessage(
-              objDef.ObjectId,
-              PlanetSideGUID(interface_guid),
-              ObjectCreateMessageParent(parent_guid, 1),
-              objDef.Packet.ConstructorData(obj).get
-            )
-          )
-        case _ => ;
-      }
-      //seat terminal occupants
-      continent.GUID(terminal_guid) match {
-        case Some(obj : Mountable) =>
-          obj.Seats(0).Occupant match {
-            case Some(tplayer) =>
-              val tdefintion = tplayer.Definition
-              sendResponse(
-                ObjectCreateMessage(
-                  tdefintion.ObjectId,
-                  tplayer.GUID,
-                  ObjectCreateMessageParent(parent_guid, 0),
-                  tdefintion.Packet.ConstructorData(tplayer).get
-                )
-              )
-            case None => ;
-          }
-        case _ => ;
-      }
-    })
-
-    //base turrets
-    continent.Map.TurretToWeapon.foreach({ case((turret_guid, weapon_guid)) =>
-      val parent_guid = PlanetSideGUID(turret_guid)
-      continent.GUID(turret_guid) match {
-        case Some(turret : FacilityTurret) =>
-          //attached weapon
-          turret.ControlledWeapon(1) match {
-            case Some(obj : Tool) =>
-              val objDef = obj.Definition
-              sendResponse(
-                ObjectCreateMessage(
-                  objDef.ObjectId,
-                  obj.GUID,
-                  ObjectCreateMessageParent(parent_guid, 1),
-                  objDef.Packet.ConstructorData(obj).get
-                )
-              )
-            case _ => ;
-          }
-          //reserved ammunition?
-          //TODO need to register if it exists
-          //seat turret occupant
-          turret.Seats(0).Occupant match {
-            case Some(tplayer) =>
-              val tdefintion = tplayer.Definition
-              sendResponse(
-                ObjectCreateMessage(
-                  tdefintion.ObjectId,
-                  tplayer.GUID,
-                  ObjectCreateMessageParent(parent_guid, 0),
-                  tdefintion.Packet.ConstructorData(tplayer).get
-                )
-              )
-            case None => ;
-          }
-        case _ => ;
-      }
     })
   }
 
@@ -9205,13 +8979,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 connection.sendPreparedStatement(
                   "UPDATE loadouts SET exosuit_id=?, name=?, items=? where id=?", Array(owner.ExoSuit.id, label, megaList.drop(1), row(0))
                 ) // Todo maybe add a .onComplete ?
-                connection.disconnect
+                Thread.sleep(5)
+                if (connection.isConnected) connection.disconnect
               case _ => // Save
                 connection.sendPreparedStatement(
                   "INSERT INTO loadouts (characters_id, loadout_number, exosuit_id, name, items) VALUES(?,?,?,?,?) RETURNING id",
                   Array(owner.CharId, line, owner.ExoSuit.id, label, megaList.drop(1))
                 ) // Todo maybe add a .onComplete ?
-                connection.disconnect
+                Thread.sleep(5)
+                if (connection.isConnected) connection.disconnect
             }
           case scala.util.Failure(e) =>
             log.error("Failed to execute the query " + e.getMessage)
@@ -9231,13 +9007,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
             if (result.rows.nonEmpty) {
               result.rows foreach{ row  =>
                 row.zipWithIndex.foreach{ case (value,i) =>
-                  log.info(s"loadout name : ${value(3).asInstanceOf[String]}")
                   val lLoadoutNumber : Int = value(1).asInstanceOf[Int]
                   val lExosuitId : Int = value(2).asInstanceOf[Int]
                   val lName : String = value(3).asInstanceOf[String]
                   val lItems : String = value(4).asInstanceOf[String]
 
-                  log.info(s"Set exosuit ID : $lExosuitId to player : ${owner.Name}")
                   owner.ExoSuit = ExoSuitType(lExosuitId)
 
                   val args = lItems.split("/")
@@ -9249,22 +9023,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
                     lType match {
                       case "Tool" =>
-                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
                         owner.Slot(lIndex).Equipment = Tool(GetToolDefFromObjectID(lObjectId).asInstanceOf[ToolDefinition])
                       case "AmmoBox" =>
-                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
                         owner.Slot(lIndex).Equipment = AmmoBox(GetToolDefFromObjectID(lObjectId).asInstanceOf[AmmoBoxDefinition])
                       case "ConstructionItem" =>
-                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
                         owner.Slot(lIndex).Equipment = ConstructionItem(GetToolDefFromObjectID(lObjectId).asInstanceOf[ConstructionItemDefinition])
                       case "BoomerTrigger" =>
-                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
                         log.error("Found a BoomerTrigger in a loadout ?!")
                       case "SimpleItem" =>
-                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
                         owner.Slot(lIndex).Equipment = SimpleItem(GetToolDefFromObjectID(lObjectId).asInstanceOf[SimpleItemDefinition])
                       case "Kit" =>
-                        log.info(s"Add object ID : $lObjectId to slot : $lIndex")
                         owner.Slot(lIndex).Equipment = Kit(GetToolDefFromObjectID(lObjectId).asInstanceOf[KitDefinition])
                       case _ =>
                         log.error("What's that item in the loadout ?!")
@@ -9276,13 +9044,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
                           val lAmmoSlots = args4(0).toInt
                           val lAmmoTypeIndex = args4(1).toInt
                           val lAmmoBoxDefinition = args4(2).toInt
-                          log.info(s"Changing ammo on object ID : $lObjectId")
                           owner.Slot(lIndex).Equipment.get.asInstanceOf[Tool].AmmoSlots(lAmmoSlots).AmmoTypeIndex = lAmmoTypeIndex
                           owner.Slot(lIndex).Equipment.get.asInstanceOf[Tool].AmmoSlots(lAmmoSlots).Box = AmmoBox(AmmoBoxDefinition(lAmmoBoxDefinition))
                       })
                     }
                   })
-                  log.info(s"Loadout : $lName to player : ${owner.Name}, on slot $lLoadoutNumber")
                   avatar.SaveLoadout(owner, lName, lLoadoutNumber)
                   (0 until 4).foreach( index => {
                     if (owner.Slot(index).Equipment.isDefined) owner.Slot(index).Equipment = None
@@ -9292,7 +9058,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 // something to do at end of loading ?
               }
             }
-            connection.get.disconnect
+            Thread.sleep(5)
+            if (connection.get.isConnected) connection.get.disconnect
           case _ =>
             log.error(s"No saved loadout(s) for character ID : ${owner.CharId}")
         }

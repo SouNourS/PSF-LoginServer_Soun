@@ -71,7 +71,7 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
 //            building.Faction = PlanetSideEmpire.NEUTRAL
 //          }
         case _ => ;
-          ntuLevel = 1
+          ntuLevel = 0
       }
 
       // Get hack status & time from control console if it exists
