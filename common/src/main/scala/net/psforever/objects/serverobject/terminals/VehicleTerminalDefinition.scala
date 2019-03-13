@@ -35,8 +35,8 @@ object VehicleTerminalDefinition {
     "apc_vs" -> MakeVehicle(apc_vs),
     "magrider" -> MakeVehicle(magrider),
     "flail" -> MakeVehicle(flail),
-    "switchblade" -> MakeVehicle(switchblade)//,
-//    "router" -> MakeVehicle(router) // PTS v3
+    "switchblade" -> MakeVehicle(switchblade),
+    "router" -> MakeVehicle(router) // PTS v3 or not
   )
 
   /**

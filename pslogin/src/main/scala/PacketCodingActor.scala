@@ -92,9 +92,9 @@ class PacketCodingActor extends Actor with MDCContextAware {
 
   def Established : Receive = {
     case PacketCodingActor.SubslotResend() => {
-      log.trace("Subslot resend timeout reached")
+      log.info("Subslot resend timeout reached")
       relatedABufferTimeout.cancel()
-      log.trace(s"Client indicated successful subslots ${relatedALog.sortBy(x => x).mkString(" ")}")
+      log.info(s"Client indicated successful subslots ${relatedALog.sortBy(x => x).mkString(" ")}")
 
       // If a non-contiguous range of RelatedA packets were received we may need to send multiple missing packets, thus split the array into contiguous ranges
       val sorted_log = relatedALog.sortBy(x => x)
@@ -326,7 +326,7 @@ class PacketCodingActor extends Actor with MDCContextAware {
       case Successful(packet) =>
         handlePacketContainer(packet)
       case Failure(ex) =>
-        log.info(s"Failed to unmarshal $description: $ex")
+        log.info(s"Failed to unmarshal $description: $ex. Data : $data")
     }
   }
 
@@ -372,7 +372,7 @@ class PacketCodingActor extends Actor with MDCContextAware {
         packets.foreach { UnmarshalInnerPacket(_, "the inner packet of a MultiPacketEx") }
 
       case RelatedA(slot, subslot) =>
-        log.trace(s"Client indicated a packet is missing prior to slot: $slot subslot: $subslot")
+        log.info(s"Client indicated a packet is missing prior to slot: $slot subslot: $subslot")
 
         relatedALog += subslot
 
@@ -382,14 +382,14 @@ class PacketCodingActor extends Actor with MDCContextAware {
         relatedABufferTimeout = context.system.scheduler.scheduleOnce(100 milliseconds, self, PacketCodingActor.SubslotResend())
 
       case RelatedB(slot, subslot) =>
-        log.trace(s"result $slot: subslot $subslot accepted")
+        log.info(s"result $slot: subslot $subslot accepted")
 
         // The client has indicated it's received up to a certain subslot, that means we can purge the log of any subslots prior to and including the confirmed subslot
         // Find where this subslot is stored in the packet log (if at all) and drop anything to the left of it, including itself
         val pos = slottedPacketLog.keySet.toArray.indexOf(subslot)
         if(pos != -1) {
           slottedPacketLog = slottedPacketLog.drop(pos+1)
-          log.trace(s"Subslots left in log: ${slottedPacketLog.keySet.toString()}")
+          log.info(s"Subslots left in log: ${slottedPacketLog.keySet.toString()}")
         }
       case _ =>
         sendResponseRight(container)
@@ -402,7 +402,6 @@ class PacketCodingActor extends Actor with MDCContextAware {
     */
   def sendResponseRight(cont : PlanetSidePacketContainer) : Unit = {
     log.trace("PACKET SEND, RIGHT: " + cont)
-//    println("PACKET SEND, RIGHT: " + cont)
     MDC("sessionId") = sessionId.toString
     rightRef !> cont
   }

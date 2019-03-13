@@ -1,7 +1,6 @@
 // Copyright (c) 2017 PSForever
 import akka.actor.ActorContext
-import net.psforever.objects.serverobject.pad.VehicleSpawnPad
-import net.psforever.objects.serverobject.pad.process._
+import net.psforever.objects.GlobalDefinitions
 import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
 import net.psforever.objects.zones.Zone
 import net.psforever.types.PlanetSideEmpire
@@ -10,6 +9,29 @@ object Zones {
   val z1 = new Zone("z1", Maps.map1, 1){ // Solsar
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
+
+    Buildings.values.foreach(building =>
+      building.Amenities.foreach(amenity =>
+        amenity.Definition match {
+          case GlobalDefinitions.resource_silo =>
+            val r = new scala.util.Random
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+            silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+          case _ => ;
+        }
+      )
+    )
+
+    BuildingByMapId(5).Name = Some("Seth")
+    BuildingByMapId(6).Name = Some("Bastet")
+    BuildingByMapId(7).Name = Some("Aton")
+    BuildingByMapId(8).Name = Some("Hapi")
+    BuildingByMapId(9).Name = Some("Thoth")
+    BuildingByMapId(10).Name = Some("Mont")
+    BuildingByMapId(11).Name = Some("Amun")
+    BuildingByMapId(12).Name = Some("Horus")
+    BuildingByMapId(13).Name = Some("Sobek")
 
     import net.psforever.types.PlanetSideEmpire
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
@@ -20,6 +42,31 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
+
+      BuildingByMapId(5).Name = Some("Voltan")
+      BuildingByMapId(6).Name = Some("Naum")
+      BuildingByMapId(7).Name = Some("Zotz")
+      BuildingByMapId(8).Name = Some("Acan")
+      BuildingByMapId(9).Name = Some("Bitol")
+      BuildingByMapId(10).Name = Some("Chac")
+      BuildingByMapId(11).Name = Some("Ghanon")
+      BuildingByMapId(12).Name = Some("Ixtab")
+      BuildingByMapId(13).Name = Some("Kisin")
+      BuildingByMapId(14).Name = Some("Mulac")
+      BuildingByMapId(48).Name = Some("Hurakan")
+
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
     }
@@ -28,6 +75,37 @@ object Zones {
   val z3 = new Zone("z3", Maps.map3, 3){ // Cyssor
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
+
+    Buildings.values.foreach(building =>
+      building.Amenities.foreach(amenity =>
+        amenity.Definition match {
+          case GlobalDefinitions.resource_silo =>
+            val r = new scala.util.Random
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+            silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+          case _ => ;
+        }
+      )
+    )
+
+    BuildingByMapId(1).Name = Some("Aja")
+    BuildingByMapId(2).Name = Some("Bomazi")
+    BuildingByMapId(4).Name = Some("Chuku")
+    BuildingByMapId(5).Name = Some("Ekera")
+    BuildingByMapId(6).Name = Some("Faro")
+    BuildingByMapId(7).Name = Some("Wele")
+    BuildingByMapId(8).Name = Some("Itan")
+    BuildingByMapId(10).Name = Some("Leza")
+    BuildingByMapId(11).Name = Some("Tore")
+    BuildingByMapId(12).Name = Some("Nzame")
+    BuildingByMapId(14).Name = Some("Orisha")
+    BuildingByMapId(15).Name = Some("Pamba")
+    BuildingByMapId(16).Name = Some("Shango")
+    BuildingByMapId(18).Name = Some("Gunuku")
+    BuildingByMapId(19).Name = Some("Honsi")
+    BuildingByMapId(20).Name = Some("Kaang")
+    BuildingByMapId(21).Name = Some("Mukuru")
 
     import net.psforever.types.PlanetSideEmpire
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
@@ -39,6 +117,18 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
 
       import net.psforever.types.PlanetSideEmpire
 
@@ -124,6 +214,30 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
+
+      BuildingByMapId(5).Name = Some("Ogma")
+      BuildingByMapId(6).Name = Some("Neit")
+      BuildingByMapId(7).Name = Some("Lugh")
+      BuildingByMapId(8).Name = Some("Gwydion")
+      BuildingByMapId(9).Name = Some("Dagda")
+      BuildingByMapId(10).Name = Some("Pwyll")
+      BuildingByMapId(11).Name = Some("Anu")
+      BuildingByMapId(12).Name = Some("Bel")
+      BuildingByMapId(13).Name = Some("Eadon")
+      BuildingByMapId(36).Name = Some("Caer")
+
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
     }
@@ -133,8 +247,31 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
+
 //      var silo = GUID(2094).get.asInstanceOf[ResourceSilo]
 //      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
+
+      BuildingByMapId(1).Name = Some("Akna")
+      BuildingByMapId(2).Name = Some("Angutai")
+      BuildingByMapId(3).Name = Some("Igaluk")
+      BuildingByMapId(4).Name = Some("Keelut")
+      BuildingByMapId(5).Name = Some("Nerrivik")
+      BuildingByMapId(6).Name = Some("Pinga")
+      BuildingByMapId(7).Name = Some("Sedna")
+      BuildingByMapId(8).Name = Some("Tarqaq")
+      BuildingByMapId(9).Name = Some("Tootega")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
@@ -153,6 +290,33 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
+
+      BuildingByMapId(5).Name = Some("Andvari")
+      BuildingByMapId(6).Name = Some("Dagur")
+      BuildingByMapId(7).Name = Some("Eisa")
+      BuildingByMapId(8).Name = Some("Freyr")
+      BuildingByMapId(9).Name = Some("Gjallar")
+      BuildingByMapId(10).Name = Some("Helheim")
+      BuildingByMapId(11).Name = Some("Kvasir")
+      BuildingByMapId(12).Name = Some("Mani")
+      BuildingByMapId(13).Name = Some("Nott")
+      BuildingByMapId(14).Name = Some("Vidar")
+      BuildingByMapId(15).Name = Some("Ymir")
+      BuildingByMapId(16).Name = Some("Jarl")
+      BuildingByMapId(17).Name = Some("Ran")
+
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
 
@@ -164,6 +328,19 @@ object Zones {
   val z8 = new Zone("z8", Maps.map8, 8) { // Oshur
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
 
       import net.psforever.types.PlanetSideEmpire
 
@@ -193,6 +370,34 @@ object Zones {
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
 
+    Buildings.values.foreach(building =>
+      building.Amenities.foreach(amenity =>
+        amenity.Definition match {
+          case GlobalDefinitions.resource_silo =>
+            val r = new scala.util.Random
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+            silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+          case _ => ;
+        }
+      )
+    )
+
+    BuildingByMapId(4).Name = Some("Akua")
+    BuildingByMapId(5).Name = Some("Drakulu")
+    BuildingByMapId(6).Name = Some("Hiro")
+    BuildingByMapId(7).Name = Some("Iva")
+    BuildingByMapId(8).Name = Some("Karihi")
+    BuildingByMapId(9).Name = Some("Laka")
+    BuildingByMapId(10).Name = Some("Matagi")
+    BuildingByMapId(11).Name = Some("Ngaru")
+    BuildingByMapId(12).Name = Some("Oro")
+    BuildingByMapId(13).Name = Some("Pele")
+    BuildingByMapId(14).Name = Some("Rehua")
+    BuildingByMapId(15).Name = Some("Sina")
+    BuildingByMapId(16).Name = Some("Tara")
+    BuildingByMapId(17).Name = Some("Wakea")
+
     import net.psforever.types.PlanetSideEmpire
 
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
@@ -203,6 +408,19 @@ object Zones {
   val z10 = new Zone("z10", Maps.map10, 10) { // Amerish
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
+
+    Buildings.values.foreach(building =>
+      building.Amenities.foreach(amenity =>
+        amenity.Definition match {
+          case GlobalDefinitions.resource_silo =>
+            val r = new scala.util.Random
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+            silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+          case _ => ;
+        }
+      )
+    )
 
     import net.psforever.types.PlanetSideEmpire
 
@@ -294,13 +512,110 @@ object Zones {
 
   val c6 = new Zone("c6", Maps.ugd06, 28)
 
-  val i1 = new Zone("i1", Maps.map99, 29)
+  val i1 = new Zone("i1", Maps.map99, 29){
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
 
-  val i2 = new Zone("i2", Maps.map98, 30)
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
 
-  val i3 = new Zone("i3", Maps.map97, 31)
+      BuildingByMapId(7).Name = Some("Mithra")
+      BuildingByMapId(8).Name = Some("Hvar")
+      BuildingByMapId(18).Name = Some("Yazata")
 
-  val i4 = new Zone("i4", Maps.map96, 32)
+      import net.psforever.types.PlanetSideEmpire
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR}
+    }
+  }
+
+  val i2 = new Zone("i2", Maps.map98, 30){
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
+
+      BuildingByMapId(7).Name = Some("Zal")
+      BuildingByMapId(8).Name = Some("Rashnu")
+      BuildingByMapId(39).Name = Some("Sraosha")
+
+      import net.psforever.types.PlanetSideEmpire
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC}
+    }
+  }
+
+  val i3 = new Zone("i3", Maps.map97, 31){
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
+
+      BuildingByMapId(1).Name = Some("Dahaka")
+      BuildingByMapId(2).Name = Some("Jamshid")
+      BuildingByMapId(3).Name = Some("Izha")
+
+      import net.psforever.types.PlanetSideEmpire
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS}
+    }
+  }
+
+  val i4 = new Zone("i4", Maps.map96, 32){
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+
+      Buildings.values.foreach(building =>
+        building.Amenities.foreach(amenity =>
+          amenity.Definition match {
+            case GlobalDefinitions.resource_silo =>
+              val r = new scala.util.Random
+              val silo = amenity.asInstanceOf[ResourceSilo]
+              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
+            case _ => ;
+          }
+        )
+      )
+
+      BuildingByMapId(1).Name = Some("Atar")
+      BuildingByMapId(2).Name = Some("North Rim Gun Tower")
+      BuildingByMapId(3).Name = Some("East Rim Gun Tower")
+      BuildingByMapId(4).Name = Some("South Rim Gun Tower")
+      BuildingByMapId(5).Name = Some("L8 Gate Watch Tower")
+      BuildingByMapId(6).Name = Some("K14 Gate Watch Tower")
+
+    }
+  }
 
   /**
     * Get the zone identifier name for the sanctuary continent of a given empire.

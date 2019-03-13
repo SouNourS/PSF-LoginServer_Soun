@@ -96,7 +96,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var speed : Float = 1.0f
   var spectator : Boolean = false
   var admin : Boolean = false
-  var loadConfZone : Boolean = false
+//  var loadConfZone : Boolean = false
   var usingMedicalTerminal : Option[PlanetSideGUID] = None
   var controlled : Option[Int] = None
   //keep track of avatar's ServerVehicleOverride state
@@ -898,6 +898,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       taskResolver ! GUIDTask.UnregisterObjectTask(obj)(continent.GUID)
 
     case InterstellarCluster.ClientInitializationComplete() =>
+      StopBundlingPackets()
       log.info("ClientInitializationComplete")
       LivePlayerList.Add(sessionId, avatar)
       traveler = new Traveler(self, continent.Id)
@@ -992,8 +993,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(FriendsResponse(FriendAction.InitializeFriendList, 0, true, true, Nil))
       sendResponse(FriendsResponse(FriendAction.InitializeIgnoreList, 0, true, true, Nil))
 
-      StopBundlingPackets()
-
       avatarService ! Service.Join(avatar.name) //channel will be player.Name
       localService ! Service.Join(avatar.name) //channel will be player.Name
 //      cluster ! InterstellarCluster.GetWorld("z4")
@@ -1001,7 +1000,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
-      loadConfZone = true
+//      loadConfZone = true
       if (zoneId == "z4") { // PTS v3
         player.FirstLoad = true
         if (player.Faction == PlanetSideEmpire.TR) {
@@ -1040,8 +1039,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
       log.info(s"Player ${tplayer.Name} has been loaded")
       player = tplayer
       //LoadMapMessage will cause the client to send back a BeginZoningMessage packet (see below)
-      sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, 3770441820L))
+      if (continent.Map.Name == "map11" || continent.Map.Name == "map12" || continent.Map.Name == "map13") {
+        sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, false, 3770441820L))
+      } else sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, 3770441820L))
       // PTS v3
+      Thread.sleep(5)
 //      if(player.Faction == PlanetSideEmpire.VS) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(36), 38, 0))
       AvatarCreate() //important! the LoadMapMessage must be processed by the client before the avatar is created
 
@@ -2033,10 +2035,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val (dropHolsters, beforeHolsters) = clearHolsters(tplayer.Holsters().iterator).partition(dropPred)
         val (dropInventory, beforeInventory) = tplayer.Inventory.Clear().partition(dropPred)
         val (_, afterHolsters) = holsters.partition(dropPred) //dropped items are forgotten
-      val (_, afterInventory) = inventory.partition(dropPred) //dropped items are forgotten
+        val (_, afterInventory) = inventory.partition(dropPred) //dropped items are forgotten
         //change suit (clear inventory and change holster sizes; holsters must be empty before this point)
         tplayer.FreeHand.Equipment = None //terminal and inventory will close, so prematurely dropping should be fine
-      val originalSuit = player.ExoSuit
+        val originalSuit = player.ExoSuit
         val originalSubtype = Loadout.DetermineSubtype(tplayer)
         val originalArmor = player.Armor
         tplayer.ExoSuit = exosuit
@@ -2872,8 +2874,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     // PTS v3
     sendResponse(CreateShortcutMessage(guid, 2, 0, true, Shortcut.SURGE))
     sendResponse(CreateShortcutMessage(guid, 3, 0, true, Shortcut.DARKLIGHT_VISION))
-    sendResponse(CreateShortcutMessage(guid, 7, 0, true, Shortcut.MACRO("Col",
-      "Use '\\ #x' (without space & with x = \\#0 0\\#1 1\\#2 2\\#3 3\\#4 4\\#5 5\\#6 6\\#7 7\\#8 8\\#9 9\\#0 0\\#a a\\#b b\\#c c\\#d d\\#e e\\#f f\\#0)")))
     sendResponse(CreateShortcutMessage(guid, 8, 0, true, Shortcut.MACRO("SOS", "!help")))
     if (admin) {
       sendResponse(CreateShortcutMessage(guid, 9, 0, true, Shortcut.MACRO("Fly", "/fly")))
@@ -2881,8 +2881,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(CreateShortcutMessage(guid, 11, 0, true, Shortcut.MACRO("Sp1", "/speed 1")))
       sendResponse(CreateShortcutMessage(guid, 12, 0, true, Shortcut.MACRO("Sp5", "/speed 5")))
     }
+//    sendResponse(CreateShortcutMessage(guid, 7, 0, true, Shortcut.MACRO("Col",
+//      "Use '\\ #x' (without space & with x = \\#0 0\\#1 1\\#2 2\\#3 3\\#4 4\\#5 5\\#6 6\\#7 7\\#8 8\\#9 9\\#0 0\\#a a\\#b b\\#c c\\#d d\\#e e\\#f f\\#0)")))
     sendResponse(ChangeShortcutBankMessage(guid, 0))
-
     //Favorites lists
     val (inf, veh) = avatar.Loadouts.partition { case (index, _) => index < 10 }
     inf.foreach {
@@ -2898,10 +2899,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     sendResponse(AvatarDeadStateMessage(DeadState.Alive, 0, 0, tplayer.Position, player.Faction, true))
     sendResponse(PlanetsideAttributeMessage(guid, 53, 1))
     sendResponse(AvatarSearchCriteriaMessage(guid, List(0, 0, 0, 0, 0, 0)))
-//    (1 to 73).foreach(i => { PTS v3
-//      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
-//    })
-
+    (1 to 73).foreach(i => {
+      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
+    })
     (0 to 30).foreach(i => {
       //TODO 30 for a new character only?
       sendResponse(AvatarStatisticsMessage(2, Statistics(0L)))
@@ -2912,17 +2912,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
     //MapObjectStateBlockMessage and ObjectCreateMessage?
     //TacticsMessage?
     //change the owner on our deployables (re-draw the icons for our deployables too)
-    StopBundlingPackets()
 
     // PTS v3
-    avatar.Implants(0).Initialized = true
-    avatar.Implants(1).Initialized = true
-    avatar.Implants(2).Initialized = true
-    sendResponse(AvatarImplantMessage(PlanetSideGUID(tplayer.GUID.guid),ImplantAction.Initialization,0,1))
-    sendResponse(AvatarImplantMessage(PlanetSideGUID(tplayer.GUID.guid),ImplantAction.Initialization,1,1))
-    sendResponse(AvatarImplantMessage(PlanetSideGUID(tplayer.GUID.guid),ImplantAction.Initialization,2,1))
+    (0 until DetailedCharacterData.numberOfImplantSlots(tplayer.BEP)).foreach(slot => {
+      avatar.Implants(slot).Initialized = true
+      sendResponse(AvatarImplantMessage(guid, ImplantAction.Initialization, slot, 1)) //init implant slot
+      sendResponse(AvatarImplantMessage(guid, ImplantAction.Activation, slot, 0)) //deactivate implant
+    })
 
-    StartBundlingPackets()
     val name = tplayer.Name
     val faction = tplayer.Faction
     continent.DeployableList
@@ -2934,11 +2931,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
     StopBundlingPackets()
     drawDeloyableIcon = DontRedrawIcons
 
-    // PTS v3
-    if (loadConfZone && connectionState == 1000) {
-      configZone(continent) // PTS v3
-      loadConfZone = false
-    }
+//    // PTS v3
+//    if (loadConfZone && connectionState == 1000) {
+//      configZone(continent) // PTS v3
+//      loadConfZone = false
+//    }
 
   }
 
@@ -3030,8 +3027,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case msg @ CharacterCreateRequestMessage(name, head, voice, gender, empire) =>
       log.info("Handling " + msg)
-//      sendResponse(ActionResultMessage.Pass)
-//      self ! ListAccountCharacters
 
       Database.getConnection.connect.onComplete {
         case scala.util.Success(connection) =>
@@ -3202,7 +3197,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 case _ =>
                   println("toto tata")
               }
-              Thread.sleep(20)
+              Thread.sleep(40)
               Database.query(connection.sendPreparedStatement(
                 "UPDATE characters SET last_login = ? where id=?", Array(new java.sql.Timestamp(System.currentTimeMillis), charId)
               ))
@@ -3462,18 +3457,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case _ => ;
         }
       })
-      StopBundlingPackets()
 
-      chatService ! Service.Join("local")
-      chatService ! Service.Join("squad")
-      chatService ! Service.Join("voice")
-      chatService ! Service.Join("tell")
-      chatService ! Service.Join("broadcast")
-      chatService ! Service.Join("note")
-      chatService ! Service.Join("gm")
-
-
-      StartBundlingPackets()
       // Welcome messages by Nick
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
@@ -3495,6 +3479,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
         "  \\#6The \\#3!help\\#6 command will show that welcome message again.", None))
       StopBundlingPackets()
 
+      chatService ! Service.Join("local")
+      chatService ! Service.Join("squad")
+      chatService ! Service.Join("voice")
+      chatService ! Service.Join("tell")
+      chatService ! Service.Join("broadcast")
+      chatService ! Service.Join("note")
+      chatService ! Service.Join("gm")
 
       self ! SetCurrentAvatar(player)
 
@@ -3679,7 +3670,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       cluster ! Zone.Lattice.RequestSpawnPoint(zone_number.toInt, player, spawn_type.id.toInt)
 
     case msg @ SetChatFilterMessage(send_channel, origin, whitelist) =>
-//      log.info("SetChatFilters: " + msg)
+    //log.info("SetChatFilters: " + msg)
 
     case msg @ ChatMsg(messagetype, has_wide_contents, recipient, contents, note_contents) =>
       var makeReply : Boolean = false
@@ -3723,9 +3714,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       CSRZone.read(traveler, msg) match {
         case (true, zone, pos) =>
-            if (msg.contents.equalsIgnoreCase("ishundar") && player.Continent == "z4") { // PTS v3
-              log.info("No Warp via /Zone")
-            } else if (msg.contents.equalsIgnoreCase("oshur") && player.Continent == "z8") { // PTS v3
+            if (zone == player.Continent) { // PTS v3
               log.info("No Warp via /Zone")
             } else {
               if(player.isAlive) {
@@ -7033,32 +7022,65 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * @param building the building object
     */
   def initFacility(continentNumber : Int, buildingNumber : Int, building : Building) : Unit = {
-    building.Actor ! Building.SendMapUpdate(all_clients = false)
-//    sendResponse(
-//      BuildingInfoUpdateMessage(
-//        continentNumber,
-//        buildingNumber,
-//        ntu_level = 8,
-//        is_hacked = false,
-//        empire_hack = PlanetSideEmpire.NEUTRAL,
-//        hack_time_remaining = 0,
-//        building.Faction,
-//        unk1 = 0, //!! Field != 0 will cause malformed packet. See class def.
-//        unk1x = None,
-//        PlanetSideGeneratorState.Normal,
-//        spawn_tubes_normal = true,
-//        force_dome_active = false,
-//        lattice_benefit = 0,
-//        cavern_benefit = 0, //!! Field > 0 will cause malformed packet. See class def.
-//        unk4 = Nil,
-//        unk5 = 0,
-//        unk6 = false,
-//        unk7 = 8, //!! Field != 8 will cause malformed packet. See class def.
-//        unk7x = None,
-//        boost_spawn_pain = false,
-//        boost_generator_pain = false
-//      )
-//    )
+    //    building.Actor ! Building.SendMapUpdate(all_clients = false)
+    var ntuLevel = 0
+    var is_hacked = false
+    var hack_time_remaining_ms = 0L;
+    var hacked_by_faction = PlanetSideEmpire.NEUTRAL
+    var latticeBenefit = 0
+    var cavernBenefit = 0
+    if(building.BuildingType.id == 3){
+      latticeBenefit = 18
+      cavernBenefit = 48
+    }
+    // Get Ntu level from silo if it exists
+    building.Amenities.filter(x => (x.Definition == GlobalDefinitions.resource_silo)).headOption.asInstanceOf[Option[ResourceSilo]] match {
+      case Some(obj: ResourceSilo) =>
+        ntuLevel = obj.CapacitorDisplay.toInt
+      case _ => ;
+        ntuLevel = 0
+    }
+    // Get hack status & time from control console if it exists
+    building.Amenities.filter(x => x.Definition == GlobalDefinitions.capture_terminal).headOption.asInstanceOf[Option[CaptureTerminal with Hackable]] match {
+      case Some(obj: CaptureTerminal with Hackable) =>
+        if(!obj.HackedBy.isEmpty) {
+          is_hacked = true
+          hacked_by_faction = obj.HackedBy.get._1.Faction
+        }
+
+        import scala.concurrent.ExecutionContext.Implicits.global
+        val future = ask(localService, HackCaptureActor.GetHackTimeRemainingNanos(obj.GUID))(1 second)
+
+        //todo: this is blocking. Not so bad when we're only retrieving one piece of data but as more functionality is added we'll need to change this to be async but wait for all replies before sending BIUM to clients
+        val time = Await.result(future, 1 second).asInstanceOf[Long]
+        hack_time_remaining_ms = TimeUnit.MILLISECONDS.convert(time, TimeUnit.NANOSECONDS)
+      case _ => ;
+    }
+    sendResponse(
+      BuildingInfoUpdateMessage(
+        building.Zone.Number,
+        building.MapId,
+        ntu_level = ntuLevel,
+        is_hacked = is_hacked,
+        empire_hack = hacked_by_faction,
+        hack_time_remaining = hack_time_remaining_ms,
+        building.Faction,
+        unk1 = 0, //!! Field != 0 will cause malformed packet. See class def.
+        unk1x = None,
+        PlanetSideGeneratorState.Normal,
+        spawn_tubes_normal = true,
+        force_dome_active = false,
+        lattice_benefit = latticeBenefit,
+        cavern_benefit = cavernBenefit, //!! Field > 0 will cause malformed packet. See class def.
+        unk4 = Nil,
+        unk5 = 0,
+        unk6 = false,
+        unk7 = 8, //!! Field != 8 will cause malformed packet. See class def.
+        unk7x = None,
+        boost_spawn_pain = false,
+        boost_generator_pain = false
+      )
+    )
     sendResponse(DensityLevelUpdateMessage(continentNumber, buildingNumber, List(0,0, 0,0, 0,0, 0,0)))
   }
 
@@ -7076,8 +7098,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def initGate(continentNumber : Int, buildingNumber : Int, building : Building) : Unit = {
     sendResponse(
       BuildingInfoUpdateMessage(
-        continentNumber,
-        buildingNumber,
+        building.Zone.Number,
+        building.MapId,
         ntu_level = 0,
         is_hacked = false,
         empire_hack = PlanetSideEmpire.NEUTRAL,
