@@ -91,7 +91,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var shooting : Option[PlanetSideGUID] = None //ChangeFireStateMessage_Start
   var prefire : Option[PlanetSideGUID] = None //if WeaponFireMessage precedes ChangeFireStateMessage_Start
   var accessedContainer : Option[PlanetSideGameObject with Container] = None
-  var connectionState : Int = 400
+  var connectionState : Int = 100
   var flying : Boolean = false
   var speed : Float = 1.0f
   var spectator : Boolean = false
@@ -546,7 +546,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     //currently being handled by VehicleSpawnPad.LoadVehicle during testing phase
 
     case Zone.ClientInitialization(zone) =>
-//      Thread.sleep(connectionState/10)
+      Thread.sleep(connectionState/2)
       val continentNumber = zone.Number
       val poplist = zone.Players
       val popBO = 0
@@ -3142,6 +3142,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       AwardBattleExperiencePoints(avatar, 20000000L)
                       avatar.CEP = 600000
 
+                      // PTS v3
+                      avatar.Implants(0).Unlocked = true
+                      avatar.Implants(0).Implant = sample
+                      avatar.Implants(1).Unlocked = true
+                      avatar.Implants(1).Implant = sample2
+
                       player = new Player(avatar)
 
                       (0 until 4).foreach( index => {
@@ -3155,44 +3161,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
                         case scala.util.Failure(e) =>
                           println(s"shit : ${e.getMessage}")
                       }
-
-                      Thread.sleep(100)
-
-                      (0 until 4).foreach( index => {
-                        if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
-                      })
-                      player.Inventory.Clear()
-
-                      player.ExoSuit = ExoSuitType.Standard
-                      player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
-                      player.Slot(2).Equipment = Tool(suppressor)
-//                      player.Slot(2).Equipment = Tool(GetToolDefFromObjectID(845).asInstanceOf[ToolDefinition])
-                      player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
-                      player.Slot(6).Equipment = AmmoBox(bullet_9mm)
-                      player.Slot(9).Equipment = AmmoBox(bullet_9mm)
-                      player.Slot(12).Equipment = AmmoBox(bullet_9mm)
-                      player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
-                      player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
-                      player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
-                      player.Inventory.Items.foreach { _.obj.Faction = lFaction }
-                      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
-
-                      // PTS v3
-                      avatar.Implants(0).Unlocked = true
-                      avatar.Implants(0).Implant = sample
-                      avatar.Implants(1).Unlocked = true
-                      avatar.Implants(1).Implant = sample2
-
-                      ////        player.FirstLoad = true
-
-                      //          LivePlayerList.Add(sessionId, avatar)
-
-
-                      //TODO check if can spawn on last continent/location from player?
-                      //TODO if yes, get continent guid accessors
-                      //TODO if no, get sanctuary guid accessors and reset the player's expectations
-                      cluster ! InterstellarCluster.RequestClientInitialization()
-//                      self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3 or not
                   }
                 case _ =>
                   println("toto tata")
@@ -3202,6 +3170,33 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 "UPDATE characters SET last_login = ? where id=?", Array(new java.sql.Timestamp(System.currentTimeMillis), charId)
               ))
               Thread.sleep(5)
+
+              (0 until 4).foreach( index => {
+                if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+              })
+              player.Inventory.Clear()
+              player.ExoSuit = ExoSuitType.Standard
+              player.Slot(0).Equipment = Tool(StandardPistol(player.Faction))
+              player.Slot(2).Equipment = Tool(suppressor)
+              player.Slot(4).Equipment = Tool(StandardMelee(player.Faction))
+              player.Slot(6).Equipment = AmmoBox(bullet_9mm)
+              player.Slot(9).Equipment = AmmoBox(bullet_9mm)
+              player.Slot(12).Equipment = AmmoBox(bullet_9mm)
+              player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
+              player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
+              player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
+              player.Inventory.Items.foreach { _.obj.Faction = player.Faction }
+              player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
+              ////        player.FirstLoad = true
+              //          LivePlayerList.Add(sessionId, avatar)
+
+
+              //TODO check if can spawn on last continent/location from player?
+              //TODO if yes, get continent guid accessors
+              //TODO if no, get sanctuary guid accessors and reset the player's expectations
+              cluster ! InterstellarCluster.RequestClientInitialization()
+              //                      self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3 or not
+
               if(connection.isConnected) connection.disconnect
             case scala.util.Failure(e) =>
               log.error("Failed connecting to database for account lookup " + e.getMessage)
@@ -3752,9 +3747,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           Suicide(player)
         }
       } else if(messagetype == ChatMessageType.CMT_CULLWATERMARK) {
-        if(trimContents.contains("40 80")) connectionState = 1000
-        else if(trimContents.contains("120 200")) connectionState = 80
-        else connectionState = 400
+        if(trimContents.contains("40 80")) connectionState = 200
+        else if(trimContents.contains("120 200")) connectionState = 20
+        else connectionState = 100
       } else if(messagetype == ChatMessageType.CMT_DESTROY) {
         makeReply = true
         val guid = contents.toInt
@@ -7171,7 +7166,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         }
       })
-//      Thread.sleep(connectionState/2)
+      Thread.sleep(connectionState/4)
 //      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
 
     })
