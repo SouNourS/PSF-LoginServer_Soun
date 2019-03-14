@@ -2,8 +2,10 @@
 package net.psforever.objects.serverobject.structures
 
 import akka.actor.ActorContext
+import net.psforever.objects.GlobalDefinitions
 import net.psforever.objects.definition.ObjectDefinition
 import net.psforever.objects.serverobject.PlanetSideServerObject
+import net.psforever.objects.serverobject.terminals.CaptureTerminal
 import net.psforever.objects.zones.Zone
 import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.types.{PlanetSideEmpire, Vector3}
@@ -33,6 +35,14 @@ class Building(private val building_guid : Int, private val map_id : Int, privat
     amenities = amenities :+ obj
     obj.Owner = this
     amenities
+  }
+
+  def CaptureConsoleIsHacked : Boolean = {
+    Amenities.filter(x => x.Definition == GlobalDefinitions.capture_terminal).headOption.asInstanceOf[Option[CaptureTerminal]] match {
+      case Some(obj: CaptureTerminal) =>
+        obj.HackedBy.isDefined
+      case None => false
+    }
   }
 
   def Zone : Zone = zone

@@ -60,7 +60,8 @@ class HackCaptureActor extends Actor {
 
     case HackCaptureActor.ClearHack(target, zone) =>
       hackedObjects = hackedObjects.filterNot(x => x.target == target)
-      target.Owner.Actor ! Building.SendMapUpdate(all_clients = true)
+
+      if(target.isInstanceOf[CaptureTerminal]) { target.Owner.Actor ! Building.SendMapUpdate(all_clients = true) }
 
       // Restart the timer in case the object we just removed was the next one scheduled
       RestartTimer()
