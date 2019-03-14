@@ -4828,7 +4828,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         case Some(terminal : Terminal) =>
           val tdef = terminal.Definition
         // If the base this terminal belongs to has been hacked the owning faction needs to be able to hack it to gain access
-          val ownerIsHacked = terminal.Owner.asInstanceOf[Building].CaptureConsoleIsHacked
+        val ownerIsHacked = terminal.Owner match {
+          case b: Building => b.CaptureConsoleIsHacked
+          case _ => false
+        }
           var playerIsHacking = false
 
           player.Slot(player.DrawnSlot).Equipment match {
