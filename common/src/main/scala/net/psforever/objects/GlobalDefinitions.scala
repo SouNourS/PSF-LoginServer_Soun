@@ -2680,7 +2680,7 @@ object GlobalDefinitions {
     ProjectileDefinition.CalculateDerivedFields(lancer_projectile)
 
     lasher_projectile.Name = "lasher_projectile"
-    lasher_projectile.Damage0 = 30
+    lasher_projectile.Damage0 = 33 // PTS v3 (real value is 30)
     lasher_projectile.Damage1 = 15
     lasher_projectile.Damage2 = 15
     lasher_projectile.Damage3 = 12
