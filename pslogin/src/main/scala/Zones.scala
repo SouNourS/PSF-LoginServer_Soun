@@ -2,6 +2,7 @@
 import akka.actor.ActorContext
 import net.psforever.objects.GlobalDefinitions
 import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
+import net.psforever.objects.serverobject.structures.WarpGate
 import net.psforever.objects.zones.Zone
 import net.psforever.types.PlanetSideEmpire
 
@@ -10,28 +11,23 @@ object Zones {
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
 
-    Buildings.values.foreach(building =>
-      building.Amenities.foreach(amenity =>
-        amenity.Definition match {
-          case GlobalDefinitions.resource_silo =>
-            val r = new scala.util.Random
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-            silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-          case _ => ;
-        }
-      )
-    )
+    Buildings.values.flatMap {
+      _.Amenities.collect {
+        case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+          val silo = amenity.asInstanceOf[ResourceSilo]
+          silo.ChargeLevel = silo.MaximumCharge
+      }
+    }
 
-    BuildingByMapId(5).Name = Some("Seth")
-    BuildingByMapId(6).Name = Some("Bastet")
-    BuildingByMapId(7).Name = Some("Aton")
-    BuildingByMapId(8).Name = Some("Hapi")
-    BuildingByMapId(9).Name = Some("Thoth")
-    BuildingByMapId(10).Name = Some("Mont")
-    BuildingByMapId(11).Name = Some("Amun")
-    BuildingByMapId(12).Name = Some("Horus")
-    BuildingByMapId(13).Name = Some("Sobek")
+    BuildingByMapId(5).get.Name = Some("Seth")
+    BuildingByMapId(6).get.Name = Some("Bastet")
+    BuildingByMapId(7).get.Name = Some("Aton")
+    BuildingByMapId(8).get.Name = Some("Hapi")
+    BuildingByMapId(9).get.Name = Some("Thoth")
+    BuildingByMapId(10).get.Name = Some("Mont")
+    BuildingByMapId(11).get.Name = Some("Amun")
+    BuildingByMapId(12).get.Name = Some("Horus")
+    BuildingByMapId(13).get.Name = Some("Sobek")
 
     import net.psforever.types.PlanetSideEmpire
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
@@ -42,30 +38,25 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
-      BuildingByMapId(5).Name = Some("Voltan")
-      BuildingByMapId(6).Name = Some("Naum")
-      BuildingByMapId(7).Name = Some("Zotz")
-      BuildingByMapId(8).Name = Some("Acan")
-      BuildingByMapId(9).Name = Some("Bitol")
-      BuildingByMapId(10).Name = Some("Chac")
-      BuildingByMapId(11).Name = Some("Ghanon")
-      BuildingByMapId(12).Name = Some("Ixtab")
-      BuildingByMapId(13).Name = Some("Kisin")
-      BuildingByMapId(14).Name = Some("Mulac")
-      BuildingByMapId(48).Name = Some("Hurakan")
+      BuildingByMapId(5).get.Name = Some("Voltan")
+      BuildingByMapId(6).get.Name = Some("Naum")
+      BuildingByMapId(7).get.Name = Some("Zotz")
+      BuildingByMapId(8).get.Name = Some("Acan")
+      BuildingByMapId(9).get.Name = Some("Bitol")
+      BuildingByMapId(10).get.Name = Some("Chac")
+      BuildingByMapId(11).get.Name = Some("Ghanon")
+      BuildingByMapId(12).get.Name = Some("Ixtab")
+      BuildingByMapId(13).get.Name = Some("Kisin")
+      BuildingByMapId(14).get.Name = Some("Mulac")
+      BuildingByMapId(48).get.Name = Some("Hurakan")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
@@ -76,36 +67,31 @@ object Zones {
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
 
-    Buildings.values.foreach(building =>
-      building.Amenities.foreach(amenity =>
-        amenity.Definition match {
-          case GlobalDefinitions.resource_silo =>
-            val r = new scala.util.Random
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-            silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-          case _ => ;
-        }
-      )
-    )
+    Buildings.values.flatMap {
+      _.Amenities.collect {
+        case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+          val silo = amenity.asInstanceOf[ResourceSilo]
+          silo.ChargeLevel = silo.MaximumCharge
+      }
+    }
 
-    BuildingByMapId(1).Name = Some("Aja")
-    BuildingByMapId(2).Name = Some("Bomazi")
-    BuildingByMapId(4).Name = Some("Chuku")
-    BuildingByMapId(5).Name = Some("Ekera")
-    BuildingByMapId(6).Name = Some("Faro")
-    BuildingByMapId(7).Name = Some("Wele")
-    BuildingByMapId(8).Name = Some("Itan")
-    BuildingByMapId(10).Name = Some("Leza")
-    BuildingByMapId(11).Name = Some("Tore")
-    BuildingByMapId(12).Name = Some("Nzame")
-    BuildingByMapId(14).Name = Some("Orisha")
-    BuildingByMapId(15).Name = Some("Pamba")
-    BuildingByMapId(16).Name = Some("Shango")
-    BuildingByMapId(18).Name = Some("Gunuku")
-    BuildingByMapId(19).Name = Some("Honsi")
-    BuildingByMapId(20).Name = Some("Kaang")
-    BuildingByMapId(21).Name = Some("Mukuru")
+    BuildingByMapId(1).get.Name = Some("Aja")
+    BuildingByMapId(2).get.Name = Some("Bomazi")
+    BuildingByMapId(4).get.Name = Some("Chuku")
+    BuildingByMapId(5).get.Name = Some("Ekera")
+    BuildingByMapId(6).get.Name = Some("Faro")
+    BuildingByMapId(7).get.Name = Some("Wele")
+    BuildingByMapId(8).get.Name = Some("Itan")
+    BuildingByMapId(10).get.Name = Some("Leza")
+    BuildingByMapId(11).get.Name = Some("Tore")
+    BuildingByMapId(12).get.Name = Some("Nzame")
+    BuildingByMapId(14).get.Name = Some("Orisha")
+    BuildingByMapId(15).get.Name = Some("Pamba")
+    BuildingByMapId(16).get.Name = Some("Shango")
+    BuildingByMapId(18).get.Name = Some("Gunuku")
+    BuildingByMapId(19).get.Name = Some("Honsi")
+    BuildingByMapId(20).get.Name = Some("Kaang")
+    BuildingByMapId(21).get.Name = Some("Mukuru")
 
     import net.psforever.types.PlanetSideEmpire
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
@@ -117,96 +103,91 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
       import net.psforever.types.PlanetSideEmpire
 
       // PTS v3
-      BuildingByMapId(5).Name = Some("Akkan")
-      BuildingByMapId(6).Name = Some("Baal")
-      BuildingByMapId(7).Name = Some("Dagon")
-      BuildingByMapId(8).Name = Some("Enkidu")
-      BuildingByMapId(9).Name = Some("Girru")
-      BuildingByMapId(10).Name = Some("Hanish")
-      BuildingByMapId(11).Name = Some("Irkalla")
-      BuildingByMapId(12).Name = Some("Kusag")
-      BuildingByMapId(13).Name = Some("Lahar")
-      BuildingByMapId(14).Name = Some("Marduk")
-      BuildingByMapId(15).Name = Some("Neti")
-      BuildingByMapId(16).Name = Some("Zaqar")
+      BuildingByMapId(5).get.Name = Some("Akkan")
+      BuildingByMapId(6).get.Name = Some("Baal")
+      BuildingByMapId(7).get.Name = Some("Dagon")
+      BuildingByMapId(8).get.Name = Some("Enkidu")
+      BuildingByMapId(9).get.Name = Some("Girru")
+      BuildingByMapId(10).get.Name = Some("Hanish")
+      BuildingByMapId(11).get.Name = Some("Irkalla")
+      BuildingByMapId(12).get.Name = Some("Kusag")
+      BuildingByMapId(13).get.Name = Some("Lahar")
+      BuildingByMapId(14).get.Name = Some("Marduk")
+      BuildingByMapId(15).get.Name = Some("Neti")
+      BuildingByMapId(16).get.Name = Some("Zaqar")
 
-      BuildingByMapId(5).Faction = PlanetSideEmpire.TR //Akkan
-      BuildingByMapId(6).Faction = PlanetSideEmpire.TR //Baal
-      BuildingByMapId(7).Faction = PlanetSideEmpire.TR //Dagon
-      BuildingByMapId(8).Faction = PlanetSideEmpire.NC //Enkidu
-      BuildingByMapId(9).Faction = PlanetSideEmpire.VS //Girru
-      BuildingByMapId(10).Faction = PlanetSideEmpire.VS //Hanish
-      BuildingByMapId(11).Faction = PlanetSideEmpire.VS //Irkalla
-      BuildingByMapId(12).Faction = PlanetSideEmpire.VS //Kusag
-      BuildingByMapId(13).Faction = PlanetSideEmpire.VS //Lahar
-      BuildingByMapId(14).Faction = PlanetSideEmpire.NC //Marduk
-      BuildingByMapId(15).Faction = PlanetSideEmpire.NC //Neti
-      BuildingByMapId(16).Faction = PlanetSideEmpire.NC //Zaqar
-      BuildingByMapId(17).Faction = PlanetSideEmpire.NC //S_Marduk_Tower
-      BuildingByMapId(18).Faction = PlanetSideEmpire.NC //W_Neti_Tower
-      BuildingByMapId(19).Faction = PlanetSideEmpire.NC //W_Zaqar_Tower
-      BuildingByMapId(20).Faction = PlanetSideEmpire.NC //E_Zaqar_Tower
-      BuildingByMapId(21).Faction = PlanetSideEmpire.NC //NE_Neti_Tower
-      BuildingByMapId(22).Faction = PlanetSideEmpire.NC //SE_Ceryshen_Warpgate_Tower
-      BuildingByMapId(23).Faction = PlanetSideEmpire.VS //S_Kusag_Tower
-      BuildingByMapId(24).Faction = PlanetSideEmpire.VS //NW_Kusag_Tower
-      BuildingByMapId(25).Faction = PlanetSideEmpire.VS //N_Ceryshen_Warpgate_Tower
-      BuildingByMapId(26).Faction = PlanetSideEmpire.VS //SE_Irkalla_Tower
-      BuildingByMapId(27).Faction = PlanetSideEmpire.VS //S_Irkalla_Tower
-      BuildingByMapId(28).Faction = PlanetSideEmpire.TR //NE_Enkidu_Tower
-      BuildingByMapId(29).Faction = PlanetSideEmpire.NC //SE_Akkan_Tower
-      BuildingByMapId(30).Faction = PlanetSideEmpire.NC //SW_Enkidu_Tower
-      BuildingByMapId(31).Faction = PlanetSideEmpire.TR //E_Searhus_Warpgate_Tower
-      BuildingByMapId(32).Faction = PlanetSideEmpire.TR //N_Searhus_Warpgate_Tower
-      BuildingByMapId(33).Faction = PlanetSideEmpire.VS //E_Girru_Tower
-      BuildingByMapId(34).Faction = PlanetSideEmpire.VS //SE_Hanish_Tower
-      BuildingByMapId(35).Faction = PlanetSideEmpire.TR //SW_Hanish_Tower
-      BuildingByMapId(36).Faction = PlanetSideEmpire.VS //W_Girru_Tower
-      BuildingByMapId(37).Faction = PlanetSideEmpire.TR //E_Dagon_Tower
-      BuildingByMapId(38).Faction = PlanetSideEmpire.TR //NE_Baal_Tower
-      BuildingByMapId(39).Faction = PlanetSideEmpire.TR //SE_Baal_Tower
-      BuildingByMapId(40).Faction = PlanetSideEmpire.TR //S_Dagon_Tower
-      BuildingByMapId(41).Faction = PlanetSideEmpire.NC //W_Ceryshen_Warpgate_Tower
-      BuildingByMapId(42).Faction = PlanetSideEmpire.NEUTRAL //dagon bunker
-      BuildingByMapId(43).Faction = PlanetSideEmpire.NEUTRAL //Akkan North Bunker
-      BuildingByMapId(44).Faction = PlanetSideEmpire.NEUTRAL //Enkidu East Bunker
-      BuildingByMapId(45).Faction = PlanetSideEmpire.NEUTRAL //Neti bunker
-      BuildingByMapId(46).Faction = PlanetSideEmpire.NEUTRAL //Hanish West Bunker
-      BuildingByMapId(47).Faction = PlanetSideEmpire.NEUTRAL //Irkalla East Bunker
-      BuildingByMapId(48).Faction = PlanetSideEmpire.NEUTRAL //Zaqar bunker
-      BuildingByMapId(49).Faction = PlanetSideEmpire.NEUTRAL //Kusag West Bunker
-      BuildingByMapId(50).Faction = PlanetSideEmpire.NEUTRAL //marduk bunker
-      BuildingByMapId(51).Faction = PlanetSideEmpire.TR //baal bunker
-      BuildingByMapId(52).Faction = PlanetSideEmpire.NEUTRAL //girru bunker
-      BuildingByMapId(53).Faction = PlanetSideEmpire.NEUTRAL //lahar bunker
-      BuildingByMapId(54).Faction = PlanetSideEmpire.NEUTRAL //akkan bunker
-      BuildingByMapId(55).Faction = PlanetSideEmpire.VS //Irkalla_Tower
-      BuildingByMapId(56).Faction = PlanetSideEmpire.VS //Hanish_Tower
-      BuildingByMapId(57).Faction = PlanetSideEmpire.VS //E_Ceryshen_Warpgate_Tower
-      BuildingByMapId(58).Faction = PlanetSideEmpire.VS //Lahar_Tower
-      BuildingByMapId(59).Faction = PlanetSideEmpire.VS //VSSanc_Warpgate_Tower
-      BuildingByMapId(60).Faction = PlanetSideEmpire.TR //Akkan_Tower
-      BuildingByMapId(61).Faction = PlanetSideEmpire.NC //TRSanc_Warpgate_Tower
-      BuildingByMapId(62).Faction = PlanetSideEmpire.NC //Marduk_Tower
-      BuildingByMapId(63).Faction = PlanetSideEmpire.TR //NW_Dagon_Tower
-      BuildingByMapId(64).Faction = PlanetSideEmpire.NEUTRAL //E7 East Bunker (at north from bridge)
-      BuildingByMapId(65).Faction = PlanetSideEmpire.VS //W_Hanish_Tower
+      BuildingByMapId(5).get.Faction = PlanetSideEmpire.TR //Akkan
+      BuildingByMapId(6).get.Faction = PlanetSideEmpire.TR //Baal
+      BuildingByMapId(7).get.Faction = PlanetSideEmpire.TR //Dagon
+      BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC //Enkidu
+      BuildingByMapId(9).get.Faction = PlanetSideEmpire.VS //Girru
+      BuildingByMapId(10).get.Faction = PlanetSideEmpire.VS //Hanish
+      BuildingByMapId(11).get.Faction = PlanetSideEmpire.VS //Irkalla
+      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS //Kusag
+      BuildingByMapId(13).get.Faction = PlanetSideEmpire.VS //Lahar
+      BuildingByMapId(14).get.Faction = PlanetSideEmpire.NC //Marduk
+      BuildingByMapId(15).get.Faction = PlanetSideEmpire.NC //Neti
+      BuildingByMapId(16).get.Faction = PlanetSideEmpire.NC //Zaqar
+      BuildingByMapId(17).get.Faction = PlanetSideEmpire.NC //S_Marduk_Tower
+      BuildingByMapId(18).get.Faction = PlanetSideEmpire.NC //W_Neti_Tower
+      BuildingByMapId(19).get.Faction = PlanetSideEmpire.NC //W_Zaqar_Tower
+      BuildingByMapId(20).get.Faction = PlanetSideEmpire.NC //E_Zaqar_Tower
+      BuildingByMapId(21).get.Faction = PlanetSideEmpire.NC //NE_Neti_Tower
+      BuildingByMapId(22).get.Faction = PlanetSideEmpire.NC //SE_Ceryshen_Warpgate_Tower
+      BuildingByMapId(23).get.Faction = PlanetSideEmpire.VS //S_Kusag_Tower
+      BuildingByMapId(24).get.Faction = PlanetSideEmpire.VS //NW_Kusag_Tower
+      BuildingByMapId(25).get.Faction = PlanetSideEmpire.VS //N_Ceryshen_Warpgate_Tower
+      BuildingByMapId(26).get.Faction = PlanetSideEmpire.VS //SE_Irkalla_Tower
+      BuildingByMapId(27).get.Faction = PlanetSideEmpire.VS //S_Irkalla_Tower
+      BuildingByMapId(28).get.Faction = PlanetSideEmpire.TR //NE_Enkidu_Tower
+      BuildingByMapId(29).get.Faction = PlanetSideEmpire.NC //SE_Akkan_Tower
+      BuildingByMapId(30).get.Faction = PlanetSideEmpire.NC //SW_Enkidu_Tower
+      BuildingByMapId(31).get.Faction = PlanetSideEmpire.TR //E_Searhus_Warpgate_Tower
+      BuildingByMapId(32).get.Faction = PlanetSideEmpire.TR //N_Searhus_Warpgate_Tower
+      BuildingByMapId(33).get.Faction = PlanetSideEmpire.VS //E_Girru_Tower
+      BuildingByMapId(34).get.Faction = PlanetSideEmpire.VS //SE_Hanish_Tower
+      BuildingByMapId(35).get.Faction = PlanetSideEmpire.TR //SW_Hanish_Tower
+      BuildingByMapId(36).get.Faction = PlanetSideEmpire.VS //W_Girru_Tower
+      BuildingByMapId(37).get.Faction = PlanetSideEmpire.TR //E_Dagon_Tower
+      BuildingByMapId(38).get.Faction = PlanetSideEmpire.TR //NE_Baal_Tower
+      BuildingByMapId(39).get.Faction = PlanetSideEmpire.TR //SE_Baal_Tower
+      BuildingByMapId(40).get.Faction = PlanetSideEmpire.TR //S_Dagon_Tower
+      BuildingByMapId(41).get.Faction = PlanetSideEmpire.NC //W_Ceryshen_Warpgate_Tower
+      BuildingByMapId(42).get.Faction = PlanetSideEmpire.NEUTRAL //dagon bunker
+      BuildingByMapId(43).get.Faction = PlanetSideEmpire.NEUTRAL //Akkan North Bunker
+      BuildingByMapId(44).get.Faction = PlanetSideEmpire.NEUTRAL //Enkidu East Bunker
+      BuildingByMapId(45).get.Faction = PlanetSideEmpire.NEUTRAL //Neti bunker
+      BuildingByMapId(46).get.Faction = PlanetSideEmpire.NEUTRAL //Hanish West Bunker
+      BuildingByMapId(47).get.Faction = PlanetSideEmpire.NEUTRAL //Irkalla East Bunker
+      BuildingByMapId(48).get.Faction = PlanetSideEmpire.NEUTRAL //Zaqar bunker
+      BuildingByMapId(49).get.Faction = PlanetSideEmpire.NEUTRAL //Kusag West Bunker
+      BuildingByMapId(50).get.Faction = PlanetSideEmpire.NEUTRAL //marduk bunker
+      BuildingByMapId(51).get.Faction = PlanetSideEmpire.TR //baal bunker
+      BuildingByMapId(52).get.Faction = PlanetSideEmpire.NEUTRAL //girru bunker
+      BuildingByMapId(53).get.Faction = PlanetSideEmpire.NEUTRAL //lahar bunker
+      BuildingByMapId(54).get.Faction = PlanetSideEmpire.NEUTRAL //akkan bunker
+      BuildingByMapId(55).get.Faction = PlanetSideEmpire.VS //Irkalla_Tower
+      BuildingByMapId(56).get.Faction = PlanetSideEmpire.VS //Hanish_Tower
+      BuildingByMapId(57).get.Faction = PlanetSideEmpire.VS //E_Ceryshen_Warpgate_Tower
+      BuildingByMapId(58).get.Faction = PlanetSideEmpire.VS //Lahar_Tower
+      BuildingByMapId(59).get.Faction = PlanetSideEmpire.VS //VSSanc_Warpgate_Tower
+      BuildingByMapId(60).get.Faction = PlanetSideEmpire.TR //Akkan_Tower
+      BuildingByMapId(61).get.Faction = PlanetSideEmpire.NC //TRSanc_Warpgate_Tower
+      BuildingByMapId(62).get.Faction = PlanetSideEmpire.NC //Marduk_Tower
+      BuildingByMapId(63).get.Faction = PlanetSideEmpire.TR //NW_Dagon_Tower
+      BuildingByMapId(64).get.Faction = PlanetSideEmpire.NEUTRAL //E7 East Bunker (at north from bridge)
+      BuildingByMapId(65).get.Faction = PlanetSideEmpire.VS //W_Hanish_Tower
     }
   }
 
@@ -214,29 +195,24 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
-      BuildingByMapId(5).Name = Some("Ogma")
-      BuildingByMapId(6).Name = Some("Neit")
-      BuildingByMapId(7).Name = Some("Lugh")
-      BuildingByMapId(8).Name = Some("Gwydion")
-      BuildingByMapId(9).Name = Some("Dagda")
-      BuildingByMapId(10).Name = Some("Pwyll")
-      BuildingByMapId(11).Name = Some("Anu")
-      BuildingByMapId(12).Name = Some("Bel")
-      BuildingByMapId(13).Name = Some("Eadon")
-      BuildingByMapId(36).Name = Some("Caer")
+      BuildingByMapId(5).get.Name = Some("Ogma")
+      BuildingByMapId(6).get.Name = Some("Neit")
+      BuildingByMapId(7).get.Name = Some("Lugh")
+      BuildingByMapId(8).get.Name = Some("Gwydion")
+      BuildingByMapId(9).get.Name = Some("Dagda")
+      BuildingByMapId(10).get.Name = Some("Pwyll")
+      BuildingByMapId(11).get.Name = Some("Anu")
+      BuildingByMapId(12).get.Name = Some("Bel")
+      BuildingByMapId(13).get.Name = Some("Eadon")
+      BuildingByMapId(36).get.Name = Some("Caer")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
@@ -247,42 +223,42 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
+//      GUID(2094) match {
+//        case Some(silo : ResourceSilo) =>
+//          silo.ChargeLevel = silo.MaximumCharge
+//        case _ => ;
+//      }
 
-//      var silo = GUID(2094).get.asInstanceOf[ResourceSilo]
-//      silo.Actor ! ResourceSilo.UpdateChargeLevel(1000)
-
-      BuildingByMapId(1).Name = Some("Akna")
-      BuildingByMapId(2).Name = Some("Angutai")
-      BuildingByMapId(3).Name = Some("Igaluk")
-      BuildingByMapId(4).Name = Some("Keelut")
-      BuildingByMapId(5).Name = Some("Nerrivik")
-      BuildingByMapId(6).Name = Some("Pinga")
-      BuildingByMapId(7).Name = Some("Sedna")
-      BuildingByMapId(8).Name = Some("Tarqaq")
-      BuildingByMapId(9).Name = Some("Tootega")
+      BuildingByMapId(1).get.Name = Some("Akna")
+      BuildingByMapId(2).get.Name = Some("Anguta")
+      BuildingByMapId(3).get.Name = Some("Igaluk")
+      BuildingByMapId(4).get.Name = Some("Keelut")
+      BuildingByMapId(5).get.Name = Some("Nerrivik")
+      BuildingByMapId(6).get.Name = Some("Pinga")
+      BuildingByMapId(7).get.Name = Some("Sedna")
+      BuildingByMapId(8).get.Name = Some("Tarqaq")
+      BuildingByMapId(9).get.Name = Some("Tootega")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
-//      BuildingByMapId(2).Faction = PlanetSideEmpire.VS
-//      BuildingByMapId(2).ModelId = 20
-//      BuildingByMapId(38).ModelId = 0
-//      BuildingByMapId(42).ModelId = 0
-//      BuildingByMapId(48).Faction = PlanetSideEmpire.VS
-//      BuildingByMapId(48).ModelId = 59
-//      BuildingByMapId(49).Faction = PlanetSideEmpire.VS
-//      BuildingByMapId(49).ModelId = 69
+
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.VS
+      BuildingByMapId(10).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(11).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(12).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(13).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(48).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(49).get.Faction = PlanetSideEmpire.VS
+      BuildingByMapId(18657).get.asInstanceOf[WarpGate].Active = false
+      BuildingByMapId(18658).get.asInstanceOf[WarpGate].Active = false
+
     }
   }
 
@@ -290,37 +266,32 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
-      BuildingByMapId(5).Name = Some("Andvari")
-      BuildingByMapId(6).Name = Some("Dagur")
-      BuildingByMapId(7).Name = Some("Eisa")
-      BuildingByMapId(8).Name = Some("Freyr")
-      BuildingByMapId(9).Name = Some("Gjallar")
-      BuildingByMapId(10).Name = Some("Helheim")
-      BuildingByMapId(11).Name = Some("Kvasir")
-      BuildingByMapId(12).Name = Some("Mani")
-      BuildingByMapId(13).Name = Some("Nott")
-      BuildingByMapId(14).Name = Some("Vidar")
-      BuildingByMapId(15).Name = Some("Ymir")
-      BuildingByMapId(16).Name = Some("Jarl")
-      BuildingByMapId(17).Name = Some("Ran")
+      BuildingByMapId(5).get.Name = Some("Andvari")
+      BuildingByMapId(6).get.Name = Some("Dagur")
+      BuildingByMapId(7).get.Name = Some("Eisa")
+      BuildingByMapId(8).get.Name = Some("Freyr")
+      BuildingByMapId(9).get.Name = Some("Gjallar")
+      BuildingByMapId(10).get.Name = Some("Helheim")
+      BuildingByMapId(11).get.Name = Some("Kvasir")
+      BuildingByMapId(12).get.Name = Some("Mani")
+      BuildingByMapId(13).get.Name = Some("Nott")
+      BuildingByMapId(14).get.Name = Some("Vidar")
+      BuildingByMapId(15).get.Name = Some("Ymir")
+      BuildingByMapId(16).get.Name = Some("Jarl")
+      BuildingByMapId(17).get.Name = Some("Ran")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
 
-      BuildingByMapId(7).Faction = PlanetSideEmpire.TR //Eisa
+      BuildingByMapId(7).get.Faction = PlanetSideEmpire.TR //Eisa
 
     }
   }
@@ -329,40 +300,35 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
       import net.psforever.types.PlanetSideEmpire
 
-      BuildingByMapId(5).Name = Some("Atar")
-      BuildingByMapId(6).Name = Some("Dahaka")
-      BuildingByMapId(7).Name = Some("Hvar")
-      BuildingByMapId(8).Name = Some("Izha")
-      BuildingByMapId(9).Name = Some("Jamshid")
-      BuildingByMapId(10).Name = Some("Mithra")
-      BuildingByMapId(11).Name = Some("Rashnu")
-      BuildingByMapId(12).Name = Some("Yazata")
-      BuildingByMapId(13).Name = Some("Zal")
+      BuildingByMapId(5).get.Name = Some("Atar")
+      BuildingByMapId(6).get.Name = Some("Dahaka")
+      BuildingByMapId(7).get.Name = Some("Hvar")
+      BuildingByMapId(8).get.Name = Some("Izha")
+      BuildingByMapId(9).get.Name = Some("Jamshid")
+      BuildingByMapId(10).get.Name = Some("Mithra")
+      BuildingByMapId(11).get.Name = Some("Rashnu")
+      BuildingByMapId(12).get.Name = Some("Yazata")
+      BuildingByMapId(13).get.Name = Some("Zal")
 
-      BuildingByMapId(5).Faction = PlanetSideEmpire.VS //Atar
-      BuildingByMapId(6).Faction = PlanetSideEmpire.NC //Dahaka
-      BuildingByMapId(7).Faction = PlanetSideEmpire.NC //Hvar
-      BuildingByMapId(8).Faction = PlanetSideEmpire.NC //Izha
-      BuildingByMapId(9).Faction = PlanetSideEmpire.TR //Jamshid
-      BuildingByMapId(10).Faction = PlanetSideEmpire.TR //Mithra
-      BuildingByMapId(11).Faction = PlanetSideEmpire.TR //Rashnu
-      BuildingByMapId(12).Faction = PlanetSideEmpire.VS //Yazata
-      BuildingByMapId(13).Faction = PlanetSideEmpire.VS //Zal
+      BuildingByMapId(5).get.Faction = PlanetSideEmpire.VS //Atar
+      BuildingByMapId(6).get.Faction = PlanetSideEmpire.NC //Dahaka
+      BuildingByMapId(7).get.Faction = PlanetSideEmpire.NC //Hvar
+      BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC //Izha
+      BuildingByMapId(9).get.Faction = PlanetSideEmpire.TR //Jamshid
+      BuildingByMapId(10).get.Faction = PlanetSideEmpire.TR //Mithra
+      BuildingByMapId(11).get.Faction = PlanetSideEmpire.TR //Rashnu
+      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS //Yazata
+      BuildingByMapId(13).get.Faction = PlanetSideEmpire.VS //Zal
     }
   }
 
@@ -370,33 +336,28 @@ object Zones {
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
 
-    Buildings.values.foreach(building =>
-      building.Amenities.foreach(amenity =>
-        amenity.Definition match {
-          case GlobalDefinitions.resource_silo =>
-            val r = new scala.util.Random
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-            silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-          case _ => ;
-        }
-      )
-    )
+    Buildings.values.flatMap {
+      _.Amenities.collect {
+        case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+          val silo = amenity.asInstanceOf[ResourceSilo]
+          silo.ChargeLevel = silo.MaximumCharge
+      }
+    }
 
-    BuildingByMapId(4).Name = Some("Akua")
-    BuildingByMapId(5).Name = Some("Drakulu")
-    BuildingByMapId(6).Name = Some("Hiro")
-    BuildingByMapId(7).Name = Some("Iva")
-    BuildingByMapId(8).Name = Some("Karihi")
-    BuildingByMapId(9).Name = Some("Laka")
-    BuildingByMapId(10).Name = Some("Matagi")
-    BuildingByMapId(11).Name = Some("Ngaru")
-    BuildingByMapId(12).Name = Some("Oro")
-    BuildingByMapId(13).Name = Some("Pele")
-    BuildingByMapId(14).Name = Some("Rehua")
-    BuildingByMapId(15).Name = Some("Sina")
-    BuildingByMapId(16).Name = Some("Tara")
-    BuildingByMapId(17).Name = Some("Wakea")
+    BuildingByMapId(4).get.Name = Some("Akua")
+    BuildingByMapId(5).get.Name = Some("Drakulu")
+    BuildingByMapId(6).get.Name = Some("Hiro")
+    BuildingByMapId(7).get.Name = Some("Iva")
+    BuildingByMapId(8).get.Name = Some("Karihi")
+    BuildingByMapId(9).get.Name = Some("Laka")
+    BuildingByMapId(10).get.Name = Some("Matagi")
+    BuildingByMapId(11).get.Name = Some("Ngaru")
+    BuildingByMapId(12).get.Name = Some("Oro")
+    BuildingByMapId(13).get.Name = Some("Pele")
+    BuildingByMapId(14).get.Name = Some("Rehua")
+    BuildingByMapId(15).get.Name = Some("Sina")
+    BuildingByMapId(16).get.Name = Some("Tara")
+    BuildingByMapId(17).get.Name = Some("Wakea")
 
     import net.psforever.types.PlanetSideEmpire
 
@@ -409,33 +370,28 @@ object Zones {
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
 
-    Buildings.values.foreach(building =>
-      building.Amenities.foreach(amenity =>
-        amenity.Definition match {
-          case GlobalDefinitions.resource_silo =>
-            val r = new scala.util.Random
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-            silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-          case _ => ;
-        }
-      )
-    )
+    Buildings.values.flatMap {
+      _.Amenities.collect {
+        case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+          val silo = amenity.asInstanceOf[ResourceSilo]
+          silo.ChargeLevel = silo.MaximumCharge
+      }
+    }
 
     import net.psforever.types.PlanetSideEmpire
 
-    BuildingByMapId(5).Name = Some("Azeban")
-    BuildingByMapId(6).Name = Some("Cetan")
-    BuildingByMapId(7).Name = Some("Heyoka")
-    BuildingByMapId(8).Name = Some("Ikanam")
-    BuildingByMapId(9).Name = Some("Kyoi")
-    BuildingByMapId(10).Name = Some("Mekala")
-    BuildingByMapId(11).Name = Some("Onatha")
-    BuildingByMapId(12).Name = Some("Qumu")
-    BuildingByMapId(13).Name = Some("Sungrey")
-    BuildingByMapId(14).Name = Some("Tumas")
-    BuildingByMapId(15).Name = Some("Xelas")
-    BuildingByMapId(49).Name = Some("Verica")
+    BuildingByMapId(5).get.Name = Some("Azeban")
+    BuildingByMapId(6).get.Name = Some("Cetan")
+    BuildingByMapId(7).get.Name = Some("Heyoka")
+    BuildingByMapId(8).get.Name = Some("Ikanam")
+    BuildingByMapId(9).get.Name = Some("Kyoi")
+    BuildingByMapId(10).get.Name = Some("Mekala")
+    BuildingByMapId(11).get.Name = Some("Onatha")
+    BuildingByMapId(12).get.Name = Some("Qumu")
+    BuildingByMapId(13).get.Name = Some("Sungrey")
+    BuildingByMapId(14).get.Name = Some("Tumas")
+    BuildingByMapId(15).get.Name = Some("Xelas")
+    BuildingByMapId(49).get.Name = Some("Verica")
 
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
 
@@ -466,11 +422,9 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
-//      BuildingByMapId(29).Faction = PlanetSideEmpire.NC //South Villa Gun Tower
-//      GUID(293).get.asInstanceOf[VehicleSpawnPad].Railed = false //building 52
-//      GUID(706).get.asInstanceOf[VehicleSpawnPad].Guide = List(AutoDriveControls.DistanceFromHere(50f)) //building 77
-//      GUID(710).get.asInstanceOf[VehicleSpawnPad].Railed = false //building 79
-//      GUID(712).get.asInstanceOf[VehicleSpawnPad].Railed = false //building 81
+      BuildingByMapId(60).get.Faction = PlanetSideEmpire.NC //South Villa Gun Tower
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
     }
   }
 
@@ -501,7 +455,7 @@ object Zones {
   //      super.Init(context)
   //
   //      import net.psforever.types.PlanetSideEmpire
-  //      BuildingByMapId(10359).Faction = PlanetSideEmpire.TR //Redoubt SE
+  //      BuildingByMapId(10359).get.Faction = PlanetSideEmpire.TR //Redoubt SE
   //      BuildingByMapId(10359).ModelId = 104
   //    }
   //  }
@@ -516,22 +470,17 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
-      BuildingByMapId(7).Name = Some("Mithra")
-      BuildingByMapId(8).Name = Some("Hvar")
-      BuildingByMapId(18).Name = Some("Yazata")
+      BuildingByMapId(7).get.Name = Some("Mithra")
+      BuildingByMapId(8).get.Name = Some("Hvar")
+      BuildingByMapId(18).get.Name = Some("Yazata")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR}
@@ -542,22 +491,17 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
-      BuildingByMapId(7).Name = Some("Zal")
-      BuildingByMapId(8).Name = Some("Rashnu")
-      BuildingByMapId(39).Name = Some("Sraosha")
+      BuildingByMapId(7).get.Name = Some("Zal")
+      BuildingByMapId(8).get.Name = Some("Rashnu")
+      BuildingByMapId(39).get.Name = Some("Sraosha")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC}
@@ -568,22 +512,17 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
-      BuildingByMapId(1).Name = Some("Dahaka")
-      BuildingByMapId(2).Name = Some("Jamshid")
-      BuildingByMapId(3).Name = Some("Izha")
+      BuildingByMapId(1).get.Name = Some("Dahaka")
+      BuildingByMapId(2).get.Name = Some("Jamshid")
+      BuildingByMapId(3).get.Name = Some("Izha")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS}
@@ -594,25 +533,20 @@ object Zones {
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
 
-      Buildings.values.foreach(building =>
-        building.Amenities.foreach(amenity =>
-          amenity.Definition match {
-            case GlobalDefinitions.resource_silo =>
-              val r = new scala.util.Random
-              val silo = amenity.asInstanceOf[ResourceSilo]
-              val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
-              silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
-            case _ => ;
-          }
-        )
-      )
+      Buildings.values.flatMap {
+        _.Amenities.collect {
+          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+            val silo = amenity.asInstanceOf[ResourceSilo]
+            silo.ChargeLevel = silo.MaximumCharge
+        }
+      }
 
-      BuildingByMapId(1).Name = Some("Atar")
-      BuildingByMapId(2).Name = Some("North Rim Gun Tower")
-      BuildingByMapId(3).Name = Some("East Rim Gun Tower")
-      BuildingByMapId(4).Name = Some("South Rim Gun Tower")
-      BuildingByMapId(5).Name = Some("L8 Gate Watch Tower")
-      BuildingByMapId(6).Name = Some("K14 Gate Watch Tower")
+      BuildingByMapId(1).get.Name = Some("Atar")
+      BuildingByMapId(2).get.Name = Some("North Rim Gun Tower")
+      BuildingByMapId(3).get.Name = Some("East Rim Gun Tower")
+      BuildingByMapId(4).get.Name = Some("South Rim Gun Tower")
+      BuildingByMapId(5).get.Name = Some("L8 Gate Watch Tower")
+      BuildingByMapId(6).get.Name = Some("K14 Gate Watch Tower")
 
     }
   }
@@ -642,6 +576,34 @@ object Zones {
       case PlanetSideEmpire.TR => 12
       case PlanetSideEmpire.VS => 13
       case PlanetSideEmpire.NEUTRAL => 0 //invalid, not black ops
+    }
+  }
+
+  /**
+    * Given a zone identification string, provide that zone's ordinal number.
+    * As zone identification naming is extremely formulaic,
+    * just being able to poll the zone's identifier by its first few letters will produce its ordinal position.
+    * @param id a zone id string
+    * @return a zone number
+    */
+  def NumberFromId(id : String) : Int = {
+    if(id.startsWith("z")) { //z2 -> 2
+      id.substring(1).toInt
+    }
+    else if(id.startsWith("home")) { //home2 -> 2 + 10 = 12
+      id.substring(4).toInt + 10
+    }
+    else if(id.startsWith("tz")) { //tzconc -> (14 + (3 * 1) + 2) -> 19
+      (List("tr", "nc", "vs").indexOf(id.substring(4)) * 3) + List("sh", "dr", "co").indexOf(id.substring(2, 4)) + 14
+    }
+    else if(id.startsWith("c")) { //c2 -> 2 + 21 = 23
+      id.substring(1).toInt + 21
+    }
+    else if(id.startsWith("i")) { //i2 -> 2 + 28 = 30
+      id.substring(1).toInt + 28
+    }
+    else {
+      0
     }
   }
 }
