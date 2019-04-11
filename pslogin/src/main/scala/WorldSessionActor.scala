@@ -493,8 +493,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       StartBundlingPackets()
       connection.get.sendPreparedStatement(
-          "SELECT id, name, faction_id, gender_id, head_id, voice_id, deleted, last_login FROM characters where account_id=? ORDER BY last_login", Array(account.AccountId)
-        ).onComplete {
+        "SELECT id, name, faction_id, gender_id, head_id, voice_id, deleted, last_login FROM characters where account_id=? ORDER BY last_login", Array(account.AccountId)
+      ).onComplete {
         case Success(queryResult) =>
           queryResult match {
             case result: QueryResult =>
@@ -1045,7 +1045,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       } else sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, 3770441820L))
       // PTS v3
       Thread.sleep(5)
-//      if(player.Faction == PlanetSideEmpire.VS) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(36), 38, 0))
+      //      if(player.Faction == PlanetSideEmpire.VS) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(36), 38, 0))
       AvatarCreate() //important! the LoadMapMessage must be processed by the client before the avatar is created
 
     case PlayerLoaded(tplayer) =>
@@ -1215,32 +1215,32 @@ class WorldSessionActor extends Actor with MDCContextAware {
       admin = account.GM
 
       Database.getConnection.connect.onComplete { // TODO remove that DB access.
-      case scala.util.Success(connection) =>
-        Database.query(connection.sendPreparedStatement(
-          "SELECT gm FROM accounts where id=?", Array(account.AccountId)
-        )).onComplete {
-          case scala.util.Success(queryResult) =>
-            queryResult match {
-              case row: ArrayRowData => // If we got a row from the database
-                log.info(s"Ready to load character list for ${account.Username}")
-                //                  admin = row(0).asInstanceOf[Boolean]
-                self ! ListAccountCharacters(Some(connection))
-                Thread.sleep(connectionState/2)
-                cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3 or not
-              case _ => // If the account didn't exist in the database
-                log.error(s"Issue retrieving result set from database for account $account")
-                Thread.sleep(5)
-                if (connection.isConnected) connection.disconnect
-                sendResponse(DropSession(sessionId, "You should not exist !"))
-            }
-          case scala.util.Failure(e) =>
-            log.error("Is there a problem ? " + e.getMessage)
-            Thread.sleep(5)
-            if (connection.isConnected) connection.disconnect
-        }
-      case scala.util.Failure(e) =>
-        log.error("Failed connecting to database for account lookup " + e.getMessage)
-    }
+        case scala.util.Success(connection) =>
+          Database.query(connection.sendPreparedStatement(
+            "SELECT gm FROM accounts where id=?", Array(account.AccountId)
+          )).onComplete {
+            case scala.util.Success(queryResult) =>
+              queryResult match {
+                case row: ArrayRowData => // If we got a row from the database
+                  log.info(s"Ready to load character list for ${account.Username}")
+                  //                  admin = row(0).asInstanceOf[Boolean]
+                  self ! ListAccountCharacters(Some(connection))
+                  Thread.sleep(connectionState/2)
+                  cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3 or not
+                case _ => // If the account didn't exist in the database
+                  log.error(s"Issue retrieving result set from database for account $account")
+                  Thread.sleep(5)
+                  if (connection.isConnected) connection.disconnect
+                  sendResponse(DropSession(sessionId, "You should not exist !"))
+              }
+            case scala.util.Failure(e) =>
+              log.error("Is there a problem ? " + e.getMessage)
+              Thread.sleep(5)
+              if (connection.isConnected) connection.disconnect
+          }
+        case scala.util.Failure(e) =>
+          log.error("Failed connecting to database for account lookup " + e.getMessage)
+      }
 
     case default =>
       log.warn(s"Invalid packet class received: $default from $sender")
@@ -1408,7 +1408,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PlanetsideAttributeMessage(guid, attribute_type, attribute_value))
         }
 
-        // PTS v3
+      // PTS v3
       case AvatarResponse.PlanetsideAttributeSelf(attribute_type, attribute_value) =>
         if (tplayer_guid == guid) {
           sendResponse(PlanetsideAttributeMessage(guid, attribute_type, attribute_value))
@@ -2012,10 +2012,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         val (dropHolsters, beforeHolsters) = clearHolsters(tplayer.Holsters().iterator).partition(dropPred)
         val (dropInventory, beforeInventory) = tplayer.Inventory.Clear().partition(dropPred)
         val (_, afterHolsters) = holsters.partition(dropPred) //dropped items are forgotten
-        val (_, afterInventory) = inventory.partition(dropPred) //dropped items are forgotten
+      val (_, afterInventory) = inventory.partition(dropPred) //dropped items are forgotten
         //change suit (clear inventory and change holster sizes; holsters must be empty before this point)
         tplayer.FreeHand.Equipment = None //terminal and inventory will close, so prematurely dropping should be fine
-        val originalSuit = player.ExoSuit
+      val originalSuit = player.ExoSuit
         val originalSubtype = Loadout.DetermineSubtype(tplayer)
         val originalArmor = player.Armor
         tplayer.ExoSuit = exosuit
@@ -3066,7 +3066,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     // PTS v3
     sendResponse(CreateShortcutMessage(guid, 2, 0, true, Shortcut.SURGE))
     sendResponse(CreateShortcutMessage(guid, 3, 0, true, Shortcut.DARKLIGHT_VISION))
-    sendResponse(CreateShortcutMessage(guid, 8, 0, true, Shortcut.MACRO("SOS", "!help")))
+    sendResponse(CreateShortcutMessage(guid, 8, 0, true, Shortcut.MACRO("CMD", "!help")))
     if (admin) {
       sendResponse(CreateShortcutMessage(guid, 9, 0, true, Shortcut.MACRO("Fly", "/fly")))
       sendResponse(CreateShortcutMessage(guid, 10, 0, true, Shortcut.MACRO("Spe", "/spectator")))
@@ -4621,7 +4621,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   case None =>
                     None
                 }
-              )
+                )
             }, target.Fit(item)) match {
             case (Some((source, Some(index))), Some(dest)) =>
               if(PermitEquipmentStow(item, target)) {
@@ -5088,7 +5088,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           else if(equipment.isDefined) {
             equipment.get.Definition match {
               case GlobalDefinitions.remote_electronics_kit =>
-                //TODO hacking behavior
+              //TODO hacking behavior
 
               case _ => ;
             }
@@ -5096,11 +5096,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         case Some(terminal : Terminal) =>
           val tdef = terminal.Definition
-        // If the base this terminal belongs to has been hacked the owning faction needs to be able to hack it to gain access
-        val ownerIsHacked = terminal.Owner match {
-          case b: Building => b.CaptureConsoleIsHacked
-          case _ => false
-        }
+          // If the base this terminal belongs to has been hacked the owning faction needs to be able to hack it to gain access
+          val ownerIsHacked = terminal.Owner match {
+            case b: Building => b.CaptureConsoleIsHacked
+            case _ => false
+          }
           var playerIsHacking = false
 
           player.Slot(player.DrawnSlot).Equipment match {
@@ -5687,7 +5687,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                                 self ! DismountVehicleCargoMsg(player.GUID, vehicle.GUID, true, false, false)
                               }
                             case None => ; // No vehicle in cargo
-                      }
+                          }
                         case None => ; // Not a cargo mounting point
                       }
 
@@ -6280,13 +6280,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
     ask(target.Actor, CommonMessages.Hack(player))(1 second).mapTo[Boolean].onComplete {
       case Success(_) =>
         localService ! LocalServiceMessage(continent.Id, LocalAction.TriggerSound(player.GUID, target.HackSound, player.Position, 30, 0.49803925f))
-    target match {
+        target match {
           case term : CaptureTerminal =>
             val isResecured = player.Faction == target.Faction
             localService ! LocalServiceMessage(continent.Id, LocalAction.HackCaptureTerminal(player.GUID, continent, term, unk, 8L, isResecured))
           case _ => localService ! LocalServiceMessage(continent.Id, LocalAction.HackTemporarily(player.GUID, continent, target, unk, target.HackEffectDuration(GetPlayerHackLevel())))        }
       case scala.util.Failure(_) => log.warn(s"Hack message failed on target guid: ${target.GUID}")
-  }
+    }
   }
 
   /**
@@ -6468,7 +6468,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def UnAccessContents(vehicle : Vehicle) : Unit = {
     vehicleService ! Service.Leave(Some(s"${vehicle.Actor}"))
     vehicle.Trunk.Items.foreach(entry =>{
-        sendResponse(ObjectDeleteMessage(entry.obj.GUID, 0))
+      sendResponse(ObjectDeleteMessage(entry.obj.GUID, 0))
     })
   }
 
@@ -7456,7 +7456,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
         }
       })
-//      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
+      //      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
       Thread.sleep(connectionState/2)
     })
   }
@@ -7629,7 +7629,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(posXTemp != -1) player.Position = Vector3(posXTemp, posYTemp, 0f)
 
       {
-//        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+        //        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
         val buildingTypeSet = Set(StructureType.Facility, StructureType.Building)
         continent.SpawnGroups()
           .filter({ case ((building, _)) =>
@@ -7657,16 +7657,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         case None =>
           log.info("WTF?!")
-//          if (player.Faction == PlanetSideEmpire.TR) {
-//            player.Position = Vector3(903f, 5508f, 88f)
-//            player.Orientation = Vector3(0f, 354.375f, 157.5f)
-//          } else if (player.Faction == PlanetSideEmpire.NC) {
-//            player.Position = Vector3(3091f, 2222f, 86f)
-//            player.Orientation = Vector3(0f, 0f, 129.375f)
-//          } else if (player.Faction == PlanetSideEmpire.VS) {
-//            player.Position = Vector3(6579f, 4616f, 61f)
-//            player.Orientation = Vector3(0f, 354.375f, 264.375f)
-//          }
+          //          if (player.Faction == PlanetSideEmpire.TR) {
+          //            player.Position = Vector3(903f, 5508f, 88f)
+          //            player.Orientation = Vector3(0f, 354.375f, 157.5f)
+          //          } else if (player.Faction == PlanetSideEmpire.NC) {
+          //            player.Position = Vector3(3091f, 2222f, 86f)
+          //            player.Orientation = Vector3(0f, 0f, 129.375f)
+          //          } else if (player.Faction == PlanetSideEmpire.VS) {
+          //            player.Position = Vector3(6579f, 4616f, 61f)
+          //            player.Orientation = Vector3(0f, 354.375f, 264.375f)
+          //          }
           if (player.Faction == PlanetSideEmpire.TR) {
             player.Position = Vector3(2285f, 3403f, 68f)
             player.Orientation = Vector3(0f, 357.375f, 50.5f)
@@ -8197,7 +8197,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * @param flight whether the vehicle is ascending or not, if the vehicle is an applicable type
     */
   def ServerVehicleOverride(vehicle : Vehicle, speed : Int = 0, flight : Int = 0) : Unit = {
-   controlled = Some(speed)
+    controlled = Some(speed)
     sendResponse(ServerVehicleOverrideMsg(true, true, false, false, flight, 0, speed, Some(0)))
   }
 
@@ -8363,10 +8363,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
     //TODO charId should reflect the player more properly
     val killerCharId = killer.CharId
     var victimCharId = victim.CharId
-//    if(killerCharId == victimCharId && !killer.Name.equals(victim.Name)) {
-//      //odds of hash collision in a populated zone should be close to odds of being struck by lightning
-//      victimCharId = Int.MaxValue - victimCharId + 1
-//    }
+    //    if(killerCharId == victimCharId && !killer.Name.equals(victim.Name)) {
+    //      //odds of hash collision in a populated zone should be close to odds of being struck by lightning
+    //      victimCharId = Int.MaxValue - victimCharId + 1
+    //    }
     val killer_seated = killer match {
       case obj : PlayerSource => obj.Seated
       case _ => false
@@ -9477,8 +9477,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(PlayerStateShiftMessage(ShiftState(0, dest.Position, player.Orientation.z)))
       UseRouterTelepadEffect(pguid, sguid, dguid)
       StopBundlingPackets()
-//      vehicleService ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(router), continent))
-//      vehicleService ! VehicleServiceMessage.Decon(RemoverActor.AddTask(router, continent, router.Definition.DeconstructionTime))
+      //      vehicleService ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(router), continent))
+      //      vehicleService ! VehicleServiceMessage.Decon(RemoverActor.AddTask(router, continent, router.Definition.DeconstructionTime))
       localService ! LocalServiceMessage(continent.Id, LocalAction.RouterTelepadTransport(pguid, pguid, sguid, dguid))
     }
     else {
@@ -9791,11 +9791,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       val args3 = args2(3).split("_")
                       (1 until args3.length).foreach(j => {
                         val args4 = args3(j).split("-")
-                          val lAmmoSlots = args4(0).toInt
-                          val lAmmoTypeIndex = args4(1).toInt
-                          val lAmmoBoxDefinition = args4(2).toInt
-                          owner.Slot(lIndex).Equipment.get.asInstanceOf[Tool].AmmoSlots(lAmmoSlots).AmmoTypeIndex = lAmmoTypeIndex
-                          owner.Slot(lIndex).Equipment.get.asInstanceOf[Tool].AmmoSlots(lAmmoSlots).Box = AmmoBox(AmmoBoxDefinition(lAmmoBoxDefinition))
+                        val lAmmoSlots = args4(0).toInt
+                        val lAmmoTypeIndex = args4(1).toInt
+                        val lAmmoBoxDefinition = args4(2).toInt
+                        owner.Slot(lIndex).Equipment.get.asInstanceOf[Tool].AmmoSlots(lAmmoSlots).AmmoTypeIndex = lAmmoTypeIndex
+                        owner.Slot(lIndex).Equipment.get.asInstanceOf[Tool].AmmoSlots(lAmmoSlots).Box = AmmoBox(AmmoBoxDefinition(lAmmoBoxDefinition))
                       })
                     }
                   })
@@ -10283,81 +10283,81 @@ class WorldSessionActor extends Actor with MDCContextAware {
       case _ => frag_grenade
     }
   }
-        /**
-          * Make this client display the deployment map, and all its available destination spawn points.
-          * @see `AvatarDeadStateMessage`
-          * @see `DeadState.Release`
-          * @see `Player.Release`
-          */
-      def GoToDeploymentMap() : Unit = {
-      player.Release
-      deadState = DeadState.Release
-      sendResponse(AvatarDeadStateMessage(DeadState.Release, 0, 0, player.Position, player.Faction, true))
-      DrawCurrentAmsSpawnPoint()
-      }
+  /**
+    * Make this client display the deployment map, and all its available destination spawn points.
+    * @see `AvatarDeadStateMessage`
+    * @see `DeadState.Release`
+    * @see `Player.Release`
+    */
+  def GoToDeploymentMap() : Unit = {
+    player.Release
+    deadState = DeadState.Release
+    sendResponse(AvatarDeadStateMessage(DeadState.Release, 0, 0, player.Position, player.Faction, true))
+    DrawCurrentAmsSpawnPoint()
+  }
 
-        /**
-          * From a seat, find the weapon controlled from it, and update the ammunition counts for that weapon's magazines.
-          * @param objWithSeat the object that owns seats (and weaponry)
-          * @param seatNum the seat
-          */
-      def UpdateWeaponAtSeatPosition(objWithSeat : MountedWeapons, seatNum : Int) : Unit = {
-      objWithSeat.WeaponControlledFromSeat(seatNum) match {
+  /**
+    * From a seat, find the weapon controlled from it, and update the ammunition counts for that weapon's magazines.
+    * @param objWithSeat the object that owns seats (and weaponry)
+    * @param seatNum the seat
+    */
+  def UpdateWeaponAtSeatPosition(objWithSeat : MountedWeapons, seatNum : Int) : Unit = {
+    objWithSeat.WeaponControlledFromSeat(seatNum) match {
       case Some(weapon : Tool) =>
         //update mounted weapon belonging to seat
-      weapon.AmmoSlots.foreach(slot => {
-        //update the magazine(s) in the weapon, specifically
-      val magazine = slot.Box
-      sendResponse(InventoryStateMessage(magazine.GUID, weapon.GUID, magazine.Capacity.toLong))
-      })
+        weapon.AmmoSlots.foreach(slot => {
+          //update the magazine(s) in the weapon, specifically
+          val magazine = slot.Box
+          sendResponse(InventoryStateMessage(magazine.GUID, weapon.GUID, magazine.Capacity.toLong))
+        })
       case _ => ; //no weapons to update
-      }
-      }
+    }
+  }
 
-        /**
-          * Given an origin and a destination, determine how long the process of traveling should take in reconstruction time.
-          * For most destinations, the unit of receiving ("spawn point") determines the reconstruction time.
-          * In a special consideration, travel from any sanctuary or sanctuary-special zone should be as immediate as zone loading.
-          * @param toZoneId the zone where the target is headed
-          * @param toSpawnPoint the unit the target is using as a destination
-          * @param fromZoneId the zone where the target current is located
-          * @return how long in seconds the spawning process will take
-          */
-      def CountSpawnDelay(toZoneId : String, toSpawnPoint : SpawnPoint, fromZoneId : String) : Long = {
-      val sanctuaryZoneId = Zones.SanctuaryZoneId(player.Faction)
-      if(sanctuaryZoneId.equals(fromZoneId)) { //TODO includes traveing zones
+  /**
+    * Given an origin and a destination, determine how long the process of traveling should take in reconstruction time.
+    * For most destinations, the unit of receiving ("spawn point") determines the reconstruction time.
+    * In a special consideration, travel from any sanctuary or sanctuary-special zone should be as immediate as zone loading.
+    * @param toZoneId the zone where the target is headed
+    * @param toSpawnPoint the unit the target is using as a destination
+    * @param fromZoneId the zone where the target current is located
+    * @return how long in seconds the spawning process will take
+    */
+  def CountSpawnDelay(toZoneId : String, toSpawnPoint : SpawnPoint, fromZoneId : String) : Long = {
+    val sanctuaryZoneId = Zones.SanctuaryZoneId(player.Faction)
+    if(sanctuaryZoneId.equals(fromZoneId)) { //TODO includes traveing zones
       0L
-      }
-      else if(sanctuaryZoneId.equals(toZoneId)) {
+    }
+    else if(sanctuaryZoneId.equals(toZoneId)) {
       10L
-      }
-      else if(!player.isAlive) {
+    }
+    else if(!player.isAlive) {
       toSpawnPoint.Definition.Delay //TODO +cumulative death penalty
-      }
-      else {
+    }
+    else {
       toSpawnPoint.Definition.Delay
-      }
-      }
+    }
+  }
 
-        /**
-          * In the background, a list of advanced mobile spawn vehicles that are deployed in the zone is being updated constantly.
-          * Select, from this list, the AMS that is closest to the player's current or last position
-          * and draw its spawn selection icon onto the deployment map.
-          * @see `BindPlayerMessage`
-          * @see `DeadState.Release`
-          */
-      def DrawCurrentAmsSpawnPoint() : Unit = {
-      if(deadState == DeadState.Release) {
+  /**
+    * In the background, a list of advanced mobile spawn vehicles that are deployed in the zone is being updated constantly.
+    * Select, from this list, the AMS that is closest to the player's current or last position
+    * and draw its spawn selection icon onto the deployment map.
+    * @see `BindPlayerMessage`
+    * @see `DeadState.Release`
+    */
+  def DrawCurrentAmsSpawnPoint() : Unit = {
+    if(deadState == DeadState.Release) {
       amsSpawnPoints
-      .sortBy(tube => Vector3.DistanceSquared(tube.Position, player.Position))
-      .headOption match {
-      case Some(tube) =>
-      sendResponse(BindPlayerMessage(BindStatus.Available, "@ams", true, false, SpawnGroup.AMS, continent.Number, 5, tube.Position))
-      case None =>
-      sendResponse(BindPlayerMessage(BindStatus.Unavailable, "@ams", false, false, SpawnGroup.AMS, continent.Number, 0, Vector3.Zero))
+        .sortBy(tube => Vector3.DistanceSquared(tube.Position, player.Position))
+        .headOption match {
+        case Some(tube) =>
+          sendResponse(BindPlayerMessage(BindStatus.Available, "@ams", true, false, SpawnGroup.AMS, continent.Number, 5, tube.Position))
+        case None =>
+          sendResponse(BindPlayerMessage(BindStatus.Unavailable, "@ams", false, false, SpawnGroup.AMS, continent.Number, 0, Vector3.Zero))
       }
-      }
-      }
+    }
+  }
 
   def failWithError(error : String) = {
     log.error(error)
