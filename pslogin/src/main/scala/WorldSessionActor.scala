@@ -7443,7 +7443,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             is_hacked = false,
             empire_hack = PlanetSideEmpire.NEUTRAL,
             hack_time_remaining = 0,
-            PlanetSideEmpire.NEUTRAL, // PTS v3 (building.Faction)
+            building.Faction,
             unk1 = 0,
             unk1x = None,
             PlanetSideGeneratorState.Normal,

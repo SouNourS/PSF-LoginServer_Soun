@@ -248,6 +248,10 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
+      BuildingByMapId(10).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(11).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(12).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
 
 //      BuildingByMapId(2).get.Faction = PlanetSideEmpire.VS
       BuildingByMapId(10).get.asInstanceOf[WarpGate].Broadcast = true
@@ -422,6 +426,9 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+
       BuildingByMapId(60).get.Faction = PlanetSideEmpire.NC //South Villa Gun Tower
       BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
       BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
