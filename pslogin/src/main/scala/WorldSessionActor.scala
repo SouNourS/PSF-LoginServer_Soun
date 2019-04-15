@@ -893,12 +893,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //PropertyOverrideMessage
       sendResponse(PropertyOverrideMessage(List(GamePropertyScope(0, List(
         GamePropertyTarget(343,List(
-          "broadcast_spam_count" -> "5",
-          "broadcast_spam_seconds" -> "20",
-          "voice_macro_spam_count" -> "5",
           "purchase_exempt_vs" -> "",
           "purchase_exempt_tr" -> "",
-          "purchase_exempt_nc" -> "")),
+          "purchase_exempt_nc" -> "",
+          "broadcast_spam_count" -> "10",
+          "broadcast_spam_seconds" -> "20",
+          "voice_macro_spam_count" -> "5")),
         GamePropertyTarget(ObjectClass.magrider, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.prowler, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.vanguard, "purchase_empire" -> "all"),
@@ -975,7 +975,217 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.nano_dispenser, "works_nopvp" -> "true"),
         GamePropertyTarget(430, "lash_delay" -> "0.0"),
         GamePropertyTarget(431, "lasher_projectile_ap" -> "false"),
-        GamePropertyTarget(431, "lasher_projectile" -> "true"))))))
+        GamePropertyTarget(431, "lasher_projectile" -> "true"))),
+        GamePropertyScope(8, List(
+          // Oshur Prime
+          //Surgile
+          GamePropertyTarget(846, "weapon_OK" -> "true"),
+          GamePropertyTarget(846, "activation_delay" -> "0"),
+          GamePropertyTarget(846, "deactivation_delay" -> "0")
+        )),
+        GamePropertyScope(17,
+          GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
+        ),
+        GamePropertyScope(18,
+          GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
+        ),
+        GamePropertyScope(19,
+          GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
+        ),
+        GamePropertyScope(20,
+          GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
+        ),
+        GamePropertyScope(21,
+          GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
+        ),
+        GamePropertyScope(22,
+          GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
+        ),
+        GamePropertyScope(29, List(
+          //Extinction (i1) - ground based bridge brawls! - Battle Island Event
+          //Free Certification Grants
+          GamePropertyTarget(ObjectClass.nano_dispenser, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.ams, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.quadstealth, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.quadassault, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.fury, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.two_man_assault_buggy, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.skyguard, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.twomanhoverbuggy, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.threemanheavybuggy, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.twomanheavybuggy, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.lightning, "requirement_certification0" -> "false"),
+          //No Air Vehicles
+          GamePropertyTarget(ObjectClass.dropship, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.galaxy_gunship, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.liberator, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.lightgunship, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.lodestar, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.mosquito, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.phantasm, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.vulture, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.wasp, "allowed" -> "false"),
+          //No Tanks, no BFRs, no Flails, no Deliverer Variants
+          GamePropertyTarget(ObjectClass.mediumtransport, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.aurora, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.battlewagon, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.flail, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.magrider, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.prowler, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.thunderer, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.vanguard, "allowed" -> "false"),
+          //A Tank, but commented out for population purposes
+//          GamePropertyTarget(ObjectClass.lightning, "allowed" -> "false"),
+          //No BFRs
+          GamePropertyTarget(ObjectClass.aphelion_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.aphelion_gunner, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.colossus_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.colossus_gunner, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.peregrine_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.peregrine_gunner, "allowed" -> "false")
+        )),
+        GamePropertyScope(30, List(
+          //Ascension (i2) - battle for air supremacy! - Battle Island Event
+          //No Skyguards, no Deliverer Variants, no AA MAX, no BFRs, no Tanks, no Flails Zone specific change – Everyone has access to Empire AV weapons and can pilot air vehicles
+          //Cert Grants
+          GamePropertyTarget(ObjectClass.dropship, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.galaxy_gunship, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.liberator, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.lightgunship, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.lodestar, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.mosquito, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.phantasm, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.vulture, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.wasp, "requirement_certification0" -> "false"),
+
+          GamePropertyTarget(ObjectClass.striker, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.lancer, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.phoenix, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.nano_dispenser, "requirement_certification0" -> "false"),
+
+          //No AA MAXes
+          GamePropertyTarget(ObjectClass.order_terminal, "forsale_nchev_antiaircraft" -> "false"),
+          GamePropertyTarget(ObjectClass.order_terminal, "forsale_vshev_antiaircraft" -> "false"),
+          GamePropertyTarget(ObjectClass.order_terminal, "forsale_trhev_antiaircraft" -> "false"),
+
+          //No Skyguards, no Deliverer Variants, no Tanks, no Flails (default vehicle setup -- commented out for now)
+          //GamePropertyTarget(ObjectClass.aurora, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.battlewagon, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.flail, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.lightning, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.magrider, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.mediumtransport, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.prowler, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.skyguard, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.thunderer, "allowed" -> "false"),
+          //GamePropertyTarget(ObjectClass.vanguard, "allowed" -> "false"),
+
+          //Custom Setup: Only AMS, Router and ANT can be purchased at the Ground Vehicle Terminals. Take to the skies!
+          GamePropertyTarget(ObjectClass.apc_nc, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.apc_tr, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.apc_vs, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.aurora, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.battlewagon, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.flail, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.fury, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.lightning, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.magrider, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.mediumtransport, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.prowler, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.quadassault, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.quadstealth, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.skyguard, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.switchblade, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.threemanheavybuggy, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.thunderer, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.two_man_assault_buggy, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.twomanheavybuggy, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.twomanhoverbuggy, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.vanguard, "allowed" -> "false"),
+
+          //No BFRs
+          GamePropertyTarget(ObjectClass.aphelion_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.aphelion_gunner, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.colossus_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.colossus_gunner, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.peregrine_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.peregrine_gunner, "allowed" -> "false")
+        )),
+        GamePropertyScope(31, List(
+          // Desolation
+          //Surgile
+          GamePropertyTarget(846, "activation_delay" -> "0"),
+          GamePropertyTarget(846, "deactivation_delay" -> "0")
+        )),
+        GamePropertyScope(32, List(
+          //Nexus (i4) - t3h footzerg! - Battle Island Event
+          //Surgile
+          GamePropertyTarget(846, "weapon_OK" -> "true"),
+
+          //Free Vehicle Certification Grants
+          GamePropertyTarget(ObjectClass.dropship, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.phantasm, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.router, "requirement_certification0" -> "false"),
+
+          //Free Weapon Certification Grants
+          GamePropertyTarget(ObjectClass.anniversary_gun, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.flechette, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.punisher, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.cycler, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.gauss, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.pulsar, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.mini_chaingun, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.r_shotgun, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.lasher, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.striker, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.lancer, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.phoenix, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "requirement_certification0" -> "false"),
+          GamePropertyTarget(ObjectClass.nano_dispenser, "requirement_certification0" -> "false"),
+
+          //Only Galaxies and Phantasms can be purchased at the Dropship Terminal
+          GamePropertyTarget(ObjectClass.galaxy_gunship, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.liberator, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.lightgunship, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.lodestar, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.mosquito, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.vulture, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.wasp, "allowed" -> "false"),
+
+          //Only Routers and ANTs can be purchased at the Ground Vehicle Terminal
+          GamePropertyTarget(ObjectClass.ams, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.apc_nc, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.apc_tr, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.apc_vs, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.aurora, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.battlewagon, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.flail, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.fury, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.lightning, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.magrider, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.mediumtransport, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.prowler, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.quadassault, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.quadstealth, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.skyguard, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.switchblade, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.threemanheavybuggy, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.thunderer, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.two_man_assault_buggy, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.twomanheavybuggy, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.twomanhoverbuggy, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.vanguard, "allowed" -> "false"),
+
+          //No BFRs
+          GamePropertyTarget(ObjectClass.aphelion_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.aphelion_gunner, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.colossus_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.colossus_gunner, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.peregrine_flight, "allowed" -> "false"),
+          GamePropertyTarget(ObjectClass.peregrine_gunner, "allowed" -> "false")
+        ))
+      )))
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1))
 //      sendResponse(WeatherMessage(List(CloudInfo(0,Vector3(-2.6748898f,-1.025668f,0.0f),Vector3(0.9573444f,-0.09207539f,0.0f))),List(StormInfo(Vector3(0.5852982f,0.7721373f,0.0f),122,64), StormInfo(Vector3(0.95833915f,0.7752719f,0.0f),67,102), StormInfo(Vector3(0.03514052f,0.7752719f,0.0f),62,107), StormInfo(Vector3(0.82354355f,0.9978426f,0.0f),77,41), StormInfo(Vector3(0.6871782f,0.3771526f,0.0f),40,97), StormInfo(Vector3(0.34391987f,0.13890885f,0.0f),30,34), StormInfo(Vector3(0.24830915f,0.8379686f,0.0f),62,25), StormInfo(Vector3(0.94736725f,0.28937906f,0.0f),3,21), StormInfo(Vector3(0.43639442f,0.72668326f,0.0f),89,194), StormInfo(Vector3(0.43169186f,0.5699438f,0.0f),202,50), StormInfo(Vector3(0.19501628f,0.994708f,0.0f),23,73))))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
@@ -987,7 +1197,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       localService ! Service.Join(avatar.name) //channel will be player.Name
       vehicleService ! Service.Join(avatar.name) //channel will be player.Name
 //      cluster ! InterstellarCluster.GetWorld("z4")
-      cluster ! InterstellarCluster.GetWorld("z8")
+//      cluster ! InterstellarCluster.GetWorld("z8")
+      cluster ! InterstellarCluster.GetWorld("z5")
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
@@ -3983,39 +4194,43 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
 
       CSRZone.read(traveler, msg) match {
-        case (true, zone, pos) if (player.isAlive && zone != player.Continent) =>
-          deadState = DeadState.Release //cancel movement updates
-          PlayerActionsToCancel()
-          continent.GUID(player.VehicleSeated) match {
-            case Some(vehicle : Vehicle) =>
-              vehicle.Position = pos
-              vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.UnloadVehicle(player.GUID, continent, vehicle, vehicle.GUID))
-              LoadZonePhysicalSpawnPoint(zone, pos, Vector3.Zero, 0)
-            case None =>
-              player.Position = pos
-              avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ObjectDelete(player.GUID, player.GUID))
-              LoadZonePhysicalSpawnPoint(zone, pos, Vector3.Zero, 0)
-            case _ => //seated in something that is not a vehicle, in which case we can't move
-              deadState = DeadState.Alive
+        case (true, zone, pos) =>
+          println(zone)
+          if (player.isAlive && zone != player.Continent && (admin || zone == "z8")) {
+            deadState = DeadState.Release //cancel movement updates
+            PlayerActionsToCancel()
+            continent.GUID(player.VehicleSeated) match {
+              case Some(vehicle : Vehicle) =>
+                vehicle.Position = pos
+                vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.UnloadVehicle(player.GUID, continent, vehicle, vehicle.GUID))
+                LoadZonePhysicalSpawnPoint(zone, pos, Vector3.Zero, 0)
+              case None =>
+                player.Position = pos
+                avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.ObjectDelete(player.GUID, player.GUID))
+                LoadZonePhysicalSpawnPoint(zone, pos, Vector3.Zero, 0)
+              case _ => //seated in something that is not a vehicle, in which case we can't move
+                deadState = DeadState.Alive
+            }
           }
         case (false, _, _) => ;
       }
 
       CSRWarp.read(traveler, msg) match {
-        case (true, pos) if (player.isAlive && admin) =>
-          deadState = DeadState.Release //cancel movement updates
-          PlayerActionsToCancel()
-          continent.GUID(player.VehicleSeated) match {
-            case Some(vehicle : Vehicle) =>
-              LoadZonePhysicalSpawnPoint(continent.Id, pos, Vector3.z(vehicle.Orientation.z), 0)
-            case None =>
-              player.Position = pos
-              sendResponse(PlayerStateShiftMessage(ShiftState(0, pos, player.Orientation.z, None)))
-              deadState = DeadState.Alive //must be set here
-            case _ => //seated in something that is not a vehicle, in which case we can't move
-              deadState = DeadState.Alive
+        case (true, pos) =>
+          if (player.isAlive && admin) {
+            deadState = DeadState.Release //cancel movement updates
+            PlayerActionsToCancel()
+            continent.GUID(player.VehicleSeated) match {
+              case Some(vehicle : Vehicle) =>
+                LoadZonePhysicalSpawnPoint(continent.Id, pos, Vector3.z(vehicle.Orientation.z), 0)
+              case None =>
+                player.Position = pos
+                sendResponse(PlayerStateShiftMessage(ShiftState(0, pos, player.Orientation.z, None)))
+                deadState = DeadState.Alive //must be set here
+              case _ => //seated in something that is not a vehicle, in which case we can't move
+                deadState = DeadState.Alive
+            }
           }
-
         case (false, _) => ;
       }
 

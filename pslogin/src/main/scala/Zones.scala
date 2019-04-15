@@ -31,6 +31,12 @@ object Zones {
 
     import net.psforever.types.PlanetSideEmpire
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
+    BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(19998).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(19999).get.Faction = PlanetSideEmpire.NEUTRAL
   }
   }
 
@@ -60,6 +66,12 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(18907).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(18908).get.Faction = PlanetSideEmpire.NEUTRAL
     }
   }
 
@@ -95,6 +107,12 @@ object Zones {
 
     import net.psforever.types.PlanetSideEmpire
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
+    BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(9).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(17).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(25936).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(25937).get.Faction = PlanetSideEmpire.NEUTRAL
 
   }
   }
@@ -188,6 +206,13 @@ object Zones {
       BuildingByMapId(63).get.Faction = PlanetSideEmpire.TR //NW_Dagon_Tower
       BuildingByMapId(64).get.Faction = PlanetSideEmpire.NEUTRAL //E7 East Bunker (at north from bridge)
       BuildingByMapId(65).get.Faction = PlanetSideEmpire.VS //W_Hanish_Tower
+
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(26620).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(26621).get.Faction = PlanetSideEmpire.NEUTRAL
     }
   }
 
@@ -216,6 +241,13 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
+
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(21074).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(21078).get.Faction = PlanetSideEmpire.NEUTRAL
     }
   }
 
@@ -252,6 +284,8 @@ object Zones {
       BuildingByMapId(11).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(12).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(18657).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(18658).get.Faction = PlanetSideEmpire.NEUTRAL
 
 //      BuildingByMapId(2).get.Faction = PlanetSideEmpire.VS
       BuildingByMapId(10).get.asInstanceOf[WarpGate].Broadcast = true
@@ -295,7 +329,12 @@ object Zones {
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
 
-      BuildingByMapId(7).get.Faction = PlanetSideEmpire.TR //Eisa
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(21321).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(21322).get.Faction = PlanetSideEmpire.NEUTRAL
 
     }
   }
@@ -333,6 +372,13 @@ object Zones {
       BuildingByMapId(11).get.Faction = PlanetSideEmpire.TR //Rashnu
       BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS //Yazata
       BuildingByMapId(13).get.Faction = PlanetSideEmpire.VS //Zal
+
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(24811).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(24815).get.Faction = PlanetSideEmpire.NEUTRAL
     }
   }
 
@@ -366,6 +412,11 @@ object Zones {
     import net.psforever.types.PlanetSideEmpire
 
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
+    BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(23717).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(23718).get.Faction = PlanetSideEmpire.NEUTRAL
 
   }
   }
@@ -399,6 +450,13 @@ object Zones {
 
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
 
+    BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(20900).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(20902).get.Faction = PlanetSideEmpire.NEUTRAL
+
   }
   }
 
@@ -408,6 +466,9 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
     }
   }
 
@@ -417,6 +478,9 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
     }
   }
 
@@ -427,6 +491,7 @@ object Zones {
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
       BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
 
       BuildingByMapId(60).get.Faction = PlanetSideEmpire.NC //South Villa Gun Tower
