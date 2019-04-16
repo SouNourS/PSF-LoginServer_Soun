@@ -37,6 +37,12 @@ object Zones {
     BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(19998).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(19999).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(19998).get.asInstanceOf[WarpGate].Active = false
+    BuildingByMapId(19999).get.asInstanceOf[WarpGate].Active = false
   }
   }
 
@@ -72,6 +78,12 @@ object Zones {
       BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(18907).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(18908).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(18907).get.asInstanceOf[WarpGate].Active = false
+      BuildingByMapId(18908).get.asInstanceOf[WarpGate].Active = false
     }
   }
 
@@ -113,6 +125,12 @@ object Zones {
     BuildingByMapId(17).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(25936).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(25937).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(9).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(13).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(17).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(25936).get.asInstanceOf[WarpGate].Active = false
+    BuildingByMapId(25937).get.asInstanceOf[WarpGate].Active = false
 
   }
   }
@@ -213,6 +231,12 @@ object Zones {
       BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(26620).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(26621).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(26620).get.asInstanceOf[WarpGate].Active = false
+      BuildingByMapId(26621).get.asInstanceOf[WarpGate].Active = false
     }
   }
 
@@ -248,6 +272,12 @@ object Zones {
       BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(21074).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(21078).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(21074).get.asInstanceOf[WarpGate].Active = false
+      BuildingByMapId(21078).get.asInstanceOf[WarpGate].Active = false
     }
   }
 
@@ -335,6 +365,12 @@ object Zones {
       BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(21321).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(21322).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(21321).get.asInstanceOf[WarpGate].Active = false
+      BuildingByMapId(21322).get.asInstanceOf[WarpGate].Active = false
 
     }
   }
@@ -379,6 +415,12 @@ object Zones {
       BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(24811).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(24815).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(24811).get.asInstanceOf[WarpGate].Active = false
+      BuildingByMapId(24815).get.asInstanceOf[WarpGate].Active = false
     }
   }
 
@@ -417,6 +459,11 @@ object Zones {
     BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(23717).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(23718).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(23717).get.asInstanceOf[WarpGate].Active = false
+    BuildingByMapId(23718).get.asInstanceOf[WarpGate].Active = false
 
   }
   }
@@ -456,6 +503,12 @@ object Zones {
     BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(20900).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(20902).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+    BuildingByMapId(20900).get.asInstanceOf[WarpGate].Active = false
+    BuildingByMapId(20902).get.asInstanceOf[WarpGate].Active = false
 
   }
   }
@@ -469,6 +522,9 @@ object Zones {
       BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
     }
   }
 
@@ -481,6 +537,9 @@ object Zones {
       BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
     }
   }
 
@@ -496,6 +555,7 @@ object Zones {
 
       BuildingByMapId(60).get.Faction = PlanetSideEmpire.NC //South Villa Gun Tower
       BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = false
       BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
     }
   }
@@ -556,6 +616,12 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR}
+      BuildingByMapId(10461).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10462).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10464).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10461).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10462).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10464).get.asInstanceOf[WarpGate].Broadcast = true
     }
   }
 
@@ -577,6 +643,12 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC}
+      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10000).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10002).get.asInstanceOf[WarpGate].Broadcast = true
     }
   }
 
@@ -598,6 +670,12 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS}
+      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10000).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10002).get.asInstanceOf[WarpGate].Broadcast = true
     }
   }
 
@@ -619,6 +697,15 @@ object Zones {
       BuildingByMapId(4).get.Name = Some("South Rim Gun Tower")
       BuildingByMapId(5).get.Name = Some("L8 Gate Watch Tower")
       BuildingByMapId(6).get.Name = Some("K14 Gate Watch Tower")
+
+      import net.psforever.types.PlanetSideEmpire
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR}
+      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10002).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(10000).get.asInstanceOf[WarpGate].Active = false
 
     }
   }
