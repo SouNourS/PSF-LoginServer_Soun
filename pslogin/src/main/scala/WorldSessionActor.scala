@@ -4195,7 +4195,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       CSRZone.read(traveler, msg) match {
         case (true, zone, pos) =>
-          println(zone)
           if (player.isAlive && zone != player.Continent && (admin || zone == "z8")) {
             deadState = DeadState.Release //cancel movement updates
             PlayerActionsToCancel()
