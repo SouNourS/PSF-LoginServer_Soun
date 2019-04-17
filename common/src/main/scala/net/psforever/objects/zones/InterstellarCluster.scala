@@ -51,13 +51,13 @@ class InterstellarCluster(zones : List[Zone]) extends Actor {
     case InterstellarCluster.RequestClientInitialization() =>
       import scala.concurrent.duration._
       import scala.concurrent.ExecutionContext.Implicits.global
-      var interval : Int = 100
+      var interval : Int = 200
       zones.foreach(zone => {
 //        sender ! Zone.ClientInitialization(zone.ClientInitialization())
         context.system.scheduler.scheduleOnce(interval milliseconds, sender, Zone.ClientInitialization(zone.ClientInitialization()))
         interval += 1
       })
-      sender ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
+//      sender ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
 
     case msg @ Zone.Lattice.RequestSpawnPoint(zone_number, _, _) =>
       recursiveFindWorldInCluster(zones.iterator, _.Number == zone_number) match {

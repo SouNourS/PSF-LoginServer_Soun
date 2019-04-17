@@ -1437,7 +1437,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   //                  admin = row(0).asInstanceOf[Boolean]
                   self ! ListAccountCharacters(Some(connection))
 //                  Thread.sleep(connectionState/2)
-//                  cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3 or not
+                  cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3 or not
                 case _ => // If the account didn't exist in the database
                   log.error(s"Issue retrieving result set from database for account $account")
                   Thread.sleep(5)
@@ -3646,8 +3646,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
               //TODO check if can spawn on last continent/location from player?
               //TODO if yes, get continent guid accessors
               //TODO if no, get sanctuary guid accessors and reset the player's expectations
-              cluster ! InterstellarCluster.RequestClientInitialization()
-//              self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3 or not
+//              cluster ! InterstellarCluster.RequestClientInitialization()
+              self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3 or not
 
               if(connection.isConnected) connection.disconnect
             case scala.util.Failure(e) =>
@@ -4249,7 +4249,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       } else if(messagetype == ChatMessageType.CMT_CULLWATERMARK) {
         if(trimContents.contains("40 80")) connectionState = 200
         else if(trimContents.contains("120 200")) connectionState = 0
-        else connectionState = 4
+        else connectionState = 100
       } else if(messagetype == ChatMessageType.CMT_DESTROY) {
         makeReply = true
         val guid = contents.toInt
@@ -5750,6 +5750,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
             true
         })) =>
           cluster ! Zone.Lattice.RequestSpecificSpawnPoint(dest_continent_guid.guid, player, dest_building_guid)
+
+        case Some(wg : WarpGate) if(!wg.Active) =>
+          log.info(s"WarpgateRequest: inactive WarpGate")
 
         case _ =>
           RequestSanctuaryZoneSpawn(player, continent.Number)
@@ -7662,7 +7665,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           )
         )
         sendResponse(DensityLevelUpdateMessage(continentNumber, buildingNumber, List(0,0, 0,0, 0,0, 0,0)))
-        sendResponse(BroadcastWarpgateUpdateMessage(continentNumber, buildingNumber, false, false, wg.Broadcast))
+        sendResponse(BroadcastWarpgateUpdateMessage(continentNumber, buildingNumber, wg.Broadcast, wg.Broadcast, wg.Broadcast))
       case _ => ;
     }
   }
