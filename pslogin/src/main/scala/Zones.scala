@@ -670,12 +670,12 @@ object Zones {
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS}
-      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10000).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10003).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true
       BuildingByMapId(10002).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(10003).get.asInstanceOf[WarpGate].Broadcast = true
     }
   }
 
