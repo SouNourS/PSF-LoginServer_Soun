@@ -1,6 +1,8 @@
 // Copyright (c) 2017 PSForever
 package net.psforever.objects.serverobject.structures
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.ActorContext
 import net.psforever.objects.GlobalDefinitions
 import net.psforever.objects.definition.ObjectDefinition
@@ -83,7 +85,7 @@ class Building(private val building_guid : Int, private val map_id : Int, privat
       case Some(obj: CaptureTerminal with Hackable) =>
         obj.HackedBy match {
           case Some(Hackable.HackInfo(_, _, hfaction, _, start, length)) =>
-            (true, hfaction, math.max(0, start + length - System.nanoTime))
+            (true, hfaction, TimeUnit.MILLISECONDS.convert(math.max(0, start + length - System.nanoTime), TimeUnit.NANOSECONDS)) // PTS v3 (TimeUnit)
           case _ =>
             (false, PlanetSideEmpire.NEUTRAL, 0L)
         }

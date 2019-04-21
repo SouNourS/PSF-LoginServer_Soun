@@ -692,11 +692,11 @@ object Zones {
       }
 
       BuildingByMapId(1).get.Name = Some("Atar")
-      BuildingByMapId(2).get.Name = Some("North Rim Gun Tower")
-      BuildingByMapId(3).get.Name = Some("East Rim Gun Tower")
-      BuildingByMapId(4).get.Name = Some("South Rim Gun Tower")
-      BuildingByMapId(5).get.Name = Some("L8 Gate Watch Tower")
-      BuildingByMapId(6).get.Name = Some("K14 Gate Watch Tower")
+      BuildingByMapId(2).get.Name = Some("North_Rim_Gun_Tower")
+      BuildingByMapId(3).get.Name = Some("East_Rim_Gun_Tower")
+      BuildingByMapId(4).get.Name = Some("South_Rim_Gun_Tower")
+      BuildingByMapId(5).get.Name = Some("L8_Gate_Watch_Tower")
+      BuildingByMapId(6).get.Name = Some("K14_Gate_Watch_Tower")
 
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR}

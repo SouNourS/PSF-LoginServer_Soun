@@ -143,8 +143,7 @@ object DamageCalculations {
   def LashDamage(projectile : Projectile, rawDamage : Int, distance : Float) : Int = {
     val profile = projectile.profile
     if(distance > 5 || distance <= profile.DistanceMax) {
-//      (rawDamage * 0.2f) toInt // PTS v3 (was 0.2 before)
-        7 // PTS v3 (was 0.2 before)
+      (rawDamage * 0.3f) toInt // PTS v3 (was 0.2 before)
     }
     else {
       0
