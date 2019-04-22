@@ -37,6 +37,10 @@ object Zones {
     BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(19998).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(19999).get.Faction = PlanetSideEmpire.NEUTRAL
+//    BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//    BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//    BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//    BuildingByMapId(4).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
     BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
     BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
     BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
@@ -526,9 +530,9 @@ object Zones {
       BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
     }
   }
 
@@ -541,9 +545,9 @@ object Zones {
       BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
     }
   }
 
@@ -558,9 +562,9 @@ object Zones {
       BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
 
       BuildingByMapId(60).get.Faction = PlanetSideEmpire.NC //South Villa Gun Tower
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = false
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
+      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
+      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
     }
   }
 
