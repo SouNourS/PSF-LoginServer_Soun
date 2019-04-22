@@ -91,12 +91,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var shooting : Option[PlanetSideGUID] = None //ChangeFireStateMessage_Start
   var prefire : Option[PlanetSideGUID] = None //if WeaponFireMessage precedes ChangeFireStateMessage_Start
   var accessedContainer : Option[PlanetSideGameObject with Container] = None
-  var connectionState : Int = 0
+  var connectionState : Int = 25
   var flying : Boolean = false
   var speed : Float = 1.0f
   var spectator : Boolean = false
   var admin : Boolean = false
   var loadConfZone : Boolean = false
+  var noSpawnPointHere : Boolean = false
   var usingMedicalTerminal : Option[PlanetSideGUID] = None
   var controlled : Option[Int] = None
   //keep track of avatar's ServerVehicleOverride state
@@ -561,7 +562,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     //currently being handled by VehicleSpawnPad.LoadVehicle during testing phase
 
     case Zone.ClientInitialization(zone) =>
-      Thread.sleep(connectionState/2)
+      Thread.sleep(connectionState)
       val continentNumber = zone.Number
       val poplist = zone.Players
       val popBO = 0
@@ -979,9 +980,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyScope(8, List(
           // Oshur Prime
           //Surgile
-          GamePropertyTarget(846, "weapon_OK" -> "true"),
-          GamePropertyTarget(846, "activation_delay" -> "0"),
-          GamePropertyTarget(846, "deactivation_delay" -> "0")
+          GamePropertyTarget(846, "weapon_OK" -> "true")
+//          GamePropertyTarget(846, "activation_delay" -> "0"),
+//          GamePropertyTarget(846, "deactivation_delay" -> "0")
         )),
         GamePropertyScope(17,
           GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
@@ -1203,32 +1204,32 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
       loadConfZone = true
-      if (zoneId == "z4") { // PTS v3
-        player.FirstLoad = true
-        if (player.Faction == PlanetSideEmpire.TR) {
-          player.Position = Vector3(903f, 5508f, 88f)
-          player.Orientation = Vector3(0f, 354.375f, 157.5f)
-        } else if (player.Faction == PlanetSideEmpire.NC) {
-          player.Position = Vector3(3091f, 2222f, 86f)
-          player.Orientation = Vector3(0f, 0f, 129.375f)
-        } else if (player.Faction == PlanetSideEmpire.VS) {
-          player.Position = Vector3(6579f, 4616f, 61f)
-          player.Orientation = Vector3(0f, 354.375f, 264.375f)
-        }
-      }
-      if (zoneId == "z8") { // PTS v3
-        player.FirstLoad = true
-        if (player.Faction == PlanetSideEmpire.TR) {
-          player.Position = Vector3(2285f, 3403f, 68f)
-          player.Orientation = Vector3(0f, 357.375f, 50.5f)
-        } else if (player.Faction == PlanetSideEmpire.NC) {
-          player.Position = Vector3(4719f, 5413f, 69f)
-          player.Orientation = Vector3(0f, 357f, 177.375f)
-        } else if (player.Faction == PlanetSideEmpire.VS) {
-          player.Position = Vector3(3989f, 2241f, 72f)
-          player.Orientation = Vector3(0f, 348.375f, 101.375f)
-        }
-      }
+//      if (zoneId == "z4") { // PTS v3
+//        player.FirstLoad = true
+//        if (player.Faction == PlanetSideEmpire.TR) {
+//          player.Position = Vector3(903f, 5508f, 88f)
+//          player.Orientation = Vector3(0f, 354.375f, 157.5f)
+//        } else if (player.Faction == PlanetSideEmpire.NC) {
+//          player.Position = Vector3(3091f, 2222f, 86f)
+//          player.Orientation = Vector3(0f, 0f, 129.375f)
+//        } else if (player.Faction == PlanetSideEmpire.VS) {
+//          player.Position = Vector3(6579f, 4616f, 61f)
+//          player.Orientation = Vector3(0f, 354.375f, 264.375f)
+//        }
+//      }
+//      if (zoneId == "z8") { // PTS v3
+//        player.FirstLoad = true
+//        if (player.Faction == PlanetSideEmpire.TR) {
+//          player.Position = Vector3(2285f, 3403f, 68f)
+//          player.Orientation = Vector3(0f, 357.375f, 50.5f)
+//        } else if (player.Faction == PlanetSideEmpire.NC) {
+//          player.Position = Vector3(4719f, 5413f, 69f)
+//          player.Orientation = Vector3(0f, 357f, 177.375f)
+//        } else if (player.Faction == PlanetSideEmpire.VS) {
+//          player.Position = Vector3(3989f, 2241f, 72f)
+//          player.Orientation = Vector3(0f, 348.375f, 101.375f)
+//        }
+//      }
       val continentId = continent.Id
       val factionOnContinentChannel = s"$continentId/${avatar.faction}"
       avatarService ! Service.Leave(Some(continentId))
@@ -3383,9 +3384,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
     drawDeloyableIcon = DontRedrawIcons
 
     // PTS v3
-    if (loadConfZone && connectionState == 200) {
+    if (loadConfZone && connectionState == 100) {
       configZone(continent) // PTS v3
       loadConfZone = false
+    }
+
+    if (noSpawnPointHere) {
+      RequestSanctuaryZoneSpawn(player, continent.Number)
     }
 
   }
@@ -3639,7 +3644,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
               player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
               player.Inventory.Items.foreach { _.obj.Faction = player.Faction }
               player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
-              ////        player.FirstLoad = true
+              player.Position = Vector3(4000f ,4000f ,500f)
+              player.Orientation = Vector3(0f, 354.375f, 157.5f)
+              player.FirstLoad = true
               //          LivePlayerList.Add(sessionId, avatar)
 
 
@@ -3673,7 +3680,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       localService ! Service.Join(factionOnContinentChannel)
       vehicleService ! Service.Join(continentId)
       galaxyService ! Service.Join("galaxy")
-      if(connectionState != 200) configZone(continent) // PTS v3
+      if(connectionState != 100) configZone(continent) // PTS v3
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
@@ -3940,7 +3947,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The combat test area is on Ishundar. Type \\#3/zone ishundar\\#6 if necessary.", None))
+        "  \\#6The default combat area is Forseral, but you can travel to any continent using WarpGates.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -4159,7 +4166,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val trimContents = contents.trim
       val trimRecipient = recipient.trim
       //TODO messy on/off strings may work
-      if(messagetype == ChatMessageType.CMT_FLY && admin) {
+      if(messagetype == ChatMessageType.CMT_FLY && (admin || player.Continent == "c1" || player.Continent == "c2" ||
+        player.Continent == "c3" || player.Continent == "c4" || player.Continent == "c5" || player.Continent == "c6")) {
         makeReply = false
         if(!flying) {
           flying = true
@@ -4195,7 +4203,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       CSRZone.read(traveler, msg) match {
         case (true, zone, pos) =>
-          if (player.isAlive && zone != player.Continent && (admin || zone == "z8")) {
+          if (player.isAlive && zone != player.Continent && (admin || zone == "z8" || zone == "c1" || zone == "c2" || zone == "c3" || zone == "c4" || zone == "c5" || zone == "c6")) {
             deadState = DeadState.Release //cancel movement updates
             PlayerActionsToCancel()
             continent.GUID(player.VehicleSeated) match {
@@ -4246,9 +4254,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           Suicide(player)
         }
       } else if(messagetype == ChatMessageType.CMT_CULLWATERMARK) {
-        if(trimContents.contains("40 80")) connectionState = 200
-        else if(trimContents.contains("120 200")) connectionState = 0
-        else connectionState = 100
+        if(trimContents.contains("40 80")) connectionState = 100
+        else if(trimContents.contains("120 200")) connectionState = 25
+        else connectionState = 50
       } else if(messagetype == ChatMessageType.CMT_DESTROY) {
         makeReply = true
         val guid = contents.toInt
@@ -7716,7 +7724,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       })
       //      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
-      Thread.sleep(connectionState/2)
+      Thread.sleep(connectionState)
     })
   }
 
@@ -7916,26 +7924,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         case None =>
           log.info("WTF?!")
-          //          if (player.Faction == PlanetSideEmpire.TR) {
-          //            player.Position = Vector3(903f, 5508f, 88f)
-          //            player.Orientation = Vector3(0f, 354.375f, 157.5f)
-          //          } else if (player.Faction == PlanetSideEmpire.NC) {
-          //            player.Position = Vector3(3091f, 2222f, 86f)
-          //            player.Orientation = Vector3(0f, 0f, 129.375f)
-          //          } else if (player.Faction == PlanetSideEmpire.VS) {
-          //            player.Position = Vector3(6579f, 4616f, 61f)
-          //            player.Orientation = Vector3(0f, 354.375f, 264.375f)
-          //          }
-          if (player.Faction == PlanetSideEmpire.TR) {
-            player.Position = Vector3(2285f, 3403f, 68f)
-            player.Orientation = Vector3(0f, 357.375f, 50.5f)
-          } else if (player.Faction == PlanetSideEmpire.NC) {
-            player.Position = Vector3(4719f, 5413f, 69f)
-            player.Orientation = Vector3(0f, 357f, 177.375f)
-          } else if (player.Faction == PlanetSideEmpire.VS) {
-            player.Position = Vector3(3989f, 2241f, 72f)
-            player.Orientation = Vector3(0f, 348.375f, 101.375f)
-          }
+          println(player.Position)
+          noSpawnPointHere = true
+        //z4
+        //          if (player.Faction == PlanetSideEmpire.TR) {
+        //            player.Position = Vector3(903f, 5508f, 88f)
+        //            player.Orientation = Vector3(0f, 354.375f, 157.5f)
+        //          } else if (player.Faction == PlanetSideEmpire.NC) {
+        //            player.Position = Vector3(3091f, 2222f, 86f)
+        //            player.Orientation = Vector3(0f, 0f, 129.375f)
+        //          } else if (player.Faction == PlanetSideEmpire.VS) {
+        //            player.Position = Vector3(6579f, 4616f, 61f)
+        //            player.Orientation = Vector3(0f, 354.375f, 264.375f)
+        //          }
+        //z8
+        //          if (player.Faction == PlanetSideEmpire.TR) {
+        //            player.Position = Vector3(2285f, 3403f, 68f)
+        //            player.Orientation = Vector3(0f, 357.375f, 50.5f)
+        //          } else if (player.Faction == PlanetSideEmpire.NC) {
+        //            player.Position = Vector3(4719f, 5413f, 69f)
+        //            player.Orientation = Vector3(0f, 357f, 177.375f)
+        //          } else if (player.Faction == PlanetSideEmpire.VS) {
+        //            player.Position = Vector3(3989f, 2241f, 72f)
+        //            player.Orientation = Vector3(0f, 348.375f, 101.375f)
+        //          }
       }
       player.FirstLoad = false
     }
@@ -9260,10 +9272,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
     */
   def LoadZonePhysicalSpawnPoint(zone_id : String, pos : Vector3, ori : Vector3, respawnTime : Long) : Unit = {
     log.info(s"Load in zone $zone_id at position $pos")
+    var localRespawnTime = respawnTime
     respawnTimer.cancel
     reviveTimer.cancel
+    if (noSpawnPointHere) { // PTS v3
+      localRespawnTime = 2
+      noSpawnPointHere = false
+    }
     val backpack = player.isBackpack
-    val respawnTimeMillis = respawnTime * 1000 //ms
+    val respawnTimeMillis = localRespawnTime * 1000 //ms
     deadState = DeadState.RespawnTime
     sendResponse(AvatarDeadStateMessage(DeadState.RespawnTime, respawnTimeMillis, respawnTimeMillis, Vector3.Zero, player.Faction, true))
     val (target, msg) = if(backpack) { //if the player is dead, he is handled as dead infantry, even if he died in a vehicle
@@ -9288,7 +9305,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
     }
     import scala.concurrent.ExecutionContext.Implicits.global
-    respawnTimer = context.system.scheduler.scheduleOnce(respawnTime seconds, target, msg)
+    respawnTimer = context.system.scheduler.scheduleOnce(localRespawnTime seconds, target, msg)
   }
 
   /**
