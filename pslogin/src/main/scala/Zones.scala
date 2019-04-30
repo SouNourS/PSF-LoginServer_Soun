@@ -461,7 +461,7 @@ object Zones {
 
     import net.psforever.types.PlanetSideEmpire
 
-    Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
+    Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
     BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
@@ -505,7 +505,10 @@ object Zones {
 
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
 
-    BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+    BuildingByMapId(5).get.Faction = PlanetSideEmpire.TR
+    BuildingByMapId(11).get.Faction = PlanetSideEmpire.VS
+
+    BuildingByMapId(1).get.Faction = PlanetSideEmpire.NC
     BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
