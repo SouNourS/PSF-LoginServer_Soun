@@ -951,8 +951,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.pulse_battery, "purchase_empire" -> "all"),
 
         //No Surge Activation/Deactivation Delay (Quality of Life improvement)
-        GamePropertyTarget(846, "activation_delay" -> "0"),
-        GamePropertyTarget(846, "deactivation_delay" -> "0"),
+//        GamePropertyTarget(846, "activation_delay" -> "0"),
+//        GamePropertyTarget(846, "deactivation_delay" -> "0"),
 
         //Reverting Reaver Armor Value from "Coder Madness 2" Patch from Live (clientside indicator?)
         GamePropertyTarget(ObjectClass.lightgunship, "maxhealth" -> "900"),
@@ -1217,12 +1217,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
           GamePropertyTarget(ObjectClass.peregrine_flight, "allowed" -> "false"),
           GamePropertyTarget(ObjectClass.peregrine_gunner, "allowed" -> "false")
         )),
-        GamePropertyScope(31, List(
-          // Desolation
-          //Surgile
-          GamePropertyTarget(846, "activation_delay" -> "0"),
-          GamePropertyTarget(846, "deactivation_delay" -> "0")
-        )),
+//        GamePropertyScope(31, List(
+//          // Desolation
+//          //Surgile
+//          GamePropertyTarget(846, "weapon_OK" -> "true"),
+//          GamePropertyTarget(846, "activation_delay" -> "0"),
+//          GamePropertyTarget(846, "deactivation_delay" -> "0")
+//        )),
         GamePropertyScope(32, List(
           //Nexus (i4) - t3h footzerg! - Battle Island Event
 
@@ -4073,7 +4074,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The default combat area is Forseral, but you can travel to any continent using WarpGates.", None))
+        "  \\#6The default zone is set to Amerish if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -4303,7 +4304,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       val trimContents = contents.trim
       val trimRecipient = recipient.trim
       //TODO messy on/off strings may work
-      if(messagetype == ChatMessageType.CMT_FLY && (admin || player.Continent == "c1" || player.Continent == "c2" ||
+      if(messagetype == ChatMessageType.CMT_FLY && (admin || movieMaker || player.Continent == "c1" || player.Continent == "c2" ||
         player.Continent == "c3" || player.Continent == "c4" || player.Continent == "c5" || player.Continent == "c6")) {
         makeReply = false
         if(!flying) {
@@ -4340,7 +4341,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       CSRZone.read(traveler, msg) match {
         case (true, zone, pos) =>
-          if (player.isAlive && zone != player.Continent && (admin || zone == "z8" || zone == "c1" || zone == "c2" || zone == "c3" || zone == "c4" || zone == "c5" || zone == "c6")) {
+          if (player.isAlive && zone != player.Continent && (admin || zone == "z8" || zone == "c1" || zone == "c2" || zone == "c3" || zone == "c4" || zone == "c5" || zone == "c6" ||
+            zone == "tzshtr" || zone == "tzcotr" || zone == "tzdrtr" ||
+            zone == "tzshnc" || zone == "tzconc" || zone == "tzdrnc" ||
+            zone == "tzshvs" || zone == "tzcovs" || zone == "tzdrvs")) {
             deadState = DeadState.Release //cancel movement updates
             PlayerActionsToCancel()
             continent.GUID(player.VehicleSeated) match {
@@ -4365,7 +4369,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       CSRWarp.read(traveler, msg) match {
         case (true, pos) =>
-          if (player.isAlive && admin) {
+          if (player.isAlive && (admin || movieMaker || continent == "z8" || continent == "c1" || continent == "c2" || continent == "c3" || continent == "c4" || continent == "c5" || continent == "c6" ||
+            continent == "tzshtr" || continent == "tzcotr" || continent == "tzdrtr" ||
+            continent == "tzshnc" || continent == "tzconc" || continent == "tzdrnc" ||
+            continent == "tzshvs" || continent == "tzcovs" || continent == "tzdrvs")) {
             deadState = DeadState.Release //cancel movement updates
             PlayerActionsToCancel()
             continent.GUID(player.VehicleSeated) match {

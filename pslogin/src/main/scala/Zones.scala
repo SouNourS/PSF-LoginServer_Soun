@@ -626,7 +626,7 @@ object Zones {
       BuildingByMapId(18).get.Name = Some("Yazata")
 
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR}
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS}
       BuildingByMapId(10461).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10462).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10464).get.Faction = PlanetSideEmpire.NEUTRAL
@@ -653,7 +653,7 @@ object Zones {
       BuildingByMapId(39).get.Name = Some("Sraosha")
 
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC}
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS}
       BuildingByMapId(10000).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
@@ -710,7 +710,7 @@ object Zones {
       BuildingByMapId(6).get.Name = Some("K14_Gate_Watch_Tower")
 
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR}
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS}
       BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true

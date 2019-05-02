@@ -3067,7 +3067,8 @@ object GlobalDefinitions {
     phoenix_missile_projectile.Damage0 = 80
     phoenix_missile_projectile.Damage1 = 400
     phoenix_missile_projectile.Damage2 = 400
-    phoenix_missile_projectile.Damage3 = 300
+//    phoenix_missile_projectile.Damage3 = 300 // PTS v3
+    phoenix_missile_projectile.Damage3 = 400
     phoenix_missile_projectile.Damage4 = 600
     phoenix_missile_projectile.Acceleration = 60
     phoenix_missile_projectile.AccelerationUntil = 2.5f
