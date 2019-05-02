@@ -2396,16 +2396,21 @@ object GlobalDefinitions {
     ProjectileDefinition.CalculateDerivedFields(firebird_missile_projectile)
 
     flail_projectile.Name = "flail_projectile"
-    flail_projectile.Damage0 = 75
-    flail_projectile.Damage1 = 200
-    flail_projectile.Damage2 = 200
-    flail_projectile.Damage3 = 200
-    flail_projectile.Damage4 = 300
+//    flail_projectile.Damage0 = 75  // PTS v3
+//    flail_projectile.Damage1 = 200
+//    flail_projectile.Damage2 = 200
+//    flail_projectile.Damage3 = 200
+//    flail_projectile.Damage4 = 300
+    flail_projectile.Damage0 = 375
+    flail_projectile.Damage1 = 1000
+    flail_projectile.Damage2 = 1000
+    flail_projectile.Damage3 = 1000
+    flail_projectile.Damage4 = 1500
     flail_projectile.DamageAtEdge = 0.1f
     flail_projectile.DamageRadius = 15f
     flail_projectile.ProjectileDamageType = DamageType.Splash
-    flail_projectile.DegradeDelay = 1.5f
-    flail_projectile.DegradeMultiplier = 5f
+//    flail_projectile.DegradeDelay = 1.5f  // PTS v3
+//    flail_projectile.DegradeMultiplier = 5f
     flail_projectile.InitialVelocity = 75
     flail_projectile.Lifespan = 40f
     ProjectileDefinition.CalculateDerivedFields(flail_projectile)
@@ -3046,7 +3051,8 @@ object GlobalDefinitions {
     phoenix_missile_guided_projectile.Damage0 = 80
     phoenix_missile_guided_projectile.Damage1 = 400
     phoenix_missile_guided_projectile.Damage2 = 400
-    phoenix_missile_guided_projectile.Damage3 = 300
+//    phoenix_missile_guided_projectile.Damage3 = 300  // PTS v3
+    phoenix_missile_guided_projectile.Damage3 = 400
     phoenix_missile_guided_projectile.Damage4 = 600
     phoenix_missile_guided_projectile.Acceleration = 60
     phoenix_missile_guided_projectile.AccelerationUntil = 2.5f
@@ -3200,14 +3206,16 @@ object GlobalDefinitions {
     ProjectileDefinition.CalculateDerivedFields(radiator_sticky_projectile)
 
     reaver_rocket_projectile.Name = "reaver_rocket_projectile"
-    reaver_rocket_projectile.Damage0 = 25
+//    reaver_rocket_projectile.Damage0 = 25 // PTS v3
+    reaver_rocket_projectile.Damage0 = 50
     reaver_rocket_projectile.Damage1 = 88
     reaver_rocket_projectile.Damage2 = 75
     reaver_rocket_projectile.Damage3 = 75
     reaver_rocket_projectile.Damage4 = 88
     reaver_rocket_projectile.Acceleration = 50
     reaver_rocket_projectile.AccelerationUntil = 1f
-    reaver_rocket_projectile.DamageAtEdge = 0.1f
+//    reaver_rocket_projectile.DamageAtEdge = 0.1f // PTS v3
+    reaver_rocket_projectile.DamageAtEdge = 0.5f
     reaver_rocket_projectile.DamageRadius = 3f
     reaver_rocket_projectile.ProjectileDamageType = DamageType.Splash
     reaver_rocket_projectile.InitialVelocity = 100
@@ -3721,8 +3729,8 @@ object GlobalDefinitions {
     suppressor.FireModes.head.AmmoTypeIndices += 1
     suppressor.FireModes.head.AmmoSlotIndex = 0
     suppressor.FireModes.head.Magazine = 25
-    suppressor.FireModes.head.Modifiers.Damage0 = -1
-    suppressor.FireModes.head.Modifiers.Damage1 = -1
+//    suppressor.FireModes.head.Modifiers.Damage0 = -1 // PTS v3
+//    suppressor.FireModes.head.Modifiers.Damage1 = -1
     suppressor.Tile = InventoryTile.Tile63
 
     punisher.Name = "punisher"
@@ -5434,7 +5442,8 @@ object GlobalDefinitions {
     ant.Subtract.Damage1 = 5
 
     ams.Name = "ams"
-    ams.MaxHealth = 3000
+    ams.MaxHealth = 3000 // PTS v3
+    ams.MaxHealth = 4500
     ams.MaxShields = 600 + 1
     ams.Seats += 0 -> new SeatDefinition()
     ams.Seats(0).ArmorRestriction = SeatArmorRestriction.NoReinforcedOrMax
@@ -5525,7 +5534,8 @@ object GlobalDefinitions {
     mosquito.DestroyedModel = Some(DestroyedVehicle.Mosquito)
 
     lightgunship.Name = "lightgunship"
-    lightgunship.MaxHealth = 1000
+//    lightgunship.MaxHealth = 1000 // PTS v3
+    lightgunship.MaxHealth = 900
     lightgunship.MaxShields = 200 + 1
     lightgunship.CanFly = true
     lightgunship.Seats += 0 -> new SeatDefinition()

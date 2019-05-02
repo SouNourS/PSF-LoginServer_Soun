@@ -923,6 +923,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
           "broadcast_spam_count" -> "10",
           "broadcast_spam_seconds" -> "20",
           "voice_macro_spam_count" -> "5")),
+
+        //Lasher (Time until Orb starts Lashing)
+        GamePropertyTarget(430, "lash_delay" -> "0.00"),
+
+        //Fixes bug preventing AP Lasher from Lashing
+        GamePropertyTarget(431, "lasher_projectile_ap" -> "false"),
+        GamePropertyTarget(431, "lasher_projectile" -> "true"),
+
+        //Enemy Vehicles for All
         GamePropertyTarget(ObjectClass.magrider, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.prowler, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.vanguard, "purchase_empire" -> "all"),
@@ -940,72 +949,138 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.fluxpod_ammo, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.heavy_rail_beam_battery, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.pulse_battery, "purchase_empire" -> "all"),
+
+        //No Surge Activation/Deactivation Delay (Quality of Life improvement)
+        GamePropertyTarget(846, "activation_delay" -> "0"),
+        GamePropertyTarget(846, "deactivation_delay" -> "0"),
+
+        //Reverting Reaver Armor Value from "Coder Madness 2" Patch from Live (clientside indicator?)
+        GamePropertyTarget(ObjectClass.lightgunship, "maxhealth" -> "900"),
+
+        //AMS Health Increase (clientside indicator?)
+        GamePropertyTarget(ObjectClass.ams, "maxhealth" -> "4500"),
+
+        //Enemy HA for All (can't save to loadout)
 //        GamePropertyTarget(ObjectClass.mini_chaingun, "purchase_empire" -> "all"),
 //        GamePropertyTarget(ObjectClass.r_shotgun, "purchase_empire" -> "all"),
 //        GamePropertyTarget(ObjectClass.lasher, "purchase_empire" -> "all"),
+
+        //No Vulture requirement
         GamePropertyTarget(ObjectClass.vulture, "requirement_award0" -> "false"),
+
+        //MAX at AMS
 //        GamePropertyTarget(390, "purchase_ams" -> "true"),
+
+        //Galaxy purchasable at any combined vehicle terminal or air vehicle terminal
         GamePropertyTarget(952, "forsale_dropship" -> "true"),
         GamePropertyTarget(43, "forsale_dropship" -> "true"),
-        GamePropertyTarget(ObjectClass.dropship, "cargomountzone1_acceptedvehicles" -> "ams fury two_man_assault_buggy twomanhoverbuggy quadassault threemanheavybuggy twomanheavybuggy quadstealth ant lightning skyguard switchblade"),
-        GamePropertyTarget(ObjectClass.dropship, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.galaxy_gunship, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.liberator, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.lightgunship, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.lodestar, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.mosquito, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.orbital_shuttle, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.phantasm, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.vulture, "flightmaxheight" -> "500"),
-        GamePropertyTarget(ObjectClass.wasp, "flightmaxheight" -> "500"),
-//        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
-//        GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
-//        GamePropertyTarget(ObjectClass.super_medkit, "requirement_award0" -> "false"),
-//        GamePropertyTarget(ObjectClass.super_staminakit, "requirement_award0" -> "false"),
-//        GamePropertyTarget(ObjectClass.super_armorkit, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.super_medkit, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.super_staminakit, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.super_armorkit, "nodrop" -> "false"),
-//        GamePropertyTarget(ObjectClass.super_medkit, "nodrop" -> "false"),
-//        GamePropertyTarget(ObjectClass.super_staminakit, "nodrop" -> "false"),
-//        GamePropertyTarget(ObjectClass.order_terminal, "forsale_winchester" -> "ordertype_weapon"),
-//        GamePropertyTarget(ObjectClass.order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
-//        GamePropertyTarget(ObjectClass.order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
-//        GamePropertyTarget(ObjectClass.order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
-//        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_winchester" -> "ordertype_weapon"),
-//        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
-//        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
-//        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
-//        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_winchester_ammo" -> "ordertype_equipment"),
-//        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
-//        GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
-//        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_winchester_ammo" -> "ordertype_equipment"),
-//        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
-//        GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
-//        GamePropertyTarget(ObjectClass.winchester, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.pellet_gun, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.six_shooter, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.dynomite, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.winchester_ammo, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.pellet_gun_ammo, "allowed" -> "true"),
-//        GamePropertyTarget(ObjectClass.six_shooter_ammo, "allowed" -> "true"),
+
+        //Galaxy Cargo Hold Vehicle Type Allowance (currently added: AMS, Deliverer and all Variants)
+        GamePropertyTarget(ObjectClass.dropship, "cargomountzone1_acceptedvehicles" -> "ams aurora delivererv fury mediumtransport two_man_assault_buggy twomanhoverbuggy quadassault threemanheavybuggy thunderer twomanheavybuggy quadstealth ant lightning skyguard switchblade"),
+
+        //Flight Ceiling for all aircraft except the droppod
+        //GamePropertyTarget(ObjectClass.dropship, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.galaxy_gunship, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.liberator, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.lightgunship, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.lodestar, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.mosquito, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.orbital_shuttle, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.phantasm, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.vulture, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.wasp, "flightmaxheight" -> "500"),
+
+        //Droppod Max Height (4000 is default)
+        //GamePropertyTarget(ObjectClass.droppod, "flightmaxheight" -> "4000"),
+
+        //Fusion Blade
+        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
+        GamePropertyTarget(ObjectClass.katana, "allowed" -> "true"),
+
+        //Event Kits - Super Stamina Kit
+        GamePropertyTarget(ObjectClass.super_staminakit, "requirement_award0" -> "false"),
+        GamePropertyTarget(ObjectClass.super_staminakit, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.super_staminakit, "nodrop" -> "false"),
+
+        //Event Kits - Super Armor Kit
+        //GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
+        //GamePropertyTarget(ObjectClass.super_armorkit, "allowed" -> "true"),
+        //GamePropertyTarget(ObjectClass.super_armorkit, "nodrop" -> "false"),
+
+        //Event Kits - Super Medkit
+        //GamePropertyTarget(ObjectClass.super_medkit, "requirement_award0" -> "false"),
+        //GamePropertyTarget(ObjectClass.super_medkit, "allowed" -> "true"),
+        //GamePropertyTarget(ObjectClass.super_medkit, "nodrop" -> "false"),
+
+        //Wild West Weapons
+
+        //Long Rifle (winchester)
+        //GamePropertyTarget(ObjectClass.winchester, "allowed" -> "true"),
+        //GamePropertyTarget(ObjectClass.order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+        //GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+        //GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_winchester_ammo" -> "ordertype_equipment"),
+        //GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_winchester_ammo" -> "ordertype_equipment"),
+        //GamePropertyTarget(ObjectClass.winchester_ammo, "allowed" -> "true"),
+
+        //TNT (dynomite)
+        GamePropertyTarget(ObjectClass.dynomite, "allowed" -> "true"),
+        GamePropertyTarget(ObjectClass.order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
+        GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_dynomite" -> "ordertype_weapon"),
+
+        //Single Shot-Shotgun (pellet_gun)
+        //GamePropertyTarget(ObjectClass.pellet_gun, "allowed" -> "true"),
+        //GamePropertyTarget(ObjectClass.order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
+        //GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_pellet_gun" -> "ordertype_weapon"),
+        //GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
+        //GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_pellet_gun_ammo" -> "ordertype_equipment"),
+        //GamePropertyTarget(ObjectClass.pellet_gun_ammo, "allowed" -> "true"),
+
+        //6 Shooter (six_shooter)
+        //GamePropertyTarget(ObjectClass.six_shooter, "allowed" -> "true"),
+        //GamePropertyTarget(ObjectClass.order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
+        //GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_six_shooter" -> "ordertype_weapon"),
+        //GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
+        //GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
+        //GamePropertyTarget(ObjectClass.six_shooter_ammo, "allowed" -> "true"),
+
+        //No PvP (doesn't work?)
         //Causes Medical Applicator to work in No PvP areas
         GamePropertyTarget(ObjectClass.medicalapplicator, "works_nopvp" -> "true"),
+
         //Causes BANK to work in No PvP areas
         GamePropertyTarget(ObjectClass.bank, "works_nopvp" -> "true"),
+
         //Causes Laze Pointer to work in No PvP areas
         GamePropertyTarget(ObjectClass.flail_targeting_laser, "works_nopvp" -> "true"),
+
         //Causes Nano Dispenser to work in No PvP areas
-        GamePropertyTarget(ObjectClass.nano_dispenser, "works_nopvp" -> "true"),
-        GamePropertyTarget(430, "lash_delay" -> "0.0"),
-        GamePropertyTarget(431, "lasher_projectile_ap" -> "false"),
-        GamePropertyTarget(431, "lasher_projectile" -> "true"))),
+        GamePropertyTarget(ObjectClass.nano_dispenser, "works_nopvp" -> "true"))),
+
         GamePropertyScope(8, List(
           // Oshur Prime
           //Surgile
-          GamePropertyTarget(846, "weapon_OK" -> "true")
+//          GamePropertyTarget(846, "weapon_OK" -> "true"),
 //          GamePropertyTarget(846, "activation_delay" -> "0"),
-//          GamePropertyTarget(846, "deactivation_delay" -> "0")
+//          GamePropertyTarget(846, "deactivation_delay" -> "0"),
+
+          //Radiator Override Tests (to see what is possible)
+          GamePropertyTarget(ObjectClass.radiator, "ancient_weapon" -> "false"),
+          GamePropertyTarget(ObjectClass.radiator, "firemode0_ammo_max" -> "125"),
+          GamePropertyTarget(ObjectClass.radiator, "equiptime" -> "100"),
+          GamePropertyTarget(ObjectClass.radiator, "holstertime" -> "100"),
+          GamePropertyTarget(ObjectClass.radiator, "firemode0_maxCOF" -> "0"),
+          GamePropertyTarget(ObjectClass.radiator, "clientfiremode0_crosshair" -> "RifleCrosshair"),
+          GamePropertyTarget(ObjectClass.radiator, "firemode0_refiretime" -> "100"),
+          GamePropertyTarget(ObjectClass.radiator, "firemode0_reloadtime" -> "0.500"),
+          GamePropertyTarget(ObjectClass.radiator, "firemode0_recoil" -> "0"),
+          GamePropertyTarget(ObjectClass.radiator, "firemode0_defaultCOF" -> "0"),
+          GamePropertyTarget(ObjectClass.radiator, "firemode0_crouchCOF" -> "0"),
+          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false"),
+
+          //MAX Armor Test
+          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false"),
+          GamePropertyTarget(390, "heavy_armor_turn_rate_cap" -> "65535")
+
         )),
         GamePropertyScope(17,
           GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
@@ -1027,6 +1102,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         ),
         GamePropertyScope(29, List(
           //Extinction (i1) - ground based bridge brawls! - Battle Island Event
+
           //Free Certification Grants
           GamePropertyTarget(ObjectClass.nano_dispenser, "requirement_certification0" -> "false"),
           GamePropertyTarget(ObjectClass.ams, "requirement_certification0" -> "false"),
@@ -1039,6 +1115,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           GamePropertyTarget(ObjectClass.threemanheavybuggy, "requirement_certification0" -> "false"),
           GamePropertyTarget(ObjectClass.twomanheavybuggy, "requirement_certification0" -> "false"),
           GamePropertyTarget(ObjectClass.lightning, "requirement_certification0" -> "false"),
+
           //No Air Vehicles
           GamePropertyTarget(ObjectClass.dropship, "allowed" -> "false"),
           GamePropertyTarget(ObjectClass.galaxy_gunship, "allowed" -> "false"),
@@ -1049,6 +1126,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           GamePropertyTarget(ObjectClass.phantasm, "allowed" -> "false"),
           GamePropertyTarget(ObjectClass.vulture, "allowed" -> "false"),
           GamePropertyTarget(ObjectClass.wasp, "allowed" -> "false"),
+
           //No Tanks, no BFRs, no Flails, no Deliverer Variants
           GamePropertyTarget(ObjectClass.mediumtransport, "allowed" -> "false"),
           GamePropertyTarget(ObjectClass.aurora, "allowed" -> "false"),
@@ -1058,8 +1136,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
           GamePropertyTarget(ObjectClass.prowler, "allowed" -> "false"),
           GamePropertyTarget(ObjectClass.thunderer, "allowed" -> "false"),
           GamePropertyTarget(ObjectClass.vanguard, "allowed" -> "false"),
+
           //A Tank, but commented out for population purposes
 //          GamePropertyTarget(ObjectClass.lightning, "allowed" -> "false"),
+
           //No BFRs
           GamePropertyTarget(ObjectClass.aphelion_flight, "allowed" -> "false"),
           GamePropertyTarget(ObjectClass.aphelion_gunner, "allowed" -> "false"),
@@ -1071,6 +1151,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyScope(30, List(
           //Ascension (i2) - battle for air supremacy! - Battle Island Event
           //No Skyguards, no Deliverer Variants, no AA MAX, no BFRs, no Tanks, no Flails Zone specific change – Everyone has access to Empire AV weapons and can pilot air vehicles
+
           //Cert Grants
           GamePropertyTarget(ObjectClass.dropship, "requirement_certification0" -> "false"),
           GamePropertyTarget(ObjectClass.galaxy_gunship, "requirement_certification0" -> "false"),
@@ -1144,8 +1225,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
         )),
         GamePropertyScope(32, List(
           //Nexus (i4) - t3h footzerg! - Battle Island Event
-          //Surgile
-          GamePropertyTarget(846, "weapon_OK" -> "true"),
 
           //Free Vehicle Certification Grants
           GamePropertyTarget(ObjectClass.dropship, "requirement_certification0" -> "false"),
