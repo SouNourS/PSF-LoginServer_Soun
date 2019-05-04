@@ -924,7 +924,16 @@ class WorldSessionActor extends Actor with MDCContextAware {
           "broadcast_spam_seconds" -> "20",
           "voice_macro_spam_count" -> "5")),
 
-        //Lasher (Time until Orb starts Lashing)
+        //Burst Refire Slop Fix
+        GamePropertyTarget(ObjectClass.punisher, "firemode0_burst_refire_slop" -> "250"),
+        GamePropertyTarget(ObjectClass.pulsar, "firemode1_burst_refire_slop" -> "250"),
+
+        //Striker/Lancer Fix for missing holstertime property
+        GamePropertyTarget(ObjectClass.striker, "holstertime" -> "1000"),
+        GamePropertyTarget(ObjectClass.lancer, "holstertime" -> "1000"),
+
+
+        //Lasher Balance Change (1/2) (Time until Orb starts Lashing)
         GamePropertyTarget(430, "lash_delay" -> "0.00"),
 
         //Fixes bug preventing AP Lasher from Lashing
@@ -949,8 +958,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.fluxpod_ammo, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.heavy_rail_beam_battery, "purchase_empire" -> "all"),
         GamePropertyTarget(ObjectClass.pulse_battery, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.aphelion_flight, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.aphelion_gunner, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.colossus_flight, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.colossus_gunner, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.peregrine_flight, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.peregrine_gunner, "purchase_empire" -> "all"),
 
-        //No Surge Activation/Deactivation Delay (Quality of Life improvement)
+        //No Surge Activation/Deactivation Delay (Quality of Life improvement -- buggy?)
 //        GamePropertyTarget(846, "activation_delay" -> "0"),
 //        GamePropertyTarget(846, "deactivation_delay" -> "0"),
 
@@ -975,32 +990,35 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(952, "forsale_dropship" -> "true"),
         GamePropertyTarget(43, "forsale_dropship" -> "true"),
 
-        //Galaxy Cargo Hold Vehicle Type Allowance (currently added: AMS, Deliverer and all Variants)
-        GamePropertyTarget(ObjectClass.dropship, "cargomountzone1_acceptedvehicles" -> "ams aurora delivererv fury mediumtransport two_man_assault_buggy twomanhoverbuggy quadassault threemanheavybuggy thunderer twomanheavybuggy quadstealth ant lightning skyguard switchblade"),
+        //Galaxy Cargo Hold Vehicle Type Allowance (currently added: AMS, Deliverer and all Variants, Router)
+        GamePropertyTarget(ObjectClass.dropship, "cargomountzone1_acceptedvehicles" -> "ams aurora delivererv fury mediumtransport two_man_assault_buggy twomanhoverbuggy quadassault threemanheavybuggy thunderer twomanheavybuggy quadstealth router ant lightning skyguard switchblade"),
 
         //Flight Ceiling for all aircraft except the droppod
-        //GamePropertyTarget(ObjectClass.dropship, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.galaxy_gunship, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.liberator, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.lightgunship, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.lodestar, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.mosquito, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.orbital_shuttle, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.phantasm, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.vulture, "flightmaxheight" -> "500"),
-        //GamePropertyTarget(ObjectClass.wasp, "flightmaxheight" -> "500"),
+        //GamePropertyTarget(ObjectClass.dropship, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.galaxy_gunship, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.liberator, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.lightgunship, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.lodestar, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.mosquito, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.orbital_shuttle, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.phantasm, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.vulture, "flightmaxheight" -> "600"),
+        //GamePropertyTarget(ObjectClass.wasp, "flightmaxheight" -> "600"),
 
         //Droppod Max Height (4000 is default)
         //GamePropertyTarget(ObjectClass.droppod, "flightmaxheight" -> "4000"),
 
         //Fusion Blade
-        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
-        GamePropertyTarget(ObjectClass.katana, "allowed" -> "true"),
+//        GamePropertyTarget(ObjectClass.katana, "requirement_award0" -> "false"),
+//        GamePropertyTarget(ObjectClass.katana, "allowed" -> "true"),
 
         //Event Kits - Super Stamina Kit
         GamePropertyTarget(ObjectClass.super_staminakit, "requirement_award0" -> "false"),
         GamePropertyTarget(ObjectClass.super_staminakit, "allowed" -> "true"),
         GamePropertyTarget(ObjectClass.super_staminakit, "nodrop" -> "false"),
+
+        //Super Stamina Kit -- Cooldown Timer (5 minutes)
+        GamePropertyTarget(ObjectClass.super_staminakit, "medkit_reuse_delay" -> "300"),
 
         //Event Kits - Super Armor Kit
         //GamePropertyTarget(ObjectClass.super_armorkit, "requirement_award0" -> "false"),
@@ -1043,6 +1061,126 @@ class WorldSessionActor extends Actor with MDCContextAware {
         //GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_six_shooter_ammo" -> "ordertype_equipment"),
         //GamePropertyTarget(ObjectClass.six_shooter_ammo, "allowed" -> "true"),
 
+        //Equip/Holster Time Changes (Quality of Life)
+
+        //Heavy Items -- Equip/Holster Time Changes -- 0.75 seconds
+        GamePropertyTarget(ObjectClass.r_shotgun, "equiptime" -> "750"),
+        GamePropertyTarget(ObjectClass.r_shotgun, "holstertime" -> "750"),
+        GamePropertyTarget(ObjectClass.mini_chaingun, "equiptime" -> "750"),
+        GamePropertyTarget(ObjectClass.mini_chaingun, "holstertime" -> "750"),
+        GamePropertyTarget(ObjectClass.lasher, "equiptime" -> "750"),
+        GamePropertyTarget(ObjectClass.lasher, "holstertime" -> "750"),
+        GamePropertyTarget(ObjectClass.flamethrower, "equiptime" -> "750"),
+        GamePropertyTarget(ObjectClass.flamethrower, "holstertime" -> "750"),
+        GamePropertyTarget(ObjectClass.maelstrom, "equiptime" -> "750"),
+        GamePropertyTarget(ObjectClass.maelstrom, "holstertime" -> "750"),
+        GamePropertyTarget(ObjectClass.advanced_ace, "equiptime" -> "750"),
+        GamePropertyTarget(ObjectClass.advanced_ace, "holstertime" -> "750"),
+
+
+        //Medium Items -- Equip/Holster Time Changes -- 0.6 seconds
+        GamePropertyTarget(ObjectClass.suppressor, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.suppressor, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.punisher, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.punisher, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.gauss, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.gauss, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.cycler, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.cycler, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.cycler_v2, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.cycler_v2, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.cycler_v3, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.cycler_v3, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.cycler_v4, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.cycler_v4, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.pulsar, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.pulsar, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.radiator, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.radiator, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.nano_dispenser, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.nano_dispenser, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.thumper, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.thumper, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.rocklet, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.rocklet, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.flechette, "equiptime" -> "600"),
+        GamePropertyTarget(ObjectClass.flechette, "holstertime" -> "600"),
+        GamePropertyTarget(ObjectClass.oicw, "equiptime" -> "750"),
+        GamePropertyTarget(ObjectClass.oicw, "holstertime" -> "750"),
+        GamePropertyTarget(ObjectClass.pellet_gun, "equiptime" -> "750"),
+        GamePropertyTarget(ObjectClass.pellet_gun, "holstertime" -> "750"),
+
+        //Small Items -- Equip/Holster Time Changes -- 0.5s
+        GamePropertyTarget(ObjectClass.applicator, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.applicator, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.bank, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.bank, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.trek, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.trek, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.spiker, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.spiker, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.isp, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.isp, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.ilc9, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.ilc9, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.six_shooter, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.six_shooter, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.beamer, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.beamer, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.repeater, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.repeater, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.remote_electronics_kit, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.remote_electronics_kit, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.flail_targeting_laser, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.flail_targeting_laser, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.anniversary_gun, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.anniversary_gun, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.anniversary_guna, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.anniversary_guna, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.anniversary_gunb, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.anniversary_gunb, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.ace, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.ace, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.ace_deployable, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.ace_deployable, "holstertime" -> "500"),
+
+        //Knives -- Equip/Holster Time Changes -- 0.25 seconds
+        GamePropertyTarget(ObjectClass.katana, "equiptime" -> "250"),
+        GamePropertyTarget(ObjectClass.katana, "holstertime" -> "250"),
+        GamePropertyTarget(ObjectClass.forceblade, "equiptime" -> "250"),
+        GamePropertyTarget(ObjectClass.forceblade, "holstertime" -> "250"),
+        GamePropertyTarget(ObjectClass.magcutter, "equiptime" -> "250"),
+        GamePropertyTarget(ObjectClass.magcutter, "holstertime" -> "250"),
+        GamePropertyTarget(ObjectClass.forceblade, "equiptime" -> "250"),
+        GamePropertyTarget(ObjectClass.forceblade, "holstertime" -> "250"),
+
+        //Potentially Imba Equip/Holster Time Changes -- No Changes (Default Values Listed)
+        //GamePropertyTarget(ObjectClass.phoenix, "equiptime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.phoenix, "holstertime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.generic_grenade, "equiptime" -> "700"),
+        //GamePropertyTarget(ObjectClass.generic_grenade, "holstertime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.bolt_driver, "equiptime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.bolt_driver, "holstertime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.winchester, "equiptime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.winchester, "holstertime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.heavy_sniper, "equiptime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.heavy_sniper, "holstertime" -> "1000"),
+
+        //Phoenix/Decimator -- Equip/Holster Time Changes -- No Changes because Decimator hotswap interactions could possibly change (Default Values Listed)
+        //GamePropertyTarget(ObjectClass.phoenix, "equiptime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.phoenix, "holstertime" -> "1000"),
+
+        //MAX Quality of Life Changes (Test)
+        GamePropertyTarget(390, "heavy_armor_turn_rate_cap" -> "65535"),
+        GamePropertyTarget(390, "max_pitch_rate" -> "1.00"),
+        GamePropertyTarget(390, "max_turn_rate" -> "1.00"),
+        GamePropertyTarget(390, "min_pitch_rate" -> "1.00"),
+        GamePropertyTarget(390, "min_turn_rate" -> "1.00"),
+        GamePropertyTarget(390, "jump_speed" -> "5.25"),
+
+        //Rexo Quality of Life Change (Test)
+        GamePropertyTarget(528, "jump_speed" -> "5.25"),
+
         //No PvP (doesn't work?)
         //Causes Medical Applicator to work in No PvP areas
         GamePropertyTarget(ObjectClass.medicalapplicator, "works_nopvp" -> "true"),
@@ -1063,6 +1201,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //          GamePropertyTarget(846, "activation_delay" -> "0"),
 //          GamePropertyTarget(846, "deactivation_delay" -> "0"),
 
+          //Armor Test
+          GamePropertyTarget(829, "run_forward_speed" -> "10"),
+          GamePropertyTarget(829, "strafe_run_speed" -> "10"),
+          GamePropertyTarget(829, "max_integrity" -> "75"),
+
           //Radiator Override Tests (to see what is possible)
           GamePropertyTarget(ObjectClass.radiator, "ancient_weapon" -> "false"),
           GamePropertyTarget(ObjectClass.radiator, "firemode0_ammo_max" -> "125"),
@@ -1078,8 +1221,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false"),
 
           //MAX Armor Test
-          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false"),
-          GamePropertyTarget(390, "heavy_armor_turn_rate_cap" -> "65535")
+          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false")
 
         )),
         GamePropertyScope(17,
@@ -5250,8 +5392,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       if(player.Stamina == player.MaxStamina) {
                         sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", "Stamina at maximum - No recharge required.", None))
                       }
-                      else if(System.currentTimeMillis - whenUsedLastSSKit < 1200000) {
-                        sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", s"@TimeUntilNextUse^${1200 - (System.currentTimeMillis - whenUsedLastSSKit) / 1000}~", None))
+                      else if(System.currentTimeMillis - whenUsedLastSSKit < 300000) { // PTS v3 real is 1200000
+                        sendResponse(ChatMsg(ChatMessageType.UNK_225, false, "", s"@TimeUntilNextUse^${300 - (System.currentTimeMillis - whenUsedLastSSKit) / 1000}~", None)) // PTS v3 real is 1200
                       }
                       else {
                         player.Find(kit) match {
