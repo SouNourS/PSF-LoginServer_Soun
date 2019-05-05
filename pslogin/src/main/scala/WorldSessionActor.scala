@@ -1111,8 +1111,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.pellet_gun, "holstertime" -> "750"),
 
         //Small Items -- Equip/Holster Time Changes -- 0.5s
-        GamePropertyTarget(ObjectClass.applicator, "equiptime" -> "500"),
-        GamePropertyTarget(ObjectClass.applicator, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.medicalapplicator, "equiptime" -> "500"),
+        GamePropertyTarget(ObjectClass.medicalapplicator, "holstertime" -> "500"),
         GamePropertyTarget(ObjectClass.bank, "equiptime" -> "500"),
         GamePropertyTarget(ObjectClass.bank, "holstertime" -> "500"),
         GamePropertyTarget(ObjectClass.trek, "equiptime" -> "500"),
