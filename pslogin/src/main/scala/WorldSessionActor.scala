@@ -980,8 +980,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //        GamePropertyTarget(ObjectClass.r_shotgun, "purchase_empire" -> "all"),
 //        GamePropertyTarget(ObjectClass.lasher, "purchase_empire" -> "all"),
 
+        // Lancer for All
+        GamePropertyTarget(ObjectClass.lancer, "purchase_empire" -> "all"),
+        GamePropertyTarget(ObjectClass.lancer_cartridge, "purchase_empire" -> "all"),
+
         //No Vulture requirement
         GamePropertyTarget(ObjectClass.vulture, "requirement_award0" -> "false"),
+
+        //One Man Field Turret can now be placed in any sphere of influence and on facility walls
+        GamePropertyTarget(685, "odf_soi_enemy" -> "true"),
+        GamePropertyTarget(685, "odf_soi_friendly" -> "true"),
+        GamePropertyTarget(685, "odf_walls" -> "true"),
 
         //MAX at AMS
 //        GamePropertyTarget(390, "purchase_ams" -> "true"),
@@ -1151,8 +1160,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.forceblade, "holstertime" -> "250"),
         GamePropertyTarget(ObjectClass.magcutter, "equiptime" -> "250"),
         GamePropertyTarget(ObjectClass.magcutter, "holstertime" -> "250"),
-        GamePropertyTarget(ObjectClass.forceblade, "equiptime" -> "250"),
-        GamePropertyTarget(ObjectClass.forceblade, "holstertime" -> "250"),
+        GamePropertyTarget(ObjectClass.chainblade, "equiptime" -> "250"),
+        GamePropertyTarget(ObjectClass.chainblade, "holstertime" -> "250"),
 
         //Potentially Imba Equip/Holster Time Changes -- No Changes (Default Values Listed)
         //GamePropertyTarget(ObjectClass.phoenix, "equiptime" -> "1000"),
@@ -1201,27 +1210,36 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //          GamePropertyTarget(846, "activation_delay" -> "0"),
 //          GamePropertyTarget(846, "deactivation_delay" -> "0"),
 
-          //Armor Test
-          GamePropertyTarget(829, "run_forward_speed" -> "10"),
-          GamePropertyTarget(829, "strafe_run_speed" -> "10"),
-          GamePropertyTarget(829, "max_integrity" -> "75"),
+          //Agile Armor Test
+          GamePropertyTarget(449, "capacitor_jump_lift" -> "15"),
+          GamePropertyTarget(449, "capacitor_jump_min" -> "0"),
+          GamePropertyTarget(449, "capacitor_jump_power_per_second" -> "20"),
+          GamePropertyTarget(449, "capacitor_max" -> "50"),
+          GamePropertyTarget(449, "capacitor_recharge_delay_ms" -> "5000"),
+          GamePropertyTarget(449, "capacitor_recharge_per_second" -> "3"),
+          GamePropertyTarget(449, "jumpcofpenalty" -> "1")
 
-          //Radiator Override Tests (to see what is possible)
-          GamePropertyTarget(ObjectClass.radiator, "ancient_weapon" -> "false"),
-          GamePropertyTarget(ObjectClass.radiator, "firemode0_ammo_max" -> "125"),
-          GamePropertyTarget(ObjectClass.radiator, "equiptime" -> "100"),
-          GamePropertyTarget(ObjectClass.radiator, "holstertime" -> "100"),
-          GamePropertyTarget(ObjectClass.radiator, "firemode0_maxCOF" -> "0"),
-          GamePropertyTarget(ObjectClass.radiator, "clientfiremode0_crosshair" -> "RifleCrosshair"),
-          GamePropertyTarget(ObjectClass.radiator, "firemode0_refiretime" -> "100"),
-          GamePropertyTarget(ObjectClass.radiator, "firemode0_reloadtime" -> "0.500"),
-          GamePropertyTarget(ObjectClass.radiator, "firemode0_recoil" -> "0"),
-          GamePropertyTarget(ObjectClass.radiator, "firemode0_defaultCOF" -> "0"),
-          GamePropertyTarget(ObjectClass.radiator, "firemode0_crouchCOF" -> "0"),
-          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false"),
-
-          //MAX Armor Test
-          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false")
+//          //Armor Test
+//          GamePropertyTarget(829, "run_forward_speed" -> "10"),
+//          GamePropertyTarget(829, "strafe_run_speed" -> "10"),
+//          GamePropertyTarget(829, "max_integrity" -> "75"),
+//
+//          //Radiator Override Tests (to see what is possible)
+//          GamePropertyTarget(ObjectClass.radiator, "ancient_weapon" -> "false"),
+//          GamePropertyTarget(ObjectClass.radiator, "firemode0_ammo_max" -> "125"),
+//          GamePropertyTarget(ObjectClass.radiator, "equiptime" -> "100"),
+//          GamePropertyTarget(ObjectClass.radiator, "holstertime" -> "100"),
+//          GamePropertyTarget(ObjectClass.radiator, "firemode0_maxCOF" -> "0"),
+//          GamePropertyTarget(ObjectClass.radiator, "clientfiremode0_crosshair" -> "RifleCrosshair"),
+//          GamePropertyTarget(ObjectClass.radiator, "firemode0_refiretime" -> "100"),
+//          GamePropertyTarget(ObjectClass.radiator, "firemode0_reloadtime" -> "0.500"),
+//          GamePropertyTarget(ObjectClass.radiator, "firemode0_recoil" -> "0"),
+//          GamePropertyTarget(ObjectClass.radiator, "firemode0_defaultCOF" -> "0"),
+//          GamePropertyTarget(ObjectClass.radiator, "firemode0_crouchCOF" -> "0"),
+//          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false"),
+//
+//          //MAX Armor Test
+//          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false")
 
         )),
         GamePropertyScope(17,
@@ -4511,10 +4529,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       CSRWarp.read(traveler, msg) match {
         case (true, pos) =>
-          if (player.isAlive && (admin || movieMaker || continent == "z8" || continent == "c1" || continent == "c2" || continent == "c3" || continent == "c4" || continent == "c5" || continent == "c6" ||
-            continent == "tzshtr" || continent == "tzcotr" || continent == "tzdrtr" ||
-            continent == "tzshnc" || continent == "tzconc" || continent == "tzdrnc" ||
-            continent == "tzshvs" || continent == "tzcovs" || continent == "tzdrvs")) {
+          if (player.isAlive && (admin || movieMaker || continent.Id == "z8" || continent.Id == "c1" || continent.Id == "c2" || continent.Id == "c3" || continent.Id == "c4" || continent.Id == "c5" ||
+            continent.Id == "c6" ||
+            continent.Id == "tzshtr" || continent.Id == "tzcotr" || continent.Id == "tzdrtr" ||
+            continent.Id == "tzshnc" || continent.Id == "tzconc" || continent.Id == "tzdrnc" ||
+            continent.Id == "tzshvs" || continent.Id == "tzcovs" || continent.Id == "tzdrvs")) {
             deadState = DeadState.Release //cancel movement updates
             PlayerActionsToCancel()
             continent.GUID(player.VehicleSeated) match {
@@ -5430,7 +5449,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   // TODO : bank ?
                   continent.GUID(object_guid) match {
                     case Some(tplayer: Player) =>
-                      if (player.GUID != tplayer.GUID && player.Velocity.isEmpty && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction) {
+                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 3 && player.Faction == tplayer.Faction) { // PTS v3 : 5 to 3 && player.Velocity.isEmpty
                         if (tplayer.MaxArmor - tplayer.Armor <= 15) {
                           tplayer.Armor = tplayer.MaxArmor
                           //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
@@ -5469,7 +5488,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   // TODO : med app ?
                   continent.GUID(object_guid) match {
                     case Some(tplayer: Player) =>
-                      if (player.GUID != tplayer.GUID && player.Velocity.isEmpty && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction) {
+                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 3 && player.Faction == tplayer.Faction) { // PTS v3 : 5 to 3 && player.Velocity.isEmpty
                         if (tplayer.MaxHealth - tplayer.Health <= 10) {
                           tplayer.Health = tplayer.MaxHealth
                           //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
