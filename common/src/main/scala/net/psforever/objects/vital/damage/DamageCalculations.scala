@@ -144,12 +144,12 @@ object DamageCalculations {
     */
   def LashDamage(projectile : Projectile, rawDamage : Int, distance : Float) : Int = {
 //    if(distance > 5) {
-//      (DirectHitDamageWithDegrade(projectile, rawDamage, math.max(distance - 5, 0f)) * 0.4f) toInt // PTS v3 (was 0.2 before)
+//      (DirectHitDamageWithDegrade(projectile, rawDamage, math.max(distance - 5, 0f)) * 0.2f) toInt
 //    }
 //    else {
 //      0
 //    }
-    (DirectHitDamageWithDegrade(projectile, rawDamage, distance) * 0.4f) toInt // PTS v3 for Nick
+    (DirectHitDamageWithDegrade(projectile, rawDamage, distance) * 0.3f) toInt // PTS v3 for Nick
   }
 
   //distance functions

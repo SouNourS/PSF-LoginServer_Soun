@@ -6,10 +6,13 @@ import net.psforever.objects.serverobject.structures.WarpGate
 import net.psforever.objects.zones.Zone
 import net.psforever.types.PlanetSideEmpire
 
+
 object Zones {
   val z1 = new Zone("z1", Maps.map1, 1){ // Solsar
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
+    HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+    HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
     Buildings.values.flatMap {
       _.Amenities.collect {
@@ -53,6 +56,8 @@ object Zones {
   val z2 = new Zone("z2", Maps.map2, 2){ // Hossin
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -94,6 +99,8 @@ object Zones {
   val z3 = new Zone("z3", Maps.map3, 3){ // Cyssor
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
+    HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+    HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
     Buildings.values.flatMap {
       _.Amenities.collect {
@@ -142,6 +149,8 @@ object Zones {
   val z4 = new Zone("z4", Maps.map4, 4) { // Ishundar
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -249,6 +258,8 @@ object Zones {
   val z5 = new Zone("z5", Maps.map5, 5){ // Forseral
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -292,6 +303,8 @@ object Zones {
   val z6 = new Zone("z6", Maps.map6, 6) { // Ceryshen
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -341,6 +354,8 @@ object Zones {
   val z7 = new Zone("z7", Maps.map7, 7){ // Esamir
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -386,6 +401,8 @@ object Zones {
   val z8 = new Zone("z8", Maps.map8, 8) { // Oshur
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -435,6 +452,8 @@ object Zones {
   val z9 = new Zone("z9", Maps.map9, 9) { // Searhus
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
+    HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+    HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
     Buildings.values.flatMap {
       _.Amenities.collect {
@@ -479,6 +498,8 @@ object Zones {
   val z10 = new Zone("z10", Maps.map10, 10) { // Amerish
   override def Init(implicit context : ActorContext) : Unit = {
     super.Init(context)
+    HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+    HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
     Buildings.values.flatMap {
       _.Amenities.collect {
@@ -589,29 +610,63 @@ object Zones {
 
   val tzcovs = new Zone("tzcovs", Maps.map16, 22)
 
-  val c1 = new Zone("c1", Maps.ugd01, 23)
+  val c1 = new Zone("c1", Maps.ugd01, 23) {
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
 
-  val c2 = new Zone("c2", Maps.ugd02, 24)
+  val c2 = new Zone("c2", Maps.ugd02, 24) {
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
 
-  val c3 = new Zone("c3", Maps.ugd03, 25)//{
-  //    override def Init(implicit context : ActorContext) : Unit = {
-  //      super.Init(context)
-  //
-  //      import net.psforever.types.PlanetSideEmpire
-  //      BuildingByMapId(10359).get.Faction = PlanetSideEmpire.TR //Redoubt SE
-  //      BuildingByMapId(10359).ModelId = 104
-  //    }
-  //  }
+  val c3 = new Zone("c3", Maps.ugd03, 25){
+      override def Init(implicit context : ActorContext) : Unit = {
+        super.Init(context)
+        HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+        HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-  val c4 = new Zone("c4", Maps.ugd04, 26)
+//        import net.psforever.types.PlanetSideEmpire
+//        BuildingByMapId(10359).get.Faction = PlanetSideEmpire.TR //Redoubt SE
+//        BuildingByMapId(10359).ModelId = 104
+      }
+    }
 
-  val c5 = new Zone("c5", Maps.ugd05, 27)
+  val c4 = new Zone("c4", Maps.ugd04, 26) {
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
 
-  val c6 = new Zone("c6", Maps.ugd06, 28)
+  val c5 = new Zone("c5", Maps.ugd05, 27) {
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
+
+  val c6 = new Zone("c6", Maps.ugd06, 28) {
+    override def Init(implicit context : ActorContext) : Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
 
   val i1 = new Zone("i1", Maps.map99, 29){
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -639,6 +694,8 @@ object Zones {
   val i2 = new Zone("i2", Maps.map98, 30){
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -666,6 +723,8 @@ object Zones {
   val i3 = new Zone("i3", Maps.map97, 31){
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -693,6 +752,8 @@ object Zones {
   val i4 = new Zone("i4", Maps.map96, 32){
     override def Init(implicit context : ActorContext) : Unit = {
       super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
       Buildings.values.flatMap {
         _.Amenities.collect {
@@ -774,6 +835,102 @@ object Zones {
     }
     else {
       0
+    }
+  }
+
+  object HotSpots {
+    import net.psforever.objects.ballistics.SourceEntry
+    import net.psforever.objects.zones.MapScale
+    import net.psforever.types.Vector3
+
+    import scala.concurrent.duration._
+
+    /**
+      * Produce hotspot coordinates based on map coordinates.
+      * @see `FindClosestDivision`
+      * @param scale the map's scale (width and height)
+      * @param longDivNum the number of division lines spanning the width of the `scale`
+      * @param latDivNum the number of division lines spanning the height of the `scale`
+      * @param pos the absolute position of the activity reported
+      * @return the position for a hotspot
+      */
+    def StandardRemapping(scale : MapScale, longDivNum : Int, latDivNum : Int)(pos : Vector3) : Vector3 = {
+      Vector3(
+        //x
+        FindClosestDivision(pos.x, scale.width, longDivNum),
+        //y
+        FindClosestDivision(pos.y, scale.height, latDivNum),
+        //z is always zero - maps are flat 2D planes
+        0
+      )
+    }
+
+    /**
+      * Produce hotspot coordinates based on map coordinates.<br>
+      * <br>
+      * Transform a reported number by mapping it
+      * into a division from a regular pattern of divisions
+      * defined by the scale divided evenly a certain number of times.
+      * The depicted number of divisions is actually one less than the parameter number
+      * as the first division is used to represent everything before that first division (there is no "zero").
+      * Likewise, the last division occurs before the farther edge of the scale is counted
+      * and is used to represent everything after that last division.
+      * This is not unlike rounding.
+      * @param coordinate the point to scale
+      * @param scale the map's scale (width and height)
+      * @param divisions the number of division lines spanning across the `scale`
+      * @return the closest regular division
+      */
+    private def FindClosestDivision(coordinate : Float, scale : Float, divisions : Float) : Float = {
+      val divLength : Float = scale / divisions
+      if(coordinate >= scale - divLength) {
+        scale - divLength
+      }
+      else if(coordinate >= divLength) {
+        val sector : Float = (coordinate * divisions / scale).toInt * divLength
+        val nextSector : Float = sector + divLength
+        if(coordinate - sector < nextSector - coordinate) {
+          sector
+        }
+        else {
+          nextSector
+        }
+      }
+      else {
+        divLength
+      }
+    }
+
+    /**
+      * Determine a duration for which the hotspot will be displayed on the zone map.
+      * Friendly fire is not recognized.
+      * @param defender the defending party
+      * @param attacker the attacking party
+      * @return the duration
+      */
+    def StandardTimeRules(defender : SourceEntry, attacker : SourceEntry) : FiniteDuration = {
+      import net.psforever.objects.ballistics._
+      import net.psforever.objects.GlobalDefinitions
+      if(attacker.Faction == defender.Faction) {
+        0 seconds
+      }
+      else {
+        //TODO is target occupy-able and occupied, or jammer-able and jammered?
+        defender match {
+          case _ : PlayerSource =>
+            60 seconds
+          case _ : VehicleSource =>
+            60 seconds
+          case t : ObjectSource if t.Definition == GlobalDefinitions.manned_turret =>
+            60 seconds
+          case _ : DeployableSource =>
+            30 seconds
+          case _ : ComplexDeployableSource =>
+            30 seconds
+          case _ =>
+            0 seconds
+        }
+      }
     }
   }
 }

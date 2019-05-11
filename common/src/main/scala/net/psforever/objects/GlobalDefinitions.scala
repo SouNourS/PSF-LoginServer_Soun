@@ -2406,7 +2406,8 @@ object GlobalDefinitions {
     flail_projectile.Damage2 = 1000
     flail_projectile.Damage3 = 1000
     flail_projectile.Damage4 = 1500
-    flail_projectile.DamageAtEdge = 0.1f
+//    flail_projectile.DamageAtEdge = 0.1f  // PTS v3
+    flail_projectile.DamageAtEdge = 0.5f
     flail_projectile.DamageRadius = 15f
     flail_projectile.ProjectileDamageType = DamageType.Splash
 //    flail_projectile.DegradeDelay = 1.5f  // PTS v3

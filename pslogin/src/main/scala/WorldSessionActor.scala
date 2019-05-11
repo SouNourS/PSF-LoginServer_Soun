@@ -44,8 +44,9 @@ import net.psforever.objects.serverobject.tube.SpawnTube
 import net.psforever.objects.serverobject.turret.{FacilityTurret, TurretUpgrade, WeaponTurret}
 import net.psforever.objects.vehicles.{AccessPermissionGroup, Cargo, Utility, VehicleLockState, _}
 import net.psforever.objects.vital._
-import net.psforever.objects.zones.{InterstellarCluster, Zone}
+import net.psforever.objects.zones.{InterstellarCluster, Zone, ZoneHotSpotProjector}
 import net.psforever.packet.game.objectcreate._
+import net.psforever.packet.game.{HotSpotInfo => PacketHotSpotInfo}
 import net.psforever.types._
 import services._
 import services.account.{ReceiveAccountData, RetrieveAccountData}
@@ -334,6 +335,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case GalaxyServiceResponse(_, reply) =>
       reply match {
+        case GalaxyResponse.HotSpotUpdate(zone_index, priority, hot_spot_info) =>
+          sendResponse(
+            HotSpotUpdateMessage(
+              zone_index,
+              priority,
+              hot_spot_info.map { spot => PacketHotSpotInfo(spot.DisplayLocation.x, spot.DisplayLocation.y, 40) }
+            )
+          )
         case GalaxyResponse.MapUpdate(msg) =>
           sendResponse(msg)
       }
@@ -632,7 +641,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
       }
       sendResponse(ZoneLockInfoMessage(continentNumber, false, true))
       sendResponse(ZoneForcedCavernConnectionsMessage(continentNumber, 0))
-      sendResponse(HotSpotUpdateMessage(continentNumber, 1, Nil)) //normally set in bulk; should be fine doing per continent
+//      sendResponse(HotSpotUpdateMessage(
+//        continentNumber,
+//        1,
+//        ZoneHotSpotProjector.SpecificHotSpotInfo(player.Faction, zone.HotSpots)
+//          .map { spot => PacketHotSpotInfo(spot.DisplayLocation.x, spot.DisplayLocation.y, 40) }
+//      )) //normally set for all zones in bulk; should be fine manually updating per zone like this
       StopBundlingPackets()
 
     case Zone.Population.PlayerHasLeft(zone, None) =>
@@ -651,7 +665,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case Zone.Lattice.SpawnPoint(zone_id, spawn_tube) =>
       var (pos, ori) = spawn_tube.SpecificPoint(continent.GUID(player.VehicleSeated) match {
-        case Some(obj) =>
+        case Some(obj : Vehicle) if obj.Health > 0 =>
           obj
         case _ =>
           player
@@ -1460,6 +1474,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       avatarService ! Service.Join(avatar.name) //channel will be player.Name
       localService ! Service.Join(avatar.name) //channel will be player.Name
       vehicleService ! Service.Join(avatar.name) //channel will be player.Name
+      galaxyService ! Service.Join("galaxy") //for galaxy-wide messages
+      galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
 //      cluster ! InterstellarCluster.GetWorld("z4")
 //      cluster ! InterstellarCluster.GetWorld("z8")
 //      cluster ! InterstellarCluster.GetWorld("z5")
@@ -1799,7 +1815,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
               //first damage entry -> most recent damage source -> killing blow
               target.History.find(p => p.isInstanceOf[DamagingActivity]) match {
                 case Some(data : DamageFromProjectile) =>
-                  data.data.projectile.owner match {
+                  val owner = data.data.projectile.owner
+                  owner match {
                     case pSource : PlayerSource =>
                       continent.LivePlayers.find(_.Name == pSource.Name) match {
                         case Some(tplayer) =>
@@ -1810,6 +1827,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       sendResponse(DamageWithPositionMessage(damageToHealth + damageToArmor, vSource.Position))
                     case _ => ;
                   }
+                  continent.Activity ! Zone.HotSpot.Activity(owner, data.Target, target.Position)
                 case _ => ;
               }
             }
@@ -3159,6 +3177,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           log.info(s"HandleCheckCargoMounting: mounting cargo vehicle in carrier at distance of $distance")
           cargo.MountedIn = carrierGUID
           hold.Occupant = cargo
+          cargo.Velocity = None
           vehicleService ! VehicleServiceMessage(s"${cargo.Actor}", VehicleAction.SendResponse(PlanetSideGUID(0), PlanetsideAttributeMessage(cargoGUID, 0, cargo.Health)))
           vehicleService ! VehicleServiceMessage(s"${cargo.Actor}", VehicleAction.SendResponse(PlanetSideGUID(0), PlanetsideAttributeMessage(cargoGUID, 68, cargo.Shields)))
           StartBundlingPackets()
@@ -3327,56 +3346,104 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def HandleVehicleDamageResolution(target : Vehicle) : Unit = {
     val targetGUID = target.GUID
     val playerGUID = player.GUID
-    val continentId = continent.Id
     val players = target.Seats.values.filter(seat => {
       seat.isOccupied && seat.Occupant.get.isAlive
     })
-    if(target.Health > 0) {
-      //alert occupants to damage source
-      players.foreach(seat => {
-        val tplayer = seat.Occupant.get
-        avatarService ! AvatarServiceMessage(tplayer.Name, AvatarAction.HitHint(playerGUID, tplayer.GUID))
-      })
-    }
-    else {
-      //alert to vehicle death (hence, occupants' deaths)
-      players.foreach(seat => {
-        val tplayer = seat.Occupant.get
-        val tplayerGUID = tplayer.GUID
-        avatarService ! AvatarServiceMessage(tplayer.Name, AvatarAction.KilledWhileInVehicle(tplayerGUID))
-        avatarService ! AvatarServiceMessage(continentId, AvatarAction.ObjectDelete(tplayerGUID, tplayerGUID)) //dead player still sees self
-      })
-      //vehicle wreckage has no weapons
-      target.Weapons.values
-        .filter {
-          _.Equipment.nonEmpty
+    target.LastShot match { //TODO: collision damage from/in history
+      case Some(shot) =>
+        if(target.Health > 0) {
+          //activity on map
+          continent.Activity ! Zone.HotSpot.Activity(shot.target, shot.projectile.owner, shot.hit_pos)
+          //alert occupants to damage source
+          HandleVehicleDamageAwareness(target, playerGUID, shot)
         }
-        .foreach(slot => {
-          val wep = slot.Equipment.get
-          avatarService ! AvatarServiceMessage(continentId, AvatarAction.ObjectDelete(Service.defaultPlayerGUID, wep.GUID))
-        })
-      target.CargoHolds.values.foreach(hold => {
-        hold.Occupant match {
-          case Some(cargo) =>
+        else {
+          //alert to vehicle death (hence, occupants' deaths)
+          HandleVehicleDestructionAwareness(target, shot)
+        }
+        vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.PlanetsideAttribute(Service.defaultPlayerGUID, targetGUID, 0, target.Health))
+        vehicleService ! VehicleServiceMessage(s"${target.Actor}", VehicleAction.PlanetsideAttribute(Service.defaultPlayerGUID, targetGUID, 68, target.Shields))
+      case None => ;
+    }
+  }
 
-          case None => ;
-        }
-      })
-      target.Definition match {
-        case GlobalDefinitions.ams =>
-          target.Actor ! Deployment.TryDeploymentChange(DriveState.Undeploying)
-        case GlobalDefinitions.router =>
-          target.Actor ! Deployment.TryDeploymentChange(DriveState.Undeploying)
-          BeforeUnloadVehicle(target)
-          localService ! LocalServiceMessage(continent.Id, LocalAction.ToggleTeleportSystem(PlanetSideGUID(0), target, None))
-        case _ => ;
+  /**
+    * na
+    * @param target na
+    * @param attribution na
+    * @param lastShot na
+    */
+  def HandleVehicleDamageAwareness(target : Vehicle, attribution : PlanetSideGUID, lastShot : ResolvedProjectile) : Unit = {
+    //alert occupants to damage source
+    target.Seats.values.filter(seat => {
+      seat.isOccupied && seat.Occupant.get.isAlive
+    }).foreach(seat => {
+      val tplayer = seat.Occupant.get
+      avatarService ! AvatarServiceMessage(tplayer.Name, AvatarAction.HitHint(attribution, tplayer.GUID))
+    })
+    //alert cargo occupants to damage source
+    target.CargoHolds.values.foreach(hold => {
+      hold.Occupant match {
+        case Some(cargo) =>
+          cargo.Health = 0
+          cargo.Shields = 0
+          cargo.History(lastShot)
+          HandleVehicleDamageAwareness(cargo, attribution, lastShot)
+        case None => ;
       }
-      avatarService ! AvatarServiceMessage(continentId, AvatarAction.Destroy(targetGUID, playerGUID, playerGUID, target.Position))
-      vehicleService ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(target), continent))
-      vehicleService ! VehicleServiceMessage.Decon(RemoverActor.AddTask(target, continent, Some(1 minute)))
+    })
+  }
+
+  /**
+    * na
+    * @param target na
+    * @param attribution na
+    * @param lastShot na
+    */
+  def HandleVehicleDestructionAwareness(target : Vehicle, lastShot : ResolvedProjectile) : Unit = {
+    val playerGUID = player.GUID
+    val continentId = continent.Id
+    //alert to vehicle death (hence, occupants' deaths)
+    target.Seats.values.filter(seat => {
+      seat.isOccupied && seat.Occupant.get.isAlive
+    }).foreach(seat => {
+      val tplayer = seat.Occupant.get
+      val tplayerGUID = tplayer.GUID
+      avatarService ! AvatarServiceMessage(tplayer.Name, AvatarAction.KilledWhileInVehicle(tplayerGUID))
+      avatarService ! AvatarServiceMessage(continentId, AvatarAction.ObjectDelete(tplayerGUID, tplayerGUID)) //dead player still sees self
+    })
+    //vehicle wreckage has no weapons
+    target.Weapons.values
+      .filter {
+        _.Equipment.nonEmpty
+      }
+      .foreach(slot => {
+        val wep = slot.Equipment.get
+        avatarService ! AvatarServiceMessage(continentId, AvatarAction.ObjectDelete(Service.defaultPlayerGUID, wep.GUID))
+      })
+    target.CargoHolds.values.foreach(hold => {
+      hold.Occupant match {
+        case Some(cargo) =>
+          cargo.Health = 0
+          cargo.Shields = 0
+          cargo.Position += Vector3.z(1)
+          cargo.History(lastShot) //necessary to kill cargo vehicle occupants //TODO: collision damage
+          HandleVehicleDestructionAwareness(cargo, lastShot) //might cause redundant packets
+        case None => ;
+      }
+    })
+    target.Definition match {
+      case GlobalDefinitions.ams =>
+        target.Actor ! Deployment.TryDeploymentChange(DriveState.Undeploying)
+      case GlobalDefinitions.router =>
+        target.Actor ! Deployment.TryDeploymentChange(DriveState.Undeploying)
+        BeforeUnloadVehicle(target)
+        localService ! LocalServiceMessage(continent.Id, LocalAction.ToggleTeleportSystem(PlanetSideGUID(0), target, None))
+      case _ => ;
     }
-    vehicleService ! VehicleServiceMessage(continentId, VehicleAction.PlanetsideAttribute(Service.defaultPlayerGUID, targetGUID, 0, target.Health))
-    vehicleService ! VehicleServiceMessage(s"${target.Actor}", VehicleAction.PlanetsideAttribute(Service.defaultPlayerGUID, targetGUID, 68, target.Shields))
+    avatarService ! AvatarServiceMessage(continentId, AvatarAction.Destroy(target.GUID, playerGUID, playerGUID, target.Position))
+    vehicleService ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(target), continent))
+    vehicleService ! VehicleServiceMessage.Decon(RemoverActor.AddTask(target, continent, Some(1 minute)))
   }
 
   /**
@@ -3975,7 +4042,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
       localService ! Service.Join(factionOnContinentChannel)
       vehicleService ! Service.Join(continentId)
       vehicleService ! Service.Join(factionOnContinentChannel)
-      galaxyService ! Service.Join("galaxy")
       if(connectionState != 100) configZone(continent) // PTS v3
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
@@ -4388,11 +4454,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
             }
             obj.Position = pos
             obj.Orientation = ang
-            obj.Velocity = vel
-            if(obj.Definition.CanFly) {
-              obj.Flying = flight.nonEmpty //usually Some(7)
+            if(obj.MountedIn.isEmpty) {
+              obj.Velocity = vel
+              if(obj.Definition.CanFly) {
+                obj.Flying = flight.nonEmpty //usually Some(7)
+              }
+              vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.VehicleState(player.GUID, vehicle_guid, unk1, pos, ang, vel, flight, unk6, unk7, wheels, unk9, unkA))
             }
-            vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.VehicleState(player.GUID, vehicle_guid, unk1, pos, ang, vel, flight, unk6, unk7, wheels, unk9, unkA))
           case (None, _) =>
             //log.error(s"VehicleState: no vehicle $vehicle_guid found in zone")
             //TODO placing a "not driving" warning here may trigger as we are disembarking the vehicle
@@ -8152,6 +8220,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
     }) match {
       case Some(shot) =>
+        continent.Activity ! Zone.HotSpot.Activity(pentry, shot.projectile.owner, shot.hit_pos)
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.DestroyDisplay(shot.projectile.owner, pentry, shot.projectile.attribute_to))
       case None =>
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.DestroyDisplay(pentry, pentry, 0))
@@ -8576,8 +8645,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
     }
     else {
       continent.GUID(player.VehicleSeated) match {
-        case Some(_ : Vehicle) =>
-          cluster ! Zone.Lattice.RequestSpawnPoint(sanctNumber, tplayer, 12) //warp gates
+        case Some(obj : Vehicle) if obj.Health > 0 =>
+          cluster ! Zone.Lattice.RequestSpawnPoint(sanctNumber, tplayer, 12) //warp gates for functioning vehicles
         case None =>
           cluster ! Zone.Lattice.RequestSpawnPoint(sanctNumber, tplayer, 7) //player character spawns
         case _ =>
