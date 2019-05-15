@@ -104,6 +104,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
   //keep track of avatar's ServerVehicleOverride state
   var traveler : Traveler = null
   var deadState : DeadState.Value = DeadState.Dead
+  var whenUsedLastAAMAX : Long = 0
+  var whenUsedLastAIMAX : Long = 0
+  var whenUsedLastAVMAX : Long = 0
   var whenUsedLastKit : Long = 0
   var whenUsedLastSMKit : Long = 0
   var whenUsedLastSAKit : Long = 0
@@ -2513,15 +2516,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
       case Terminal.InfantryLoadout(exosuit, subtype, holsters, inventory) =>
         log.info(s"$tplayer wants to change equipment loadout to their option #${msg.unk1 + 1}")
         sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Loadout, true))
+        //sanitize exo-suit for change
+        val originalSuit = player.ExoSuit
+        val originalSubtype = Loadout.DetermineSubtype(tplayer)
         //prepare lists of valid objects
         val beforeFreeHand = tplayer.FreeHand.Equipment
         val dropPred = DropPredicate(tplayer)
         val (dropHolsters, beforeHolsters) = clearHolsters(tplayer.Holsters().iterator).partition(dropPred)
         val (dropInventory, beforeInventory) = tplayer.Inventory.Clear().partition(dropPred)
         tplayer.FreeHand.Equipment = None //terminal and inventory will close, so prematurely dropping should be fine
-        //sanitize exo-suit for change
-        val originalSuit = player.ExoSuit
-        val originalSubtype = Loadout.DetermineSubtype(tplayer)
         val fallbackSuit = ExoSuitType.Standard
         val fallbackSubtype = 0
         //a loadout with a prohibited exo-suit type will result in a fallback exo-suit type
@@ -2536,7 +2539,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
             case permissions =>
               tplayer.Certifications.intersect(permissions.toSet).nonEmpty
           }) {
-          (exosuit, subtype)
+            val lTime = System.currentTimeMillis
+            if ((lTime - whenUsedLastAIMAX < 300000 && subtype == 1) || // PTS v3 hack
+              (lTime - whenUsedLastAVMAX < 300000 && subtype == 2) ||
+              (lTime - whenUsedLastAAMAX < 300000 && subtype == 3)) {
+              (originalSuit, originalSubtype)
+            } else {
+              if (lTime - whenUsedLastAIMAX > 300000 && subtype == 1) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, "nchev_antipersonnel", 300, true))
+              else if (lTime - whenUsedLastAVMAX > 300000 && subtype == 2) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, "nchev_antivehicular", 300, true))
+              else if (lTime - whenUsedLastAAMAX > 300000 && subtype == 3) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, "nchev_antiaircraft", 300, true))
+              (exosuit, subtype)
+            }
         }
         else {
           log.warn(s"$tplayer no longer has permission to wear the exo-suit type $exosuit; will wear $fallbackSuit instead")
@@ -3689,6 +3702,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     val (inf, veh) = avatar.Loadouts.partition { case (index, _) => index < 10 }
     inf.foreach {
       case (index, loadout : InfantryLoadout) =>
+        println(loadout.label, InfantryLoadout.DetermineSubtypeB(loadout.exosuit, loadout.subtype))
         sendResponse(FavoritesMessage(LoadoutType.Infantry, guid, index, loadout.label, InfantryLoadout.DetermineSubtypeB(loadout.exosuit, loadout.subtype)))
     }
     veh.foreach {
@@ -5970,7 +5984,28 @@ class WorldSessionActor extends Actor with MDCContextAware {
           log.info(s"ItemTransaction: ${term.Definition.Name} found")
           if(lastTerminalOrderFulfillment) {
             lastTerminalOrderFulfillment = false
-            term.Actor ! Terminal.Request(player, msg)
+            if (msg.item_name.contains("hev")) { // PTS v3 hack
+              val lTime = System.currentTimeMillis
+              println(lTime - whenUsedLastAAMAX, lTime - whenUsedLastAIMAX, lTime - whenUsedLastAVMAX)
+              if (msg.item_name.contains("antiaircraft") && lTime - whenUsedLastAAMAX > 300000 ) {
+                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
+                term.Actor ! Terminal.Request(player, msg)
+                whenUsedLastAAMAX = lTime
+              } else if (msg.item_name.contains("antipersonnel") && lTime - whenUsedLastAIMAX > 300000 ) {
+                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
+                term.Actor ! Terminal.Request(player, msg)
+                whenUsedLastAIMAX = lTime
+              } else if (msg.item_name.contains("antivehicular") && lTime - whenUsedLastAVMAX > 300000 ) {
+                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
+                term.Actor ! Terminal.Request(player, msg)
+                whenUsedLastAVMAX = lTime
+              } else {
+                sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, false))
+                lastTerminalOrderFulfillment = true
+              }
+            } else {
+              term.Actor ! Terminal.Request(player, msg)
+            }
           }
         case Some(obj : PlanetSideGameObject) =>
           log.error(s"ItemTransaction: $obj is not a terminal")
@@ -8350,7 +8385,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         case None =>
           log.info("WTF?!")
-          println(player.Position)
           noSpawnPointHere = true
         //z4
         //          if (player.Faction == PlanetSideEmpire.TR) {

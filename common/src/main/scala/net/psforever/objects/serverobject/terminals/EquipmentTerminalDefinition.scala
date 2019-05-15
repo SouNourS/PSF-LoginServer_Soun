@@ -31,13 +31,13 @@ object EquipmentTerminalDefinition {
     * value - a `Tuple` containing exo-suit specifications
     */
   val maxSuits : Map[String, (ExoSuitType.Value, Int)] = Map(
-//    "trhev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
+    "trhev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
     "trhev_antipersonnel" -> (ExoSuitType.MAX, 1),
     "trhev_antivehicular" -> (ExoSuitType.MAX, 2),
-//    "nchev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
+    "nchev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
     "nchev_antipersonnel" -> (ExoSuitType.MAX, 1),
     "nchev_antivehicular" -> (ExoSuitType.MAX, 2),
-//    "vshev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
+    "vshev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
     "vshev_antipersonnel" -> (ExoSuitType.MAX, 1),
     "vshev_antivehicular" -> (ExoSuitType.MAX, 2)
   )
