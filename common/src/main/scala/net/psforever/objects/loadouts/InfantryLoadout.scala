@@ -64,11 +64,11 @@ object InfantryLoadout {
         case Some(item) =>
           item.Definition match {
             case GlobalDefinitions.trhev_dualcycler | GlobalDefinitions.nchev_scattercannon | GlobalDefinitions.vshev_quasar =>
-              1
-            case GlobalDefinitions.trhev_pounder | GlobalDefinitions.nchev_falcon | GlobalDefinitions.vshev_comet =>
               2
-            case GlobalDefinitions.trhev_burster | GlobalDefinitions.nchev_sparrow | GlobalDefinitions.vshev_starfire =>
+            case GlobalDefinitions.trhev_pounder | GlobalDefinitions.nchev_falcon | GlobalDefinitions.vshev_comet =>
               3
+            case GlobalDefinitions.trhev_burster | GlobalDefinitions.nchev_sparrow | GlobalDefinitions.vshev_starfire =>
+              1
             case _ =>
               0
           }
@@ -109,9 +109,9 @@ object InfantryLoadout {
     * @return a `Set` of all certifications that would grant access to the mechanized assault exo-suit subtype
     */
   def DetermineSubtypeC(subtype : Int) : Set[CertificationType.Value] = subtype match {
-    case 1 => Set(CertificationType.AIMAX, CertificationType.UniMAX)
-    case 2 => Set(CertificationType.AVMAX, CertificationType.UniMAX)
-    case 3 => Set(CertificationType.AAMAX, CertificationType.UniMAX)
+    case 2 => Set(CertificationType.AIMAX, CertificationType.UniMAX)
+    case 3 => Set(CertificationType.AVMAX, CertificationType.UniMAX)
+    case 1 => Set(CertificationType.AAMAX, CertificationType.UniMAX)
     case _ => Set.empty[CertificationType.Value]
   }
 }

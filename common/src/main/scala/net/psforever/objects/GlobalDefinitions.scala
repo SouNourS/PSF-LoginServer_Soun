@@ -5909,7 +5909,8 @@ object GlobalDefinitions {
     */
   private def initMiscellaneous() : Unit = {
     ams_respawn_tube.Name = "ams_respawn_tube"
-    ams_respawn_tube.Delay = 5
+    ams_respawn_tube.Delay = 5 // PTS v3
+    ams_respawn_tube.Delay = 10
     ams_respawn_tube.SpecificPointFunc = SpawnPoint.AMS
 
     matrix_terminala.Name = "matrix_terminala"

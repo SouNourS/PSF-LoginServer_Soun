@@ -945,6 +945,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
           "broadcast_spam_seconds" -> "20",
           "voice_macro_spam_count" -> "5")),
 
+        GamePropertyTarget(ObjectClass.command_detonater, "allowed" -> "false"),
+
         //Burst Refire Slop Fix
         GamePropertyTarget(ObjectClass.punisher, "firemode0_burst_refire_slop" -> "250"),
         GamePropertyTarget(ObjectClass.pulsar, "firemode1_burst_refire_slop" -> "250"),
@@ -2564,7 +2566,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //            println(originalSuit, originalSubtype, exosuit, subtype, msg.unk1)
             val lTime = System.currentTimeMillis
             if (lTime - whenUsedLastMAX(subtype) < 300000){ // PTS v3 hack
-              (originalSuit, originalSubtype)
+              (originalSuit, subtype)
             } else {
               if (lTime - whenUsedLastMAX(subtype) > 300000 && subtype != 0) {
 //                println(whenUsedLastMAXName(subtype), subtype)
@@ -4058,9 +4060,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
               var faction : String = "tr"
               if (player.Faction == PlanetSideEmpire.NC) faction = "nc"
               else if (player.Faction == PlanetSideEmpire.VS) faction = "vs"
-              whenUsedLastMAXName(1) = faction+"hev_antipersonnel"
-              whenUsedLastMAXName(2) = faction+"hev_antivehicular"
-              whenUsedLastMAXName(3) = faction+"hev_antiaircraft"
+              whenUsedLastMAXName(2) = faction+"hev_antipersonnel"
+              whenUsedLastMAXName(3) = faction+"hev_antivehicular"
+              whenUsedLastMAXName(1) = faction+"hev_antiaircraft"
 
               (0 until 4).foreach( index => {
                 if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
