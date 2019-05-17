@@ -107,6 +107,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var whenUsedLastAAMAX : Long = 0
   var whenUsedLastAIMAX : Long = 0
   var whenUsedLastAVMAX : Long = 0
+  var whenUsedLastMAX : Array[Long] = Array.fill[Long](4)(0L)
+  var whenUsedLastMAXName : Array[String] = Array.fill[String](4)("")
+  var whenUsedLastItem : Array[Long] = Array.fill[Long](1020)(0L)
+  var whenUsedLastItemName : Array[String] = Array.fill[String](1020)("")
   var whenUsedLastKit : Long = 0
   var whenUsedLastSMKit : Long = 0
   var whenUsedLastSAKit : Long = 0
@@ -587,7 +591,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 Thread.sleep(5)
                 if(connection.nonEmpty) connection.get.disconnect
               } else {
-                println("dunno")
+                log.info("dunno")
               }
             case _ =>
               log.error(s"Error listing character(s) for account $accountUserName")
@@ -2344,7 +2348,18 @@ class WorldSessionActor extends Actor with MDCContextAware {
         //TODO check exo-suit permissions
         val originalSuit = tplayer.ExoSuit
         val originalSubtype = Loadout.DetermineSubtype(tplayer)
-        if(originalSuit != exosuit || originalSubtype != subtype) {
+
+        val lTime = System.currentTimeMillis
+        var changeArmor : Boolean = true
+        if (lTime - whenUsedLastMAX(subtype) < 300000) {
+          changeArmor = false
+        }
+        if (changeArmor && exosuit.id == 2) {
+          whenUsedLastMAX(subtype) = lTime
+          sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, whenUsedLastMAXName(subtype), 300, true))
+        }
+
+        if(originalSuit != exosuit || originalSubtype != subtype && changeArmor) {
           sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, true))
           //prepare lists of valid objects
           val beforeInventory = tplayer.Inventory.Clear()
@@ -2540,16 +2555,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
               tplayer.Certifications.intersect(permissions.toSet).nonEmpty
           }) {
             val lTime = System.currentTimeMillis
-            if ((lTime - whenUsedLastAIMAX < 300000 && subtype == 1) || // PTS v3 hack
-              (lTime - whenUsedLastAVMAX < 300000 && subtype == 2) ||
-              (lTime - whenUsedLastAAMAX < 300000 && subtype == 3)) {
+            if (lTime - whenUsedLastMAX(subtype) < 300000){ // PTS v3 hack
               (originalSuit, originalSubtype)
             } else {
-              if (lTime - whenUsedLastAIMAX > 300000 && subtype == 1) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, "nchev_antipersonnel", 300, true))
-              else if (lTime - whenUsedLastAVMAX > 300000 && subtype == 2) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, "nchev_antivehicular", 300, true))
-              else if (lTime - whenUsedLastAAMAX > 300000 && subtype == 3) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, "nchev_antiaircraft", 300, true))
+              if (lTime - whenUsedLastMAX(subtype) > 300000 && subtype != 0) {
+                sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, whenUsedLastMAXName(subtype), 300, true))
+                whenUsedLastMAX(subtype) = lTime
+              }
               (exosuit, subtype)
             }
+//            val lTime = System.currentTimeMillis
+//            println(subtype, lTime - whenUsedLastAAMAX, lTime - whenUsedLastAIMAX, lTime - whenUsedLastAVMAX)
+//            if ((lTime - whenUsedLastAAMAX < 300000 && subtype == 1) || // PTS v3 hack
+//              (lTime - whenUsedLastAIMAX < 300000 && subtype == 2) ||
+//              (lTime - whenUsedLastAVMAX < 300000 && subtype == 3)) {
+//              (originalSuit, originalSubtype)
+//            } else {
+//              var faction : String = "tr"
+//              if (player.Faction == PlanetSideEmpire.NC) faction = "nc"
+//              else if (player.Faction == PlanetSideEmpire.VS) faction = "vs"
+//              if (lTime - whenUsedLastAAMAX > 300000 && subtype == 1) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, faction+"hev_antiaircraft", 300, true))
+//              else if (lTime - whenUsedLastAIMAX > 300000 && subtype == 2) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, faction+"hev_antipersonnel", 300, true))
+//              else if (lTime - whenUsedLastAVMAX > 300000 && subtype == 3) sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, faction+"hev_antivehicular", 300, true))
+//              (exosuit, subtype)
+//            }
         }
         else {
           log.warn(s"$tplayer no longer has permission to wear the exo-suit type $exosuit; will wear $fallbackSuit instead")
@@ -2828,34 +2857,43 @@ class WorldSessionActor extends Actor with MDCContextAware {
       case Terminal.BuyVehicle(vehicle, weapons, trunk) =>
         continent.Map.TerminalToSpawnPad.get(msg.terminal_guid.guid) match {
           case Some(pad_guid) =>
-            val toFaction = tplayer.Faction
-            val pad = continent.GUID(pad_guid).get.asInstanceOf[VehicleSpawnPad]
-            vehicle.Faction = toFaction
-            vehicle.Continent = continent.Id
-            vehicle.Position = pad.Position
-            vehicle.Orientation = pad.Orientation
-            //default loadout, weapons
-            val vWeapons = vehicle.Weapons
-            weapons.foreach(entry => {
-              val index = entry.start
-              vWeapons.get(index) match {
-                case Some(slot) =>
-                  entry.obj.Faction = toFaction
-                  slot.Equipment = None
-                  slot.Equipment = entry.obj
-                case None =>
-                  log.warn(s"applying default loadout to $vehicle on spawn, but can not find a mounted weapon @ $index")
-              }
-            })
-            //default loadout, trunk
-            val vTrunk = vehicle.Trunk
-            vTrunk.Clear()
-            trunk.foreach(entry => {
-              entry.obj.Faction = toFaction
-              vTrunk += entry.start -> entry.obj
-            })
-            taskResolver ! RegisterNewVehicle(vehicle, pad)
-            sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, true))
+            val lTime = System.currentTimeMillis
+            if (lTime - whenUsedLastItem(vehicle.Definition.ObjectId) > 300000) {
+              whenUsedLastItem(vehicle.Definition.ObjectId) = lTime
+              whenUsedLastItemName(vehicle.Definition.ObjectId) = msg.item_name
+              sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, msg.item_name, 300, true))
+              val toFaction = tplayer.Faction
+              val pad = continent.GUID(pad_guid).get.asInstanceOf[VehicleSpawnPad]
+              vehicle.Faction = toFaction
+              vehicle.Continent = continent.Id
+              vehicle.Position = pad.Position
+              vehicle.Orientation = pad.Orientation
+              //default loadout, weapons
+              val vWeapons = vehicle.Weapons
+              weapons.foreach(entry => {
+                val index = entry.start
+                vWeapons.get(index) match {
+                  case Some(slot) =>
+                    entry.obj.Faction = toFaction
+                    slot.Equipment = None
+                    slot.Equipment = entry.obj
+                  case None =>
+                    log.warn(s"applying default loadout to $vehicle on spawn, but can not find a mounted weapon @ $index")
+                }
+              })
+              //default loadout, trunk
+              val vTrunk = vehicle.Trunk
+              vTrunk.Clear()
+              trunk.foreach(entry => {
+                entry.obj.Faction = toFaction
+                vTrunk += entry.start -> entry.obj
+              })
+              taskResolver ! RegisterNewVehicle(vehicle, pad)
+              sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, true))
+            }
+            else {
+              sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, false))
+            }
 
           case None =>
             log.error(s"$tplayer wanted to spawn a vehicle, but there was no spawn pad associated with terminal ${msg.terminal_guid} to accept it")
@@ -3702,7 +3740,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     val (inf, veh) = avatar.Loadouts.partition { case (index, _) => index < 10 }
     inf.foreach {
       case (index, loadout : InfantryLoadout) =>
-        println(loadout.label, InfantryLoadout.DetermineSubtypeB(loadout.exosuit, loadout.subtype))
         sendResponse(FavoritesMessage(LoadoutType.Infantry, guid, index, loadout.label, InfantryLoadout.DetermineSubtypeB(loadout.exosuit, loadout.subtype)))
     }
     veh.foreach {
@@ -3992,17 +4029,24 @@ class WorldSessionActor extends Actor with MDCContextAware {
                         case scala.util.Success(connection) =>
                           LoadDataBaseLoadouts(player, Some(connection))
                         case scala.util.Failure(e) =>
-                          println(s"shit : ${e.getMessage}")
+                          log.info(s"shit : ${e.getMessage}")
                       }
                   }
                 case _ =>
-                  println("toto tata")
+                  log.info("toto tata")
               }
               Thread.sleep(40)
               Database.query(connection.sendPreparedStatement(
                 "UPDATE characters SET last_login = ? where id=?", Array(new java.sql.Timestamp(System.currentTimeMillis), charId)
               ))
-              Thread.sleep(5)
+              Thread.sleep(10)
+
+              var faction : String = "tr"
+              if (player.Faction == PlanetSideEmpire.NC) faction = "nc"
+              else if (player.Faction == PlanetSideEmpire.VS) faction = "vs"
+              whenUsedLastMAXName(1) = faction+"hev_antiaircraft"
+              whenUsedLastMAXName(2) = faction+"hev_antipersonnel"
+              whenUsedLastMAXName(3) = faction+"hev_antivehicular"
 
               (0 until 4).foreach( index => {
                 if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
@@ -5531,7 +5575,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   // TODO : bank ?
                   continent.GUID(object_guid) match {
                     case Some(tplayer: Player) =>
-                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 3 && player.Faction == tplayer.Faction) { // PTS v3 : 5 to 3 && player.Velocity.isEmpty
+                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction) { // PTS v3 : player.Velocity.isEmpty
                         if (tplayer.MaxArmor - tplayer.Armor <= 15) {
                           tplayer.Armor = tplayer.MaxArmor
                           //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
@@ -5570,7 +5614,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   // TODO : med app ?
                   continent.GUID(object_guid) match {
                     case Some(tplayer: Player) =>
-                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 3 && player.Faction == tplayer.Faction) { // PTS v3 : 5 to 3 && player.Velocity.isEmpty
+                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction) { // PTS v3 : player.Velocity.isEmpty
                         if (tplayer.MaxHealth - tplayer.Health <= 10) {
                           tplayer.Health = tplayer.MaxHealth
                           //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
@@ -5984,28 +6028,28 @@ class WorldSessionActor extends Actor with MDCContextAware {
           log.info(s"ItemTransaction: ${term.Definition.Name} found")
           if(lastTerminalOrderFulfillment) {
             lastTerminalOrderFulfillment = false
-            if (msg.item_name.contains("hev")) { // PTS v3 hack
-              val lTime = System.currentTimeMillis
-              println(lTime - whenUsedLastAAMAX, lTime - whenUsedLastAIMAX, lTime - whenUsedLastAVMAX)
-              if (msg.item_name.contains("antiaircraft") && lTime - whenUsedLastAAMAX > 300000 ) {
-                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
-                term.Actor ! Terminal.Request(player, msg)
-                whenUsedLastAAMAX = lTime
-              } else if (msg.item_name.contains("antipersonnel") && lTime - whenUsedLastAIMAX > 300000 ) {
-                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
-                term.Actor ! Terminal.Request(player, msg)
-                whenUsedLastAIMAX = lTime
-              } else if (msg.item_name.contains("antivehicular") && lTime - whenUsedLastAVMAX > 300000 ) {
-                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
-                term.Actor ! Terminal.Request(player, msg)
-                whenUsedLastAVMAX = lTime
-              } else {
-                sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, false))
-                lastTerminalOrderFulfillment = true
-              }
-            } else {
+//            if (msg.item_name.contains("hev")) { // PTS v3 hack
+//              val lTime = System.currentTimeMillis
+//              println(lTime - whenUsedLastAAMAX, lTime - whenUsedLastAIMAX, lTime - whenUsedLastAVMAX)
+//              if (msg.item_name.contains("antiaircraft") && lTime - whenUsedLastAAMAX > 300000 ) {
+//                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
+//                term.Actor ! Terminal.Request(player, msg)
+//                whenUsedLastAAMAX = lTime
+//              } else if (msg.item_name.contains("antipersonnel") && lTime - whenUsedLastAIMAX > 300000 ) {
+//                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
+//                term.Actor ! Terminal.Request(player, msg)
+//                whenUsedLastAIMAX = lTime
+//              } else if (msg.item_name.contains("antivehicular") && lTime - whenUsedLastAVMAX > 300000 ) {
+//                sendResponse(AvatarVehicleTimerMessage(player.GUID, msg.item_name, 300, true))
+//                term.Actor ! Terminal.Request(player, msg)
+//                whenUsedLastAVMAX = lTime
+//              } else {
+//                sendResponse(ItemTransactionResultMessage(msg.terminal_guid, TransactionType.Buy, false))
+//                lastTerminalOrderFulfillment = true
+//              }
+//            } else {
               term.Actor ! Terminal.Request(player, msg)
-            }
+//            }
           }
         case Some(obj : PlanetSideGameObject) =>
           log.error(s"ItemTransaction: $obj is not a terminal")
@@ -8478,6 +8522,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
     continent.Population ! Zone.Population.Spawn(avatar, player)
     //cautious redundancy
     deadState = DeadState.Alive
+
+    val lTime = System.currentTimeMillis // PTS v3
+    for (i <- 0 to whenUsedLastItem.length-1) {
+      if (lTime - whenUsedLastItem(i) < 300000) {
+        sendResponse(AvatarVehicleTimerMessage(player.GUID, whenUsedLastItemName(i), 300 - ((lTime - whenUsedLastItem(i)) / 1000 toInt), true))
+      }
+    }
+    for (i <- 1 to 3) {
+      if (lTime - whenUsedLastMAX(i) < 300000) {
+        sendResponse(AvatarVehicleTimerMessage(player.GUID, whenUsedLastMAXName(i), 300 - ((lTime - whenUsedLastMAX(i)) / 1000 toInt), true))
+      }
+    }
+
   }
 
   /**
