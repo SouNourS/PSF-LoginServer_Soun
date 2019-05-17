@@ -1351,9 +1351,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
           GamePropertyTarget(ObjectClass.nano_dispenser, "requirement_certification0" -> "false"),
 
           //No AA MAXes
-          GamePropertyTarget(ObjectClass.order_terminal, "forsale_nchev_antiaircraft" -> "false"),
-          GamePropertyTarget(ObjectClass.order_terminal, "forsale_vshev_antiaircraft" -> "false"),
-          GamePropertyTarget(ObjectClass.order_terminal, "forsale_trhev_antiaircraft" -> "false"),
+//          GamePropertyTarget(ObjectClass.order_terminal, "forsale_nchev_antiaircraft" -> "false"),
+//          GamePropertyTarget(ObjectClass.order_terminal, "forsale_vshev_antiaircraft" -> "false"),
+//          GamePropertyTarget(ObjectClass.order_terminal, "forsale_trhev_antiaircraft" -> "false"),
 
           //No Skyguards, no Deliverer Variants, no Tanks, no Flails (default vehicle setup -- commented out for now)
           //GamePropertyTarget(ObjectClass.aurora, "allowed" -> "false"),
@@ -2351,11 +2351,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         val lTime = System.currentTimeMillis
         var changeArmor : Boolean = true
+        println(originalSuit, originalSubtype, exosuit, subtype, msg.item_name)
         if (lTime - whenUsedLastMAX(subtype) < 300000) {
           changeArmor = false
         }
         if (changeArmor && exosuit.id == 2) {
           whenUsedLastMAX(subtype) = lTime
+          println(whenUsedLastMAXName(subtype), subtype)
           sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, whenUsedLastMAXName(subtype), 300, true))
         }
 
@@ -2554,11 +2556,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
             case permissions =>
               tplayer.Certifications.intersect(permissions.toSet).nonEmpty
           }) {
+            println(originalSuit, originalSubtype, exosuit, subtype, msg.unk1)
             val lTime = System.currentTimeMillis
             if (lTime - whenUsedLastMAX(subtype) < 300000){ // PTS v3 hack
               (originalSuit, originalSubtype)
             } else {
               if (lTime - whenUsedLastMAX(subtype) > 300000 && subtype != 0) {
+                println(whenUsedLastMAXName(subtype), subtype)
                 sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, whenUsedLastMAXName(subtype), 300, true))
                 whenUsedLastMAX(subtype) = lTime
               }
@@ -3740,6 +3744,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     val (inf, veh) = avatar.Loadouts.partition { case (index, _) => index < 10 }
     inf.foreach {
       case (index, loadout : InfantryLoadout) =>
+        println(index, loadout.label, InfantryLoadout.DetermineSubtypeB(loadout.exosuit, loadout.subtype), loadout.exosuit, loadout.subtype)
         sendResponse(FavoritesMessage(LoadoutType.Infantry, guid, index, loadout.label, InfantryLoadout.DetermineSubtypeB(loadout.exosuit, loadout.subtype)))
     }
     veh.foreach {
@@ -4044,9 +4049,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
               var faction : String = "tr"
               if (player.Faction == PlanetSideEmpire.NC) faction = "nc"
               else if (player.Faction == PlanetSideEmpire.VS) faction = "vs"
-              whenUsedLastMAXName(1) = faction+"hev_antiaircraft"
-              whenUsedLastMAXName(2) = faction+"hev_antipersonnel"
-              whenUsedLastMAXName(3) = faction+"hev_antivehicular"
+              whenUsedLastMAXName(1) = faction+"hev_antipersonnel"
+              whenUsedLastMAXName(2) = faction+"hev_antivehicular"
+              whenUsedLastMAXName(3) = faction+"hev_antiaircraft"
 
               (0 until 4).foreach( index => {
                 if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
@@ -6082,6 +6087,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 avatar.SaveLoadout(owner, name, lineno)
                 SaveLoadoutToDB(owner, name, lineno)
                 import InfantryLoadout._
+                println(player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player)), player.ExoSuit, DetermineSubtype(player))
                 sendResponse(FavoritesMessage(list, player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player))))
               case Some(owner : Vehicle) => //VehicleLoadout
                 avatar.SaveLoadout(owner, name, lineno)
