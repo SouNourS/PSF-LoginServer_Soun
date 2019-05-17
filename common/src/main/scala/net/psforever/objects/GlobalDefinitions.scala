@@ -5442,8 +5442,7 @@ object GlobalDefinitions {
     ant.Subtract.Damage1 = 5
 
     ams.Name = "ams"
-    ams.MaxHealth = 3000 // PTS v3
-    ams.MaxHealth = 4500
+    ams.MaxHealth = 3000
     ams.MaxShields = 600 + 1
     ams.Seats += 0 -> new SeatDefinition()
     ams.Seats(0).ArmorRestriction = SeatArmorRestriction.NoReinforcedOrMax

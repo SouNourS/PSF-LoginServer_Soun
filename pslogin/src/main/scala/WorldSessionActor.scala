@@ -994,7 +994,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.lightgunship, "maxhealth" -> "900"),
 
         //AMS Health Increase (clientside indicator?)
-        GamePropertyTarget(ObjectClass.ams, "maxhealth" -> "4500"),
+//        GamePropertyTarget(ObjectClass.ams, "maxhealth" -> "4500"),
 
         //Enemy HA for All (can't save to loadout)
 //        GamePropertyTarget(ObjectClass.mini_chaingun, "purchase_empire" -> "all"),
