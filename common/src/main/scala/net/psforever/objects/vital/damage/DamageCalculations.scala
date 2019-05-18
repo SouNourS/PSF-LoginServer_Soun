@@ -149,7 +149,7 @@ object DamageCalculations {
 //    else {
 //      0
 //    }
-    (DirectHitDamageWithDegrade(projectile, rawDamage, distance) * 0.3f) toInt // PTS v3 for Nick
+    (DirectHitDamageWithDegrade(projectile, rawDamage, distance) * 0.25f) toInt // PTS v3 for Nick
   }
 
   //distance functions

@@ -3207,7 +3207,7 @@ object GlobalDefinitions {
 
     reaver_rocket_projectile.Name = "reaver_rocket_projectile"
 //    reaver_rocket_projectile.Damage0 = 25 // PTS v3
-    reaver_rocket_projectile.Damage0 = 50
+    reaver_rocket_projectile.Damage0 = 35
     reaver_rocket_projectile.Damage1 = 88
     reaver_rocket_projectile.Damage2 = 75
     reaver_rocket_projectile.Damage3 = 75
