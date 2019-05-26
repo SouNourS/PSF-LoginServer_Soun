@@ -129,7 +129,12 @@ object Zones {
     BuildingByMapId(21).get.Name = Some("Mukuru")
 
     import net.psforever.types.PlanetSideEmpire
-    Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
+    Buildings.values.foreach { _.Faction = PlanetSideEmpire.NEUTRAL }
+
+    BuildingByMapId(18).get.Faction = PlanetSideEmpire.TR
+    BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC
+    BuildingByMapId(20).get.Faction = PlanetSideEmpire.VS
+
     BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(9).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL

@@ -1490,7 +1490,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      cluster ! InterstellarCluster.GetWorld("z8")
 //      cluster ! InterstellarCluster.GetWorld("z5")
 //      cluster ! InterstellarCluster.GetWorld("z10")
-      cluster ! InterstellarCluster.GetWorld("z9")
+//      cluster ! InterstellarCluster.GetWorld("z9")
+      cluster ! InterstellarCluster.GetWorld("z3")
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
