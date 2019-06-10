@@ -1474,7 +1474,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           GamePropertyTarget(ObjectClass.peregrine_gunner, "allowed" -> "false")
         ))
       )))
-      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1))
+      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 0))
 //      sendResponse(WeatherMessage(List(CloudInfo(0,Vector3(-2.6748898f,-1.025668f,0.0f),Vector3(0.9573444f,-0.09207539f,0.0f))),List(StormInfo(Vector3(0.5852982f,0.7721373f,0.0f),122,64), StormInfo(Vector3(0.95833915f,0.7752719f,0.0f),67,102), StormInfo(Vector3(0.03514052f,0.7752719f,0.0f),62,107), StormInfo(Vector3(0.82354355f,0.9978426f,0.0f),77,41), StormInfo(Vector3(0.6871782f,0.3771526f,0.0f),40,97), StormInfo(Vector3(0.34391987f,0.13890885f,0.0f),30,34), StormInfo(Vector3(0.24830915f,0.8379686f,0.0f),62,25), StormInfo(Vector3(0.94736725f,0.28937906f,0.0f),3,21), StormInfo(Vector3(0.43639442f,0.72668326f,0.0f),89,194), StormInfo(Vector3(0.43169186f,0.5699438f,0.0f),202,50), StormInfo(Vector3(0.19501628f,0.994708f,0.0f),23,73))))
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
       sendResponse(FriendsResponse(FriendAction.InitializeFriendList, 0, true, true, Nil))
@@ -4122,7 +4122,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
-      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 1)) //common
+      sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 0)) //common
       //(0 to 255).foreach(i => { sendResponse(SetEmpireMessage(PlanetSideGUID(i), PlanetSideEmpire.VS)) })
 
       //find and reclaim own deployables, if any
