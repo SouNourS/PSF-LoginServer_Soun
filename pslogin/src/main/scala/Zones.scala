@@ -131,9 +131,14 @@ object Zones {
     import net.psforever.types.PlanetSideEmpire
     Buildings.values.foreach { _.Faction = PlanetSideEmpire.NEUTRAL }
 
-    BuildingByMapId(18).get.Faction = PlanetSideEmpire.TR
+    BuildingByMapId(18).get.Faction = PlanetSideEmpire.TR // Gunuku
     BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC
     BuildingByMapId(20).get.Faction = PlanetSideEmpire.VS
+
+    BuildingByMapId(32).get.Faction = PlanetSideEmpire.TR
+    BuildingByMapId(33).get.Faction = PlanetSideEmpire.TR
+    BuildingByMapId(43).get.Faction = PlanetSideEmpire.VS
+    BuildingByMapId(45).get.Faction = PlanetSideEmpire.NC
 
     BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
     BuildingByMapId(9).get.Faction = PlanetSideEmpire.NEUTRAL
