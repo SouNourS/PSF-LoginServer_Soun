@@ -138,6 +138,7 @@ object Zones {
     BuildingByMapId(32).get.Faction = PlanetSideEmpire.TR
     BuildingByMapId(33).get.Faction = PlanetSideEmpire.TR
     BuildingByMapId(43).get.Faction = PlanetSideEmpire.VS
+    BuildingByMapId(44).get.Faction = PlanetSideEmpire.VS
     BuildingByMapId(45).get.Faction = PlanetSideEmpire.NC
 
     BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
