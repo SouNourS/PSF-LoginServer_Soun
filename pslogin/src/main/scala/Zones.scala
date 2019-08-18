@@ -391,12 +391,16 @@ object Zones {
       BuildingByMapId(17).get.Name = Some("Ran")
 
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
+//      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NEUTRAL }
 
       BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+      BuildingByMapId(7).get.Faction = PlanetSideEmpire.VS
+      BuildingByMapId(8).get.Faction = PlanetSideEmpire.TR
+      BuildingByMapId(14).get.Faction = PlanetSideEmpire.NC
       BuildingByMapId(21321).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(21322).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true

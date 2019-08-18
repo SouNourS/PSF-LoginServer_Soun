@@ -1491,7 +1491,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      cluster ! InterstellarCluster.GetWorld("z5")
 //      cluster ! InterstellarCluster.GetWorld("z10")
 //      cluster ! InterstellarCluster.GetWorld("z9")
-      cluster ! InterstellarCluster.GetWorld("z3")
+//      cluster ! InterstellarCluster.GetWorld("z3")
+      cluster ! InterstellarCluster.GetWorld("z7")
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
@@ -4376,7 +4377,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The default zone is set to Cyssor if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
+        "  \\#6The default zone is set to Esamir if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
