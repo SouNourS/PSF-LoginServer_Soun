@@ -2134,6 +2134,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         var value = 0L
         if(isResecured) {
           value = 17039360L
+          sendResponse(PlanetsideAttributeMessage(target_guid, 20, value))
         }
         else {
           continent.GUID(target_guid) match {
@@ -4026,7 +4027,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       avatar.Certifications += AssaultEngineering
                       avatar.Certifications += Hacking
                       avatar.Certifications += AdvancedHacking
-                      //avatar.Certifications += ElectronicsExpert
+                      avatar.Certifications += ElectronicsExpert
 
                       avatar.Certifications += Sniping
                       avatar.Certifications += AntiVehicular
