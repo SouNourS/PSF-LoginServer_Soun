@@ -997,6 +997,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         //Reverting Reaver Armor Value from "Coder Madness 2" Patch from Live (clientside indicator?)
         GamePropertyTarget(ObjectClass.lightgunship, "maxhealth" -> "900"),
 
+        // Nick test
+        GamePropertyTarget(ObjectClass.galaxy_gunship, "maxhealth" -> "9500"),
+
         //AMS Health Increase (clientside indicator?)
 //        GamePropertyTarget(ObjectClass.ams, "maxhealth" -> "4500"),
 
@@ -1490,11 +1493,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
 //      cluster ! InterstellarCluster.GetWorld("z4")
 //      cluster ! InterstellarCluster.GetWorld("z8")
-//      cluster ! InterstellarCluster.GetWorld("z5")
+      cluster ! InterstellarCluster.GetWorld("z5")
 //      cluster ! InterstellarCluster.GetWorld("z10")
 //      cluster ! InterstellarCluster.GetWorld("z9")
 //      cluster ! InterstellarCluster.GetWorld("z3")
-      cluster ! InterstellarCluster.GetWorld("z7")
+//      cluster ! InterstellarCluster.GetWorld("z7")
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")

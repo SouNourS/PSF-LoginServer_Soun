@@ -5701,7 +5701,8 @@ object GlobalDefinitions {
     dropship.JackingDuration = Array(0, 60, 20, 10)
 
     galaxy_gunship.Name = "galaxy_gunship"
-    galaxy_gunship.MaxHealth = 6000
+//    galaxy_gunship.MaxHealth = 6000 // PTS v3
+    galaxy_gunship.MaxHealth = 9500
     galaxy_gunship.MaxShields = 1200 + 1
     galaxy_gunship.CanFly = true
     galaxy_gunship.Seats += 0 -> new SeatDefinition()
