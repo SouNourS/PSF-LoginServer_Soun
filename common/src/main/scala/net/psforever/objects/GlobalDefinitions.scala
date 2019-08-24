@@ -5000,8 +5000,9 @@ object GlobalDefinitions {
     fury.TrunkOffset = 30
     fury.AutoPilotSpeeds = (24, 10)
     fury.DestroyedModel = Some(DestroyedVehicle.QuadAssault)
+    fury.JackingDuration = Array(0, 10, 3, 2)
 
-    quadassault.Name = "quadassault"
+    quadassault.Name = "quadassault" // Basilisk
     quadassault.MaxHealth = 650
     quadassault.MaxShields = 130 + 1
     quadassault.Seats += 0 -> new SeatDefinition()
@@ -5014,8 +5015,9 @@ object GlobalDefinitions {
     quadassault.TrunkOffset = 30
     quadassault.AutoPilotSpeeds = (24, 10)
     quadassault.DestroyedModel = Some(DestroyedVehicle.QuadAssault)
+    quadassault.JackingDuration = Array(0, 10, 3, 2)
 
-    quadstealth.Name = "quadstealth"
+    quadstealth.Name = "quadstealth" // Wraith
     quadstealth.MaxHealth = 650
     quadstealth.MaxShields = 130 + 1
     quadstealth.CanCloak = true
@@ -5028,8 +5030,9 @@ object GlobalDefinitions {
     quadstealth.TrunkOffset = 30
     quadstealth.AutoPilotSpeeds = (24, 10)
     quadstealth.DestroyedModel = Some(DestroyedVehicle.QuadStealth)
+    quadstealth.JackingDuration = Array(0, 10, 3, 2)
 
-    two_man_assault_buggy.Name = "two_man_assault_buggy"
+    two_man_assault_buggy.Name = "two_man_assault_buggy" // Harasser
     two_man_assault_buggy.MaxHealth = 1250
     two_man_assault_buggy.MaxShields = 250 + 1
     two_man_assault_buggy.Seats += 0 -> new SeatDefinition()
@@ -5044,6 +5047,7 @@ object GlobalDefinitions {
     two_man_assault_buggy.TrunkOffset = 30
     two_man_assault_buggy.AutoPilotSpeeds = (22, 8)
     two_man_assault_buggy.DestroyedModel = Some(DestroyedVehicle.TwoManAssaultBuggy)
+    two_man_assault_buggy.JackingDuration = Array(0, 15, 5, 3)
 
     skyguard.Name = "skyguard"
     skyguard.MaxHealth = 1000
@@ -5061,8 +5065,9 @@ object GlobalDefinitions {
     skyguard.TrunkOffset = 30
     skyguard.AutoPilotSpeeds = (22, 8)
     skyguard.DestroyedModel = Some(DestroyedVehicle.Skyguard)
+    skyguard.JackingDuration = Array(0, 15, 5, 3)
 
-    threemanheavybuggy.Name = "threemanheavybuggy"
+    threemanheavybuggy.Name = "threemanheavybuggy" // Marauder
     threemanheavybuggy.MaxHealth = 1700
     threemanheavybuggy.MaxShields = 340 + 1
     threemanheavybuggy.Seats += 0 -> new SeatDefinition()
@@ -5083,8 +5088,9 @@ object GlobalDefinitions {
     threemanheavybuggy.AutoPilotSpeeds = (22, 8)
     threemanheavybuggy.DestroyedModel = Some(DestroyedVehicle.ThreeManHeavyBuggy)
     threemanheavybuggy.Subtract.Damage1 = 5
+    threemanheavybuggy.JackingDuration = Array(0, 20, 7, 5)
 
-    twomanheavybuggy.Name = "twomanheavybuggy"
+    twomanheavybuggy.Name = "twomanheavybuggy" // Enforcer
     twomanheavybuggy.MaxHealth = 1800
     twomanheavybuggy.MaxShields = 360 + 1
     twomanheavybuggy.Seats += 0 -> new SeatDefinition()
@@ -5100,8 +5106,9 @@ object GlobalDefinitions {
     twomanheavybuggy.AutoPilotSpeeds = (22, 8)
     twomanheavybuggy.DestroyedModel = Some(DestroyedVehicle.TwoManHeavyBuggy)
     twomanheavybuggy.Subtract.Damage1 = 5
+    twomanheavybuggy.JackingDuration = Array(0, 20, 7, 5)
 
-    twomanhoverbuggy.Name = "twomanhoverbuggy"
+    twomanhoverbuggy.Name = "twomanhoverbuggy" // Thresher
     twomanhoverbuggy.MaxHealth = 1600
     twomanhoverbuggy.MaxShields = 320 + 1
     twomanhoverbuggy.Seats += 0 -> new SeatDefinition()
@@ -5117,8 +5124,9 @@ object GlobalDefinitions {
     twomanhoverbuggy.AutoPilotSpeeds = (22, 10)
     twomanhoverbuggy.DestroyedModel = Some(DestroyedVehicle.TwoManHoverBuggy)
     twomanhoverbuggy.Subtract.Damage1 = 5
+    twomanhoverbuggy.JackingDuration = Array(0, 20, 7, 5)
 
-    mediumtransport.Name = "mediumtransport"
+    mediumtransport.Name = "mediumtransport" // Deliverer
     mediumtransport.MaxHealth = 2500
     mediumtransport.MaxShields = 500 + 1
     mediumtransport.Seats += 0 -> new SeatDefinition()
@@ -5141,8 +5149,9 @@ object GlobalDefinitions {
     mediumtransport.AutoPilotSpeeds = (18, 6)
     mediumtransport.DestroyedModel = Some(DestroyedVehicle.MediumTransport)
     mediumtransport.Subtract.Damage1 = 7
+    mediumtransport.JackingDuration = Array(0, 25, 8, 5)
 
-    battlewagon.Name = "battlewagon"
+    battlewagon.Name = "battlewagon" // Raider
     battlewagon.MaxHealth = 2500
     battlewagon.MaxShields = 500 + 1
     battlewagon.Seats += 0 -> new SeatDefinition()
@@ -5168,6 +5177,7 @@ object GlobalDefinitions {
     battlewagon.TrunkOffset = 30
     battlewagon.AutoPilotSpeeds = (18, 6)
     battlewagon.DestroyedModel = Some(DestroyedVehicle.MediumTransport)
+    battlewagon.JackingDuration = Array(0, 25, 8, 5)
 
     thunderer.Name = "thunderer"
     thunderer.MaxHealth = 2500
@@ -5192,6 +5202,7 @@ object GlobalDefinitions {
     thunderer.AutoPilotSpeeds = (18, 6)
     thunderer.DestroyedModel = Some(DestroyedVehicle.MediumTransport)
     thunderer.Subtract.Damage1 = 7
+    thunderer.JackingDuration = Array(0, 25, 8, 5)
 
     aurora.Name = "aurora"
     aurora.MaxHealth = 2500
@@ -5216,8 +5227,9 @@ object GlobalDefinitions {
     aurora.AutoPilotSpeeds = (18, 6)
     aurora.DestroyedModel = Some(DestroyedVehicle.MediumTransport)
     aurora.Subtract.Damage1 = 7
+    aurora.JackingDuration = Array(0, 25, 8 ,5)
 
-    apc_tr.Name = "apc_tr"
+    apc_tr.Name = "apc_tr" // Juggernaut
     apc_tr.MaxHealth = 6000
     apc_tr.MaxShields = 1200 + 1
     apc_tr.Seats += 0 -> new SeatDefinition()
@@ -5262,8 +5274,9 @@ object GlobalDefinitions {
     apc_tr.TrunkOffset = 30
     apc_tr.AutoPilotSpeeds = (16, 6)
     apc_tr.DestroyedModel = Some(DestroyedVehicle.Apc)
+    apc_tr.JackingDuration = Array(0, 45, 15, 10)
 
-    apc_nc.Name = "apc_nc"
+    apc_nc.Name = "apc_nc" // Vindicator
     apc_nc.MaxHealth = 6000
     apc_nc.MaxShields = 1200 + 1
     apc_nc.Seats += 0 -> new SeatDefinition()
@@ -5308,8 +5321,9 @@ object GlobalDefinitions {
     apc_nc.TrunkOffset = 30
     apc_nc.AutoPilotSpeeds = (16, 6)
     apc_nc.DestroyedModel = Some(DestroyedVehicle.Apc)
+    apc_nc.JackingDuration = Array(0, 45, 15, 10)
 
-    apc_vs.Name = "apc_vs"
+    apc_vs.Name = "apc_vs" // Leviathan
     apc_vs.MaxHealth = 6000
     apc_vs.MaxShields = 1200 + 1
     apc_vs.Seats += 0 -> new SeatDefinition()
@@ -5354,6 +5368,7 @@ object GlobalDefinitions {
     apc_vs.TrunkOffset = 30
     apc_vs.AutoPilotSpeeds = (16, 6)
     apc_vs.DestroyedModel = Some(DestroyedVehicle.Apc)
+    apc_vs.JackingDuration = Array(0, 45, 15, 10)
 
     lightning.Name = "lightning"
     lightning.MaxHealth = 2000
@@ -5369,6 +5384,7 @@ object GlobalDefinitions {
     lightning.AutoPilotSpeeds = (20, 8)
     lightning.DestroyedModel = Some(DestroyedVehicle.Lightning)
     lightning.Subtract.Damage1 = 7
+    lightning.JackingDuration = Array(0, 20, 7 ,5)
 
     prowler.Name = "prowler"
     prowler.MaxHealth = 4800
@@ -5389,6 +5405,7 @@ object GlobalDefinitions {
     prowler.AutoPilotSpeeds = (14, 6)
     prowler.DestroyedModel = Some(DestroyedVehicle.Prowler)
     prowler.Subtract.Damage1 = 9
+    prowler.JackingDuration = Array(0, 30, 10, 5)
 
     vanguard.Name = "vanguard"
     vanguard.MaxHealth = 5400
@@ -5405,6 +5422,7 @@ object GlobalDefinitions {
     vanguard.AutoPilotSpeeds = (16, 6)
     vanguard.DestroyedModel = Some(DestroyedVehicle.Vanguard)
     vanguard.Subtract.Damage1 = 9
+    vanguard.JackingDuration = Array(0, 30, 10, 5)
 
     magrider.Name = "magrider"
     magrider.MaxHealth = 4200
@@ -5423,6 +5441,7 @@ object GlobalDefinitions {
     magrider.AutoPilotSpeeds = (18, 6)
     magrider.DestroyedModel = Some(DestroyedVehicle.Magrider)
     magrider.Subtract.Damage1 = 9
+    magrider.JackingDuration = Array(0, 30, 10, 5)
 
     val utilityConverter = new UtilityVehicleConverter
     ant.Name = "ant"
@@ -5440,6 +5459,7 @@ object GlobalDefinitions {
     ant.Packet = utilityConverter
     ant.DestroyedModel = Some(DestroyedVehicle.Ant)
     ant.Subtract.Damage1 = 5
+    ant.JackingDuration = Array (0, 60, 20, 15)
 
     ams.Name = "ams"
     ams.MaxHealth = 3000
@@ -5460,6 +5480,7 @@ object GlobalDefinitions {
     ams.Packet = utilityConverter
     ams.DestroyedModel = Some(DestroyedVehicle.Ams)
     ams.Subtract.Damage1 = 10
+    ams.JackingDuration = Array(0, 60, 20, 15)
 
     val variantConverter = new VariantVehicleConverter
     router.Name = "router"
@@ -5479,6 +5500,7 @@ object GlobalDefinitions {
     router.Packet = variantConverter
     router.DestroyedModel = Some(DestroyedVehicle.Router)
     router.Subtract.Damage1 = 5
+    router.JackingDuration = Array(0, 20, 7, 5)
 
     switchblade.Name = "switchblade"
     switchblade.MaxHealth = 1750
@@ -5498,6 +5520,7 @@ object GlobalDefinitions {
     switchblade.DestroyedModel = Some(DestroyedVehicle.Switchblade)
     switchblade.Subtract.Damage0 = 5
     switchblade.Subtract.Damage1 = 5
+    switchblade.JackingDuration = Array(0, 20, 7, 5)
 
     flail.Name = "flail"
     flail.MaxHealth = 2400
@@ -5515,6 +5538,7 @@ object GlobalDefinitions {
     flail.Packet = variantConverter
     flail.DestroyedModel = Some(DestroyedVehicle.Flail)
     flail.Subtract.Damage1 = 7
+    flail.JackingDuration = Array(0, 20, 7, 5)
 
     mosquito.Name = "mosquito"
     mosquito.MaxHealth = 665
@@ -5531,8 +5555,9 @@ object GlobalDefinitions {
     mosquito.AutoPilotSpeeds = (0, 6)
     mosquito.Packet = variantConverter
     mosquito.DestroyedModel = Some(DestroyedVehicle.Mosquito)
+    mosquito.JackingDuration = Array(0, 20, 7, 5)
 
-    lightgunship.Name = "lightgunship"
+    lightgunship.Name = "lightgunship"  // Reaver
 //    lightgunship.MaxHealth = 1000 // PTS v3
     lightgunship.MaxHealth = 900
     lightgunship.MaxShields = 200 + 1
@@ -5549,6 +5574,7 @@ object GlobalDefinitions {
     lightgunship.Packet = variantConverter
     lightgunship.DestroyedModel = Some(DestroyedVehicle.LightGunship)
     lightgunship.Subtract.Damage1 = 3
+    lightgunship.JackingDuration = Array(0, 30, 10, 5)
 
     wasp.Name = "wasp"
     wasp.MaxHealth = 515
@@ -5565,6 +5591,7 @@ object GlobalDefinitions {
     wasp.AutoPilotSpeeds = (0, 6)
     wasp.Packet = variantConverter
     wasp.DestroyedModel = Some(DestroyedVehicle.Mosquito) //set_resource_parent wasp game_objects mosquito
+    wasp.JackingDuration = Array(0, 20, 7, 5)
 
     liberator.Name = "liberator"
     liberator.MaxHealth = 2500
@@ -5589,6 +5616,7 @@ object GlobalDefinitions {
     liberator.Packet = variantConverter
     liberator.DestroyedModel = Some(DestroyedVehicle.Liberator)
     liberator.Subtract.Damage1 = 5
+    liberator.JackingDuration = Array(0, 30, 10, 5)
 
     vulture.Name = "vulture"
     vulture.MaxHealth = 2500
@@ -5613,8 +5641,9 @@ object GlobalDefinitions {
     vulture.Packet = variantConverter
     vulture.DestroyedModel = Some(DestroyedVehicle.Liberator) //add_property vulture destroyedphysics liberator_destroyed
     vulture.Subtract.Damage1 = 5
+    vulture.JackingDuration = Array(0, 30, 10, 5)
 
-    dropship.Name = "dropship"
+    dropship.Name = "dropship" // Galaxy
     dropship.MaxHealth = 5000
     dropship.MaxShields = 1000 + 1
     dropship.CanFly = true
@@ -5669,6 +5698,7 @@ object GlobalDefinitions {
     dropship.Packet = variantConverter
     dropship.DestroyedModel = Some(DestroyedVehicle.Dropship)
     dropship.Subtract.Damage1 = 7
+    dropship.JackingDuration = Array(0, 60, 20, 10)
 
     galaxy_gunship.Name = "galaxy_gunship"
     galaxy_gunship.MaxHealth = 6000
@@ -5702,6 +5732,7 @@ object GlobalDefinitions {
     galaxy_gunship.Packet = variantConverter
     galaxy_gunship.DestroyedModel = Some(DestroyedVehicle.Dropship) //the adb calls out a galaxy_gunship_destroyed but no such asset exists
     galaxy_gunship.Subtract.Damage1 = 7
+    galaxy_gunship.JackingDuration = Array(0, 60, 20, 10)
 
     lodestar.Name = "lodestar"
     lodestar.MaxHealth = 5000
@@ -5725,6 +5756,7 @@ object GlobalDefinitions {
     lodestar.Packet = variantConverter
     lodestar.DestroyedModel = Some(DestroyedVehicle.Lodestar)
     lodestar.Subtract.Damage1 = 7
+    lodestar.JackingDuration = Array(0, 60, 20, 10)
 
     phantasm.Name = "phantasm"
     phantasm.MaxHealth = 2500
@@ -5750,6 +5782,7 @@ object GlobalDefinitions {
     phantasm.AutoPilotSpeeds = (0, 6)
     phantasm.Packet = variantConverter
     phantasm.DestroyedModel = None //the adb calls out a phantasm_destroyed but no such asset exists
+    phantasm.JackingDuration = Array(0, 60, 20, 10)
   }
 
   /**

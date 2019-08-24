@@ -37,6 +37,7 @@ import scodec.codecs._
   * `102 - TRAPSs`<br>
   * `103 - OMFTs`<br>
   * `104 - sensor disruptors`<br>
+  * `112 - enable/disable festive backpacks`<br>
   * <br>
   * Players/General:<br>
   * Server to client : <br>
@@ -65,6 +66,7 @@ import scodec.codecs._
   *     <li>196608 - 262143 - VS</li>
   *     <li>17039360 - CC Resecured</li>
   *   </ul>
+  *   <br>These values seem to correspond to the following data structure: Time left - 2 bytes, faction - 1 byte (1-4), isResecured - 1 byte (0-1)<br>
   * `24 - Learn certifications with value :`<br>
   *         01 : Medium Assault<br>
   *         02 : Heavy Assault<br>

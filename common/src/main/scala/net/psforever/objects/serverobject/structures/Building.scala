@@ -80,12 +80,13 @@ class Building(private val building_guid : Int, private val map_id : Int, privat
     // PTS v3 force some Benefits
     val latticeBenefit : Int = if(BuildingType.id == 3){18} else {0}
     val cavernBenefit : Int = if(BuildingType.id == 3){48} else {0}
-    //if we have a capture terminal, get the hack status & time from control console if it exists
+    //if we have a capture terminal, get the hack status & time (in milliseconds) from control console if it exists
     val (hacking, hackingFaction, hackTime) : (Boolean, PlanetSideEmpire.Value, Long) = amenities.find(_.Definition == GlobalDefinitions.capture_terminal) match {
       case Some(obj: CaptureTerminal with Hackable) =>
         obj.HackedBy match {
           case Some(Hackable.HackInfo(_, _, hfaction, _, start, length)) =>
-            (true, hfaction, TimeUnit.MILLISECONDS.convert(math.max(0, start + length - System.nanoTime), TimeUnit.NANOSECONDS)) // PTS v3 (TimeUnit)
+            val hack_time_remaining_ms = TimeUnit.MILLISECONDS.convert(math.max(0, start + length - System.nanoTime), TimeUnit.NANOSECONDS)
+            (true, hfaction, hack_time_remaining_ms)
           case _ =>
             (false, PlanetSideEmpire.NEUTRAL, 0L)
         }
