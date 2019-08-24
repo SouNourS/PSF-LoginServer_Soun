@@ -4026,7 +4026,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       avatar.Certifications += AssaultEngineering
                       avatar.Certifications += Hacking
                       avatar.Certifications += AdvancedHacking
-                      avatar.Certifications += ElectronicsExpert
+                      //avatar.Certifications += ElectronicsExpert
 
                       avatar.Certifications += Sniping
                       avatar.Certifications += AntiVehicular
