@@ -805,10 +805,22 @@ object Zones {
       BuildingByMapId(2).get.Name = Some("Jamshid")
       BuildingByMapId(3).get.Name = Some("Izha")
 
+      BuildingByMapId(6).get.Name = Some("twr1")
+      BuildingByMapId(4).get.Name = Some("twr2")
+      BuildingByMapId(5).get.Name = Some("twr3")
+      BuildingByMapId(7).get.Name = Some("twr4")
+      BuildingByMapId(8).get.Name = Some("twr5")
+      BuildingByMapId(9).get.Name = Some("twr6")
+      BuildingByMapId(10).get.Name = Some("twr7")
+
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.VS
-      }
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.VS
+//      }
+      BuildingByMapId(1).get.Faction = PlanetSideEmpire.TR
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NC
+      BuildingByMapId(3).get.Faction = PlanetSideEmpire.VS
+
       BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(10003).get.Faction = PlanetSideEmpire.NEUTRAL

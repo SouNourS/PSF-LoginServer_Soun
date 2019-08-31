@@ -1497,7 +1497,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
 //      cluster ! InterstellarCluster.GetWorld("z4")
 //      cluster ! InterstellarCluster.GetWorld("z8")
-      cluster ! InterstellarCluster.GetWorld("z5")
+//      cluster ! InterstellarCluster.GetWorld("z5")
+      cluster ! InterstellarCluster.GetWorld("i3")
 //      cluster ! InterstellarCluster.GetWorld("z10")
 //      cluster ! InterstellarCluster.GetWorld("z9")
 //      cluster ! InterstellarCluster.GetWorld("z3")
