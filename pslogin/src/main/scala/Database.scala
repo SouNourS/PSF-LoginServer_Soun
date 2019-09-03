@@ -1,6 +1,6 @@
 // Copyright (c) 2017 PSForever
 import com.github.mauricio.async.db.postgresql.PostgreSQLConnection
-import com.github.mauricio.async.db.{Configuration, QueryResult, RowData}
+import com.github.mauricio.async.db.{Configuration, QueryResult, RowData, SSLConfiguration}
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
@@ -12,11 +12,12 @@ object Database {
 
   // TODO Will probably want to use the ConnectionPool, although I don't know the implications for multithreaded apps
   def getConnection = new PostgreSQLConnection(Configuration(
-    "PSForever", // user
-    "localhost", // host
+    "psforever", // user
+    "198.50.147.114", // host
     5432, // port
     Some("PSFDB"), // password
-    Some("psforever")  // database
+    Some("psforever"),  // database
+    SSLConfiguration(SSLConfiguration.Mode.Require)
   ))
 
   def query(query : Future[QueryResult]) : Future[Any] = {

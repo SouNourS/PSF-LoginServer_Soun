@@ -588,7 +588,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   }
                   sendResponse(CharacterInfoMessage(0, PlanetSideZoneID(1), 0, PlanetSideGUID(0), true, 0))
                 }
-                Thread.sleep(5)
+                Thread.sleep(50)
                 if(connection.nonEmpty) connection.get.disconnect
               } else {
                 log.info("dunno")
@@ -1746,13 +1746,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3 or not
                 case _ => // If the account didn't exist in the database
                   log.error(s"Issue retrieving result set from database for account $account")
-                  Thread.sleep(5)
+                  Thread.sleep(50)
                   if (connection.isConnected) connection.disconnect
                   sendResponse(DropSession(sessionId, "You should not exist !"))
               }
             case scala.util.Failure(e) =>
               log.error("Is there a problem ? " + e.getMessage)
-              Thread.sleep(5)
+              Thread.sleep(50)
               if (connection.isConnected) connection.disconnect
           }
         case scala.util.Failure(e) =>
@@ -3960,11 +3960,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   if (row(0).asInstanceOf[Int] == account.AccountId) { // create char
 //                    self ! CreateCharacter(Some(connection), name, head, voice, gender, empire)
                     sendResponse(ActionResultMessage.Fail(1))
-                    Thread.sleep(5)
+                    Thread.sleep(50)
                     if (connection.isConnected) connection.disconnect
                   } else { // send "char already exist"
                     sendResponse(ActionResultMessage.Fail(1))
-                    Thread.sleep(5)
+                    Thread.sleep(50)
                     if (connection.isConnected) connection.disconnect
                   }
                 case _ => // If the char name didn't exist in the database, create char
@@ -3994,7 +3994,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                   self ! ListAccountCharacters(Some(connection))
                 case scala.util.Failure(e) =>
                   sendResponse(ActionResultMessage.Fail(6))
-                  Thread.sleep(5)
+                  Thread.sleep(50)
                   if (connection.isConnected) connection.disconnect
               }
             case scala.util.Failure(e) =>
@@ -4087,11 +4087,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 case _ =>
                   log.info("toto tata")
               }
-              Thread.sleep(40)
+              Thread.sleep(200)
               Database.query(connection.sendPreparedStatement(
                 "UPDATE characters SET last_login = ? where id=?", Array(new java.sql.Timestamp(System.currentTimeMillis), charId)
               ))
-              Thread.sleep(10)
+              Thread.sleep(50)
 
               var faction : String = "tr"
               if (player.Faction == PlanetSideEmpire.NC) faction = "nc"
@@ -10723,14 +10723,14 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 connection.sendPreparedStatement(
                   "UPDATE loadouts SET exosuit_id=?, name=?, items=? where id=?", Array(owner.ExoSuit.id, label, megaList.drop(1), row(0))
                 ) // Todo maybe add a .onComplete ?
-                Thread.sleep(5)
+                Thread.sleep(50)
                 if (connection.isConnected) connection.disconnect
               case _ => // Save
                 connection.sendPreparedStatement(
                   "INSERT INTO loadouts (characters_id, loadout_number, exosuit_id, name, items) VALUES(?,?,?,?,?) RETURNING id",
                   Array(owner.CharId, line, owner.ExoSuit.id, label, megaList.drop(1))
                 ) // Todo maybe add a .onComplete ?
-                Thread.sleep(5)
+                Thread.sleep(50)
                 if (connection.isConnected) connection.disconnect
             }
           case scala.util.Failure(e) =>
@@ -10802,7 +10802,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 // something to do at end of loading ?
               }
             }
-            Thread.sleep(5)
+            Thread.sleep(50)
             if (connection.get.isConnected) connection.get.disconnect
           case _ =>
             log.error(s"No saved loadout(s) for character ID : ${owner.CharId}")
