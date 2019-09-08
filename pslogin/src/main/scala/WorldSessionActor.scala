@@ -1557,8 +1557,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       player = tplayer
       //LoadMapMessage will cause the client to send back a BeginZoningMessage packet (see below)
       if (continent.Map.Name == "map11" || continent.Map.Name == "map12" || continent.Map.Name == "map13") {
-        sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, false, 3770441820L))
-      } else sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, 3770441820L))
+        sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, false, continent.Map.Checksum))
+      } else sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, continent.Map.Checksum))
       // PTS v3
       Thread.sleep(5)
       //      if(player.Faction == PlanetSideEmpire.VS) sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(36), 38, 0))
