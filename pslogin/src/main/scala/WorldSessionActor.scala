@@ -1495,14 +1495,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
       vehicleService ! Service.Join(avatar.name) //channel will be player.Name
       galaxyService ! Service.Join("galaxy") //for galaxy-wide messages
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
-//      cluster ! InterstellarCluster.GetWorld("z4")
-//      cluster ! InterstellarCluster.GetWorld("z8")
-//      cluster ! InterstellarCluster.GetWorld("z5")
-//      cluster ! InterstellarCluster.GetWorld("i3")
-//      cluster ! InterstellarCluster.GetWorld("z10")
-      cluster ! InterstellarCluster.GetWorld("z9")
+//      cluster ! InterstellarCluster.GetWorld("z1")
+//      cluster ! InterstellarCluster.GetWorld("z2")
 //      cluster ! InterstellarCluster.GetWorld("z3")
+//      cluster ! InterstellarCluster.GetWorld("z4")
+//      cluster ! InterstellarCluster.GetWorld("z5")
+      cluster ! InterstellarCluster.GetWorld("z6")
 //      cluster ! InterstellarCluster.GetWorld("z7")
+//      cluster ! InterstellarCluster.GetWorld("z8")
+//      cluster ! InterstellarCluster.GetWorld("z9")
+//      cluster ! InterstellarCluster.GetWorld("z10")
+//      cluster ! InterstellarCluster.GetWorld("i1")
+//      cluster ! InterstellarCluster.GetWorld("i2")
+//      cluster ! InterstellarCluster.GetWorld("i3")
+//      cluster ! InterstellarCluster.GetWorld("i4")
+//      cluster ! InterstellarCluster.GetWorld("c1")
+//      cluster ! InterstellarCluster.GetWorld("c2")
+//      cluster ! InterstellarCluster.GetWorld("c3")
+//      cluster ! InterstellarCluster.GetWorld("c4")
+//      cluster ! InterstellarCluster.GetWorld("c5")
+//      cluster ! InterstellarCluster.GetWorld("c6")
+
+
+
+
 
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
