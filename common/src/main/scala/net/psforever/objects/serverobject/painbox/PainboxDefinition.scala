@@ -14,11 +14,13 @@ class PainboxDefinition(objectId : Int) extends ObjectDefinition(objectId) {
     case 622 =>
       Name = "painbox"
       alwaysOn = false
-      radius = 10f // Guess - not in game_objects.adb.lst - probably not radius based but it will have to do for the moment
+//      radius = 10f // Guess - not in game_objects.adb.lst - probably not radius based but it will have to do for the moment
+      radius = 10f * 0.8f // PTS v3
       damage = 0
     case 623 =>
       Name = "painbox_continuous"
-      radius = 10f // Guess - not in game_objects.adb.lst - probably not radius based but it will have to do for the moment
+//      radius = 10f // Guess - not in game_objects.adb.lst - probably not radius based but it will have to do for the moment
+      radius = 10f * 0.8f // PTS v3
     case 624 =>
       Name = "painbox_door_radius"
       alwaysOn = false
