@@ -34,10 +34,10 @@ object EquipmentTerminalDefinition {
     "trhev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
     "trhev_antipersonnel" -> (ExoSuitType.MAX, 1),
     "trhev_antivehicular" -> (ExoSuitType.MAX, 2),
-//    "nchev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
+    "nchev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
     "nchev_antipersonnel" -> (ExoSuitType.MAX, 1),
     "nchev_antivehicular" -> (ExoSuitType.MAX, 2),
-//    "vshev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
+    "vshev_antiaircraft" -> (ExoSuitType.MAX, 3), // PTS v3
     "vshev_antipersonnel" -> (ExoSuitType.MAX, 1),
     "vshev_antivehicular" -> (ExoSuitType.MAX, 2)
   )
@@ -77,11 +77,11 @@ object EquipmentTerminalDefinition {
     "burster_ammo" -> MakeAmmoBox(burster_ammo),
     "scattercannon_ammo" -> MakeAmmoBox(scattercannon_ammo),
     "falcon_ammo" -> MakeAmmoBox(falcon_ammo),
-//    "sparrow_ammo" -> MakeAmmoBox(sparrow_ammo), PTSv3
+//    "sparrow_ammo" -> MakeAmmoBox(sparrow_ammo), PTS v3
     "sparrow_ammo" -> MakeAmmoBox(burster_ammo),
     "quasar_ammo" -> MakeAmmoBox(quasar_ammo),
     "comet_ammo" -> MakeAmmoBox(comet_ammo),
-//    "starfire_ammo" -> MakeAmmoBox(starfire_ammo) PTSv3
+//    "starfire_ammo" -> MakeAmmoBox(starfire_ammo) PTS v3
     "starfire_ammo" -> MakeAmmoBox(burster_ammo)
   )
   /**
