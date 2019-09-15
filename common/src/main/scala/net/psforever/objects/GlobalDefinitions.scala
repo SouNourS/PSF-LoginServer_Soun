@@ -1376,8 +1376,11 @@ object GlobalDefinitions {
   def AA_MAX(faction : PlanetSideEmpire.Value) : ToolDefinition = {
     faction match {
       case PlanetSideEmpire.TR => trhev_burster
-      case PlanetSideEmpire.NC => nchev_sparrow
-      case PlanetSideEmpire.VS => vshev_starfire
+//      case PlanetSideEmpire.NC => nchev_sparrow
+//      case PlanetSideEmpire.VS => vshev_starfire
+        // PTSv3
+      case PlanetSideEmpire.NC => trhev_burster
+      case PlanetSideEmpire.VS => trhev_burster
       case PlanetSideEmpire.NEUTRAL => suppressor //there are no common pool MAX arms
     }
   }
@@ -1385,8 +1388,10 @@ object GlobalDefinitions {
   def AA_MAXAmmo(faction : PlanetSideEmpire.Value) : AmmoBoxDefinition = {
     faction match {
       case PlanetSideEmpire.TR => burster_ammo
-      case PlanetSideEmpire.NC => sparrow_ammo
-      case PlanetSideEmpire.VS => starfire_ammo
+//      case PlanetSideEmpire.NC => sparrow_ammo PTSv3
+//      case PlanetSideEmpire.VS => starfire_ammo PTSv3
+      case PlanetSideEmpire.NC => burster_ammo
+      case PlanetSideEmpire.VS => burster_ammo
       case PlanetSideEmpire.NEUTRAL => bullet_9mm //there are no common pool MAX arms
     }
   }
