@@ -3970,7 +3970,7 @@ object GlobalDefinitions {
     r_shotgun.FireModes(1).Magazine = 16
     r_shotgun.FireModes(1).Chamber = 8 //16 shells * 8 pellets = 128
 //    r_shotgun.FireModes(1).Modifiers.Damage0 = -3
-    r_shotgun.FireModes(1).Modifiers.Damage0 = 0 // PTS v3 for Nick's tests
+    r_shotgun.FireModes(1).Modifiers.Damage0 = 1 // PTS v3 for Nick's tests
     r_shotgun.Tile = InventoryTile.Tile93
 
     lasher.Name = "lasher"
