@@ -1141,10 +1141,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyTarget(ObjectClass.radiator, "holstertime" -> "600"),
         GamePropertyTarget(ObjectClass.nano_dispenser, "equiptime" -> "600"),
         GamePropertyTarget(ObjectClass.nano_dispenser, "holstertime" -> "600"),
-        GamePropertyTarget(ObjectClass.thumper, "equiptime" -> "600"),
-        GamePropertyTarget(ObjectClass.thumper, "holstertime" -> "600"),
-        GamePropertyTarget(ObjectClass.rocklet, "equiptime" -> "600"),
-        GamePropertyTarget(ObjectClass.rocklet, "holstertime" -> "600"),
+//        GamePropertyTarget(ObjectClass.thumper, "equiptime" -> "600"),
+//        GamePropertyTarget(ObjectClass.thumper, "holstertime" -> "600"),
+//        GamePropertyTarget(ObjectClass.rocklet, "equiptime" -> "600"),
+//        GamePropertyTarget(ObjectClass.rocklet, "holstertime" -> "600"),
         GamePropertyTarget(ObjectClass.flechette, "equiptime" -> "600"),
         GamePropertyTarget(ObjectClass.flechette, "holstertime" -> "600"),
         GamePropertyTarget(ObjectClass.oicw, "equiptime" -> "750"),
@@ -1207,6 +1207,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         //GamePropertyTarget(ObjectClass.winchester, "holstertime" -> "1000"),
         //GamePropertyTarget(ObjectClass.heavy_sniper, "equiptime" -> "1000"),
         //GamePropertyTarget(ObjectClass.heavy_sniper, "holstertime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.thumper, "equiptime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.thumper, "holstertime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.rocklet, "equiptime" -> "1000"),
+        //GamePropertyTarget(ObjectClass.rocklet, "holstertime" -> "1000"),
 
         //Phoenix/Decimator -- Equip/Holster Time Changes -- No Changes because Decimator hotswap interactions could possibly change (Default Values Listed)
         //GamePropertyTarget(ObjectClass.phoenix, "equiptime" -> "1000"),
@@ -1344,6 +1348,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
         GamePropertyScope(30, List(
           //Ascension (i2) - battle for air supremacy! - Battle Island Event
           //No Skyguards, no Deliverer Variants, no AA MAX, no BFRs, no Tanks, no Flails Zone specific change – Everyone has access to Empire AV weapons and can pilot air vehicles
+
+          //Allow Galaxy Gunship and Lodestar at Vehicle Terminals on Ascension
+          GamePropertyTarget(952, "forsale_galaxy_gunship" -> "true"),
+          GamePropertyTarget(43, "forsale_galaxy_gunship" -> "true"),
+          GamePropertyTarget(952, "forsale_lodestar" -> "true"),
+          GamePropertyTarget(43, "forsale_lodestar" -> "true"),
 
           //Cert Grants
           GamePropertyTarget(ObjectClass.dropship, "requirement_certification0" -> "false"),
@@ -1495,12 +1505,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
       vehicleService ! Service.Join(avatar.name) //channel will be player.Name
       galaxyService ! Service.Join("galaxy") //for galaxy-wide messages
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
-//      cluster ! InterstellarCluster.GetWorld("z1")
+      cluster ! InterstellarCluster.GetWorld("z1")
 //      cluster ! InterstellarCluster.GetWorld("z2")
 //      cluster ! InterstellarCluster.GetWorld("z3")
 //      cluster ! InterstellarCluster.GetWorld("z4")
 //      cluster ! InterstellarCluster.GetWorld("z5")
-      cluster ! InterstellarCluster.GetWorld("z6")
+//      cluster ! InterstellarCluster.GetWorld("z6")
 //      cluster ! InterstellarCluster.GetWorld("z7")
 //      cluster ! InterstellarCluster.GetWorld("z8")
 //      cluster ! InterstellarCluster.GetWorld("z9")
