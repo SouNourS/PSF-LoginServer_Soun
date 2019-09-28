@@ -1505,8 +1505,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       vehicleService ! Service.Join(avatar.name) //channel will be player.Name
       galaxyService ! Service.Join("galaxy") //for galaxy-wide messages
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
-      cluster ! InterstellarCluster.GetWorld("z1")
-//      cluster ! InterstellarCluster.GetWorld("z2")
+//      cluster ! InterstellarCluster.GetWorld("z1")
+      cluster ! InterstellarCluster.GetWorld("z2")
 //      cluster ! InterstellarCluster.GetWorld("z3")
 //      cluster ! InterstellarCluster.GetWorld("z4")
 //      cluster ! InterstellarCluster.GetWorld("z5")
@@ -2326,8 +2326,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def HandleMountMessages(tplayer : Player, reply : Mountable.Exchange) : Unit = {
     reply match {
       case Mountable.CanMount(obj : ImplantTerminalMech, seat_num) =>
-        MountingAction(tplayer, obj, seat_num)
-        sendResponse(PlanetsideAttributeMessage(obj.GUID, 0, 1000L)) //health of mech
+        // PTS v3
+//        MountingAction(tplayer, obj, seat_num)
+//        sendResponse(PlanetsideAttributeMessage(obj.GUID, 0, 1000L)) //health of mech
+        log.info("no implant term")
 
       case Mountable.CanMount(obj : Vehicle, seat_num) =>
         val obj_guid : PlanetSideGUID = obj.GUID
