@@ -2326,9 +2326,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
   def HandleMountMessages(tplayer : Player, reply : Mountable.Exchange) : Unit = {
     reply match {
       case Mountable.CanMount(obj : ImplantTerminalMech, seat_num) =>
-//        MountingAction(tplayer, obj, seat_num)
-//        sendResponse(PlanetsideAttributeMessage(obj.GUID, 0, 1000L)) //health of mech
-        log.info("no implant term")
+        MountingAction(tplayer, obj, seat_num)
+        sendResponse(PlanetsideAttributeMessage(obj.GUID, 0, 1000L)) //health of mech
 
       case Mountable.CanMount(obj : Vehicle, seat_num) =>
         val obj_guid : PlanetSideGUID = obj.GUID
