@@ -14,7 +14,8 @@ import net.psforever.packet.game.TriggeredSound
   * For the most part, it merely implements the support data structures indicated by `Mountable`.
   * @param idef the `ObjectDefinition` that constructs this object and maintains some of its immutable fields
   */
-class ImplantTerminalMech(private val idef : ImplantTerminalMechDefinition) extends Amenity with Mountable with Hackable {
+//class ImplantTerminalMech(private val idef : ImplantTerminalMechDefinition) extends Amenity with Mountable with Hackable { PTS v3
+class ImplantTerminalMech(private val idef : ImplantTerminalMechDefinition) extends Amenity with Hackable {
   private val seats : Map[Int, Seat] = Map( 0 -> new Seat(idef.Seats(0)) )
 
   HackSound = TriggeredSound.HackTerminal

@@ -107,10 +107,40 @@ object Zones {
       BuildingByMapId(14).get.Name = Some("Mulac")
       BuildingByMapId(48).get.Name = Some("Hurakan")
 
+      BuildingByMapId(15).get.Name = Some("twr1")
+      BuildingByMapId(17).get.Name = Some("twr2")
+      BuildingByMapId(28).get.Name = Some("twr3")
+      BuildingByMapId(49).get.Name = Some("twr4")
+      BuildingByMapId(32).get.Name = Some("twr5")
+      BuildingByMapId(50).get.Name = Some("twr6")
+      BuildingByMapId(23).get.Name = Some("twr7")
+      BuildingByMapId(52).get.Name = Some("twr8")
+      BuildingByMapId(31).get.Name = Some("twr9")
+      BuildingByMapId(30).get.Name = Some("twr10")
+      BuildingByMapId(16).get.Name = Some("twr11")
+      BuildingByMapId(19).get.Name = Some("twr12")
+      BuildingByMapId(22).get.Name = Some("twr13")
+      BuildingByMapId(42).get.Name = Some("twr14")
+      BuildingByMapId(24).get.Name = Some("twr15")
+      BuildingByMapId(33).get.Name = Some("twr16")
+      BuildingByMapId(29).get.Name = Some("twr17")
+      BuildingByMapId(18).get.Name = Some("twr18")
+      BuildingByMapId(27).get.Name = Some("twr19")
+      BuildingByMapId(20).get.Name = Some("twr20")
+      BuildingByMapId(21).get.Name = Some("twr21")
+      BuildingByMapId(26).get.Name = Some("twr22")
+      BuildingByMapId(25).get.Name = Some("twr23")
+      BuildingByMapId(51).get.Name = Some("twr24")
+
       import net.psforever.types.PlanetSideEmpire
       Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.TR
+        _.Faction = PlanetSideEmpire.NEUTRAL
       }
+
+      BuildingByMapId(6).get.Faction = PlanetSideEmpire.TR
+      BuildingByMapId(14).get.Faction = PlanetSideEmpire.NC
+      BuildingByMapId(7).get.Faction = PlanetSideEmpire.VS
+
       BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
       BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
