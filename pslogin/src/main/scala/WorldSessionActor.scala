@@ -1581,7 +1581,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       //new zone
       log.info(s"Player ${tplayer.Name} has been loaded")
       player = tplayer
-      //LoadMapMessage will cause the client to send back a BeginZoningMessage packet (see below)
+      //LoadMapMessage causes the client to send BeginZoningMessage, eventually leading to SetCurrentAvatar
       if (continent.Map.Name == "map11" || continent.Map.Name == "map12" || continent.Map.Name == "map13") {
         sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, false, continent.Map.Checksum))
       } else sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, continent.Map.Checksum))
@@ -2183,7 +2183,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(HackMessage(0, target_guid, guid, 100, unk1, HackState.Hacked, unk2))
       case LocalResponse.HackCaptureTerminal(target_guid, unk1, unk2, isResecured) =>
         var value = 0L
-        if(isResecured) {
+
+        if (isResecured) {
           value = 17039360L
           sendResponse(PlanetsideAttributeMessage(target_guid, 20, value))
         }
