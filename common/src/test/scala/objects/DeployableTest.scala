@@ -207,7 +207,7 @@ class TurretControlMountTest extends ActorTest {
       obj.Actor = system.actorOf(Props(classOf[TurretControl], obj), s"${obj.Definition.Name}_test")
 
       assert(obj.Seats(0).Occupant.isEmpty)
-      val player1 = Player(Avatar("test1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player1 = Player(Avatar(0L, "test1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       obj.Actor ! Mountable.TryMount(player1, 0)
       val reply1a = receiveOne(200 milliseconds)
       assert(reply1a.isInstanceOf[Mountable.MountMessages])
@@ -227,7 +227,7 @@ class TurretControlBlockMountTest extends ActorTest {
       obj.Actor = system.actorOf(Props(classOf[TurretControl], obj), s"${obj.Definition.Name}_test")
 
       assert(obj.Seats(0).Occupant.isEmpty)
-      val player1 = Player(Avatar("test1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player1 = Player(Avatar(0L, "test1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       obj.Actor ! Mountable.TryMount(player1, 0)
       val reply1a = receiveOne(200 milliseconds)
       assert(reply1a.isInstanceOf[Mountable.MountMessages])
@@ -236,7 +236,7 @@ class TurretControlBlockMountTest extends ActorTest {
       assert(reply1b.response.isInstanceOf[Mountable.CanMount])
       assert(obj.Seats(0).Occupant.contains(player1))
 
-      val player2 = Player(Avatar("test2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player2 = Player(Avatar(0L, "test2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       obj.Actor ! Mountable.TryMount(player2, 0)
       val reply2a = receiveOne(200 milliseconds)
       assert(reply2a.isInstanceOf[Mountable.MountMessages])
@@ -255,7 +255,7 @@ class TurretControlBlockBetrayalMountTest extends ActorTest {
       obj.Actor = system.actorOf(Props(classOf[TurretControl], obj), s"${obj.Definition.Name}_test")
 
       assert(obj.Seats(0).Occupant.isEmpty)
-      val player = Player(Avatar("test", PlanetSideEmpire.VS, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player = Player(Avatar(0L, "test", PlanetSideEmpire.VS, CharacterGender.Male, 0, CharacterVoice.Mute))
       obj.Actor ! Mountable.TryMount(player, 0)
       val reply1a = receiveOne(200 milliseconds)
       assert(reply1a.isInstanceOf[Mountable.MountMessages])
@@ -275,7 +275,7 @@ class TurretControlDismountTest extends ActorTest {
       obj.Actor = system.actorOf(Props(classOf[TurretControl], obj), s"${obj.Definition.Name}_test")
 
       assert(obj.Seats(0).Occupant.isEmpty)
-      val player = Player(Avatar("test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player = Player(Avatar(0L, "test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       obj.Actor ! Mountable.TryMount(player, 0)
       val reply1a = receiveOne(200 milliseconds)
       assert(reply1a.isInstanceOf[Mountable.MountMessages])
@@ -305,7 +305,7 @@ class TurretControlBetrayalMountTest extends ActorTest {
       obj.Actor = system.actorOf(Props(classOf[TurretControl], obj), s"${obj.Definition.Name}_test")
 
       assert(obj.Seats(0).Occupant.isEmpty)
-      val player = Player(Avatar("test", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player = Player(Avatar(0L, "test", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute))
       assert(player.Faction != obj.Faction)
       obj.Actor ! Mountable.TryMount(player, 0)
       val reply1a = receiveOne(200 milliseconds)

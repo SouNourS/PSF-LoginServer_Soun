@@ -91,6 +91,6 @@ object IFFLockControlTest {
     lock.Actor = system.actorOf(Props(classOf[IFFLockControl], lock), "lock-control")
     lock.Owner = new Building(building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)
     lock.Owner.Faction = faction
-    (Player(Avatar("test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), lock)
+    (Player(Avatar(0L, "test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), lock)
   }
 }

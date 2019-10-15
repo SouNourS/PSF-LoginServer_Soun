@@ -42,6 +42,7 @@ import net.psforever.objects.serverobject.terminals._
 import net.psforever.objects.serverobject.terminals.Terminal.TerminalMessage
 import net.psforever.objects.serverobject.tube.SpawnTube
 import net.psforever.objects.serverobject.turret.{FacilityTurret, TurretUpgrade, WeaponTurret}
+import net.psforever.objects.teamwork.Squad
 import net.psforever.objects.vehicles.{AccessPermissionGroup, Cargo, Utility, VehicleLockState, _}
 import net.psforever.objects.vital._
 import net.psforever.objects.zones.{InterstellarCluster, Zone, ZoneHotSpotProjector}
@@ -56,7 +57,9 @@ import services.local.{LocalAction, LocalResponse, LocalServiceMessage, LocalSer
 import services.chat._
 import services.vehicle.support.TurretUpgrader
 import services.vehicle.{VehicleAction, VehicleResponse, VehicleServiceMessage, VehicleServiceResponse}
+import services.teamwork.{SquadAction => SquadServiceAction, SquadServiceMessage, SquadServiceResponse, SquadResponse, SquadService}
 
+import scala.collection.mutable.LongMap
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.annotation.tailrec
@@ -81,6 +84,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var chatService: ActorRef = ActorRef.noSender
   var vehicleService : ActorRef = ActorRef.noSender
   var galaxyService : ActorRef = ActorRef.noSender
+  var squadService : ActorRef = ActorRef.noSender
   var taskResolver : ActorRef = Actor.noSender
   var cluster : ActorRef = Actor.noSender
   var continent : Zone = Zone.Nowhere
@@ -115,8 +119,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var whenUsedLastSMKit : Long = 0
   var whenUsedLastSAKit : Long = 0
   var whenUsedLastSSKit : Long = 0
+  var whenUpdatedSquad : Long = 0
   val projectiles : Array[Option[Projectile]] = Array.fill[Option[Projectile]](Projectile.RangeUID - Projectile.BaseUID)(None)
   var drawDeloyableIcon : PlanetSideGameObject with Deployable => Unit = RedrawDeployableIcons
+  var updateSquad : () => Unit = NoSquadUpdates
   var recentTeleportAttempt : Long = 0
   var lastTerminalOrderFulfillment : Boolean = true  /**
     * used during zone transfers to maintain reference to seated vehicle (which does not yet exist in the new zone)
@@ -133,6 +139,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * no harm should come from leaving the field set to an old unique identifier value after the transfer period
     */
   var interstellarFerryTopLevelGUID : Option[PlanetSideGUID] = None
+  val squadUI : LongMap[SquadUIElement] = new LongMap[SquadUIElement]()
+  var squad_supplement_id : Int = 0
+  /**
+    * `AvatarConverter` can only rely on the `Avatar`-local Looking For Squad variable.
+    * When joining or creating a squad, the original state of the avatar's local LFS variable is blanked.
+    * This `WSA`-local variable is then used to indicate the ongoing state of the LFS UI component,
+    * now called "Looking for Squad Member."
+    * Upon leaving or disbanding a squad, this value is made false.
+    * Control switching between the `Avatar`-local and the `WSA`-local variable is contingent on `squadUI` being populated.
+    */
+  var lfs : Boolean = false
+  var squadChannel : Option[String] = None
+  var squadSetup : () => Unit = FirstTimeSquadSetup
 
   // PTS v3
   var timeDL : Long = 0
@@ -169,6 +188,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     galaxyService ! Service.Leave()
     LivePlayerList.Remove(sessionId)
     if(player != null && player.HasGUID) {
+      squadService ! Service.Leave(Some(player.CharId.toString))
       val player_guid = player.GUID
       //handle orphaned deployables
       DisownDeployables()
@@ -180,6 +200,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           .collect { case ((index, Some(obj))) => InventoryItem(obj, index) }
           ) ++ player.Inventory.Items)
         .filterNot({ case InventoryItem(obj, _) => obj.isInstanceOf[BoomerTrigger] || obj.isInstanceOf[Telepad] })
+      //put any temporary value back into the avatar
       //TODO final character save before doing any of this (use equipment)
       continent.Population ! Zone.Population.Release(avatar)
       if(player.isAlive) {
@@ -293,6 +314,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       ServiceManager.serviceManager ! Lookup("taskResolver")
       ServiceManager.serviceManager ! Lookup("cluster")
       ServiceManager.serviceManager ! Lookup("galaxy")
+      ServiceManager.serviceManager ! Lookup("squad")
 
     case _ =>
       log.error("Unknown message")
@@ -324,6 +346,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case ServiceManager.LookupResult("cluster", endpoint) =>
       cluster = endpoint
       log.info("ID: " + sessionId + " Got cluster service " + endpoint)
+    case ServiceManager.LookupResult("squad", endpoint) =>
+      squadService = endpoint
+      log.info("ID: " + sessionId + " Got squad service " + endpoint)
 
     case ControlPacket(_, ctrl) =>
       handleControlPkt(ctrl)
@@ -371,6 +396,233 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
     case VehicleServiceResponse(toChannel, guid, reply) =>
       HandleVehicleServiceResponse(toChannel, guid, reply)
+
+    case SquadServiceResponse(_, excluded, response) =>
+      if(!excluded.exists(_ == avatar.CharId)) {
+        response match {
+          case SquadResponse.ListSquadFavorite(line, task) =>
+            sendResponse(SquadDefinitionActionMessage(PlanetSideGUID(0), line, SquadAction.ListSquadFavorite(task)))
+
+          case SquadResponse.InitList(infos) =>
+            sendResponse(ReplicationStreamMessage(infos))
+
+          case SquadResponse.UpdateList(infos) if infos.nonEmpty =>
+            sendResponse(
+              ReplicationStreamMessage(6, None,
+                infos.map { case (index, squadInfo) =>
+                  SquadListing(index, squadInfo)
+                }.toVector
+              )
+            )
+
+          case SquadResponse.RemoveFromList(infos) if infos.nonEmpty =>
+            sendResponse(
+              ReplicationStreamMessage(1, None,
+                infos.map { index =>
+                  SquadListing(index, None)
+                }.toVector
+              )
+            )
+
+          case SquadResponse.Detail(guid, detail) =>
+            sendResponse(SquadDetailDefinitionUpdateMessage(guid, detail))
+
+          case SquadResponse.AssociateWithSquad(squad_guid) =>
+            sendResponse(SquadDefinitionActionMessage(squad_guid, 0, SquadAction.AssociateWithSquad()))
+
+          case SquadResponse.SetListSquad(squad_guid) =>
+            sendResponse(SquadDefinitionActionMessage(squad_guid, 0, SquadAction.SetListSquad()))
+
+          case SquadResponse.Membership(request_type, unk1, unk2, char_id, opt_char_id, player_name, unk5, unk6) =>
+            val name = request_type match {
+              case SquadResponseType.Invite if unk5 =>
+                //player_name is our name; the name of the player indicated by unk3 is needed
+                LivePlayerList.WorldPopulation({ case (_, a : Avatar) => char_id == a.CharId }).headOption match {
+                  case Some(player) =>
+                    player.name
+                  case None =>
+                    player_name
+                }
+              case _ =>
+                player_name
+            }
+            sendResponse(SquadMembershipResponse(request_type, unk1, unk2, char_id, opt_char_id, name, unk5, unk6))
+
+          case SquadResponse.WantsSquadPosition(_, name) =>
+            sendResponse(
+              ChatMsg(
+                ChatMessageType.CMT_SQUAD, true, name,
+                s"\\#6 would like to join your squad. (respond with \\#3/accept\\#6 or \\#3/reject\\#6)",
+                None
+              )
+            )
+
+          case SquadResponse.Join(squad, positionsToUpdate, toChannel) =>
+            val leader = squad.Leader
+            val membershipPositions = positionsToUpdate map squad.Membership.zipWithIndex
+            StartBundlingPackets()
+            membershipPositions.find({ case(member, _) => member.CharId == avatar.CharId }) match {
+              case Some((ourMember, ourIndex)) =>
+                //we are joining the squad
+                //load each member's entry (our own too)
+                squad_supplement_id = squad.GUID.guid + 1
+                membershipPositions.foreach { case(member, index) =>
+                  sendResponse(SquadMemberEvent.Add(squad_supplement_id, member.CharId, index, member.Name, member.ZoneId, unk7 = 0))
+                  squadUI(member.CharId) = SquadUIElement(member.Name, index, member.ZoneId, member.Health, member.Armor, member.Position)
+                }
+                //repeat our entry
+                sendResponse(SquadMemberEvent.Add(squad_supplement_id, ourMember.CharId, ourIndex, ourMember.Name, ourMember.ZoneId, unk7 = 0)) //repeat of our entry
+                val playerGuid = player.GUID
+                //turn lfs off
+                val factionOnContinentChannel = s"${continent.Id}/${player.Faction}"
+                if(avatar.LFS) {
+                  avatar.LFS = false
+                  sendResponse(PlanetsideAttributeMessage(playerGuid, 53, 0))
+                  avatarService ! AvatarServiceMessage(factionOnContinentChannel, AvatarAction.PlanetsideAttribute(playerGuid, 53, 0))
+                }
+                //squad colors
+                GiveSquadColorsInZone()
+                avatarService ! AvatarServiceMessage(factionOnContinentChannel, AvatarAction.PlanetsideAttribute(playerGuid, 31, squad_supplement_id))
+                //associate with member position in squad
+                sendResponse(PlanetsideAttributeMessage(playerGuid, 32, ourIndex))
+                //a finalization? what does this do?
+                sendResponse(SquadDefinitionActionMessage(squad.GUID, 0, SquadAction.Unknown(18)))
+                updateSquad = UpdatesWhenEnrolledInSquad
+                squadChannel = Some(toChannel)
+                chatService ! Service.Join(squadChannel.get)
+              case _ =>
+                //other player is joining our squad
+                //load each member's entry
+                GiveSquadColorsInZone(
+                  membershipPositions.map { case(member, index) =>
+                    val charId = member.CharId
+                    sendResponse(SquadMemberEvent.Add(squad_supplement_id, charId, index, member.Name, member.ZoneId, unk7 = 0))
+                    squadUI(charId) = SquadUIElement(member.Name, index, member.ZoneId, member.Health, member.Armor, member.Position)
+                    charId
+                  }
+                )
+            }
+            StopBundlingPackets()
+            //send an initial dummy update for map icon(s)
+            sendResponse(SquadState(PlanetSideGUID(squad_supplement_id),
+              membershipPositions
+                .filterNot { case (member, _) => member.CharId == avatar.CharId }
+                .map{ case (member, _) => SquadStateInfo(member.CharId, member.Health, member.Armor, member.Position, 2,2, false, 429, None,None) }
+                .toList
+            ))
+
+          case SquadResponse.Leave(squad, positionsToUpdate) =>
+            StartBundlingPackets()
+            positionsToUpdate.find({ case(member, _) => member == avatar.CharId }) match {
+              case Some((ourMember, ourIndex)) =>
+                //we are leaving the squad
+                //remove each member's entry (our own too)
+                positionsToUpdate.foreach { case(member, index) =>
+                  sendResponse(SquadMemberEvent.Remove(squad_supplement_id, member, index))
+                  squadUI.remove(member)
+                }
+                //uninitialize
+                val playerGuid = player.GUID
+                sendResponse(SquadMemberEvent.Remove(squad_supplement_id, ourMember, ourIndex)) //repeat of our entry
+                sendResponse(PlanetsideAttributeMessage(playerGuid, 31, 0)) //disassociate with squad?
+                avatarService ! AvatarServiceMessage(s"${continent.Id}/${player.Faction}", AvatarAction.PlanetsideAttribute(playerGuid, 31, 0))
+                sendResponse(PlanetsideAttributeMessage(playerGuid, 32, 0)) //disassociate with member position in squad?
+                sendResponse(PlanetsideAttributeMessage(playerGuid, 34, 4294967295L)) //unknown, perhaps unrelated?
+                lfs = false
+                //a finalization? what does this do?
+                sendResponse(SquadDefinitionActionMessage(PlanetSideGUID(0), 0, SquadAction.Unknown(18)))
+                updateSquad = NoSquadUpdates
+                chatService ! Service.Leave(squadChannel)
+                squadChannel = None
+              case _ =>
+                //remove each member's entry
+                GiveSquadColorsInZone(
+                  positionsToUpdate.map { case(member, index) =>
+                    sendResponse(SquadMemberEvent.Remove(squad_supplement_id, member, index))
+                    squadUI.remove(member)
+                    member
+                  },
+                  value = 0
+                )
+            }
+            StopBundlingPackets()
+            squad_supplement_id = 0
+
+          case SquadResponse.AssignMember(squad, from_index, to_index) =>
+            //we've already swapped position internally; now we swap the cards
+            SwapSquadUIElements(squad, from_index, to_index)
+
+          case SquadResponse.PromoteMember(squad, char_id, from_index, to_index) =>
+            val charId = player.CharId
+            val guid = player.GUID
+            lazy val factionOnContinentChannel = s"${continent.Id}/${player.Faction}"
+            //are we being demoted?
+            if(squadUI(charId).index == 0) {
+              //lfsm -> lfs
+              if(lfs) {
+                sendResponse(PlanetsideAttributeMessage(guid, 53, 0))
+                avatarService ! AvatarServiceMessage(factionOnContinentChannel, AvatarAction.PlanetsideAttribute(guid, 53, 0))
+              }
+              lfs = false
+              sendResponse(PlanetsideAttributeMessage(guid, 32, from_index)) //associate with member position in squad
+            }
+            //are we being promoted?
+            else if(charId == char_id) {
+              sendResponse(PlanetsideAttributeMessage(guid, 32, 0)) //associate with member position in squad
+            }
+            avatarService ! AvatarServiceMessage(factionOnContinentChannel, AvatarAction.PlanetsideAttribute(guid, 31, squad_supplement_id))
+            //we must fix the squad cards backend
+            SwapSquadUIElements(squad, from_index, to_index)
+
+          case SquadResponse.UpdateMembers(squad, positions) =>
+            import services.teamwork.SquadAction.{Update => SAUpdate}
+            val pairedEntries = positions.collect {
+              case entry if squadUI.contains(entry.char_id) =>
+                (entry, squadUI(entry.char_id))
+            }
+            //prune entries
+            val updatedEntries = pairedEntries
+              .collect({
+                case (entry, element) if entry.zone_number != element.zone =>
+                  //zone gets updated for these entries
+                  sendResponse(SquadMemberEvent.UpdateZone(squad_supplement_id, entry.char_id, element.index, entry.zone_number))
+                  squadUI(entry.char_id) = SquadUIElement(element.name, element.index, entry.zone_number, entry.health, entry.armor, entry.pos)
+                  entry
+                case (entry, element) if entry.health != element.health || entry.armor != element.armor || entry.pos != element.position =>
+                  //other elements that need to be updated
+                  squadUI(entry.char_id) = SquadUIElement(element.name, element.index, entry.zone_number, entry.health, entry.armor, entry.pos)
+                  entry
+              })
+              .filterNot(_.char_id == avatar.CharId) //we want to update our backend, but not our frontend
+            if(updatedEntries.nonEmpty) {
+              sendResponse(
+                SquadState(
+                  PlanetSideGUID(squad_supplement_id),
+                  updatedEntries.map { entry => SquadStateInfo(entry.char_id, entry.health, entry.armor, entry.pos, 2,2, false, 429, None,None)}
+                )
+              )
+            }
+
+          case SquadResponse.SquadSearchResults() =>
+            //I don't actually know how to return search results
+            sendResponse(SquadDefinitionActionMessage(PlanetSideGUID(0), 0, SquadAction.NoSquadSearchResults()))
+
+          case SquadResponse.InitWaypoints(char_id, waypoints) =>
+            StartBundlingPackets()
+            waypoints.foreach { case (waypoint_type, info, unk) =>
+              sendResponse(SquadWaypointEvent.Add(squad_supplement_id, char_id, waypoint_type, WaypointEvent(info.zone_number, info.pos, unk)))
+            }
+            StopBundlingPackets()
+
+          case SquadResponse.WaypointEvent(WaypointEventAction.Add, char_id, waypoint_type, _, Some(info), unk) =>
+            sendResponse(SquadWaypointEvent.Add(squad_supplement_id, char_id, waypoint_type, WaypointEvent(info.zone_number, info.pos, unk)))
+
+          case SquadResponse.WaypointEvent(WaypointEventAction.Remove, char_id, waypoint_type, _, _, _) =>
+            sendResponse(SquadWaypointEvent.Remove(squad_supplement_id, char_id, waypoint_type))
+
+          case _ => ;
+        }
+      }
 
     case Deployment.CanDeploy(obj, state) =>
       val vehicle_guid = obj.GUID
@@ -561,7 +813,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                     val lTime = value(7).asInstanceOf[org.joda.time.LocalDateTime].toDateTime().getMillis()/1000
                     val secondsSinceLastLogin = nowTimeInSeconds - lTime
                     if (!lDeleted) {
-                      avatarArray(i) = Avatar(lName, lFaction, lGender, lHead, lVoice)
+                      avatarArray(i) = Avatar(value(0).asInstanceOf[Int], lName, lFaction, lGender, lHead, lVoice)
                       AwardBattleExperiencePoints(avatarArray(i), 20000000L)
                       avatarArray(i).CEP = 600000
                       playerArray(i) = new Player(avatarArray(i))
@@ -1495,7 +1747,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       )))
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 0)) // disable festive backpacks
 //      sendResponse(WeatherMessage(List(CloudInfo(0,Vector3(-2.6748898f,-1.025668f,0.0f),Vector3(0.9573444f,-0.09207539f,0.0f))),List(StormInfo(Vector3(0.5852982f,0.7721373f,0.0f),122,64), StormInfo(Vector3(0.95833915f,0.7752719f,0.0f),67,102), StormInfo(Vector3(0.03514052f,0.7752719f,0.0f),62,107), StormInfo(Vector3(0.82354355f,0.9978426f,0.0f),77,41), StormInfo(Vector3(0.6871782f,0.3771526f,0.0f),40,97), StormInfo(Vector3(0.34391987f,0.13890885f,0.0f),30,34), StormInfo(Vector3(0.24830915f,0.8379686f,0.0f),62,25), StormInfo(Vector3(0.94736725f,0.28937906f,0.0f),3,21), StormInfo(Vector3(0.43639442f,0.72668326f,0.0f),89,194), StormInfo(Vector3(0.43169186f,0.5699438f,0.0f),202,50), StormInfo(Vector3(0.19501628f,0.994708f,0.0f),23,73))))
-      sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
+      sendResponse(ReplicationStreamMessage(5, Some(6), Vector.empty)) //clear squad list
       sendResponse(FriendsResponse(FriendAction.InitializeFriendList, 0, true, true, Nil))
       sendResponse(FriendsResponse(FriendAction.InitializeIgnoreList, 0, true, true, Nil))
       StopBundlingPackets()
@@ -1505,6 +1757,8 @@ class WorldSessionActor extends Actor with MDCContextAware {
       vehicleService ! Service.Join(avatar.name) //channel will be player.Name
       galaxyService ! Service.Join("galaxy") //for galaxy-wide messages
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
+      squadService ! Service.Join(s"${avatar.faction}") //channel will be player.Faction
+      squadService ! Service.Join(s"${avatar.CharId}") //channel will be player.CharId (in order to work with packets)
 //      cluster ! InterstellarCluster.GetWorld("z1")
       cluster ! InterstellarCluster.GetWorld("z2")
 //      cluster ! InterstellarCluster.GetWorld("z3")
@@ -1525,8 +1779,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      cluster ! InterstellarCluster.GetWorld("c4")
 //      cluster ! InterstellarCluster.GetWorld("c5")
 //      cluster ! InterstellarCluster.GetWorld("c6")
-
-
 
 
 
@@ -1689,7 +1941,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       import net.psforever.objects.GlobalDefinitions._
       //      import net.psforever.types.CertificationType._
       val faction = PlanetSideEmpire.TR
-      val avatar = Avatar(s"TestCharacter$sessionId", faction, CharacterGender.Female, 41, CharacterVoice.Voice1)
+      val avatar = Avatar(0L, s"TestCharacter$sessionId", faction, CharacterGender.Female, 41, CharacterVoice.Voice1)
       //      avatar.Certifications += StandardAssault
       //      avatar.Certifications += MediumAssault
       //      avatar.Certifications += StandardExoSuit
@@ -2261,7 +2513,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if (player.GUID != avatar_guid) {
           reply.messageType match {
             case ChatMessageType.CMT_TELL =>
-              if (player.Name == reply.recipient) {
+              if (player.Name.equalsIgnoreCase(reply.recipient)) {
                 sendResponse(ChatMsg(reply.messageType, reply.wideContents, avatar_name, reply.contents, reply.note))
               }
             case ChatMessageType.CMT_SILENCE =>
@@ -2303,7 +2555,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
               if (Vector3.Distance(player.Position, avatar_pos) < 25 && player.Faction == avatar_faction && player.Continent == cont.Id) {
                 sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
               }
+            case ChatMessageType.CMT_COMMAND =>
+              sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
             case ChatMessageType.CMT_SQUAD =>
+              if(squadChannel.nonEmpty) {
+                if("/Chat/"+squadChannel.get == toChannel) {
+                  sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
+                }
+              }
+            case ChatMessageType.CMT_PLATOON =>
               if (player.Faction == avatar_faction) {
                 sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
               }
@@ -3834,7 +4094,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 //      "Use '\\ #x' (without space & with x = \\#0 0\\#1 1\\#2 2\\#3 3\\#4 4\\#5 5\\#6 6\\#7 7\\#8 8\\#9 9\\#0 0\\#a a\\#b b\\#c c\\#d d\\#e e\\#f f\\#0)")))
     sendResponse(ChangeShortcutBankMessage(guid, 0))
     //Favorites lists
-    val (inf, veh) = avatar.Loadouts.partition { case (index, _) => index < 10 }
+    val (inf, veh) = avatar.EquipmentLoadouts.Loadouts.partition { case (index, _) => index < 10 }
     inf.foreach {
       case (index, loadout : InfantryLoadout) =>
 //        println(index, loadout.label, InfantryLoadout.DetermineSubtypeB(loadout.exosuit, loadout.subtype), loadout.exosuit, loadout.subtype)
@@ -3844,12 +4104,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
       case (index, loadout : VehicleLoadout) =>
         sendResponse(FavoritesMessage(LoadoutType.Vehicle, guid, index - 10, loadout.label))
     }
-    sendResponse(SetChatFilterMessage(ChatChannel.Broadcast, false, ChatChannel.values.toList)) //TODO will not always be "on" like this
+    sendResponse(SetChatFilterMessage(ChatChannel.Platoon, false, ChatChannel.values.toList)) //TODO will not always be "on" like this
     deadState = DeadState.Alive
     sendResponse(AvatarDeadStateMessage(DeadState.Alive, 0, 0, tplayer.Position, player.Faction, true))
-    sendResponse(PlanetsideAttributeMessage(guid, 53, 1))
+    //looking for squad (members)
+    if(tplayer.LFS || lfs) {
+      sendResponse(PlanetsideAttributeMessage(guid, 53, 1))
+      avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(guid, 53, 1))
+    }
     sendResponse(AvatarSearchCriteriaMessage(guid, List(0, 0, 0, 0, 0, 0)))
     (1 to 73).foreach(i => {
+      // not all GUID's are set, and not all of the set ones will always be zero; what does this section do?
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(i), 67, 0))
     })
     (0 to 30).foreach(i => {
@@ -3858,7 +4123,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     })
     //AvatarAwardMessage
     //DisplayAwardMessage
-    //SquadDefinitionActionMessage and SquadDetailDefinitionUpdateMessage
+    sendResponse(PlanetsideStringAttributeMessage(guid, 0, "Outfit Name"))
+    //squad stuff (loadouts, assignment)
+    squadSetup()
     //MapObjectStateBlockMessage and ObjectCreateMessage?
     //TacticsMessage?
     //change the owner on our deployables (re-draw the icons for our deployables too)
@@ -3913,6 +4180,97 @@ class WorldSessionActor extends Actor with MDCContextAware {
     if (noSpawnPointHere) {
       RequestSanctuaryZoneSpawn(player, continent.Number)
     }
+  }
+
+  /**
+    * These messages are dispatched when first starting up the client and connecting to the server for the first time.
+    * While many of thee messages will be reused for other situations, they appear in this order only during startup.
+    */
+  def FirstTimeSquadSetup() : Unit = {
+    sendResponse(SquadDetailDefinitionUpdateMessage.Init)
+    sendResponse(ReplicationStreamMessage(5, Some(6), Vector.empty)) //clear squad list
+    sendResponse(SquadDefinitionActionMessage(PlanetSideGUID(0), 0, SquadAction.Unknown(6)))
+    //only need to load these once - they persist between zone transfers and respawns
+    avatar.SquadLoadouts.Loadouts.foreach {
+      case (index, loadout : SquadLoadout) =>
+        sendResponse(SquadDefinitionActionMessage(PlanetSideGUID(0), index, SquadAction.ListSquadFavorite(loadout.task)))
+    }
+    //non-squad GUID-0 counts as the settings when not joined with a squad
+    sendResponse(SquadDefinitionActionMessage(PlanetSideGUID(0), 0, SquadAction.AssociateWithSquad()))
+    sendResponse(SquadDefinitionActionMessage(PlanetSideGUID(0), 0, SquadAction.SetListSquad()))
+    sendResponse(SquadDefinitionActionMessage(PlanetSideGUID(0), 0, SquadAction.Unknown(18)))
+    squadService ! SquadServiceMessage(player, continent, SquadServiceAction.InitSquadList())
+    squadService ! SquadServiceMessage(player, continent, SquadServiceAction.InitCharId())
+    squadSetup = RespawnSquadSetup
+  }
+
+  /**
+    * These messages are used during each subsequent respawn to reset the squad colors on player nameplates and marquees.
+    * By using `squadUI` to maintain relevant information about squad members,
+    * especially the unique character identifier number,
+    * only the zone-specific squad members will receive the important messages about their squad member's spawn.
+    */
+  def RespawnSquadSetup() : Unit = {
+    if(squadUI.nonEmpty) {
+      sendResponse(PlanetsideAttributeMessage(player.GUID, 31, squad_supplement_id))
+      avatarService ! AvatarServiceMessage(s"${continent.Id}/${player.Faction}", AvatarAction.PlanetsideAttribute(player.GUID, 31, squad_supplement_id))
+      sendResponse(PlanetsideAttributeMessage(player.GUID, 32, squadUI(player.CharId).index))
+    }
+  }
+
+  /**
+    * These messages are used during each subsequent respawn to reset the squad colors on player nameplates and marquees.
+    * During a zone change,
+    * on top of other squad mates in the zone needing to have their knowledge of this player's squad colors changed,
+    * the player must also set squad colors for each other squad members.
+    * Default respawn functionality may resume afterwards.
+    */
+  def ZoneChangeSquadSetup() : Unit = {
+    RespawnSquadSetup()
+    GiveSquadColorsInZone()
+    squadSetup = RespawnSquadSetup
+  }
+
+  /**
+    * Allocate all squad members in zone and give their nameplates and their marquees the appropriate squad color.
+    */
+  def GiveSquadColorsInZone() : Unit = {
+    GiveSquadColorsInZone(squadUI.keys, squad_supplement_id)
+  }
+
+  /**
+    * Allocate the listed squad members in zone and give their nameplates and their marquees the appropriate squad color.
+    * @param members members of the squad to target
+    */
+  def GiveSquadColorsInZone(members : Iterable[Long]) : Unit = {
+    GiveSquadColorsInZone(members, squad_supplement_id)
+  }
+
+  /**
+    * Allocate the listed squad members in zone and give their nameplates and their marquees the appropriate squad color.
+    * @see `PlanetsideAttributeMessage`
+    * @param members members of the squad to target
+    * @param value the assignment value
+    */
+  def GiveSquadColorsInZone(members : Iterable[Long], value : Long) : Unit = {
+    SquadMembersInZone(members).foreach {
+      members => sendResponse(PlanetsideAttributeMessage(members.GUID, 31, value))
+    }
+  }
+
+  /**
+    * For the listed squad member unique character identifier numbers,
+    * find and return all squad members in the current zone.
+    * @param members members of the squad to target
+    * @return a list of `Player` objects
+    */
+  def SquadMembersInZone(members : Iterable[Long]) : Iterable[Player] = {
+    val players = continent.LivePlayers
+    for {
+      charId <- members
+      player = players.find { _.CharId == charId }
+      if player.nonEmpty
+    } yield player.get
   }
 
   def handleControlPkt(pkt : PlanetSideControlPacket) = {
@@ -4065,8 +4423,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       val lGender : CharacterGender.Value = CharacterGender(row(3).asInstanceOf[Int])
                       val lHead : Int = row(4).asInstanceOf[Int]
                       val lVoice : CharacterVoice.Value = CharacterVoice(row(5).asInstanceOf[Int])
-                      val avatar : Avatar = Avatar(lName, lFaction, lGender, lHead, lVoice)
-                      avatar.CharId = charId
+                      val avatar : Avatar = Avatar(charId, lName, lFaction, lGender, lHead, lVoice)
                       avatar.Certifications += StandardAssault
                       avatar.Certifications += MediumAssault
                       avatar.Certifications += StandardExoSuit
@@ -4202,7 +4559,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(connectionState != 100) configZone(continent) // PTS v3
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
-      sendResponse(ReplicationStreamMessage(5, Some(6), Vector(SquadListing()))) //clear squad list
+      sendResponse(ReplicationStreamMessage(5, Some(6), Vector.empty)) //clear squad list
       sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 112, 0)) // disable festive backpacks
       //(0 to 255).foreach(i => { sendResponse(SetEmpireMessage(PlanetSideGUID(i), PlanetSideEmpire.VS)) })
 
@@ -4457,13 +4814,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The default zone is set to Esamir if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
+        "  \\#6The default zone is set to Hossin if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Broadcast chat (/b)\\#6 is global to everyone, regardless of faction.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None))
+        "  \\#3Platoon chat (/p)\\#6 is global to members of your faction.", None))
+      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+        "  \\#3Squad chat (/s)\\#6 is your squad chat.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -4475,12 +4834,13 @@ class WorldSessionActor extends Actor with MDCContextAware {
       StopBundlingPackets()
 
       chatService ! Service.Join("local")
-      chatService ! Service.Join("squad")
+      chatService ! Service.Join("platoon")
       chatService ! Service.Join("voice")
       chatService ! Service.Join("tell")
       chatService ! Service.Join("broadcast")
       chatService ! Service.Join("note")
       chatService ! Service.Join("gm")
+      if(admin) chatService ! Service.Join("command")
 
       self ! SetCurrentAvatar(player)
 
@@ -4530,7 +4890,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
           avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttributeSelf(player.GUID, 2, player.Stamina))
         }
 
-
         if (player.death_by == -1) {
           sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "", "KICKED ! ", None))
           Thread.sleep(300)
@@ -4578,6 +4937,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case None => false
         }
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlayerState(avatar_guid, msg, spectator, wepInHand))
+        if (System.currentTimeMillis() - whenUpdatedSquad > 1000 ) {
+          whenUpdatedSquad = System.currentTimeMillis()
+          updateSquad()
+        }
       }
       else { // PTS v3
         timeDL = 0
@@ -4622,6 +4985,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
               }
               obj.Cloaked = obj.Definition.CanCloak && is_cloaked
               vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.VehicleState(player.GUID, vehicle_guid, unk1, pos, ang, vel, flight, unk6, unk7, wheels, unk9, is_cloaked))
+            }
+            //vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.VehicleState(player.GUID, vehicle_guid, unk1, pos, ang, vel, flight, unk6, unk7, wheels, unk9, unkA))
+            if (System.currentTimeMillis() - whenUpdatedSquad > 1000 ) {
+              whenUpdatedSquad = System.currentTimeMillis()
+              updateSquad()
             }
           case (None, _) =>
             //log.error(s"VehicleState: no vehicle $vehicle_guid found in zone")
@@ -4835,7 +5203,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
           "  \\#3Broadcast chat (/b)\\#6 is global to everyone, regardless of faction.", None))
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-          "  \\#3Squad chat (/s)\\#6 is global to members of your faction.", None))
+          "  \\#3Platoon chat (/p)\\#6 is global to members of your faction.", None))
+        sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+          "  \\#3Squad chat (/s)\\#6 is your squad chat.", None))
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
           "  \\#3Tells (/t <name>)\\#6 are private messages sent to any player.", None))
         sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -5003,7 +5373,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
         chatService ! ChatServiceMessage("gm", ChatAction.GM(player.GUID, player.Name, msg))
       }
       else if (messagetype == ChatMessageType.CMT_SQUAD && !player.silenced) {
-        chatService ! ChatServiceMessage("squad", ChatAction.Squad(player.GUID, player.Name, continent, player.Position, player.Faction, msg))
+        if(squadChannel.nonEmpty) {
+          chatService ! ChatServiceMessage(squadChannel.get, ChatAction.Squad(player.GUID, player.Name, continent, player.Position, player.Faction, msg))
+        }
+      }
+      else if (messagetype == ChatMessageType.CMT_PLATOON && !player.silenced) {
+        chatService ! ChatServiceMessage("platoon", ChatAction.Platoon(player.GUID, player.Name, continent, player.Position, player.Faction, msg))
+      }
+      else if (messagetype == ChatMessageType.CMT_COMMAND && admin) {
+        chatService ! ChatServiceMessage("command", ChatAction.Command(player.GUID, player.Name, continent, player.Position, player.Faction, msg))
       }
       else if (messagetype == ChatMessageType.CMT_WHO || messagetype == ChatMessageType.CMT_WHO_CSR || messagetype == ChatMessageType.CMT_WHO_CR ||
         messagetype == ChatMessageType.CMT_WHO_PLATOONLEADERS || messagetype == ChatMessageType.CMT_WHO_SQUADLEADERS || messagetype == ChatMessageType.CMT_WHO_TEAMS) {
@@ -6114,7 +6492,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             log.info(s"GenericObject: $player is MAX with an unexpected weapon - ${definition.Name}")
         }
       }
-      else if(action == 16) {
+      else if(action == 16) { //max deployment
         log.info(s"GenericObject: $player has released the anchors")
         player.UsingSpecial = SpecialExoSuitDefinition.Mode.Normal
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 19, 0))
@@ -6130,6 +6508,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
             sendResponse(ChangeFireModeMessage(tool.GUID, convertFireModeIndex))
           case _ =>
             log.info(s"GenericObject: $player is MAX with an unexpected weapon - ${definition.Name}")
+        }
+      }
+      else if(action == 36) { //Looking For Squad ON
+        if(squadUI.nonEmpty) {
+          if(!lfs && squadUI(player.CharId).index == 0) {
+            lfs = true
+            avatarService ! AvatarServiceMessage(s"${continent.Id}/${player.Faction}", AvatarAction.PlanetsideAttribute(player.GUID, 53, 1))
+          }
+        }
+        else if(!avatar.LFS) {
+          avatar.LFS = true
+          avatarService ! AvatarServiceMessage(s"${continent.Id}/${player.Faction}", AvatarAction.PlanetsideAttribute(player.GUID, 53, 1))
+        }
+      }
+      else if(action == 37) { //Looking For Squad OFF
+        if(squadUI.nonEmpty) {
+          if(lfs && squadUI(player.CharId).index == 0) {
+            lfs = false
+            avatarService ! AvatarServiceMessage(s"${continent.Id}/${player.Faction}", AvatarAction.PlanetsideAttribute(player.GUID, 53, 0))
+          }
+        }
+        else if(avatar.LFS) {
+          avatar.LFS = false
+          avatarService ! AvatarServiceMessage(s"${continent.Id}/${player.Faction}", AvatarAction.PlanetsideAttribute(player.GUID, 53, 0))
         }
       }
 
@@ -6191,20 +6593,20 @@ class WorldSessionActor extends Actor with MDCContextAware {
               None
             }) match {
               case Some(owner : Player) => //InfantryLoadout
-                avatar.SaveLoadout(owner, name, lineno)
+                avatar.EquipmentLoadouts.SaveLoadout(owner, name, lineno)
                 SaveLoadoutToDB(owner, name, lineno)
                 import InfantryLoadout._
 //                println(player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player)), player.ExoSuit, DetermineSubtype(player))
                 sendResponse(FavoritesMessage(list, player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player))))
               case Some(owner : Vehicle) => //VehicleLoadout
-                avatar.SaveLoadout(owner, name, lineno)
+                avatar.EquipmentLoadouts.SaveLoadout(owner, name, lineno)
                 sendResponse(FavoritesMessage(list, player_guid, line, name))
               case Some(_) | None =>
                 log.error("FavoritesRequest: unexpected owner for favorites")
             }
 
           case FavoritesAction.Delete =>
-            avatar.DeleteLoadout(lineno)
+            avatar.EquipmentLoadouts.DeleteLoadout(lineno)
             sendResponse(FavoritesMessage(list, player_guid, line, ""))
 
           case FavoritesAction.Unknown =>
@@ -6458,8 +6860,17 @@ class WorldSessionActor extends Actor with MDCContextAware {
     case msg @ AvatarGrenadeStateMessage(player_guid, state) =>
       log.info("AvatarGrenadeStateMessage: " + msg)
 
-    case msg @ SquadDefinitionActionMessage(a, b, c, d, e, f, g, h, i) =>
-      log.info("SquadDefinitionAction: " + msg)
+    case msg @ SquadDefinitionActionMessage(u1, u2, action) =>
+      log.info(s"SquadDefinitionAction: $msg")
+        squadService ! SquadServiceMessage(player, continent, SquadServiceAction.Definition(u1, u2, action))
+
+    case msg @ SquadMembershipRequest(request_type, char_id, unk3, player_name, unk5) =>
+      log.info(s"$msg")
+      squadService ! SquadServiceMessage(player, continent, SquadServiceAction.Membership(request_type, char_id, unk3, player_name, unk5))
+
+    case msg @ SquadWaypointRequest(request, _, wtype, unk, info) =>
+      log.info(s"Waypoint Request: $msg")
+      squadService ! SquadServiceMessage(player, continent, SquadServiceAction.Waypoint(request, wtype, unk, info))
 
     case msg @ GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
       log.info("Ouch! " + msg)
@@ -9341,9 +9752,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   /**
     * Properly format a `DestroyDisplayMessage` packet
     * given sufficient information about a target (victim) and an actor (killer).
-    * For the packet, the `*_charId` field is most important to determining distinction between players.
-    * The "char id" is not a currently supported field for different players so a name hash is used instead.
-    * The virtually negligent chance of a name hash collision is covered.
+    * For the packet, the `charId` field is important for determining distinction between players.
     * @param killer the killer's entry
     * @param victim the victim's entry
     * @param method the manner of death
@@ -9352,13 +9761,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * @return a `DestroyDisplayMessage` packet that is properly formatted
     */
   def DestroyDisplayMessage(killer : SourceEntry, victim : SourceEntry, method : Int, unk : Int = 121) : DestroyDisplayMessage = {
-    //TODO charId should reflect the player more properly
-    val killerCharId = killer.CharId
-    var victimCharId = victim.CharId
-    //    if(killerCharId == victimCharId && !killer.Name.equals(victim.Name)) {
-    //      //odds of hash collision in a populated zone should be close to odds of being struck by lightning
-    //      victimCharId = Int.MaxValue - victimCharId + 1
-    //    }
     val killer_seated = killer match {
       case obj : PlayerSource => obj.Seated
       case _ => false
@@ -9368,9 +9770,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
       case _ => false
     }
     new DestroyDisplayMessage(
-      killer.Name, killerCharId, killer.Faction, killer_seated,
+      killer.Name, killer.CharId, killer.Faction, killer_seated,
       unk, method,
-      victim.Name, victimCharId, victim.Faction, victim_seated
+      victim.Name, victim.CharId, victim.Faction, victim_seated
     )
   }
 
@@ -10304,6 +10706,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     })
     DisownDeployables()
     drawDeloyableIcon = RedrawDeployableIcons //important for when SetCurrentAvatar initializes the UI next zone
+    squadSetup = ZoneChangeSquadSetup
     continent.Population ! Zone.Population.Leave(avatar)
   }
 
@@ -10840,7 +11243,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       })
                     }
                   })
-                  avatar.SaveLoadout(owner, lName, lLoadoutNumber)
+                  avatar.EquipmentLoadouts.SaveLoadout(owner, lName, lLoadoutNumber)
                   (0 until 4).foreach( index => {
                     if (owner.Slot(index).Equipment.isDefined) owner.Slot(index).Equipment = None
                   })
@@ -10873,7 +11276,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(60).Equipment = SimpleItem(remote_electronics_kit)
     player.Slot(72).Equipment = Tool(jammer_grenade)
     player.Slot(74).Equipment = Kit(medkit)
-    avatar.SaveLoadout(player, "Agile HA/Deci", 0)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "Agile HA/Deci", 0)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -10896,7 +11299,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(60).Equipment = Tool(bank)
     player.Slot(72).Equipment = Tool(jammer_grenade)
     player.Slot(74).Equipment = Kit(medkit)
-    avatar.SaveLoadout(player, "Agile HA", 1)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "Agile HA", 1)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -10921,7 +11324,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(64).Equipment = Tool(jammer_grenade)
     player.Slot(78).Equipment = Tool(phoenix)
     player.Slot(87).Equipment = Tool(bank)
-    avatar.SaveLoadout(player, "Rexo HA/Deci", 2)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "Rexo HA/Deci", 2)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -10945,7 +11348,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(66).Equipment = AmmoBox(AntiVehicularAmmo(player.Faction))
     player.Slot(70).Equipment = AmmoBox(AntiVehicularAmmo(player.Faction))
     player.Slot(74).Equipment = AmmoBox(AntiVehicularAmmo(player.Faction))
-    avatar.SaveLoadout(player, "Rexo MA/AV", 3)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "Rexo MA/AV", 3)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -10972,7 +11375,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(81).Equipment = AmmoBox(frag_cartridge)
     player.Slot(84).Equipment = AmmoBox(frag_cartridge)
     player.Slot(87).Equipment = AmmoBox(frag_cartridge)
-    avatar.SaveLoadout(player, "Rexo HA/Thumper", 4)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "Rexo HA/Thumper", 4)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -10999,7 +11402,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(81).Equipment = AmmoBox(rocket)
     player.Slot(84).Equipment = AmmoBox(rocket)
     player.Slot(87).Equipment = AmmoBox(frag_cartridge)
-    avatar.SaveLoadout(player, "Rexo HA/Rocklet", 5)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "Rexo HA/Rocklet", 5)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -11026,7 +11429,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(81).Equipment = AmmoBox(bolt)
     player.Slot(84).Equipment = AmmoBox(bolt)
     player.Slot(87).Equipment = AmmoBox(bolt)
-    avatar.SaveLoadout(player, "Rexo MA/Sniper", 6)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "Rexo MA/Sniper", 6)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -11051,7 +11454,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(64).Equipment = Tool(jammer_grenade)
     player.Slot(78).Equipment = Tool(phoenix)
     player.Slot(87).Equipment = Tool(bank)
-    avatar.SaveLoadout(player, "Rexo Sweeper/Deci", 7)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "Rexo Sweeper/Deci", 7)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -11078,7 +11481,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(170).Equipment = Kit(medkit)
     player.Slot(174).Equipment = Kit(medkit)
     player.Slot(178).Equipment = Kit(medkit)
-    avatar.SaveLoadout(player, "AI MAX", 8)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "AI MAX", 8)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -11105,7 +11508,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     player.Slot(170).Equipment = Kit(medkit)
     player.Slot(174).Equipment = Kit(medkit)
     player.Slot(178).Equipment = Kit(medkit)
-    avatar.SaveLoadout(player, "AV MAX", 9)
+    avatar.EquipmentLoadouts.SaveLoadout(player, "AV MAX", 9)
     (0 until 4).foreach( index => {
       if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
     })
@@ -11399,6 +11802,71 @@ class WorldSessionActor extends Actor with MDCContextAware {
     }
   }
 
+  def SwapSquadUIElements(squad : Squad, fromIndex : Int, toIndex : Int) : Unit = {
+    if(squadUI.nonEmpty) {
+      val fromMember = squad.Membership(toIndex) //the players have already been swapped in the backend object
+      val fromCharId = fromMember.CharId
+      val toMember = squad.Membership(fromIndex) //the players have already been swapped in the backend object
+      val toCharId = toMember.CharId
+      val id = 11
+      if(toCharId > 0) {
+        //toMember and fromMember have swapped places
+        val fromElem = squadUI(fromCharId)
+        val toElem = squadUI(toCharId)
+        squadUI(toCharId) = SquadUIElement(fromElem.name, toIndex, fromElem.zone, fromElem.health, fromElem.armor, fromElem.position)
+        squadUI(fromCharId) = SquadUIElement(toElem.name, fromIndex, toElem.zone, toElem.health, toElem.armor, toElem.position)
+        sendResponse(SquadMemberEvent.Add(id, toCharId, toIndex, fromElem.name, fromElem.zone, unk7 = 0))
+        sendResponse(SquadMemberEvent.Add(id, fromCharId, fromIndex, toElem.name, toElem.zone, unk7 = 0))
+        sendResponse(
+          SquadState(
+            PlanetSideGUID(id),
+            List(
+              SquadStateInfo(fromCharId, toElem.health, toElem.armor, toElem.position, 2, 2, false, 429, None, None),
+              SquadStateInfo(toCharId, fromElem.health, fromElem.armor, fromElem.position, 2, 2, false, 429, None, None)
+            )
+          )
+        )
+      }
+      else {
+        //previous fromMember has moved toMember
+        val elem = squadUI(fromCharId)
+        squadUI(fromCharId) = SquadUIElement(elem.name, toIndex, elem.zone, elem.health, elem.armor, elem.position)
+        sendResponse(SquadMemberEvent.Remove(id, fromCharId, fromIndex))
+        sendResponse(SquadMemberEvent.Add(id, fromCharId, toIndex, elem.name, elem.zone, unk7 = 0))
+        sendResponse(
+          SquadState(
+            PlanetSideGUID(id),
+            List(SquadStateInfo(fromCharId, elem.health, elem.armor, elem.position, 2, 2, false, 429, None, None))
+          )
+        )
+      }
+      val charId = avatar.CharId
+      if(toCharId == charId) {
+        sendResponse(PlanetsideAttributeMessage(player.GUID, 32, toIndex))
+      }
+      else if(fromCharId == charId) {
+        sendResponse(PlanetsideAttributeMessage(player.GUID, 32, fromIndex))
+      }
+    }
+  }
+
+  def NoSquadUpdates() : Unit = { }
+
+  def UpdatesWhenEnrolledInSquad() : Unit = {
+    squadService ! SquadServiceMessage(
+      player,
+      continent,
+      continent.GUID(player.VehicleSeated) match {
+        case Some(vehicle : Vehicle) =>
+          SquadServiceAction.Update(player.CharId, vehicle.Health, vehicle.MaxHealth, vehicle.Shields, vehicle.MaxShields, vehicle.Position, continent.Number)
+        case Some(obj : PlanetSideGameObject with WeaponTurret) =>
+          SquadServiceAction.Update(player.CharId, obj.Health, obj.MaxHealth, 0, 0, obj.Position, continent.Number)
+        case _ =>
+          SquadServiceAction.Update(player.CharId, player.Health, player.MaxHealth, player.Armor, player.MaxArmor, player.Position, continent.Number)
+      }
+    )
+  }
+
   def failWithError(error : String) = {
     log.error(error)
     sendResponse(ConnectionClose())
@@ -11555,6 +12023,8 @@ object WorldSessionActor {
                                            delta : Float,
                                            completeAction : () => Unit,
                                            tickAction : Option[() => Unit] = None)
+
+  protected final case class SquadUIElement(name : String, index : Int, zone : Int, health : Int, armor : Int, position : Vector3)
 
   private final case class NtuCharging(tplayer: Player,
                                        vehicle: Vehicle)

@@ -64,7 +64,7 @@ class UtilityTest extends Specification {
       obj().GUID = PlanetSideGUID(1)
 
       val msg = obj().asInstanceOf[Terminal].Request(
-        Player(Avatar("TestCharacter", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)),
+        Player(Avatar(0L, "TestCharacter", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)),
         ItemTransactionMessage(PlanetSideGUID(853), TransactionType.Buy, 0, "router_telepad", 0, PlanetSideGUID(0))
       )
       msg.isInstanceOf[Terminal.BuyEquipment] mustEqual true

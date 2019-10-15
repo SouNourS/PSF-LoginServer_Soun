@@ -14,7 +14,7 @@ import org.specs2.mutable.Specification
 import scala.concurrent.duration.Duration
 
 class DoorTest extends Specification {
-  val player = Player(Avatar("test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+  val player = Player(Avatar(0L, "test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
 
   "Door" should {
     "construct" in {
@@ -103,6 +103,6 @@ object DoorControlTest {
     door.Actor = system.actorOf(Props(classOf[DoorControl], door), "door")
     door.Owner = new Building(building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)
     door.Owner.Faction = faction
-    (Player(Avatar("test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), door)
+    (Player(Avatar(0L, "test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), door)
   }
 }

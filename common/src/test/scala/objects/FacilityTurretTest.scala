@@ -98,7 +98,7 @@ class FacilityTurretControl1Test extends ActorTest {
 }
 
 class FacilityTurretControl2Test extends ActorTest {
-  val player = Player(Avatar("", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+  val player = Player(Avatar(0L, "", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
   val obj = FacilityTurret(GlobalDefinitions.manned_turret)
   obj.GUID = PlanetSideGUID(1)
   obj.Actor = system.actorOf(Props(classOf[FacilityTurretControl], obj), "turret-control")
@@ -125,7 +125,7 @@ class FacilityTurretControl2Test extends ActorTest {
 }
 
 class FacilityTurretControl3Test extends ActorTest {
-  val player = Player(Avatar("", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+  val player = Player(Avatar(0L, "", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
   val obj = FacilityTurret(GlobalDefinitions.manned_turret)
   obj.GUID = PlanetSideGUID(1)
   obj.Actor = system.actorOf(Props(classOf[FacilityTurretControl], obj), "turret-control")
@@ -151,7 +151,7 @@ class FacilityTurretControl3Test extends ActorTest {
 }
 
 class FacilityTurretControl4Test extends ActorTest {
-  val player = Player(Avatar("", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+  val player = Player(Avatar(0L, "", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
   val objDef = new TurretDefinition(480)
   objDef.FactionLocked = false
   val obj = FacilityTurret(objDef)

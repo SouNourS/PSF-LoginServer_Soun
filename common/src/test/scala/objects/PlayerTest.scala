@@ -14,7 +14,7 @@ import scala.util.Success
 
 class PlayerTest extends Specification {
   def TestPlayer(name : String, faction : PlanetSideEmpire.Value, sex : CharacterGender.Value, head : Int, voice : CharacterVoice.Value) : Player = {
-    new Player(Avatar(name, faction, sex, head, voice))
+    new Player(Avatar(0L, name, faction, sex, head, voice))
   }
 
   "Player" should {
@@ -357,7 +357,7 @@ class PlayerTest extends Specification {
     }
 
     "battle experience point values of the avatar" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val player = Player(avatar)
 
       player.BEP mustEqual avatar.BEP
@@ -366,7 +366,7 @@ class PlayerTest extends Specification {
     }
 
     "command experience point values of the avatar" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val player = Player(avatar)
 
       player.CEP mustEqual avatar.CEP
@@ -375,14 +375,14 @@ class PlayerTest extends Specification {
     }
 
     "can get a quick summary of implant slots (default)" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val player = Player(avatar)
 
       player.Implants mustEqual Array.empty
     }
 
     "can get a quick summary of implant slots (two unlocked, one installed)" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val player = Player(avatar)
       val temp = new ImplantDefinition(1)
       avatar.Implants(0).Unlocked = true
@@ -405,7 +405,7 @@ class PlayerTest extends Specification {
     }
 
     "can get a quick summary of implant slots (all unlocked, first two installed)" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val player = Player(avatar)
       avatar.Implants(0).Unlocked = true
       avatar.InstallImplant(new ImplantDefinition(1))
@@ -527,7 +527,7 @@ class PlayerTest extends Specification {
     }
 
     "will not gain cosmetic state if player does not have a certain amount of BEP" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val obj = Player(avatar)
       obj.PersonalStyleFeatures.isEmpty mustEqual true
       val (a1, b1) = obj.AddToPersonalStyle(PersonalStyle.Beret)
@@ -548,7 +548,7 @@ class PlayerTest extends Specification {
     }
 
     "will lose cosmetic state" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val obj = Player(avatar)
       avatar.BEP = 2286231 //BR24
       obj.AddToPersonalStyle(PersonalStyle.Beret)
@@ -569,7 +569,7 @@ class PlayerTest extends Specification {
     }
 
     "will not lose cosmetic state if the player doesn't have any cosmetic state to begin with" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val obj = Player(avatar)
       obj.PersonalStyleFeatures.isEmpty mustEqual true
       val (a1, b1) = obj.RemoveFromPersonalStyle(PersonalStyle.Beret)
@@ -578,7 +578,7 @@ class PlayerTest extends Specification {
     }
 
     "toggle helmet" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val obj = Player(avatar)
       avatar.BEP = 2286231
       obj.PersonalStyleFeatures.isEmpty mustEqual true
@@ -591,7 +591,7 @@ class PlayerTest extends Specification {
     }
 
     "toggle suglasses" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val obj = Player(avatar)
       avatar.BEP = 2286231
       obj.PersonalStyleFeatures.isEmpty mustEqual true
@@ -604,7 +604,7 @@ class PlayerTest extends Specification {
     }
 
     "toggle earpiece" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val obj = Player(avatar)
       avatar.BEP = 2286231
       obj.PersonalStyleFeatures.isEmpty mustEqual true
@@ -617,7 +617,7 @@ class PlayerTest extends Specification {
     }
 
     "toggle between brimmed cap and beret" in {
-      val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+      val avatar = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val obj = Player(avatar)
       avatar.BEP = 2286231
       obj.PersonalStyleFeatures.isEmpty mustEqual true

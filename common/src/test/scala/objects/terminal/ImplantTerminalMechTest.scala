@@ -45,7 +45,7 @@ class ImplantTerminalMechTest extends Specification {
     }
 
     "get passenger in a seat" in {
-      val player = Player(Avatar("test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player = Player(Avatar(0L, "test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       val obj = ImplantTerminalMech(GlobalDefinitions.implant_terminal_mech)
       obj.PassengerInSeat(player) mustEqual None
       obj.Seats(0).Occupant = player
@@ -90,7 +90,7 @@ class ImplantTerminalMechControl3Test extends ActorTest {
   "ImplantTerminalMechControl" should {
     "block a player from mounting" in {
       val (player1, mech) = ImplantTerminalMechTest.SetUpAgents(PlanetSideEmpire.TR)
-      val player2 = Player(Avatar("test2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player2 = Player(Avatar(0L, "test2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
 
       mech.Actor ! Mountable.TryMount(player1, 0)
       receiveOne(Duration.create(100, "ms")) //consume reply
@@ -164,6 +164,6 @@ object ImplantTerminalMechTest {
     terminal.Owner = new Building(building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)
     terminal.Owner.Faction = faction
     terminal.GUID = PlanetSideGUID(1)
-    (Player(Avatar("test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), terminal)
+    (Player(Avatar(0L, "test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), terminal)
   }
 }

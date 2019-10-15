@@ -390,7 +390,7 @@ class GuidedControlTest1 extends ActorTest {
     "unguided" in {
       val vehicle = Vehicle(GlobalDefinitions.mediumtransport)
       vehicle.GUID = PlanetSideGUID(1)
-      val driver = Player(Avatar("", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val driver = Player(Avatar(0L, "", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       driver.VehicleSeated = vehicle.GUID
       val sendTo = TestProbe()
       val order = VehicleSpawnControl.Order(driver, vehicle, sendTo.ref)
@@ -412,7 +412,7 @@ class GuidedControlTest2 extends ActorTest {
       val vehicle = Vehicle(GlobalDefinitions.mediumtransport)
       vehicle.GUID = PlanetSideGUID(1)
       vehicle.Velocity = Vector3(1,1,1)
-      val driver = Player(Avatar("", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val driver = Player(Avatar(0L, "", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       driver.VehicleSeated = vehicle.GUID
       val sendTo = TestProbe()
       val order = VehicleSpawnControl.Order(driver, vehicle, sendTo.ref)
@@ -437,7 +437,7 @@ class GuidedControlTest3 extends ActorTest {
       val vehicle = Vehicle(GlobalDefinitions.mediumtransport)
       vehicle.GUID = PlanetSideGUID(1)
       vehicle.Velocity = Vector3(1,1,1)
-      val driver = Player(Avatar("", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val driver = Player(Avatar(0L, "", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       driver.VehicleSeated = vehicle.GUID
       val sendTo = TestProbe()
       val order = VehicleSpawnControl.Order(driver, vehicle, sendTo.ref)
@@ -475,7 +475,7 @@ class GuidedControlTest4 extends ActorTest {
       val vehicle = Vehicle(GlobalDefinitions.mediumtransport)
       vehicle.GUID = PlanetSideGUID(1)
       vehicle.Velocity = Vector3(1,1,1)
-      val driver = Player(Avatar("", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val driver = Player(Avatar(0L, "", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
       driver.VehicleSeated = vehicle.GUID
       val sendTo = TestProbe()
       val order = VehicleSpawnControl.Order(driver, vehicle, sendTo.ref)

@@ -298,7 +298,7 @@ class ResourceSiloControlNoUpdateTest extends ActorTest {
 }
 
 object ResourceSiloTest {
-  val player = Player(Avatar("TestCharacter", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+  val player = Player(Avatar(0L, "TestCharacter", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
 
   class ProbedAvatarService(probe : TestProbe) extends Actor {
     override def receive : Receive = {
