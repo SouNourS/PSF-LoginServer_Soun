@@ -4897,7 +4897,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
 
         if (player.death_by == -1) {
-          sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "", "KICKED ! ", None))
+          sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "", "Your account has been logged out by a Customer Service Representative.", None))
           Thread.sleep(300)
           sendResponse(DropSession(sessionId, "kick by GM"))
         }
@@ -4971,6 +4971,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
           //TODO status condition of "playing getting out of vehicle to allow for late packets without warning
           //log.warn(s"ChildObjectState: player $player not related to anything with a controllable agent")
       }
+      if (player.death_by == -1) {
+        sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "", "Your account has been logged out by a Customer Service Representative.", None))
+        Thread.sleep(300)
+        sendResponse(DropSession(sessionId, "kick by GM"))
+      }
 
     case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, ang, vel, flight, unk6, unk7, wheels, unk9, is_cloaked) =>
       if(deadState == DeadState.Alive) {
@@ -5005,7 +5010,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         }
       }
       if (player.death_by == -1) {
-        sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "", "KICKED ! ", None))
+        sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "", "Your account has been logged out by a Customer Service Representative.", None))
         Thread.sleep(300)
         sendResponse(DropSession(sessionId, "kick by GM"))
       }
