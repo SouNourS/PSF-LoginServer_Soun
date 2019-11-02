@@ -372,7 +372,7 @@ class PacketCodingActor extends Actor with MDCContextAware {
         packets.foreach { UnmarshalInnerPacket(_, "the inner packet of a MultiPacketEx") }
 
       case RelatedA(slot, subslot) =>
-        log.info(s"Client indicated a packet is missing prior to slot: $slot subslot: $subslot, session: ${sessionId}")
+        log.trace(s"Client indicated a packet is missing prior to slot: $slot subslot: $subslot, session: ${sessionId}")
 
         relatedALog += subslot
 
@@ -382,7 +382,7 @@ class PacketCodingActor extends Actor with MDCContextAware {
         relatedABufferTimeout = context.system.scheduler.scheduleOnce(100 milliseconds, self, PacketCodingActor.SubslotResend())
 
       case RelatedB(slot, subslot) =>
-        log.info(s"result $slot: subslot $subslot accepted, session: ${sessionId}")
+        log.trace(s"result $slot: subslot $subslot accepted, session: ${sessionId}")
 
         // The client has indicated it's received up to a certain subslot, that means we can purge the log of any subslots prior to and including the confirmed subslot
         // Find where this subslot is stored in the packet log (if at all) and drop anything to the left of it, including itself

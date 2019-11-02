@@ -48,7 +48,6 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
 
   private var continent : String = "home2" //the zone id
 
-  //SouNourS things
   // PTS v3
   var silenced : Boolean = false
   var firstLoad : Boolean = false

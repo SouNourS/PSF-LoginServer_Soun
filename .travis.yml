@@ -1,17 +1,13 @@
 language: scala
 jdk: oraclejdk8
 dist: trusty
-matrix:
-  include:
-  - name: "PSForever Tests"
-    scala: 2.11.8
-    env: SBT_COMMAND="test:compile test"
-  - name: "PSForever Test Coverage"
-    scala: 2.11.8
-    env: SBT_COMMAND="coverage test:compile test coverageReport" ALLOW_FAIL=1
-  allow_failures:
-    - env: ALLOW_FAIL=1
-  fast_finish: true
+
+scala:
+  - 2.11.8
+env:
+  - SBT_COMMAND="test:compile test"
+  # TODO(chord): uncomment when WorldSessionActor is refactored
+  #- SBT_COMMAND="coverage test:compile test coverageReport"
 
 cache:
   directories:

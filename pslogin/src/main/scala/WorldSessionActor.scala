@@ -94,6 +94,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var progressBarValue : Option[Float] = None
   var shooting : Option[PlanetSideGUID] = None //ChangeFireStateMessage_Start
   var prefire : Option[PlanetSideGUID] = None //if WeaponFireMessage precedes ChangeFireStateMessage_Start
+  var shotsWhileDead : Int = 0
   var accessedContainer : Option[PlanetSideGameObject with Container] = None
   var connectionState : Int = 25
   var flying : Boolean = false
@@ -159,6 +160,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
   var timeDL : Long = 0
   var timeSurge : Long = 0
 
+  lazy val unsignedIntMaxValue : Long = Int.MaxValue.toLong * 2L + 1L
+  var serverTime : Long = 0
+
   var amsSpawnPoints : List[SpawnPoint] = Nil
   var clientKeepAlive : Cancellable = DefaultCancellable.obj
   var progressBarUpdate : Cancellable = DefaultCancellable.obj
@@ -175,6 +179,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     * @param b `true` or `false` (or `null`)
     * @return 1 for `true`; 0 for `false`
     */
+  import scala.language.implicitConversions
   implicit def boolToInt(b : Boolean) : Int = if(b) 1 else 0
 
   override def postStop() : Unit = {
@@ -578,7 +583,6 @@ class WorldSessionActor extends Actor with MDCContextAware {
             SwapSquadUIElements(squad, from_index, to_index)
 
           case SquadResponse.UpdateMembers(squad, positions) =>
-            import services.teamwork.SquadAction.{Update => SAUpdate}
             val pairedEntries = positions.collect {
               case entry if squadUI.contains(entry.char_id) =>
                 (entry, squadUI(entry.char_id))
@@ -2235,7 +2239,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           sendResponse(PlanetsideAttributeMessage(guid, attribute_type, attribute_value))
         }
 
-      case AvatarResponse.PlayerState(msg, spectating, weaponInHand) =>
+      case AvatarResponse.PlayerState(pos, vel, yaw, pitch, yaw_upper, seq_time, is_crouching, is_jumping, jump_thrust, is_cloaking, spectating, weaponInHand) =>
         if(tplayer_guid != guid) {
           val now = System.currentTimeMillis()
           val (location, time, distanceSq) : (Vector3, Long, Float) = if(spectating) {
@@ -2246,30 +2250,30 @@ class WorldSessionActor extends Actor with MDCContextAware {
           }
           else {
             val before = player.lastSeenStreamMessage(guid.guid)
-            val dist = Vector3.DistanceSquared(player.Position, msg.pos)
-            (msg.pos, now - before, dist)
+            val dist = Vector3.DistanceSquared(player.Position, pos)
+            (pos, now - before, dist)
           }
           if(spectating ||
             ((distanceSq < 900 || weaponInHand) && time > 200) ||
             (distanceSq < 10000 && time > 500) ||
             (distanceSq < 160000 && (
-              (msg.is_jumping || time < 200)) ||
-              ((msg.vel.isEmpty || Vector3.MagnitudeSquared(msg.vel.get).toInt == 0) && time > 2000) ||
+              (is_jumping || time < 200)) ||
+              ((vel.isEmpty || Vector3.MagnitudeSquared(vel.get).toInt == 0) && time > 2000) ||
               (time > 1000)) ||
             (distanceSq > 160000 && time > 5000)) {
             sendResponse(
               PlayerStateMessage(
                 guid,
                 location,
-                msg.vel,
-                msg.facingYaw,
-                msg.facingPitch,
-                msg.facingYawUpper,
+                vel,
+                yaw,
+                pitch,
+                yaw_upper,
                 timestamp = 0,
-                msg.is_crouching,
-                msg.is_jumping,
-                msg.jump_thrust,
-                msg.is_cloaked
+                is_crouching,
+                is_jumping,
+                jump_thrust,
+                is_cloaking
               )
             )
             player.lastSeenStreamMessage(guid.guid) = now
@@ -2701,14 +2705,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
         val lTime = System.currentTimeMillis
         var changeArmor : Boolean = true
-//        println(originalSuit, originalSubtype, exosuit, subtype, msg.item_name)
         if (lTime - whenUsedLastMAX(subtype) < 300000) {
           changeArmor = false
         }
         if (changeArmor && exosuit.id == 2) {
-//          println(whenUsedLastMAXName(subtype), subtype)
-//          whenUsedLastMAX(subtype) = lTime
-//          sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, whenUsedLastMAXName(subtype), 300, true))
           for (i <- 1 to 3) {
             sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, whenUsedLastMAXName(i), 300, true))
             whenUsedLastMAX(i) = lTime
@@ -2910,15 +2910,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
             case permissions =>
               tplayer.Certifications.intersect(permissions.toSet).nonEmpty
           }) {
-//            println(originalSuit, originalSubtype, exosuit, subtype, msg.unk1)
             val lTime = System.currentTimeMillis
             if (lTime - whenUsedLastMAX(subtype) < 300000){ // PTS v3 hack
               (originalSuit, subtype)
             } else {
               if (lTime - whenUsedLastMAX(subtype) > 300000 && subtype != 0) {
-//                println(whenUsedLastMAXName(subtype), subtype)
-//                sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, whenUsedLastMAXName(subtype), 300, true))
-//                whenUsedLastMAX(subtype) = lTime
                 for (i <- 1 to 3) {
                     sendResponse(AvatarVehicleTimerMessage(tplayer.GUID, whenUsedLastMAXName(i), 300, true))
                     whenUsedLastMAX(i) = lTime
@@ -4283,8 +4279,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
     pkt match {
       case sync @ ControlSync(diff, _, _, _, _, _, fa, fb) =>
         log.trace(s"SYNC: $sync")
-        val serverTick = Math.abs(System.nanoTime().toInt) // limit the size to prevent encoding error
-        sendResponse(ControlSyncResp(diff, serverTick, fa, fb, fb, fa))
+        val nextDiff = if(diff == 65535) { 0 } else { diff + 1 }
+        val serverTick = ServerTick
+        sendResponse(ControlSyncResp(nextDiff, serverTick, fa, fb, fb, fa))
 
       case TeardownConnection(_) =>
         log.info("Good bye")
@@ -4311,6 +4308,19 @@ class WorldSessionActor extends Actor with MDCContextAware {
   sample2.DurationChargeByExoSuit += ExoSuitType.Standard -> 1
   sample2.DurationChargeByExoSuit += ExoSuitType.Infiltration -> 1
   sample2.DurationChargeByStance += Stance.Running -> 1
+
+  /**
+    * Return a measure of server time as an unsigned 32-bit integer.
+    * The server time started at 0 back at the beginning (POSIX time).
+    * The server time will loop around to 0 again to maintain datatype integrity.
+    * @see `Int.MaxValue`
+    * @see `System.nanoTime`
+    * @return a number that indicates server tick time
+    */
+  def ServerTick : Long = {
+    serverTime = System.currentTimeMillis() & unsignedIntMaxValue
+    serverTime
+  }
 
   def handleGamePkt(pkt : PlanetSideGamePacket) = pkt match {
     case ConnectToWorldRequestMessage(server, token, majorVersion, minorVersion, revision, buildDate, unk) =>
@@ -4850,7 +4860,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
 
       self ! SetCurrentAvatar(player)
 
-    case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, yaw, pitch, yaw_upper, seq_time, unk3, is_crouching, is_jumping, unk4, is_cloaking, unk5, unk6) =>
+    case msg @ PlayerStateMessageUpstream(avatar_guid, pos, vel, yaw, pitch, yaw_upper, seq_time, unk3, is_crouching, is_jumping, jump_thrust, is_cloaking, unk5, unk6) =>
       if(deadState == DeadState.Alive) {
         // PTS v3
         if (timeDL != 0) {
@@ -4942,7 +4952,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
           case Some(item) => item.Definition == GlobalDefinitions.bolt_driver
           case None => false
         }
-        avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlayerState(avatar_guid, msg, spectator, wepInHand))
+        avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlayerState(avatar_guid, player.Position, player.Velocity, yaw, pitch, yaw_upper, seq_time, is_crouching, is_jumping, jump_thrust, is_cloaking, spectator, wepInHand))
         if (System.currentTimeMillis() - whenUpdatedSquad > 1000 ) {
           whenUpdatedSquad = System.currentTimeMillis()
           updateSquad()
@@ -4977,7 +4987,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         sendResponse(DropSession(sessionId, "kick by GM"))
       }
 
-    case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, ang, vel, flight, unk6, unk7, wheels, unk9, is_cloaked) =>
+    case msg @ VehicleStateMessage(vehicle_guid, unk1, pos, ang, vel, flying, unk6, unk7, wheels, unk9, is_cloaked) =>
       if(deadState == DeadState.Alive) {
         GetVehicleAndSeat() match {
           case (Some(obj), Some(0)) =>
@@ -4992,11 +5002,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
             if(obj.MountedIn.isEmpty) {
               obj.Velocity = vel
               if(obj.Definition.CanFly) {
-                obj.Flying = flight.nonEmpty //usually Some(7)
+                obj.Flying = flying.nonEmpty //usually Some(7)
               }
               obj.Cloaked = obj.Definition.CanCloak && is_cloaked
-              vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.VehicleState(player.GUID, vehicle_guid, unk1, pos, ang, vel, flight, unk6, unk7, wheels, unk9, is_cloaked))
             }
+            else {
+              obj.Velocity = None
+              obj.Flying = false
+            }
+            vehicleService ! VehicleServiceMessage(continent.Id, VehicleAction.VehicleState(player.GUID, vehicle_guid, unk1, obj.Position, ang, obj.Velocity, if(obj.Flying) { flying } else { None }, unk6, unk7, wheels, unk9, obj.Cloaked))
             if (System.currentTimeMillis() - whenUpdatedSquad > 1000 ) {
               whenUpdatedSquad = System.currentTimeMillis()
               updateSquad()
@@ -6812,6 +6826,12 @@ class WorldSessionActor extends Actor with MDCContextAware {
           if(tool.Magazine <= 0) { //safety: enforce ammunition depletion
             prefire = None
             EmptyMagazine(weapon_guid, tool)
+          }
+          else if(!player.isAlive) { //proper internal accounting, but no projectile
+            prefire = shooting.orElse(Some(weapon_guid))
+            tool.Discharge
+            projectiles(projectile_guid.guid - Projectile.BaseUID) = None
+            shotsWhileDead += 1
           }
           else { //shooting
             // PTS v3
@@ -9108,6 +9128,10 @@ class WorldSessionActor extends Actor with MDCContextAware {
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.DestroyDisplay(shot.projectile.owner, pentry, shot.projectile.attribute_to))
       case None =>
         avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.DestroyDisplay(pentry, pentry, 0))
+    }
+    if(shotsWhileDead > 0) {
+      log.warn(s"KillPlayer/SHOTS_WHILE_DEAD: client of ${avatar.name} fired $shotsWhileDead rounds while character was dead on server")
+      shotsWhileDead = 0
     }
 
     import scala.concurrent.ExecutionContext.Implicits.global

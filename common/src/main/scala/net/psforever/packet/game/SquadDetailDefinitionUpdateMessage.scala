@@ -657,44 +657,6 @@ object SquadDetailDefinitionUpdateMessage extends Marshallable[SquadDetailDefini
         }
       )
     }
-    //TODO while this pattern looks elegant, bitsOverByte does not accumulate properly with the either(bool, L, R); why?
-//    private def membersCodec(bitsOverByte : StreamLengthToken) : Codec[SquadDetail] = {
-//      import shapeless.::
-//      either(bool,
-//        { //false
-//          bitsOverByte.Add(3)
-//          uint2 :: FullyPopulatedPositions.codec(bitsOverByte)
-//        },
-//        { //true
-//          bitsOverByte.Add(4)
-//          uint(3) :: vector(ItemizedPositions.codec(bitsOverByte))
-//        }
-//      ).exmap[SquadDetail] (
-//        {
-//          case Left(_ :: member_list :: HNil) =>
-//            Attempt.successful(SquadDetail(None, None, None, None, None, None, None, None, Some(ignoreTerminatingEntry(member_list.toList))))
-//          case Right(_ :: member_list :: HNil) =>
-//            Attempt.successful(SquadDetail(None, None, None, None, None, None, None, None, Some(ignoreTerminatingEntry(member_list.toList))))
-//        },
-//        {
-//          case SquadDetail(_, _, _, _, _, _, _, _, Some(member_list)) =>
-//            if(member_list
-//              .collect { case position if position.info.nonEmpty =>
-//                val info = position.info.get
-//                List(info.is_closed, info.role, info.detailed_orders, info.requirements, info.char_id, info.name)
-//              }
-//              .flatten
-//              .count(_.isEmpty) == 0) {
-//              Attempt.successful(Left(2 :: ensureTerminatingEntry(member_list).toVector :: HNil))
-//            }
-//            else {
-//              Attempt.successful(Right(4 :: ensureTerminatingEntry(member_list).toVector :: HNil))
-//            }
-//          case _ =>
-//            Attempt.failure(Err("failed to encode squad data for members"))
-//        }
-//      )
-//    }
     /**
       * A failing pattern for when the coded value is not tied to a known field pattern.
       * This pattern does not read or write any bit data.
@@ -1200,7 +1162,12 @@ object SquadDetailDefinitionUpdateMessage extends Marshallable[SquadDetailDefini
     private def unlinkFields(list : LinkedFields, out : List[SquadPositionEntry] = Nil) : List[SquadPositionEntry] = {
       list.next match {
         case None =>
-          out :+ SquadPositionEntry(list.index, list.info)
+          list.info match {
+            case SquadPositionDetail.Blank =>
+              out :+ SquadPositionEntry(list.index, None)
+            case _ =>
+              out :+ SquadPositionEntry(list.index, list.info)
+          }
         case Some(next) =>
           unlinkFields(next, out :+ SquadPositionEntry(list.index, list.info))
       }
