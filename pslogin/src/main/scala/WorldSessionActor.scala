@@ -2149,7 +2149,29 @@ class WorldSessionActor extends Actor with MDCContextAware {
             avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 0, health))
             avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 4, armor))
             if(health == 0 && player.isAlive) {
-              KillPlayer(player)
+              if (spectator) { // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                player.Health = 100 // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                sendResponse(PlanetsideAttributeMessage(playerGUID, 0, player.Health)) // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                avatarService ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 0, player.Health)) // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                target.History.find(p => p.isInstanceOf[DamagingActivity]) match { // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                  case Some(data: DamageFromProjectile) => // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                    val owner = data.data.projectile.owner // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                    owner match { // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                      case pSource: PlayerSource => // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                        continent.LivePlayers.find(_.Name == pSource.Name) match { // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                          case Some(tplayer) => // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                            tplayer.death_by = -1 // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                          case None => ; // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                        } // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                      case _ => ; // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                    } // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                  case _ => ; // PTS v3 temp fix for auto kick with one shot kill on a spectator
+                } // PTS v3 temp fix for auto kick with one shot kill on a spectator
+              } // PTS v3 temp fix for auto kick with one shot kill on a spectator
+              else {
+                KillPlayer(player)
+              }
+
             }
             else {
               //first damage entry -> most recent damage source -> killing blow
@@ -2262,6 +2284,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             val r1 = 2 + r.nextInt(30)
             val r2 = 2 + r.nextInt(4000)
             (Vector3(r2, r2, r1), 0L, 0f)
+//            (Vector3(4981, 4365, 45), 0L, 0f)
           }
           else {
             val before = player.lastSeenStreamMessage(guid.guid)
