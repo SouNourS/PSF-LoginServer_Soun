@@ -6151,7 +6151,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
             sendResponse(UseItemMessage(avatar_guid, item_used_guid, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
             accessedContainer = Some(obj)
           }
-          else if(!unk3) { //potential kit use
+          else if(!unk3 && player.isAlive) { //potential kit use
             continent.GUID(item_used_guid) match {
               case Some(kit : Kit) =>
                 player.Find(kit) match {
@@ -6165,7 +6165,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                       }
                       else {
                         player.Find(kit) match {
-                          case Some(index) =>
+                          case Some(index)  =>
                             whenUsedLastKit = System.currentTimeMillis
                             player.Slot(index).Equipment = None //remove from slot immediately; must exist on client for next packet
                             sendResponse(UseItemMessage(avatar_guid, item_used_guid, object_guid, 0, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
@@ -6269,7 +6269,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 if (tool.Definition == GlobalDefinitions.bank) {
                   continent.GUID(object_guid) match {
                     case Some(tplayer: Player) =>
-                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction && player.Velocity.isEmpty && tplayer.MaxArmor > 0) {
+                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction && player.Velocity.isEmpty && tplayer.MaxArmor > 0 && tplayer.Armor < tplayer.MaxArmor) {
                         tplayer.Armor += 15
                         tool.Discharge
                         sendResponse(InventoryStateMessage(tool.AmmoSlot.Box.GUID, obj.GUID, tool.Magazine))
@@ -6288,8 +6288,15 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 } else if (tool.Definition == GlobalDefinitions.medicalapplicator) {
                   continent.GUID(object_guid) match {
                     case Some(tplayer: Player) =>
-                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction && player.Velocity.isEmpty && tplayer.MaxHealth > 0) {
-                        tplayer.Health += 10
+                      if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction && player.Velocity.isEmpty && tplayer.MaxHealth > 0 && tplayer.Health < tplayer.MaxHealth) {
+                        if(tplayer.isAlive) {
+                          tplayer.Health += 10
+                        } else {
+                          // Reviving another player is normally 25 "medical energy" (ammo) and 5,000 milliseconds duration, based on the game properties revive_ammo_required and revive_time
+                          //todo: @NotEnoughAmmoToRevive=You do not have enough medical energy to revive this corpse.
+                          tplayer.Health += 4 // 4 health per tick = 5 second revive timer from 0 health
+                        }
+
                         tool.Discharge
                         sendResponse(InventoryStateMessage(tool.AmmoSlot.Box.GUID, obj.GUID, tool.Magazine))
                         val repairPercent: Int = tplayer.Health * 100 / tplayer.MaxHealth
@@ -6305,6 +6312,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                         }
                       } else if (player.GUID == tplayer.GUID && player.Velocity.isEmpty && tplayer.MaxHealth > 0) {
                         player.Health += 10
+                      } else if (player.GUID == tplayer.GUID && player.Velocity.isEmpty && tplayer.MaxHealth > 0 && player.isAlive) {
                         tool.Discharge
                         sendResponse(InventoryStateMessage(tool.AmmoSlot.Box.GUID, obj.GUID, tool.Magazine))
                         avatarService ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttributeToAll(player.GUID, 0, player.Health))
