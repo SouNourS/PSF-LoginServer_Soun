@@ -5749,11 +5749,11 @@ class WorldSessionActor extends Actor with MDCContextAware {
       if(shooting.isEmpty) {
         FindEquipment match {
           //special case - suppress the decimator's alternate fire mode
-          case Some(tool : Tool)
-            if tool.Projectile == GlobalDefinitions.phoenix_missile_guided_projectile &&
-              (tool.Magazine > 0 || prefire.contains(item_guid)) =>
-            prefire = None
-            shooting = Some(item_guid)
+//          case Some(tool : Tool)
+//            if tool.Projectile == GlobalDefinitions.phoenix_missile_guided_projectile &&
+//              (tool.Magazine > 0 || prefire.contains(item_guid)) =>
+//            prefire = None
+//            shooting = Some(item_guid)
           case Some(tool : Tool) =>
             if(tool.Magazine > 0 || prefire.contains(item_guid)) {
               prefire = None
