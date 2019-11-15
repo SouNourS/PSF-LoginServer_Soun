@@ -77,12 +77,12 @@ object EquipmentTerminalDefinition {
     "burster_ammo" -> MakeAmmoBox(burster_ammo),
     "scattercannon_ammo" -> MakeAmmoBox(scattercannon_ammo),
     "falcon_ammo" -> MakeAmmoBox(falcon_ammo),
-//    "sparrow_ammo" -> MakeAmmoBox(sparrow_ammo), PTS v3
-    "sparrow_ammo" -> MakeAmmoBox(burster_ammo),
+    "sparrow_ammo" -> MakeAmmoBox(sparrow_ammo), // PTS v3
+//    "sparrow_ammo" -> MakeAmmoBox(burster_ammo),
     "quasar_ammo" -> MakeAmmoBox(quasar_ammo),
     "comet_ammo" -> MakeAmmoBox(comet_ammo),
-//    "starfire_ammo" -> MakeAmmoBox(starfire_ammo) PTS v3
-    "starfire_ammo" -> MakeAmmoBox(burster_ammo)
+    "starfire_ammo" -> MakeAmmoBox(starfire_ammo) // PTS v3
+//    "starfire_ammo" -> MakeAmmoBox(burster_ammo)
   )
   /**
     * A `Map` of operations for producing the `AmmoBox` `Equipment` for infantry-held utilities.
