@@ -17,8 +17,8 @@ import scala.concurrent.duration.Duration
 class BuildingBuilderTest extends ActorTest {
   "Building object" should {
     "build" in {
-      val structure : (Int,Int,Zone,ActorContext)=>Building = Building.Structure(StructureType.Building)
-      val actor = system.actorOf(Props(classOf[ServerObjectBuilderTest.BuildingTestActor], structure, 10, 10, Zone.Nowhere), "building")
+      val structure : (String, Int,Int,Zone,ActorContext)=>Building = Building.Structure(StructureType.Building)
+      val actor = system.actorOf(Props(classOf[ServerObjectBuilderTest.BuildingTestActor], structure, "Building", 10, 10, Zone.Nowhere), "building")
       actor ! "!"
 
       val reply = receiveOne(Duration.create(1000, "ms"))
@@ -32,8 +32,8 @@ class BuildingBuilderTest extends ActorTest {
 class WarpGateBuilderTest extends ActorTest {
   "WarpGate object" should {
     "build" in {
-      val structure : (Int,Int,Zone,ActorContext)=>Building = WarpGate.Structure
-      val actor = system.actorOf(Props(classOf[ServerObjectBuilderTest.BuildingTestActor], structure, 10, 10, Zone.Nowhere), "wgate")
+      val structure : (String,Int,Int,Zone,ActorContext)=>Building = WarpGate.Structure
+      val actor = system.actorOf(Props(classOf[ServerObjectBuilderTest.BuildingTestActor], structure, "wgate", 10, 10, Zone.Nowhere), "wgate")
       actor ! "!"
 
       val reply = receiveOne(Duration.create(1000, "ms"))
@@ -119,13 +119,14 @@ class TerminalObjectBuilderTest extends ActorTest {
   "Terminal object" should {
     "build" in {
       val hub = ServerObjectBuilderTest.NumberPoolHub
-      val actor = system.actorOf(Props(classOf[ServerObjectBuilderTest.BuilderTestActor], ServerObjectBuilder(1, Terminal.Constructor(order_terminal)), hub), "term")
+      val actor = system.actorOf(Props(classOf[ServerObjectBuilderTest.BuilderTestActor], ServerObjectBuilder(1, Terminal.Constructor(Vector3(1.1f, 2.2f, 3.3f), order_terminal)), hub), "term")
       actor ! "!"
 
       val reply = receiveOne(Duration.create(1000, "ms"))
       assert(reply.isInstanceOf[Terminal])
       assert(reply.asInstanceOf[Terminal].HasGUID)
       assert(reply.asInstanceOf[Terminal].GUID == PlanetSideGUID(1))
+      assert(reply.asInstanceOf[Terminal].Position == Vector3(1.1f, 2.2f, 3.3f))
       assert(reply == hub(1).get)
     }
   }
@@ -156,7 +157,7 @@ class VehicleSpawnPadObjectBuilderTest extends ActorTest {
     "build" in {
       val hub = ServerObjectBuilderTest.NumberPoolHub
       val actor = system.actorOf(Props(classOf[ServerObjectBuilderTest.BuilderTestActor], ServerObjectBuilder(1,
-        VehicleSpawnPad.Constructor(GlobalDefinitions.mb_pad_creation, Vector3(1.1f, 2.2f, 3.3f), Vector3(4.4f, 5.5f, 6.6f))
+        VehicleSpawnPad.Constructor(Vector3(1.1f, 2.2f, 3.3f), GlobalDefinitions.mb_pad_creation, Vector3(4.4f, 5.5f, 6.6f))
       ), hub), "pad")
       actor ! "!"
 
@@ -278,10 +279,10 @@ object ServerObjectBuilderTest {
     }
   }
 
-  class BuildingTestActor(structure_con : (Int,Int,Zone,ActorContext)=>Building, building_guid : Int, map_id : Int, zone : Zone) extends Actor {
+  class BuildingTestActor(structure_con : (String,Int,Int,Zone,ActorContext)=>Building, name: String, building_guid : Int, map_id : Int, zone : Zone) extends Actor {
     def receive : Receive = {
       case _ =>
-        sender ! FoundationBuilder(structure_con).Build(building_guid, map_id, zone)(context)
+        sender ! FoundationBuilder(structure_con).Build(name, building_guid, map_id, zone)(context)
     }
   }
 }

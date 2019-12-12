@@ -26,23 +26,26 @@ import scala.collection.mutable
 import scala.concurrent.duration._
 
 object GlobalDefinitions {
-  /*
-  characters
-   */
+  // Characters
   val avatar = new AvatarDefinition(121)
   /*
   exo-suits
    */
   val Standard = ExoSuitDefinition(ExoSuitType.Standard)
-
+  
   val Agile = ExoSuitDefinition(ExoSuitType.Agile)
-
+  
   val Reinforced = ExoSuitDefinition(ExoSuitType.Reinforced)
-
+  
   val Infiltration = ExoSuitDefinition(ExoSuitType.Infiltration)
-
-  val MAX = SpecialExoSuitDefinition(ExoSuitType.MAX)
+  
+  val VSMAX = SpecialExoSuitDefinition(ExoSuitType.MAX)
+  
+  val TRMAX = SpecialExoSuitDefinition(ExoSuitType.MAX)
+  
+  val NCMAX = SpecialExoSuitDefinition(ExoSuitType.MAX)
   init_exosuit()
+
   /*
   Implants
    */
@@ -1533,6 +1536,7 @@ object GlobalDefinitions {
     Standard.ResistanceAggravated = 8
 
     Agile.Name = "lite_armor"
+    Agile.Descriptor = "agile"
     Agile.MaxArmor = 100
     Agile.InventoryScale = InventoryTile.Tile99
     Agile.InventoryOffset = 6
@@ -1545,6 +1549,7 @@ object GlobalDefinitions {
     Agile.ResistanceAggravated = 10
 
     Reinforced.Name = "med_armor"
+    Reinforced.Descriptor = "reinforced"
     Reinforced.Permissions = List(CertificationType.ReinforcedExoSuit)
     Reinforced.MaxArmor = 200
     Reinforced.InventoryScale = InventoryTile.Tile1209
@@ -1566,18 +1571,42 @@ object GlobalDefinitions {
     Infiltration.Holster(0, EquipmentSize.Pistol)
     Infiltration.Holster(4, EquipmentSize.Melee)
 
-    MAX.Permissions = List(CertificationType.AIMAX,CertificationType.AVMAX, CertificationType.AAMAX, CertificationType.UniMAX)
-    MAX.MaxArmor = 650
-    MAX.InventoryScale = InventoryTile.Tile1612
-    MAX.InventoryOffset = 6
-    MAX.Holster(0, EquipmentSize.Max)
-    MAX.Holster(4, EquipmentSize.Melee)
-    MAX.Subtract.Damage1 = -2
-    MAX.ResistanceDirectHit = 6
-    MAX.ResistanceSplash = 35
-    MAX.ResistanceAggravated = 10
-    MAX.Damage = StandardMaxDamage
-    MAX.Model = StandardResolutions.Max
+    def CommonMaxConfig(max : SpecialExoSuitDefinition): Unit = {
+      max.Permissions = List(CertificationType.AIMAX,CertificationType.AVMAX, CertificationType.AAMAX, CertificationType.UniMAX)
+      max.MaxArmor = 650
+      max.InventoryScale = InventoryTile.Tile1612
+      max.InventoryOffset = 6
+      max.Holster(0, EquipmentSize.Max)
+      max.Holster(4, EquipmentSize.Melee)
+      max.Subtract.Damage1 = -2
+      max.ResistanceDirectHit = 6
+      max.ResistanceSplash = 35
+      max.ResistanceAggravated = 10
+      max.Damage = StandardMaxDamage
+      max.Model = StandardResolutions.Max
+    }
+
+    CommonMaxConfig(VSMAX)
+    VSMAX.Name = "vshev"
+    VSMAX.MaxCapacitor = 50
+    VSMAX.CapacitorRechargeDelayMillis = 5000
+    VSMAX.CapacitorRechargePerSecond = 3
+    VSMAX.CapacitorDrainPerSecond = 20
+
+    CommonMaxConfig(TRMAX)
+    TRMAX.Name = "trhev"
+    TRMAX.MaxCapacitor = 300
+    TRMAX.CapacitorRechargeDelayMillis = 10000
+    TRMAX.CapacitorRechargePerSecond = 10
+    TRMAX.CapacitorDrainPerSecond = 30
+
+    CommonMaxConfig(NCMAX)
+    NCMAX.Name = "nchev"
+    NCMAX.MaxCapacitor = 400
+    NCMAX.CapacitorRechargeDelayMillis = 10000
+    NCMAX.CapacitorRechargePerSecond = 4
+    NCMAX.CapacitorDrainPerSecond = 4
+
   }
   /**
     * Initialize `AmmoBoxDefinition` globals.
@@ -4372,6 +4401,8 @@ object GlobalDefinitions {
     nano_dispenser.FireModes += new FireModeDefinition
     nano_dispenser.FireModes.head.AmmoTypeIndices += 0
     nano_dispenser.FireModes.head.AmmoTypeIndices += 1
+    nano_dispenser.FireModes.head.ProjectileTypeIndices += 0 //armor_canister
+    nano_dispenser.FireModes.head.ProjectileTypeIndices += 0 //upgrade_canister
     nano_dispenser.FireModes.head.AmmoSlotIndex = 0
     nano_dispenser.FireModes.head.Magazine = 100
     nano_dispenser.FireModes.head.CustomMagazine = Ammo.upgrade_canister -> 1

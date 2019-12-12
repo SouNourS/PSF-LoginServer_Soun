@@ -9,9 +9,9 @@ import net.psforever.objects.serverobject.mount.Mountable
 import net.psforever.objects.serverobject.PlanetSideServerObject
 import net.psforever.objects.serverobject.affinity.FactionAffinity
 import net.psforever.objects.serverobject.deploy.Deployment
+import net.psforever.objects.serverobject.structures.AmenityOwner
 import net.psforever.objects.vehicles._
 import net.psforever.objects.vital.{DamageResistanceModel, StandardResistanceProfile, Vitality}
-import net.psforever.objects.zones.ZoneAware
 import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.types.PlanetSideEmpire
 
@@ -65,9 +65,8 @@ import scala.annotation.tailrec
   *                   stores and unloads pertinent information about the `Vehicle`'s configuration;
   *                   used in the initialization process (`loadVehicleDefinition`)
   */
-class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServerObject
+class Vehicle(private val vehicleDef : VehicleDefinition) extends AmenityOwner
   with FactionAffinity
-  with ZoneAware
   with Mountable
   with MountedWeapons
   with Deployment
@@ -84,8 +83,6 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
   private var cloaked : Boolean = false
   private var flying : Boolean = false
   private var capacitor : Int = 0
-  private var continent : String = "home2" //the zone id
-
   /**
     * Permissions control who gets to access different parts of the vehicle;
     * the groups are Driver (seat), Gunner (seats), Passenger (seats), and the Trunk
@@ -508,13 +505,6 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
     */
   def Definition : VehicleDefinition = vehicleDef
 
-  override def Continent : String = continent
-
-  override def Continent_=(zoneId : String) : String = {
-    continent = zoneId
-    Continent
-  }
-
   def canEqual(other: Any): Boolean = other.isInstanceOf[Vehicle]
 
   override def equals(other : Any) : Boolean = other match {
@@ -624,7 +614,9 @@ object Vehicle {
     vehicle.utilities = vdef.Utilities.map({
       case(num, util) =>
         val obj = Utility(util, vehicle)
-        obj().LocationOffset = vdef.UtilityOffset.get(num)
+        val utilObj = obj()
+        vehicle.Amenities = utilObj
+        utilObj.LocationOffset = vdef.UtilityOffset.get(num)
         num -> obj
     }).toMap
     //trunk

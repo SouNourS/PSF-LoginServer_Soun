@@ -2,19 +2,20 @@
 package services.avatar
 
 import akka.actor.{Actor, ActorRef, Props}
+import net.psforever.objects.zones.Zone
 import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID}
 import net.psforever.packet.game.objectcreate.{DroppedItemData, ObjectCreateMessageParent, PlacementData}
 import services.avatar.support.{CorpseRemovalActor, DroppedItemRemover}
 import services.{GenericEventBus, RemoverActor, Service}
 
-class AvatarService extends Actor {
-  private val undertaker : ActorRef = context.actorOf(Props[CorpseRemovalActor], "corpse-removal-agent")
-  private val janitor = context.actorOf(Props[DroppedItemRemover], "item-remover-agent")
+class AvatarService(zone : Zone) extends Actor {
+  private val undertaker : ActorRef = context.actorOf(Props[CorpseRemovalActor], s"${zone.Id}-corpse-removal-agent")
+  private val janitor = context.actorOf(Props[DroppedItemRemover], s"${zone.Id}-item-remover-agent")
 
   private [this] val log = org.log4s.getLogger
 
   override def preStart = {
-    log.info("Starting...")
+    log.trace(s"Awaiting ${zone.Id} avatar events ...")
   }
 
   val AvatarEvents = new GenericEventBus[AvatarServiceResponse] //AvatarEventBus
@@ -88,7 +89,7 @@ class AvatarService extends Actor {
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", Service.defaultPlayerGUID, AvatarResponse.DestroyDisplay(killer, victim, method, unk))
           )
-        case AvatarAction.DropItem(player_guid, item, zone) =>
+        case AvatarAction.DropItem(player_guid, item, _) =>
           val definition = item.Definition
           val objectData = DroppedItemData(
             PlacementData(item.Position, item.Orientation),
@@ -131,10 +132,10 @@ class AvatarService extends Actor {
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", player_guid, AvatarResponse.LoadPlayer(pkt))
           )
-        case AvatarAction.LoadProjectile(player_guid, object_id, obj, cdata) =>
+        case AvatarAction.LoadProjectile(player_guid, object_id, object_guid, cdata) =>
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", player_guid, AvatarResponse.LoadProjectile(
-              ObjectCreateMessage(object_id, obj.GUID, cdata)
+              ObjectCreateMessage(object_id, object_guid, cdata)
             ))
           )
         case AvatarAction.ObjectDelete(player_guid, item_guid, unk) =>
@@ -174,7 +175,7 @@ class AvatarService extends Actor {
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", player_guid, AvatarResponse.ProjectileState(projectile_guid, shot_pos, shot_vel, shot_orient, sequence, end, target))
           )
-        case AvatarAction.PickupItem(player_guid, zone, target, slot, item, unk) =>
+        case AvatarAction.PickupItem(player_guid, _, target, slot, item, unk) =>
           janitor forward RemoverActor.ClearSpecific(List(item), zone)
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", player_guid, {
@@ -194,7 +195,7 @@ class AvatarService extends Actor {
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", player_guid, AvatarResponse.PutDownFDU(player_guid))
           )
-        case AvatarAction.Release(player, zone, time) =>
+        case AvatarAction.Release(player, _, time) =>
           undertaker forward RemoverActor.AddTask(player, zone, time)
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", player.GUID, AvatarResponse.Release(player))
