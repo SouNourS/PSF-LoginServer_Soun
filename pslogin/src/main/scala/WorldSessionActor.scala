@@ -4930,7 +4930,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
         if(implantsAreActive && hadStaminaBefore) {
           val time = System.currentTimeMillis()
           if(timeDL != 0) {
-            val duration = time - timeSurge
+            val duration = time - timeDL
             if(duration > 500) {
               val units = (duration / 500).toInt
               player.Stamina = player.Stamina - units
