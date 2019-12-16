@@ -22,7 +22,7 @@ import scala.annotation.tailrec
   */
 class InterstellarCluster(zones : List[Zone]) extends Actor {
   private[this] val log = org.log4s.getLogger
-  log.info("Starting interplanetary cluster ...")
+  log.trace("Starting interplanetary cluster ...")
 
   /**
     * Create a `ZoneActor` for each `Zone`.
@@ -32,7 +32,7 @@ class InterstellarCluster(zones : List[Zone]) extends Actor {
   override def preStart() : Unit = {
     super.preStart()
     for(zone <- zones) {
-      log.info(s"Built continent ${zone.Id}")
+      // log.info(s"Built continent ${zone.Id}") // PTS v3 stop spam
       zone.Actor = context.actorOf(Props(classOf[ZoneActor], zone), s"${zone.Id}-actor")
       zone.Actor ! Zone.Init()
     }

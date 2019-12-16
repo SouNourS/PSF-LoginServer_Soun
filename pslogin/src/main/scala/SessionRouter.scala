@@ -67,6 +67,8 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
 
   override def preStart = {
     log.info(s"SessionRouter started...ready for ${role} sessions")
+    log.info("/!\\ You have access to a FREE PUBLIC DATABASE. /!\\")
+    log.info("/!\\ Account name 'a', password 'a' have GM rights. /!\\")
   }
 
   def receive = initializing

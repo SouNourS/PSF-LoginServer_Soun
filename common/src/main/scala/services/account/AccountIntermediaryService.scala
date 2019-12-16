@@ -26,7 +26,7 @@ class AccountIntermediaryService extends Actor {
   private [this] val log = org.log4s.getLogger
 
   override def preStart = {
-    log.info("Starting...")
+    log.trace("Starting...")
   }
 
   def receive = {
