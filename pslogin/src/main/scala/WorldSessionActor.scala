@@ -4136,6 +4136,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
     // PTS v3
     sendResponse(CreateShortcutMessage(guid, 2, 0, true, Shortcut.SURGE))
     sendResponse(CreateShortcutMessage(guid, 3, 0, true, Shortcut.DARKLIGHT_VISION))
+    sendResponse(CreateShortcutMessage(guid, 7, 0, true, Shortcut.MACRO("WHO", "/who")))
     sendResponse(CreateShortcutMessage(guid, 8, 0, true, Shortcut.MACRO("CMD", "!help")))
     if (admin) {
       sendResponse(CreateShortcutMessage(guid, 9, 0, true, Shortcut.MACRO("Fly", "/fly")))
