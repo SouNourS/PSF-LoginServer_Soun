@@ -3,7 +3,7 @@ package net.psforever.objects.serverobject.structures
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.ActorContext
+import akka.actor.{ActorContext, ActorRef}
 import net.psforever.objects.{GlobalDefinitions, Player}
 import net.psforever.objects.definition.ObjectDefinition
 import net.psforever.objects.serverobject.hackable.Hackable
@@ -13,6 +13,7 @@ import net.psforever.objects.serverobject.tube.SpawnTube
 import net.psforever.objects.zones.Zone
 import net.psforever.packet.game._
 import net.psforever.types.{PlanetSideEmpire, Vector3}
+import scalax.collection.{Graph, GraphEdge}
 
 class Building(private val name: String,
                private val building_guid : Int,
@@ -41,6 +42,7 @@ class Building(private val name: String,
 
   override def Faction_=(fac : PlanetSideEmpire.Value) : PlanetSideEmpire.Value = {
     faction = fac
+    TriggerZoneMapUpdate()
     Faction
   }
 
@@ -68,6 +70,20 @@ class Building(private val name: String,
     }
   }
 
+  def NtuLevel : Int = {
+    //if we have a silo, get the NTU level
+    Amenities.find(_.Definition == GlobalDefinitions.resource_silo) match {
+      case Some(obj: ResourceSilo) =>
+        obj.CapacitorDisplay.toInt
+      case _ => //we have no silo; we have unlimited power
+        10
+    }
+  }
+
+  def TriggerZoneMapUpdate(): Unit = {
+    if(Actor != ActorRef.noSender) Actor ! Building.TriggerZoneMapUpdate(Zone.Number)
+  }
+
   // Get all lattice neighbours matching the specified faction
   def Neighbours(faction: PlanetSideEmpire.Value): Option[Set[Building]] = {
     this.Neighbours match {
@@ -88,15 +104,9 @@ class Building(private val name: String,
       Int, Option[Additional3],
       Boolean, Boolean
     ) = {
-    //if we have a silo, get the NTU level
-    val ntuLevel : Int = Amenities.find(_.Definition == GlobalDefinitions.resource_silo) match {
-      case Some(obj: ResourceSilo) =>
-        obj.CapacitorDisplay.toInt
-      case _ => //we have no silo; we have unlimited power
-        10
-    }
+    val ntuLevel : Int = NtuLevel
     // PTS v3 force some Benefits
-    val latticeBenefit : Int = if(BuildingType.id == 3){18} else {0}
+//    val latticeBenefit : Int = if(BuildingType.id == 3){18} else {0}
     val cavernBenefit : Int = if(BuildingType.id == 3){48} else {0}
     //if we have a capture terminal, get the hack status & time (in milliseconds) from control console if it exists
     val (hacking, hackingFaction, hackTime) : (Boolean, PlanetSideEmpire.Value, Long) = Amenities.find(_.Definition == GlobalDefinitions.capture_terminal) match {
@@ -121,6 +131,46 @@ class Building(private val name: String,
       }
       else {
         (true, false)
+      }
+    }
+
+    val latticeBenefit : Int = {
+      if(Faction == PlanetSideEmpire.NEUTRAL) 0
+      else {
+        def FindLatticeBenefit(wantedBenefit: ObjectDefinition, subGraph: Graph[Building, GraphEdge.UnDiEdge]): Boolean = {
+          var found = false
+
+          subGraph find this match {
+            case Some(self) =>
+              if (this.Definition == wantedBenefit) found = true
+              else {
+                self pathUntil (_.Definition == wantedBenefit) match {
+                  case Some(_) => found = true
+                  case None => ;
+                }
+              }
+            case None => ;
+          }
+
+          found
+        }
+
+        // Check this Building is on the lattice first
+        zone.Lattice find this match {
+          case Some(_) =>
+            // todo: generator destruction state
+            val subGraph = Zone.Lattice filter ((b: Building) => b.Faction == this.Faction && !b.CaptureConsoleIsHacked && b.NtuLevel > 0)
+
+            var stackedBenefit = 0
+            if (FindLatticeBenefit(GlobalDefinitions.amp_station, subGraph)) stackedBenefit |= 1
+            if (FindLatticeBenefit(GlobalDefinitions.comm_station_dsp, subGraph)) stackedBenefit |= 2
+            if (FindLatticeBenefit(GlobalDefinitions.cryo_facility, subGraph)) stackedBenefit |= 4
+            if (FindLatticeBenefit(GlobalDefinitions.comm_station, subGraph)) stackedBenefit |= 8
+            if (FindLatticeBenefit(GlobalDefinitions.tech_plant, subGraph)) stackedBenefit |= 16
+
+            stackedBenefit
+          case None => 0;
+        }
       }
     }
     //out
@@ -202,4 +252,5 @@ object Building {
   }
 
   final case class SendMapUpdate(all_clients: Boolean)
+  final case class TriggerZoneMapUpdate(zone_num: Int)
 }

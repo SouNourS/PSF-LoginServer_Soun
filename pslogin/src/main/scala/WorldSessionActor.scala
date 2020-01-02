@@ -5574,6 +5574,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
                 val r = new scala.util.Random
                 val silo = amenity.asInstanceOf[ResourceSilo]
                 val ntu: Int = 900 + r.nextInt(100) - silo.ChargeLevel
+//                val ntu: Int = 0 + r.nextInt(100) - silo.ChargeLevel
                 silo.Actor ! ResourceSilo.UpdateChargeLevel(ntu)
 
               case _ => ;
@@ -5597,7 +5598,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               if(!building.Name.isEmpty && args(1).equalsIgnoreCase(building.Name) && !badFaction) {
                 log.info(s"Hack Base Name : ${args(1)} to empire : ${args(2)}")
                 building.Faction = hackFaction
-                building.Actor ! Building.SendMapUpdate(all_clients = true)
+                building.Actor ! Building.TriggerZoneMapUpdate(continent.Number)
                 continent.LocalEvents ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(building.GUID, hackFaction))
               } else if(!building.Name.isEmpty && !args(1).equalsIgnoreCase(building.Name)) {
                 badBuilding = true
@@ -5616,7 +5617,7 @@ class WorldSessionActor extends Actor with MDCContextAware {
               if(!building.Name.isEmpty && !bad) {
                 log.info(s"Hack Bases to empire : ${args(1)}")
                 building.Faction = hackFaction
-                building.Actor ! Building.SendMapUpdate(all_clients = true)
+                building.Actor ! Building.TriggerZoneMapUpdate(continent.Number)
                 continent.LocalEvents ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(building.GUID, hackFaction))
               }
           })
@@ -9249,9 +9250,9 @@ class WorldSessionActor extends Actor with MDCContextAware {
             sendResponse(PlanetsideAttributeMessage(amenityId, 45, silo.CapacitorDisplay))
             sendResponse(PlanetsideAttributeMessage(amenityId, 47, if(silo.LowNtuWarningOn) 1 else 0))
 
-            if(silo.ChargeLevel == 0) {
-              sendResponse(PlanetsideAttributeMessage(silo.Owner.GUID, 48, 1))
-            }
+//            if(silo.ChargeLevel == 0) { // PTS v3 no inactive bases
+//              sendResponse(PlanetsideAttributeMessage(silo.Owner.GUID, 48, 1))
+//            }
           case _ => ;
         }
 

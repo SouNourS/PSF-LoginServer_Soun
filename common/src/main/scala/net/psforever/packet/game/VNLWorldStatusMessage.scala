@@ -5,6 +5,7 @@ import java.net.{InetAddress, InetSocketAddress}
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PacketHelpers, PlanetSideGamePacket}
 import net.psforever.types.PlanetSideEmpire
+import net.psforever.newcodecs.newcodecs._
 import scodec._
 import scodec.bits._
 import scodec.codecs._
@@ -99,17 +100,26 @@ object VNLWorldStatusMessage extends Marshallable[VNLWorldStatusMessage] {
     (bytes(4) :: uint16L).xmap(decode, encode).as[WorldConnectionInfo]
   }
 
+  implicit val world_codec : Codec[WorldInformation] = (
+    ("world_name" | PacketHelpers.encodedString) :: (
+    ("status_and_type" | statusCodec) :+
+      // TODO: limit the size of this vector to 11 as the client will fail on any more
+      ("connections" | vectorOfN(uint8L, connectionCodec))
+      :+
+      ("empire_need" | PlanetSideEmpire.codec)
+    )).as[WorldInformation]
+
+  implicit val world_codec_aligned : Codec[WorldInformation] = (
+    ("world_name" | PacketHelpers.encodedStringAligned(6)) :: (
+    ("status_and_type" | statusCodec) :+
+      // TODO: limit the size of this vector to 11 as the client will fail on any more
+      ("connections" | vectorOfN(uint8L, connectionCodec))
+      :+
+      ("empire_need" | PlanetSideEmpire.codec)
+    )).as[WorldInformation]
+
   implicit val codec : Codec[VNLWorldStatusMessage] = (
-    ("welcome_message" | PacketHelpers.encodedWideString) ::
-      ("worlds" | vectorOfN(uint8L, (
-        // XXX: this needs to be limited to 0x20 bytes
-        // XXX: this needs to be byte aligned, but not sure how to do this
-        ("world_name" | PacketHelpers.encodedString) :: (
-          ("status_and_type" | statusCodec) :+
-          // TODO: limit the size of this vector to 11 as the client will fail on any more
-          ("connections" | vectorOfN(uint8L, connectionCodec)) :+
-          ("empire_need" | PlanetSideEmpire.codec)
-        )
-      ).as[WorldInformation]
-      ))).as[VNLWorldStatusMessage]
+      ("welcome_message" | PacketHelpers.encodedWideString) ::
+      ("worlds" | prefixedVectorOfN(uint8L, world_codec, world_codec_aligned))
+    ).as[VNLWorldStatusMessage]
 }
