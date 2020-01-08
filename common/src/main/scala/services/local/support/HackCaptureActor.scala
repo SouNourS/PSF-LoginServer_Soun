@@ -72,17 +72,7 @@ class HackCaptureActor extends Actor {
       // Restart the timer in case the object we just removed was the next one scheduled
       RestartTimer()
 
-//    case HackCaptureActor.GetHackTimeRemainingNanos(capture_console_guid) =>
-//      hackedObjects.find(_.target.GUID == capture_console_guid) match {
-//        case Some(obj: HackCaptureActor.HackEntry) =>
-//          val time_left: Long = obj.duration.toNanos - (System.nanoTime - obj.hack_timestamp)
-//          sender ! time_left
-//        case _ =>
-//          // PTS v3 (not a needed log)
-////          log.warn(s"Couldn't find capture terminal guid ${capture_console_guid} in hackedObjects list")
-//          sender ! 0L
-//      }
-//    case _ => ;
+    case _ => ;
   }
 
   private def RestartTimer(): Unit = {

@@ -35,6 +35,7 @@ import net.psforever.objects.serverobject.implantmech.ImplantTerminalMech
 import net.psforever.objects.serverobject.locks.IFFLock
 import net.psforever.objects.serverobject.mblocker.Locker
 import net.psforever.objects.serverobject.pad.{VehicleSpawnControl, VehicleSpawnPad}
+import net.psforever.objects.serverobject.painbox.Painbox
 import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
 import net.psforever.objects.serverobject.structures.{Amenity, Building, StructureType, WarpGate}
 import net.psforever.objects.serverobject.terminals._
@@ -128,7 +129,9 @@ class WorldSessionActor extends Actor
   var drawDeloyableIcon : PlanetSideGameObject with Deployable => Unit = RedrawDeployableIcons
   var updateSquad : () => Unit = NoSquadUpdates
   var recentTeleportAttempt : Long = 0
-  var lastTerminalOrderFulfillment : Boolean = true  /**
+  var lastTerminalOrderFulfillment : Boolean = true
+  var shiftPosition : Option[Vector3] = None
+  /**
     * used during zone transfers to maintain reference to seated vehicle (which does not yet exist in the new zone)
     * used during intrazone gate transfers, but not in a way distinct from prior zone transfer procedures
     * should only be set during the transient period when moving between one spawn point and the next
@@ -1139,7 +1142,7 @@ class WorldSessionActor extends Actor
 
     case InterstellarCluster.ClientInitializationComplete() =>
 //      StopBundlingPackets() // PTS v3
-      log.info("ClientInitializationComplete")
+//      log.info("ClientInitializationComplete")
       LivePlayerList.Add(sessionId, avatar)
       traveler = new Traveler(self, continent.Id)
       StartBundlingPackets()
@@ -1700,16 +1703,24 @@ class WorldSessionActor extends Actor
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector.empty)) //clear squad list
       sendResponse(FriendsResponse(FriendAction.InitializeFriendList, 0, true, true, Nil))
       sendResponse(FriendsResponse(FriendAction.InitializeIgnoreList, 0, true, true, Nil))
+      //the following subscriptions last until character switch/logout
+      chatService ! Service.Join("local")
+      chatService ! Service.Join("squad")
+      chatService ! Service.Join("voice")
+      chatService ! Service.Join("tell")
+      chatService ! Service.Join("broadcast")
+      chatService ! Service.Join("note")
+      chatService ! Service.Join("gm")
       galaxyService ! Service.Join("galaxy") //for galaxy-wide messages
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
       squadService ! Service.Join(s"${avatar.faction}") //channel will be player.Faction
       squadService ! Service.Join(s"${avatar.CharId}") //channel will be player.CharId (in order to work with packets)
 //      cluster ! InterstellarCluster.GetWorld("z1")
-//      cluster ! InterstellarCluster.GetWorld("z2")
+      cluster ! InterstellarCluster.GetWorld("z2")
 //      cluster ! InterstellarCluster.GetWorld("z3")
 //      cluster ! InterstellarCluster.GetWorld("z4")
 //      cluster ! InterstellarCluster.GetWorld("z5")
-      cluster ! InterstellarCluster.GetWorld("z6")
+//      cluster ! InterstellarCluster.GetWorld("z6")
 //      cluster ! InterstellarCluster.GetWorld("z7")
 //      cluster ! InterstellarCluster.GetWorld("z8")
 //      cluster ! InterstellarCluster.GetWorld("z9")
@@ -2010,20 +2021,24 @@ class WorldSessionActor extends Actor
       case AvatarResponse.ConcealPlayer() =>
         sendResponse(GenericObjectActionMessage(guid, 9))
 
-      case AvatarResponse.EnvironmentalDamage(target, amount) =>
-        if(player.isAlive && amount != 0) {
+      case AvatarResponse.EnvironmentalDamage(target, source, amount) =>
+        if(player.isAlive && amount > 0) {
+          val playerGUID = player.GUID
           val armor = player.Armor
           val capacitor = player.Capacitor
           val originalHealth = player.Health
+          //history
+          continent.GUID(source) match {
+            case Some(obj : Painbox) =>
+              player.History(DamageFromPainbox(PlayerSource(player), obj, amount))
+            case _ => ;
+          }
           player.Health = originalHealth - amount
           sendResponse(PlanetsideAttributeMessage(target, 0, player.Health))
           continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(target, 0, player.Health))
           damageLog.info(s"${player.Name}-infantry: BEFORE=$originalHealth/$armor/$capacitor, AFTER=${player.Health}/$armor/$capacitor, CHANGE=$amount/0/0")
           if(player.Health == 0 && player.isAlive) {
             KillPlayer(player)
-          }
-          else {
-            //todo: History?
           }
         }
 
@@ -3809,7 +3824,6 @@ class WorldSessionActor extends Actor
 
         //todo: grant BEP to user
         //todo: grant BEP to squad in range
-        //todo: notify map service to update ntu % on map for all users
 
         //todo: handle silo orb / panel glow properly if more than one person is refilling silo and one player stops. effects should stay on until all players stop
 
@@ -3874,7 +3888,12 @@ class WorldSessionActor extends Actor
         HackState.Ongoing
       }
 
-      if(vis == HackState.Cancelled) {
+      if(!target.HasGUID) {
+        // Target is gone, cancel the hack.
+        // Note: I couldn't find any examples of an object that no longer has a GUID in packet captures, but sending the hacking player's GUID as the target to cancel the hack seems to work
+        sendResponse(HackMessage(progressType, player.GUID, player.GUID, 0, 0L, HackState.Cancelled, 8L))
+      }
+      else if(vis == HackState.Cancelled) {
         // Object moved. Cancel the hack (e.g. vehicle drove away)
         sendResponse(HackMessage(progressType, target.GUID, player.GUID, 0, 0L, vis, 8L))
       }
@@ -3910,7 +3929,8 @@ class WorldSessionActor extends Actor
     sendResponse(PlanetsideAttributeMessage(PlanetSideGUID(0), 75, 0))
     sendResponse(SetCurrentAvatarMessage(guid, 0, 0))
     sendResponse(ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)) //CC on //TODO once per respawn?
-    sendResponse(PlayerStateShiftMessage(ShiftState(1, tplayer.Position, tplayer.Orientation.z)))
+    sendResponse(PlayerStateShiftMessage(ShiftState(1, shiftPosition.getOrElse(tplayer.Position), tplayer.Orientation.z)))
+    shiftPosition = None
     if(spectator) {
       sendResponse(ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, false, "", "on", None))
     }
@@ -4676,7 +4696,7 @@ class WorldSessionActor extends Actor
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The default zone is set to Ceryshen if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
+        "  \\#6The default zone is set to Hossin if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -5348,14 +5368,6 @@ class WorldSessionActor extends Actor
           log.info(s"GenericObjectActionMessage received but incorrect number of arguments.")
         }
       }
-      else if(trimContents.equals("!ams")) {
-        makeReply = false
-        if(player.isBackpack) { //player is on deployment screen (either dead or deconstructed)
-          if(deadState == DeadState.Release) { //player is on deployment screen (either dead or deconstructed)
-            cluster ! Zone.Lattice.RequestSpawnPoint(continent.Number, player, 2)
-          }
-        }
-      }
       else if(trimContents.startsWith("!ntu") && admin){
         continent.Buildings.values.foreach(building =>
           building.Amenities.foreach(amenity =>
@@ -5924,14 +5936,17 @@ class WorldSessionActor extends Actor
       // PTS v3
       if (avatar.Implants(slot).Initialized) {
         if(action == ImplantAction.Activation && status == 1) { // active
-          avatar.Implants(slot).Active = true
-          continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 28, avatar.Implant(slot).id * 2 + 1))
-          if (avatar.Implant(slot).id == 3) {
-            timeDL = System.currentTimeMillis()
-            player.Stamina = player.Stamina - 3
-            sendResponse(PlanetsideAttributeMessage(player.GUID, 2, player.Stamina))
+          if(!player.Jammed) {
+            println(player.Jammed)
+            avatar.Implants(slot).Active = true
+            continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 28, avatar.Implant(slot).id * 2 + 1))
+            if (avatar.Implant(slot).id == 3) {
+              timeDL = System.currentTimeMillis()
+              player.Stamina = player.Stamina - 3
+              sendResponse(PlanetsideAttributeMessage(player.GUID, 2, player.Stamina))
+            }
+            if (avatar.Implant(slot).id == 9) timeSurge = System.currentTimeMillis()
           }
-          if (avatar.Implant(slot).id == 9) timeSurge = System.currentTimeMillis()
         } else if(action == ImplantAction.Activation && status == 0) { //desactive
           avatar.Implants(slot).Active = false
           continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 28, avatar.Implant(slot).id * 2))
@@ -5950,16 +5965,18 @@ class WorldSessionActor extends Actor
           if(player.Faction == door.Faction || (continent.Map.DoorToLock.get(object_guid.guid) match {
             case Some(lock_guid) =>
               val lock = continent.GUID(lock_guid).get.asInstanceOf[IFFLock]
+              val owner = lock.Owner.asInstanceOf[Building]
 
               val playerIsOnInside = Vector3.ScalarProjection(lock.Outwards, player.Position - door.Position) < 0f
 
               // If an IFF lock exists and the IFF lock faction doesn't match the current player and one of the following conditions are met open the door:
-              // A base is neutral
-              // A base is hacked
-              // The lock is hacked
               // The player is on the inside of the door, determined by the lock orientation
+              // The lock is hacked
+              // A base is hacked
+              // A base is neutral
+              // todo: A base is out of power (generator down)
 
-              lock.HackedBy.isDefined || lock.Owner.asInstanceOf[Building].CaptureConsoleIsHacked || lock.Faction == PlanetSideEmpire.NEUTRAL || playerIsOnInside
+              playerIsOnInside || lock.HackedBy.isDefined || owner.CaptureConsoleIsHacked || lock.Faction == PlanetSideEmpire.NEUTRAL
             case None => !door.isOpen // If there's no linked IFF lock just open the door if it's closed.
           })) {
             door.Actor ! Door.Use(player, msg)
@@ -6662,7 +6679,6 @@ class WorldSessionActor extends Actor
                 avatar.EquipmentLoadouts.SaveLoadout(owner, name, lineno)
                 SaveLoadoutToDB(owner, name, lineno)
                 import InfantryLoadout._
-//                println(player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player)), player.ExoSuit, DetermineSubtype(player))
                 sendResponse(FavoritesMessage(list, player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player))))
               case Some(owner : Vehicle) => //VehicleLoadout
                 avatar.EquipmentLoadouts.SaveLoadout(owner, name, lineno)
@@ -7258,15 +7274,15 @@ class WorldSessionActor extends Actor
         private val localAnnounce = self
         private val localService = continent.AvatarEvents
 
-        // PTS v3
-        if (index == 4) {
-          target.Slot(4).Equipment match {
-            case None => ;
-            case Some(knife) =>
-              target.Slot(4).Equipment = None
-              taskResolver ! RemoveEquipmentFromSlot(target, knife, 4)
-          }
-        }
+        // PTS v3 (a try to add fusion blade... but failed right now.
+//        if (index == 4) {
+//          target.Slot(4).Equipment match {
+//            case None => ;
+//            case Some(knife) =>
+//              target.Slot(4).Equipment = None
+//              taskResolver ! RemoveEquipmentFromSlot(target, knife, 4)
+//          }
+//        }
 
         override def isComplete : Task.Resolution.Value = {
           if(localTarget.Slot(localIndex).Equipment.contains(localObject)) {
@@ -9044,7 +9060,7 @@ class WorldSessionActor extends Actor
             // Synchronise warning light & silo capacity
             val silo = amenity.asInstanceOf[ResourceSilo]
             sendResponse(PlanetsideAttributeMessage(amenityId, 45, silo.CapacitorDisplay))
-            sendResponse(PlanetsideAttributeMessage(amenityId, 47, if(silo.LowNtuWarningOn) 1 else 0))
+            sendResponse(PlanetsideAttributeMessage(silo.Owner.GUID, 47, if(silo.LowNtuWarningOn) 1 else 0))
 
 //            if(silo.ChargeLevel == 0) { // PTS v3 no inactive bases
 //              sendResponse(PlanetsideAttributeMessage(silo.Owner.GUID, 48, 1))
@@ -10639,6 +10655,7 @@ class WorldSessionActor extends Actor
     val respawnTimeMillis = localRespawnTime * 1000 //ms
     deadState = DeadState.RespawnTime
     sendResponse(AvatarDeadStateMessage(DeadState.RespawnTime, respawnTimeMillis, respawnTimeMillis, Vector3.Zero, player.Faction, true))
+    shiftPosition = Some(pos)
     val (target, msg) = if(backpack) { //if the player is dead, he is handled as dead infantry, even if he died in a vehicle
       //new player is spawning
       val newPlayer = RespawnClone(player)

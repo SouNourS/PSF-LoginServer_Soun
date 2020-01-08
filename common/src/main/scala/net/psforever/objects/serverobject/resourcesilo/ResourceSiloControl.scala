@@ -4,7 +4,9 @@ package net.psforever.objects.serverobject.resourcesilo
 import akka.actor.Actor
 import net.psforever.objects.serverobject.affinity.{FactionAffinity, FactionAffinityBehavior}
 import net.psforever.objects.serverobject.structures.Building
+import net.psforever.types.PlanetSideEmpire
 import services.avatar.{AvatarAction, AvatarServiceMessage}
+import services.local.{LocalAction, LocalServiceMessage}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -21,7 +23,7 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
     case "startup" =>
       // todo: This is just a temporary solution to drain NTU over time. When base object destruction is properly implemented NTU should be deducted when base objects repair themselves
       val r = new scala.util.Random
-      context.system.scheduler.schedule(5 + r.nextInt(5) second, 90 second, self, ResourceSilo.UpdateChargeLevel(-1))
+      context.system.scheduler.schedule(5 + r.nextInt(5) second, 100 second, self, ResourceSilo.UpdateChargeLevel(-1))
 //      context.system.scheduler.schedule(1 + r.nextInt(5) second, 0.5 second, self, ResourceSilo.UpdateChargeLevel(-1))
       context.become(Processing)
 
@@ -43,6 +45,8 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
 
     case ResourceSilo.UpdateChargeLevel(amount: Int) =>
       val siloChargeBeforeChange = resourceSilo.ChargeLevel
+      val building = resourceSilo.Owner.asInstanceOf[Building]
+      val zone = building.Zone
 
       // Increase if positive passed in or decrease charge level if negative number is passed in
       resourceSilo.ChargeLevel += amount
@@ -56,12 +60,11 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
         log.trace(s"Silo ${resourceSilo.GUID} NTU bar level has changed from ${resourceSilo.CapacitorDisplay} to $ntuBarLevel")
         resourceSilo.CapacitorDisplay = ntuBarLevel
         resourceSilo.Owner.Actor ! Building.SendMapUpdate(all_clients = true)
-        val building = resourceSilo.Owner
-        val zone = building.Zone
         zone.AvatarEvents ! AvatarServiceMessage(
           zone.Id,
           AvatarAction.PlanetsideAttribute(resourceSilo.GUID, 45, resourceSilo.CapacitorDisplay)
         )
+        building.Actor ! Building.SendMapUpdate(all_clients = true)
       }
 
       val ntuIsLow = resourceSilo.ChargeLevel.toFloat / resourceSilo.MaximumCharge.toFloat < 0.2f
@@ -71,12 +74,11 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
         self ! ResourceSilo.LowNtuWarning(enabled = true)
       }
 
-      val building = resourceSilo.Owner.asInstanceOf[Building]
-      val zone = building.Zone
       if(resourceSilo.ChargeLevel == 0 && siloChargeBeforeChange > 0) {
         // Oops, someone let the base run out of power. Shut it all down.
-        //todo: Make base neutral if silo hits zero NTU
 //        zone.AvatarEvents ! AvatarServiceMessage(zone.Id, AvatarAction.PlanetsideAttribute(building.GUID, 48, 1)) // PTS v3 no inactive bases
+//        building.Faction = PlanetSideEmpire.NEUTRAL // PTS v3 no neutral bases
+//        zone.LocalEvents ! LocalServiceMessage(zone.Id, LocalAction.SetEmpire(building.GUID, PlanetSideEmpire.NEUTRAL)) // PTS v3 no neutral bases
         building.TriggerZoneMapUpdate()
       } else if (siloChargeBeforeChange == 0 && resourceSilo.ChargeLevel > 0) {
         // Power restored. Reactor Online. Sensors Online. Weapons Online. All systems nominal.
