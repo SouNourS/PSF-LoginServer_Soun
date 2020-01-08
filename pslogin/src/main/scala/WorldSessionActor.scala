@@ -5936,17 +5936,14 @@ class WorldSessionActor extends Actor
       // PTS v3
       if (avatar.Implants(slot).Initialized) {
         if(action == ImplantAction.Activation && status == 1) { // active
-          if(!player.Jammed) {
-            println(player.Jammed)
-            avatar.Implants(slot).Active = true
-            continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 28, avatar.Implant(slot).id * 2 + 1))
-            if (avatar.Implant(slot).id == 3) {
-              timeDL = System.currentTimeMillis()
-              player.Stamina = player.Stamina - 3
-              sendResponse(PlanetsideAttributeMessage(player.GUID, 2, player.Stamina))
-            }
-            if (avatar.Implant(slot).id == 9) timeSurge = System.currentTimeMillis()
+          avatar.Implants(slot).Active = true
+          continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 28, avatar.Implant(slot).id * 2 + 1))
+          if (avatar.Implant(slot).id == 3) {
+            timeDL = System.currentTimeMillis()
+            player.Stamina = player.Stamina - 3
+            sendResponse(PlanetsideAttributeMessage(player.GUID, 2, player.Stamina))
           }
+          if (avatar.Implant(slot).id == 9) timeSurge = System.currentTimeMillis()
         } else if(action == ImplantAction.Activation && status == 0) { //desactive
           avatar.Implants(slot).Active = false
           continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 28, avatar.Implant(slot).id * 2))
