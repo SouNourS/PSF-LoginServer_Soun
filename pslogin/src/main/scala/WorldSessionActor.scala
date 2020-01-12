@@ -1446,44 +1446,190 @@ class WorldSessionActor extends Actor
         GamePropertyTarget(ObjectClass.nano_dispenser, "works_nopvp" -> "true"))),
 
         GamePropertyScope(8, List(
-          // Oshur Prime
-          //Surgile
-//          GamePropertyTarget(846, "weapon_OK" -> "true"),
-//          GamePropertyTarget(846, "activation_delay" -> "0"),
-//          GamePropertyTarget(846, "deactivation_delay" -> "0"),
+          //map08 (Oshur Prime / Old Oshur)
 
-          //Agile Armor Test
-          GamePropertyTarget(449, "capacitor_jump_lift" -> "15"),
-          GamePropertyTarget(449, "capacitor_jump_min" -> "0"),
-          GamePropertyTarget(449, "capacitor_jump_power_per_second" -> "20"),
-          GamePropertyTarget(449, "capacitor_max" -> "50"),
-          GamePropertyTarget(449, "capacitor_recharge_delay_ms" -> "5000"),
-          GamePropertyTarget(449, "capacitor_recharge_per_second" -> "3"),
-          GamePropertyTarget(449, "jumpcofpenalty" -> "1")
+          //Jackhammer Spread/Max Cone of Fire Nerf (increased by ~25%/10%)
+          GamePropertyTarget(ObjectClass.r_shotgun, "firemode0_shotspread" -> "9"),
+          GamePropertyTarget(ObjectClass.r_shotgun, "firemode0_maxCOF" -> "10"),
 
-//          //Armor Test
-//          GamePropertyTarget(829, "run_forward_speed" -> "10"),
-//          GamePropertyTarget(829, "strafe_run_speed" -> "10"),
-//          GamePropertyTarget(829, "max_integrity" -> "75"),
-//
-//          //Radiator Override Tests (to see what is possible)
-//          GamePropertyTarget(ObjectClass.radiator, "ancient_weapon" -> "false"),
-//          GamePropertyTarget(ObjectClass.radiator, "firemode0_ammo_max" -> "125"),
-//          GamePropertyTarget(ObjectClass.radiator, "equiptime" -> "100"),
-//          GamePropertyTarget(ObjectClass.radiator, "holstertime" -> "100"),
-//          GamePropertyTarget(ObjectClass.radiator, "firemode0_maxCOF" -> "0"),
-//          GamePropertyTarget(ObjectClass.radiator, "clientfiremode0_crosshair" -> "RifleCrosshair"),
-//          GamePropertyTarget(ObjectClass.radiator, "firemode0_refiretime" -> "100"),
-//          GamePropertyTarget(ObjectClass.radiator, "firemode0_reloadtime" -> "0.500"),
-//          GamePropertyTarget(ObjectClass.radiator, "firemode0_recoil" -> "0"),
-//          GamePropertyTarget(ObjectClass.radiator, "firemode0_defaultCOF" -> "0"),
-//          GamePropertyTarget(ObjectClass.radiator, "firemode0_crouchCOF" -> "0"),
-//          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false"),
-//
-//          //MAX Armor Test
-//          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false")
+          //Sweeper Shotgun Spread/Max Cone of Fire Nerf (increased by ~25%/10%),
+          GamePropertyTarget(ObjectClass.flechette, "firemode0_shotspread" -> "8"),
+          GamePropertyTarget(ObjectClass.flechette, "firemode0_maxCOF" -> "9"),
 
+          //Mini Chaingun Nerf (PS1 Release CDs Values)
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_burst_refire_slop" -> "500"),
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_crouchCOF" -> "1.5"),
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_defaultCOF" -> "2.0"),
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_maxCOF" -> "8"),
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_max_shots_per_burst_before_cof_penalty" -> "7"),
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_recoil" -> "1.65"),
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_refiretime" -> "125"),
+
+          //Lasher Revamp Experiment (Reduced Recoil/Rate of Fire Nerf)
+          GamePropertyTarget(ObjectClass.lasher, "firemode0_recoil" -> "1.65"),
+          GamePropertyTarget(ObjectClass.lasher, "firemode1_recoil" -> "1.65"),
+
+          GamePropertyTarget(ObjectClass.lasher, "firemode0_refiretime" -> "333"),
+          GamePropertyTarget(ObjectClass.lasher, "firemode1_refiretime" -> "333"),
+
+          //No Bloom from Taking Damage
+          GamePropertyTarget(357, "damagecofpenalty" -> "0.0"),
+          GamePropertyTarget(357, "damagecofpenalty_max" -> "0.0"),
+          GamePropertyTarget(449, "damagecofpenalty" -> "0.0"),
+          GamePropertyTarget(449, "damagecofpenalty_max" -> "0.0"),
+          GamePropertyTarget(528, "damagecofpenalty" -> "0.0"),
+          GamePropertyTarget(528, "damagecofpenalty_max" -> "0.0"),
+          GamePropertyTarget(829, "damagecofpenalty" -> "0.0"),
+          GamePropertyTarget(829, "damagecofpenalty_max" -> "0.0"),
+          GamePropertyTarget(837, "damagecofpenalty" -> "0.0"),
+          GamePropertyTarget(837, "damagecofpenalty_max" -> "0.0"),
+
+          //Rifle Gunplay Pass
+          GamePropertyTarget(ObjectClass.suppressor, "firemode0_recoil" -> "1.6"),
+          GamePropertyTarget(ObjectClass.suppressor, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.suppressor, "firemode0_defaultCOF" -> "0.001"),
+
+          GamePropertyTarget(ObjectClass.punisher, "firemode0_maxCOF" -> "4"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode0_max_shots_per_burst_before_cof_penalty" -> "0"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode0_defaultCOF" -> "0.001"),
+
+          GamePropertyTarget(ObjectClass.cycler, "firemode0_maxCOF" -> "4"),
+          GamePropertyTarget(ObjectClass.cycler, "firemode0_max_shots_per_burst_before_cof_penalty" -> "0"),
+          GamePropertyTarget(ObjectClass.cycler, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.cycler, "firemode0_defaultCOF" -> "0.001"),
+
+          GamePropertyTarget(ObjectClass.gauss, "firemode0_maxCOF" -> "6"),
+          GamePropertyTarget(ObjectClass.gauss, "firemode0_max_shots_per_burst_before_cof_penalty" -> "0"),
+          GamePropertyTarget(ObjectClass.gauss, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.gauss, "firemode0_defaultCOF" -> "0.001"),
+
+          GamePropertyTarget(ObjectClass.pulsar, "firemode0_maxCOF" -> "4"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode0_max_shots_per_burst_before_cof_penalty" -> "0"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode1_maxCOF" -> "4"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode1_max_shots_per_burst_before_cof_penalty" -> "0"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode1_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode1_defaultCOF" -> "0.001"),
+
+          //Projectile Weapon Changes
+
+          GamePropertyTarget(ObjectClass.rocklet, "firemode0_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.rocklet, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.rocklet, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.rocklet, "firemode0_recoil" -> "0"),
+          GamePropertyTarget(ObjectClass.rocklet, "firemode0_reloadtime" -> "3"),
+          GamePropertyTarget(ObjectClass.rocklet, "firemode1_reloadtime" -> "3"),
+
+          GamePropertyTarget(ObjectClass.striker, "firemode0_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode0_recoil" -> "0"),
+          GamePropertyTarget(ObjectClass.striker, "firemode1_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode1_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode1_recoil" -> "0"),
+
+          GamePropertyTarget(ObjectClass.phoenix, "firemode0_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode0_recoil" -> "0"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode1_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode1_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode1_recoil" -> "0"),
+
+          GamePropertyTarget(ObjectClass.lancer, "firemode0_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.lancer, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.lancer, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.lancer, "firemode0_recoil" -> "0"),
+          GamePropertyTarget(ObjectClass.lancer, "firemode0_fire_delay" -> "500"),
+
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_recoil" -> "0"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_recoil" -> "0"),
+
+          GamePropertyTarget(ObjectClass.thumper, "firemode0_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode0_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode0_recoil" -> "0"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode1_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode1_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode1_recoil" -> "0"),
+
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_recoil" -> "0"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_maxCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_crouchCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_recoil" -> "0"),
+
+          GamePropertyTarget(ObjectClass.oicw, "firemode0_reloadtime" -> "3"),
+
+          //Long Rifle / Winchester Enabled and Changes
+          GamePropertyTarget(ObjectClass.winchester, "allowed" -> "true"),
+          GamePropertyTarget(ObjectClass.order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+          GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+          GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_winchester_ammo" -> "ordertype_equipment"),
+          GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_winchester_ammo" -> "ordertype_equipment"),
+          GamePropertyTarget(ObjectClass.winchester_ammo, "allowed" -> "true"),
+          GamePropertyTarget(ObjectClass.winchester, "turncofpenalty" -> "0.00"),
+          GamePropertyTarget(ObjectClass.winchester, "turncofpenalty_max" -> "0.0"),
+          GamePropertyTarget(1005, "hasgravity" -> "true"),
+
+          //Heavy Scout Rifle Changes
+          GamePropertyTarget(ObjectClass.heavy_sniper, "turncofpenalty" -> "0.00"),
+          GamePropertyTarget(ObjectClass.heavy_sniper, "turncofpenalty_max" -> "0.0")
         )),
+
+//        GamePropertyScope(8, List(
+//          // Oshur Prime
+//          //Surgile
+////          GamePropertyTarget(846, "weapon_OK" -> "true"),
+////          GamePropertyTarget(846, "activation_delay" -> "0"),
+////          GamePropertyTarget(846, "deactivation_delay" -> "0"),
+//
+//          //Agile Armor Test
+//          GamePropertyTarget(449, "capacitor_jump_lift" -> "15"),
+//          GamePropertyTarget(449, "capacitor_jump_min" -> "0"),
+//          GamePropertyTarget(449, "capacitor_jump_power_per_second" -> "20"),
+//          GamePropertyTarget(449, "capacitor_max" -> "50"),
+//          GamePropertyTarget(449, "capacitor_recharge_delay_ms" -> "5000"),
+//          GamePropertyTarget(449, "capacitor_recharge_per_second" -> "3"),
+//          GamePropertyTarget(449, "jumpcofpenalty" -> "1")
+//
+////          //Armor Test
+////          GamePropertyTarget(829, "run_forward_speed" -> "10"),
+////          GamePropertyTarget(829, "strafe_run_speed" -> "10"),
+////          GamePropertyTarget(829, "max_integrity" -> "75"),
+////
+////          //Radiator Override Tests (to see what is possible)
+////          GamePropertyTarget(ObjectClass.radiator, "ancient_weapon" -> "false"),
+////          GamePropertyTarget(ObjectClass.radiator, "firemode0_ammo_max" -> "125"),
+////          GamePropertyTarget(ObjectClass.radiator, "equiptime" -> "100"),
+////          GamePropertyTarget(ObjectClass.radiator, "holstertime" -> "100"),
+////          GamePropertyTarget(ObjectClass.radiator, "firemode0_maxCOF" -> "0"),
+////          GamePropertyTarget(ObjectClass.radiator, "clientfiremode0_crosshair" -> "RifleCrosshair"),
+////          GamePropertyTarget(ObjectClass.radiator, "firemode0_refiretime" -> "100"),
+////          GamePropertyTarget(ObjectClass.radiator, "firemode0_reloadtime" -> "0.500"),
+////          GamePropertyTarget(ObjectClass.radiator, "firemode0_recoil" -> "0"),
+////          GamePropertyTarget(ObjectClass.radiator, "firemode0_defaultCOF" -> "0"),
+////          GamePropertyTarget(ObjectClass.radiator, "firemode0_crouchCOF" -> "0"),
+////          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false"),
+////
+////          //MAX Armor Test
+////          GamePropertyTarget(ObjectClass.radiator, "expansion" -> "false")
+//
+//        )),
         GamePropertyScope(17,
           GamePropertyTarget(ObjectClass.katana, "allowed" -> "false")
         ),
