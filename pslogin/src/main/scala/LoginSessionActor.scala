@@ -1,5 +1,6 @@
 // Copyright (c) 2017 PSForever
 import java.net.InetSocketAddress
+import java.net.InetAddress
 
 import akka.actor.{Actor, ActorRef, Cancellable, MDCContextAware}
 import net.psforever.packet.{PlanetSideGamePacket, _}
@@ -45,7 +46,18 @@ class LoginSessionActor extends Actor with MDCContextAware {
   var canonicalHostName : String = ""
   var port : Int = 0
 
-  private val numBcryptPasses = 4
+  val serverName = WorldConfig.Get[String]("worldserver.ServerName")
+
+  // This MUST be an IP address. The client DOES NOT do name resolution 
+  var serverHost : String = if (WorldConfig.Get[String]("worldserver.Hostname") != "")
+    InetAddress.getByName(WorldConfig.Get[String]("worldserver.Hostname")).getHostAddress
+  else
+    LoginConfig.serverIpAddress.getHostAddress
+
+  val serverAddress = new InetSocketAddress(serverHost, WorldConfig.Get[Int]("worldserver.ListeningPort"))
+
+  // Reference: https://stackoverflow.com/a/50470009
+  private val numBcryptPasses = 10
 
   override def postStop() = {
     if(updateServerListTask != null)
@@ -98,15 +110,13 @@ class LoginSessionActor extends Actor with MDCContextAware {
         val serverTick = Math.abs(System.nanoTime().toInt) // limit the size to prevent encoding error
         sendResponse(PacketCoding.CreateControlPacket(ControlSyncResp(diff, serverTick, fa, fb, fb, fa)))
 
+      case TeardownConnection(_) =>
+        sendResponse(DropSession(sessionId, "client requested session termination"))
+
       case default =>
         log.error(s"Unhandled ControlPacket $default")
     }
   }
-
-  // TODO: move to global configuration or database lookup
-  val serverName = "PSForever"
-  val serverAddress = new InetSocketAddress(LoginConfig.serverIpAddress.getHostAddress, 51001)
-//  val serverAddress = new InetSocketAddress("62.210.250.199", 51401)
 
   def handleGamePkt(pkt : PlanetSideGamePacket) = pkt match {
     case LoginMessage(majorVersion, minorVersion, buildDate, username, password, token, revision) =>
@@ -135,7 +145,7 @@ class LoginSessionActor extends Actor with MDCContextAware {
       log.debug(s"Unhandled GamePacket $pkt")
   }
 
-  def startAccountLogin(username: String, password: String) = {
+  def startAccountLogin(username: String, password: String) : Unit = {
     val newToken = this.generateToken()
     Database.getConnection.connect.onComplete {
       case Success(connection) =>
@@ -158,7 +168,8 @@ class LoginSessionActor extends Actor with MDCContextAware {
     }
   }
 
-  def startAccountAuthentication() : Receive = {
+
+  def startAccountAuthentication : Receive = {
     case StartAccountAuthentication(connection, username, password, newToken, queryResult) =>
       queryResult match {
 
@@ -181,8 +192,13 @@ class LoginSessionActor extends Actor with MDCContextAware {
         // If the account didn't exist in the database
         case errorCode: Int => errorCode match {
           case Database.EMPTY_RESULT =>
-            self ! CreateNewAccount(connection, username, password, newToken)
-            context.become(createNewAccount)
+            if (WorldConfig.Get[Boolean]("loginserver.CreateMissingAccounts")) {
+              self ! CreateNewAccount(connection, username, password, newToken)
+              context.become(createNewAccount)
+            } else {
+              context.become(finishAccountLogin)
+              self ! FinishAccountLogin(connection, username, newToken, false)
+            }
 
           case _ =>
             log.error(s"Issue retrieving result set from database for account $username")
@@ -190,10 +206,11 @@ class LoginSessionActor extends Actor with MDCContextAware {
             self ! FinishAccountLogin(connection, username, newToken, false)
         }
       }
-    case default => failWithError(s"Invalid message '$default' received in startAccountAuthentication")
+    case default =>
+      failWithError(s"Invalid message '$default' received in startAccountAuthentication")
   }
 
-  def createNewAccount() : Receive = {
+  def createNewAccount : Receive = {
     case CreateNewAccount(connection, username, password, newToken) =>
       log.info(s"Account $username does not exist, creating new account...")
       val bcryptPassword : String = password.bcrypt(numBcryptPasses)
@@ -218,18 +235,30 @@ class LoginSessionActor extends Actor with MDCContextAware {
                 context.become(finishAccountLogin)
                 self ! FinishAccountLogin(connection, username, newToken, false)
               }
-            case _ =>
-              log.error(s"Error creating new account for $username")
+            case default =>
+              log.error(s"Error creating new account for $username - $default")
               context.become(finishAccountLogin)
               self ! FinishAccountLogin(connection, username, newToken, false)
           }
-        case _ => failWithError("Something to do ?")
+        case Failure(e : com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException) =>
+          log.error(s"Error creating new account - ${e.errorMessage.message}")
+          context.become(finishAccountLogin)
+          self ! FinishAccountLogin(connection, username, newToken, false)
+
+        case Failure(e : java.sql.SQLException) =>
+          log.error(s"Error creating new account - ${e.getMessage}")
+          context.become(finishAccountLogin)
+          self ! FinishAccountLogin(connection, username, newToken, false)
+
+        case _ =>
+          failWithError(s"Something to do?")
       }
-    case default => failWithError(s"Invalid message '$default' received in createNewAccount")
+    case default =>
+      failWithError(s"Invalid message '$default' received in createNewAccount")
   }
 
   // Essentially keeps a record of this individual login occurrence
-  def logTheLoginOccurrence() : Receive = {
+  def logTheLoginOccurrence : Receive = {
     case LogTheLoginOccurrence(connection, username, newToken, isSuccessfulLogin, accountId) =>
       connection.get.inTransaction {
         c => c.sendPreparedStatement(
@@ -237,14 +266,14 @@ class LoginSessionActor extends Actor with MDCContextAware {
           Array(accountId, new java.sql.Timestamp(System.currentTimeMillis), ipAddress, canonicalHostName, hostName, port)
         )
       }.onComplete {
-        case _ =>
+        _ =>
           context.become(finishAccountLogin)
           self ! FinishAccountLogin(connection, username, newToken, isSuccessfulLogin)
       }
     case default => failWithError(s"Invalid message '$default' received in logTheLoginOccurrence")
   }
 
-  def finishAccountLogin() : Receive = {
+  def finishAccountLogin : Receive = {
     case FinishAccountLogin(connection, username, newToken, isSuccessfulLogin, isInactive) =>
       if(isSuccessfulLogin) { // Login OK
         loginSuccessfulResponse(username, newToken)
@@ -324,7 +353,7 @@ class LoginSessionActor extends Actor with MDCContextAware {
   def generateToken() = {
     val r = new scala.util.Random
     val sb = new StringBuilder
-    for (i <- 1 to 31) {
+    for (_ <- 1 to 31) {
       sb.append(r.nextPrintableChar)
     }
     sb.toString
@@ -334,7 +363,8 @@ class LoginSessionActor extends Actor with MDCContextAware {
     val msg = VNLWorldStatusMessage("Welcome to PlanetSide! ",
       Vector(
         WorldInformation(
-          serverName, WorldStatus.Up, ServerType.Beta, Vector(WorldConnectionInfo(serverAddress)), PlanetSideEmpire.VS
+          serverName, WorldStatus.Up,
+          WorldConfig.Get[ServerType.Value]("worldserver.ServerType"), Vector(WorldConnectionInfo(serverAddress)), PlanetSideEmpire.VS
         )
       )
     )

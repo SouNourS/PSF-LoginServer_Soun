@@ -69,6 +69,7 @@ import scala.util.Success
 import akka.pattern.ask
 import net.psforever.objects.entity.{SimpleWorldEntity, WorldEntity}
 import net.psforever.objects.vehicles.Utility.InternalTelepad
+import net.psforever.types
 import services.local.support.{HackCaptureActor, RouterTelepadActivation}
 import services.support.SupportActor
 
@@ -179,7 +180,6 @@ class WorldSessionActor extends Actor
   var cargoDismountTimer : Cancellable = DefaultCancellable.obj
   var antChargingTick : Cancellable = DefaultCancellable.obj
   var antDischargingTick : Cancellable = DefaultCancellable.obj
-
 
   /**
     * Convert a boolean value into an integer value.
@@ -774,7 +774,7 @@ class WorldSessionActor extends Actor
                     val lTime = value(7).asInstanceOf[org.joda.time.LocalDateTime].toDateTime().getMillis()/1000
                     val secondsSinceLastLogin = nowTimeInSeconds - lTime
                     if (!lDeleted) {
-                      avatarArray(i) = Avatar(value(0).asInstanceOf[Int], lName, lFaction, lGender, lHead, lVoice)
+                      avatarArray(i) = new Avatar(value(0).asInstanceOf[Int], lName, lFaction, lGender, lHead, lVoice)
                       AwardBattleExperiencePoints(avatarArray(i), 20000000L)
                       avatarArray(i).CEP = 600000
                       playerArray(i) = new Player(avatarArray(i))
@@ -862,15 +862,14 @@ class WorldSessionActor extends Actor
       sendResponse(ZoneLockInfoMessage(continentNumber, false, true))
       sendResponse(ZoneForcedCavernConnectionsMessage(continentNumber, 0))
 
-// PTS v3 crash
-//      sendResponse(HotSpotUpdateMessage(
-//        continentNumber,
-//        1,
-//        ZoneHotSpotProjector.SpecificHotSpotInfo(player.Faction, zone.HotSpots)
-//          .map { spot => PacketHotSpotInfo(spot.DisplayLocation.x, spot.DisplayLocation.y, 40) }
-//      )) //normally set for all zones in bulk; should be fine manually updating per zone like this
-      StopBundlingPackets()
+      sendResponse(HotSpotUpdateMessage(
+        continentNumber,
+        1,
+        ZoneHotSpotProjector.SpecificHotSpotInfo(player.Faction, zone.HotSpots)
+          .map { spot => PacketHotSpotInfo(spot.DisplayLocation.x, spot.DisplayLocation.y, 40) }
+      )) //normally set for all zones in bulk; should be fine manually updating per zone like this
 
+      StopBundlingPackets()
     case Zone.Population.PlayerHasLeft(zone, None) =>
       log.info(s"$avatar does not have a body on ${zone.Id}")
 
@@ -1141,8 +1140,6 @@ class WorldSessionActor extends Actor
       taskResolver ! GUIDTask.UnregisterObjectTask(obj)(continent.GUID)
 
     case InterstellarCluster.ClientInitializationComplete() =>
-//      StopBundlingPackets() // PTS v3
-//      log.info("ClientInitializationComplete")
       LivePlayerList.Add(sessionId, avatar)
       traveler = new Traveler(self, continent.Id)
       StartBundlingPackets()
@@ -1883,7 +1880,6 @@ class WorldSessionActor extends Actor
 //      cluster ! InterstellarCluster.GetWorld("c6")
 
 
-
     case InterstellarCluster.GiveWorld(zoneId, zone) =>
       log.info(s"Zone $zoneId will now load")
       loadConfZone = true
@@ -1971,82 +1967,13 @@ class WorldSessionActor extends Actor
       log.warn(s"Vital target ${target.Definition.Name} damage resolution not supported using this method")
 
     case ResponseToSelf(pkt) =>
-      log.info(s"Received a direct message: $pkt")
+      //log.info(s"Received a direct message: $pkt")
       sendResponse(pkt)
 
     case ReceiveAccountData(account) =>
       log.info(s"Retrieved account data for accountId = ${account.AccountId}")
+
       this.account = account
-
-      //TODO begin temp player character auto-loading; remove later
-      import net.psforever.objects.GlobalDefinitions._
-      //      import net.psforever.types.CertificationType._
-      val faction = PlanetSideEmpire.TR
-      val avatar = Avatar(0L, s"TestCharacter$sessionId", faction, CharacterGender.Female, 41, CharacterVoice.Voice1)
-      //      avatar.Certifications += StandardAssault
-      //      avatar.Certifications += MediumAssault
-      //      avatar.Certifications += StandardExoSuit
-      //      avatar.Certifications += AgileExoSuit
-      //      avatar.Certifications += ReinforcedExoSuit
-      //      avatar.Certifications += ATV
-      //      avatar.Certifications += Harasser
-      //      //
-      //      avatar.Certifications += InfiltrationSuit
-      //      avatar.Certifications += Sniping
-      //      avatar.Certifications += AntiVehicular
-      //      avatar.Certifications += HeavyAssault
-      //      avatar.Certifications += SpecialAssault
-      //      avatar.Certifications += EliteAssault
-      //      avatar.Certifications += GroundSupport
-      //      avatar.Certifications += GroundTransport
-      //      avatar.Certifications += Flail
-      //      avatar.Certifications += Switchblade
-      //      avatar.Certifications += AssaultBuggy
-      //      avatar.Certifications += ArmoredAssault1
-      //      avatar.Certifications += ArmoredAssault2
-      //      avatar.Certifications += AirCavalryScout
-      //      avatar.Certifications += AirCavalryAssault
-      //      avatar.Certifications += AirCavalryInterceptor
-      //      avatar.Certifications += AirSupport
-      //      avatar.Certifications += GalaxyGunship
-      //      avatar.Certifications += Phantasm
-      //      avatar.Certifications += UniMAX
-      //      avatar.Certifications += Engineering
-      //      avatar.Certifications += CombatEngineering
-      //      avatar.Certifications += FortificationEngineering
-      //      avatar.Certifications += AssaultEngineering
-      //      avatar.Certifications += Hacking
-      //      avatar.Certifications += AdvancedHacking
-      this.avatar = avatar
-
-      //      InitializeDeployableQuantities(avatar) //set deployables ui elements
-      //      AwardBattleExperiencePoints(avatar, 1000000L)
-      //      player = new Player(avatar)
-      //      //player.Position = Vector3(3561.0f, 2854.0f, 90.859375f) //home3, HART C
-      //      player.Position = Vector3(3940.3984f, 4343.625f, 266.45312f) //z6, Anguta
-      ////      player.Position = Vector3(3571.2266f, 3278.0938f, 119.0f) //ce test
-      //      player.Orientation = Vector3(0f, 0f, 90f)
-      //      //player.Position = Vector3(4262.211f ,4067.0625f ,262.35938f) //z6, Akna.tower
-      //      //player.Orientation = Vector3(0f, 0f, 132.1875f)
-      ////      player.ExoSuit = ExoSuitType.MAX //TODO strange issue; divide number above by 10 when uncommenting
-      //      player.Slot(0).Equipment = Tool(GlobalDefinitions.StandardPistol(player.Faction))
-      //      player.Slot(2).Equipment = Tool(suppressor)
-      //      player.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(player.Faction))
-      //      player.Slot(6).Equipment = AmmoBox(bullet_9mm)
-      //      player.Slot(9).Equipment = AmmoBox(bullet_9mm)
-      //      player.Slot(12).Equipment = AmmoBox(bullet_9mm)
-      //      player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
-      //      player.Slot(36).Equipment = AmmoBox(GlobalDefinitions.StandardPistolAmmo(player.Faction))
-      //      player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
-      //      player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
-      //      player.Inventory.Items.foreach { _.obj.Faction = faction }
-      //TODO end temp player character auto-loading
-//      self ! ListAccountCharacters
-
-//      import scala.concurrent.ExecutionContext.Implicits.global
-//      clientKeepAlive.cancel
-//      clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
-
       admin = account.GM
       if (admin) movieMaker = true
 
@@ -2059,10 +1986,7 @@ class WorldSessionActor extends Actor
               queryResult match {
                 case row: ArrayRowData => // If we got a row from the database
                   log.info(s"Ready to load character list for ${account.Username}")
-                  //                  admin = row(0).asInstanceOf[Boolean]
                   self ! ListAccountCharacters(Some(connection))
-//                  Thread.sleep(connectionState/2)
-                  cluster ! InterstellarCluster.RequestClientInitialization() // PTS v3 or not
                 case _ => // If the account didn't exist in the database
                   log.error(s"Issue retrieving result set from database for account $account")
                   Thread.sleep(50)
@@ -4191,9 +4115,8 @@ class WorldSessionActor extends Actor
       case _ => ;
     }
 
-    // PTS v3
     if (loadConfZone && connectionState == 100) {
-      configZone(continent) // PTS v3
+      configZone(continent)
       loadConfZone = false
     }
 
@@ -4353,7 +4276,7 @@ class WorldSessionActor extends Actor
       clientKeepAlive.cancel
       clientKeepAlive = context.system.scheduler.schedule(0 seconds, 500 milliseconds, self, PokeClient())
 
-      accountIntermediary ! RetrieveAccountData(token) // PTS v3
+      accountIntermediary ! RetrieveAccountData(token)
 
     case msg @ MountVehicleCargoMsg(player_guid, vehicle_guid, cargo_vehicle_guid, unk4) =>
       log.info(msg.toString)
@@ -4457,7 +4380,7 @@ class WorldSessionActor extends Actor
                       val lGender : CharacterGender.Value = CharacterGender(row(3).asInstanceOf[Int])
                       val lHead : Int = row(4).asInstanceOf[Int]
                       val lVoice : CharacterVoice.Value = CharacterVoice(row(5).asInstanceOf[Int])
-                      val avatar : Avatar = Avatar(charId, lName, lFaction, lGender, lHead, lVoice)
+                      val avatar : Avatar = new Avatar(charId, lName, lFaction, lGender, lHead, lVoice)
                       avatar.Certifications += StandardAssault
                       avatar.Certifications += MediumAssault
                       avatar.Certifications += StandardExoSuit
@@ -4553,20 +4476,17 @@ class WorldSessionActor extends Actor
               player.Slot(33).Equipment = AmmoBox(bullet_9mm_AP)
               player.Slot(36).Equipment = AmmoBox(StandardPistolAmmo(player.Faction))
               player.Slot(39).Equipment = SimpleItem(remote_electronics_kit)
-              player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
               player.Inventory.Items.foreach { _.obj.Faction = player.Faction }
-//              player.Actor = self
+              player.Locker.Inventory += 0 -> SimpleItem(remote_electronics_kit)
               player.Position = Vector3(4000f ,4000f ,500f)
               player.Orientation = Vector3(0f, 354.375f, 157.5f)
               player.FirstLoad = true
               //          LivePlayerList.Add(sessionId, avatar)
 
-
               //TODO check if can spawn on last continent/location from player?
               //TODO if yes, get continent guid accessors
               //TODO if no, get sanctuary guid accessors and reset the player's expectations
-//              cluster ! InterstellarCluster.RequestClientInitialization()
-              self ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3 or not
+              cluster ! InterstellarCluster.RequestClientInitialization()
 
               if(connection.isConnected) connection.disconnect
             case scala.util.Failure(e) =>
@@ -4595,7 +4515,7 @@ class WorldSessionActor extends Actor
       continent.VehicleEvents ! Service.Join(avatar.name)
       continent.VehicleEvents ! Service.Join(continentId)
       continent.VehicleEvents ! Service.Join(factionChannel)
-      if(connectionState != 100) configZone(continent) // PTS v3
+      if(connectionState != 100) configZone(continent)
       sendResponse(TimeOfDayMessage(1191182336))
       //custom
       sendResponse(ReplicationStreamMessage(5, Some(6), Vector.empty)) //clear squad list
@@ -6833,6 +6753,7 @@ class WorldSessionActor extends Actor
                 avatar.EquipmentLoadouts.SaveLoadout(owner, name, lineno)
                 SaveLoadoutToDB(owner, name, lineno)
                 import InfantryLoadout._
+//                println(player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player)), player.ExoSuit, DetermineSubtype(player))
                 sendResponse(FavoritesMessage(list, player_guid, line, name, DetermineSubtypeB(player.ExoSuit, DetermineSubtype(player))))
               case Some(owner : Vehicle) => //VehicleLoadout
                 avatar.EquipmentLoadouts.SaveLoadout(owner, name, lineno)
@@ -9244,7 +9165,8 @@ class WorldSessionActor extends Actor
           }
         }
       })
-      //      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
+
+//      sendResponse(HackMessage(3, PlanetSideGUID(building.ModelId), PlanetSideGUID(0), 0, 3212836864L, HackState.HackCleared, 8))
       Thread.sleep(connectionState)
     })
   }
@@ -10722,7 +10644,6 @@ class WorldSessionActor extends Actor
     * @return all discovered `BoomTrigger` objects
     */
   def RemoveBoomerTriggersFromInventory() : List[BoomerTrigger] = {
-    val player_guid = player.GUID
     val holstersWithIndex = player.Holsters().zipWithIndex
     ((player.Inventory.Items.collect({ case InventoryItem(obj : BoomerTrigger, index) => (obj, index) })) ++
       (holstersWithIndex
@@ -10733,8 +10654,8 @@ class WorldSessionActor extends Actor
       .map({ case ((obj, index)) =>
         player.Slot(index).Equipment = None
         sendResponse(ObjectDeleteMessage(obj.GUID, 0))
-        if(player.VisibleSlots.contains(index)) {
-          continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.ObjectDelete(player_guid, obj.GUID))
+        if(player.VisibleSlots.contains(index) && player.HasGUID) {
+          continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.ObjectDelete(player.GUID, obj.GUID))
         }
         obj
       })

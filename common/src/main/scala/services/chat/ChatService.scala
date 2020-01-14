@@ -3,7 +3,7 @@ package services.chat
 
 import akka.actor.Actor
 import net.psforever.objects.LivePlayerList
-import net.psforever.packet.game.{ChatMsg, PlanetSideGUID}
+import net.psforever.packet.game.ChatMsg
 import net.psforever.types.ChatMessageType
 import services.{GenericEventBus, Service}
 
@@ -74,7 +74,7 @@ class ChatService extends Actor {
             ChatServiceResponse(s"/Chat/$forChannel", player_guid, player_name, target = 1, replyMessage = ChatMsg(ChatMessageType.U_CMT_GMTELLFROM,true, msg.recipient,msg.contents,None))
           )
           ChatEvents.publish(
-            ChatServiceResponse(s"/Chat/$forChannel", player_guid, player_name, target = 1, replyMessage = ChatMsg(ChatMessageType.CMT_GMTELL,true,"Server","Why do you try to /note ? That's a GM command ! ... Or not, nobody can /note",None))
+            ChatServiceResponse(s"/Chat/$forChannel", player_guid, player_name, target = 1, replyMessage = ChatMsg(ChatMessageType.CMT_GMTELL,true,"Server","RIP Gemini ! That's a GM command ! ... Or not, nobody can /note",None))
           )
         case ChatAction.Squad(player_guid, player_name, cont, player_pos, player_faction, msg) => // squad
           ChatEvents.publish(
