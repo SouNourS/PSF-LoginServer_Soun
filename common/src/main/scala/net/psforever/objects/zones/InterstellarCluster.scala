@@ -58,7 +58,7 @@ class InterstellarCluster(zones : List[Zone]) extends Actor {
         context.system.scheduler.scheduleOnce(interval milliseconds, sender, Zone.ClientInitialization(zone.ClientInitialization()))
         interval += 1
       })
-//      sender ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
+      sender ! InterstellarCluster.ClientInitializationComplete() //will be processed after all Zones // PTS v3
 
     case msg @ Zone.Lattice.RequestSpawnPoint(zone_number, _, _) =>
       recursiveFindWorldInCluster(zones.iterator, _.Number == zone_number) match {
