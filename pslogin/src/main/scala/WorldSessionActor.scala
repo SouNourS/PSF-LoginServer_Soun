@@ -1385,6 +1385,7 @@ class WorldSessionActor extends Actor
         GamePropertyTarget(ObjectClass.anniversary_gunb, "holstertime" -> "500"),
         GamePropertyTarget(ObjectClass.ace, "equiptime" -> "500"),
         GamePropertyTarget(ObjectClass.ace, "holstertime" -> "500"),
+        GamePropertyTarget(ObjectClass.ace, "allowed" -> "false"), // PTS v3 temp DC fix
         GamePropertyTarget(ObjectClass.ace_deployable, "equiptime" -> "500"),
         GamePropertyTarget(ObjectClass.ace_deployable, "holstertime" -> "500"),
 
@@ -1445,147 +1446,193 @@ class WorldSessionActor extends Actor
         GamePropertyScope(8, List(
           //map08 (Oshur Prime / Old Oshur)
 
-          //Jackhammer Spread/Max Cone of Fire Nerf (increased by ~25%/10%)
-          GamePropertyTarget(ObjectClass.r_shotgun, "firemode0_shotspread" -> "9"),
-          GamePropertyTarget(ObjectClass.r_shotgun, "firemode0_maxCOF" -> "10"),
-
-          //Sweeper Shotgun Spread/Max Cone of Fire Nerf (increased by ~25%/10%),
-          GamePropertyTarget(ObjectClass.flechette, "firemode0_shotspread" -> "8"),
-          GamePropertyTarget(ObjectClass.flechette, "firemode0_maxCOF" -> "9"),
-
-          //Mini Chaingun Nerf (PS1 Release CDs Values)
-          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_burst_refire_slop" -> "500"),
-          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_crouchCOF" -> "1.5"),
-          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_defaultCOF" -> "2.0"),
-          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_maxCOF" -> "8"),
-          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_max_shots_per_burst_before_cof_penalty" -> "7"),
-          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_recoil" -> "1.65"),
-          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_refiretime" -> "125"),
-
-          //Lasher Revamp Experiment (Reduced Recoil/Rate of Fire Nerf)
-          GamePropertyTarget(ObjectClass.lasher, "firemode0_recoil" -> "1.65"),
-          GamePropertyTarget(ObjectClass.lasher, "firemode1_recoil" -> "1.65"),
-
-          GamePropertyTarget(ObjectClass.lasher, "firemode0_refiretime" -> "333"),
-          GamePropertyTarget(ObjectClass.lasher, "firemode1_refiretime" -> "333"),
-
           //No Bloom from Taking Damage
-          GamePropertyTarget(357, "damagecofpenalty" -> "0.0"),
-          GamePropertyTarget(357, "damagecofpenalty_max" -> "0.0"),
-          GamePropertyTarget(449, "damagecofpenalty" -> "0.0"),
-          GamePropertyTarget(449, "damagecofpenalty_max" -> "0.0"),
-          GamePropertyTarget(528, "damagecofpenalty" -> "0.0"),
-          GamePropertyTarget(528, "damagecofpenalty_max" -> "0.0"),
-          GamePropertyTarget(829, "damagecofpenalty" -> "0.0"),
-          GamePropertyTarget(829, "damagecofpenalty_max" -> "0.0"),
-          GamePropertyTarget(837, "damagecofpenalty" -> "0.0"),
-          GamePropertyTarget(837, "damagecofpenalty_max" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.giant, "damagecofpenalty" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.giant, "damagecofpenalty_max" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.lite_armor, "damagecofpenalty" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.lite_armor, "damagecofpenalty_max" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.med_armor, "damagecofpenalty" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.med_armor, "damagecofpenalty_max" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.standard_issue_armor, "damagecofpenalty" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.standard_issue_armor, "damagecofpenalty_max" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.stealth_armor, "damagecofpenalty" -> "0.0"),
+//          GamePropertyTarget(ObjectClass.stealth_armor, "damagecofpenalty_max" -> "0.0"),
 
-          //Rifle Gunplay Pass
-          GamePropertyTarget(ObjectClass.suppressor, "firemode0_recoil" -> "1.6"),
-          GamePropertyTarget(ObjectClass.suppressor, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.suppressor, "firemode0_defaultCOF" -> "0.001"),
+          //Gunplay Pass
 
-          GamePropertyTarget(ObjectClass.punisher, "firemode0_maxCOF" -> "4"),
+          //Lasher CoF Normalization and Max CoF Reduction Buff
+          GamePropertyTarget(ObjectClass.lasher, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.lasher, "firemode0_defaultCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.lasher, "firemode0_maxCOF" -> "5"),
+
+          //Mini Chaingun CoF Normalization
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.mini_chaingun, "firemode0_defaultCOF" -> "0.0001"),
+
+          //Suppressor CoF Normalization and Max CoF Reduction Buff
+          GamePropertyTarget(ObjectClass.suppressor, "firemode0_maxCOF" -> "5"),
+          GamePropertyTarget(ObjectClass.suppressor, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.suppressor, "firemode0_defaultCOF" -> "0.0001"),
+
+          //Punisher CoF Normalization, Max CoF Reduction Buff, and Punisher Projectile Pass with CoF and Bloom Normalization
+          GamePropertyTarget(ObjectClass.punisher, "firemode0_maxCOF" -> "3.75"),
           GamePropertyTarget(ObjectClass.punisher, "firemode0_max_shots_per_burst_before_cof_penalty" -> "0"),
-          GamePropertyTarget(ObjectClass.punisher, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.punisher, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode0_defaultCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode0_recoil" -> "1.5"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode1_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode1_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode1_defaultCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.punisher, "firemode1_recoil" -> "0"),
 
-          GamePropertyTarget(ObjectClass.cycler, "firemode0_maxCOF" -> "4"),
+          //Cycler CoF Normalization, Removed Shots Before CoF Penalty
+          GamePropertyTarget(ObjectClass.cycler, "firemode0_maxCOF" -> "2.5"),
           GamePropertyTarget(ObjectClass.cycler, "firemode0_max_shots_per_burst_before_cof_penalty" -> "0"),
-          GamePropertyTarget(ObjectClass.cycler, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.cycler, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.cycler, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.cycler, "firemode0_defaultCOF" -> "0.0001"),
 
-          GamePropertyTarget(ObjectClass.gauss, "firemode0_maxCOF" -> "6"),
+          //Gauss CoF Normalization, Removed Shots Before CoF Penalty
+          GamePropertyTarget(ObjectClass.gauss, "firemode0_maxCOF" -> "3"),
           GamePropertyTarget(ObjectClass.gauss, "firemode0_max_shots_per_burst_before_cof_penalty" -> "0"),
-          GamePropertyTarget(ObjectClass.gauss, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.gauss, "firemode0_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.gauss, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.gauss, "firemode0_defaultCOF" -> "0.0001"),
 
-          GamePropertyTarget(ObjectClass.pulsar, "firemode0_maxCOF" -> "4"),
+          //Pulsar CoF Normalization, Removed Shots Before CoF Penalty
+          GamePropertyTarget(ObjectClass.pulsar, "firemode0_maxCOF" -> "2.5"),
           GamePropertyTarget(ObjectClass.pulsar, "firemode0_max_shots_per_burst_before_cof_penalty" -> "0"),
-          GamePropertyTarget(ObjectClass.pulsar, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.pulsar, "firemode0_defaultCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.pulsar, "firemode1_maxCOF" -> "4"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode0_defaultCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode1_maxCOF" -> "1.5"),
           GamePropertyTarget(ObjectClass.pulsar, "firemode1_max_shots_per_burst_before_cof_penalty" -> "0"),
-          GamePropertyTarget(ObjectClass.pulsar, "firemode1_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.pulsar, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode1_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.pulsar, "firemode1_defaultCOF" -> "0.0001"),
 
-          //Projectile Weapon Changes
+          //Heavy Scout Rifle Turn CoF Penalty Removal, CoF Normalization, Bloom Removal
+          GamePropertyTarget(ObjectClass.heavy_sniper, "turncofpenalty" -> "0.00"),
+          GamePropertyTarget(ObjectClass.heavy_sniper, "turncofpenalty_max" -> "0.0"),
+          GamePropertyTarget(ObjectClass.heavy_sniper, "firemode0_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.heavy_sniper, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.heavy_sniper, "firemode0_defaultCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.heavy_sniper, "firemode0_recoil" -> "0"),
 
-          GamePropertyTarget(ObjectClass.rocklet, "firemode0_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.rocklet, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.rocklet, "firemode0_defaultCOF" -> "0.001"),
+          //Projectile Weapon Pass
+
+          //Rocklet CoF and Reload Time Normalization
+          GamePropertyTarget(ObjectClass.rocklet, "firemode0_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.rocklet, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.rocklet, "firemode0_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.rocklet, "firemode0_recoil" -> "0"),
           GamePropertyTarget(ObjectClass.rocklet, "firemode0_reloadtime" -> "3"),
           GamePropertyTarget(ObjectClass.rocklet, "firemode1_reloadtime" -> "3"),
 
-          GamePropertyTarget(ObjectClass.striker, "firemode0_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.striker, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.striker, "firemode0_defaultCOF" -> "0.001"),
+          //Striker CoF Normalization
+          GamePropertyTarget(ObjectClass.striker, "firemode0_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode0_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.striker, "firemode0_recoil" -> "0"),
-          GamePropertyTarget(ObjectClass.striker, "firemode1_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.striker, "firemode1_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.striker, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode1_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode1_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.striker, "firemode1_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.striker, "firemode1_recoil" -> "0"),
 
-          GamePropertyTarget(ObjectClass.phoenix, "firemode0_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.phoenix, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.phoenix, "firemode0_defaultCOF" -> "0.001"),
+          //Phoenix CoF and Bloom Normalization
+          GamePropertyTarget(ObjectClass.phoenix, "firemode0_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode0_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.phoenix, "firemode0_recoil" -> "0"),
-          GamePropertyTarget(ObjectClass.phoenix, "firemode1_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.phoenix, "firemode1_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.phoenix, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode1_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode1_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.phoenix, "firemode1_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.phoenix, "firemode1_recoil" -> "0"),
 
-          GamePropertyTarget(ObjectClass.lancer, "firemode0_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.lancer, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.lancer, "firemode0_defaultCOF" -> "0.001"),
+          //Lancer CoF and Bloom Normalization
+          GamePropertyTarget(ObjectClass.lancer, "firemode0_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.lancer, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.lancer, "firemode0_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.lancer, "firemode0_recoil" -> "0"),
-          GamePropertyTarget(ObjectClass.lancer, "firemode0_fire_delay" -> "500"),
 
-          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_defaultCOF" -> "0.001"),
+          //Decimator CoF and Bloom Normalization
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.hunterseeker, "firemode0_recoil" -> "0"),
-          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.hunterseeker, "firemode1_recoil" -> "0"),
 
-          GamePropertyTarget(ObjectClass.thumper, "firemode0_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.thumper, "firemode0_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.thumper, "firemode0_defaultCOF" -> "0.001"),
+          //Decimator CoF and Bloom Normalization
+          GamePropertyTarget(ObjectClass.thumper, "firemode0_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode0_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode0_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.thumper, "firemode0_recoil" -> "0"),
-          GamePropertyTarget(ObjectClass.thumper, "firemode1_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.thumper, "firemode1_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.thumper, "firemode1_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode1_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode1_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.thumper, "firemode1_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.thumper, "firemode1_recoil" -> "0"),
 
-          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_defaultCOF" -> "0.001"),
+          //Splash Radius Nerfs
+//          GamePropertyTarget(ObjectClass.frag_grenade_projectile, "damage_radius" -> "3"),
+//          GamePropertyTarget(ObjectClass.frag_cartridge_projectile, "damage_radius" -> "3"),
+//          GamePropertyTarget(ObjectClass.frag_cartridge_projectile_b, "damage_radius" -> "3"),
+
+          //Maelstrom Grenade CoF and Bloom Normalization
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode1_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.maelstrom, "firemode1_recoil" -> "0"),
-          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_maxCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_crouchCOF" -> "0.001"),
-          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_defaultCOF" -> "0.001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_maxCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_crouchCOF" -> "0.0001"),
+          GamePropertyTarget(ObjectClass.maelstrom, "firemode2_defaultCOF" -> "0.0001"),
           GamePropertyTarget(ObjectClass.maelstrom, "firemode2_recoil" -> "0"),
 
+          //Scorpion Reload Time Normalization
           GamePropertyTarget(ObjectClass.oicw, "firemode0_reloadtime" -> "3"),
 
-          //Long Rifle / Winchester Enabled and Changes
+          //Long Rifle / Winchester Enabled and Changes (Now similar to Bolt Driver but with bullet drop and no turn penalty)
           GamePropertyTarget(ObjectClass.winchester, "allowed" -> "true"),
+          GamePropertyTarget(ObjectClass.winchester_ammo, "allowed" -> "true"),
           GamePropertyTarget(ObjectClass.order_terminal, "forsale_winchester" -> "ordertype_weapon"),
           GamePropertyTarget(ObjectClass.portable_order_terminal, "forsale_winchester" -> "ordertype_weapon"),
           GamePropertyTarget(ObjectClass.portable_ammo_terminal, "forsale_winchester_ammo" -> "ordertype_equipment"),
           GamePropertyTarget(ObjectClass.deployable_shield_generator, "forsale_winchester_ammo" -> "ordertype_equipment"),
-          GamePropertyTarget(ObjectClass.winchester_ammo, "allowed" -> "true"),
+          GamePropertyTarget(ObjectClass.ams_order_terminal, "forsale_winchester" -> "ordertype_weapon"),
+          GamePropertyTarget(ObjectClass.ams_order_terminal, "forsale_winchester_ammo" -> "ordertype_equipment"),
           GamePropertyTarget(ObjectClass.winchester, "turncofpenalty" -> "0.00"),
           GamePropertyTarget(ObjectClass.winchester, "turncofpenalty_max" -> "0.0"),
-          GamePropertyTarget(1005, "hasgravity" -> "true"),
+          GamePropertyTarget(ObjectClass.winchester, "firemode0_COFrecovery" -> "500"),
+          GamePropertyTarget(ObjectClass.winchester, "firemode0_crouchCOF" -> "0.05"),
+          GamePropertyTarget(ObjectClass.winchester, "firemode0_defaultCOF" -> "2"),
+          GamePropertyTarget(ObjectClass.winchester, "firemode0_maxCOF" -> "10"),
+          GamePropertyTarget(ObjectClass.winchester, "firemode0_recoil" -> "1.75"),
+//          GamePropertyTarget(ObjectClass.winchester_projectile, "hasgravity" -> "true"),
 
-          //Heavy Scout Rifle Changes
-          GamePropertyTarget(ObjectClass.heavy_sniper, "turncofpenalty" -> "0.00"),
-          GamePropertyTarget(ObjectClass.heavy_sniper, "turncofpenalty_max" -> "0.0")
+          //Misc Vehicle Things
+          GamePropertyTarget(ObjectClass.quadstealth, "maxforward" -> "120")
+//          GamePropertyTarget(ObjectClass.flail_projectile, "server_side_splash" -> "false"),
+
+          //Misc Map Things (Skydome Change, No Lattice Links)
+//          GamePropertyTarget(ObjectClass.map08, "skydome" -> "vr_sky"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_1" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_10" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_11" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_12" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_13" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_14" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_15" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_16" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_17" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_18" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_19" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_2" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_20" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_3" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_4" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_5" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_6" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_7" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_8" -> "false"),
+//          GamePropertyTarget(ObjectClass.map08, "building_link_9" -> "false")
         )),
 
 //        GamePropertyScope(8, List(

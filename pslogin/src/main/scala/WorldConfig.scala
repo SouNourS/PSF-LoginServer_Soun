@@ -29,7 +29,7 @@ object WorldConfig extends ConfigParser {
     ),
     ConfigSection("network",
       ConfigEntryTime("Session.InboundGraceTime", 1 minute, Constraints.min(10 seconds)),
-      ConfigEntryTime("Session.OutboundGraceTime", 1 minute, Constraints.min(10 seconds))
+      ConfigEntryTime("Session.OutboundGraceTime", 1 minute, Constraints.min(4 seconds))
     ),
     ConfigSection("developer",
       ConfigEntryBool ("NetSim.Active", false),
