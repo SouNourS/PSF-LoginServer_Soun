@@ -68,6 +68,7 @@ import scala.concurrent.{Await, Future}
 import scala.util.Success
 import akka.pattern.ask
 import net.psforever.objects.entity.{SimpleWorldEntity, WorldEntity}
+import net.psforever.objects.serverobject.zipline.ZipLinePath
 import net.psforever.objects.vehicles.Utility.InternalTelepad
 import net.psforever.types
 import services.local.support.{HackCaptureActor, RouterTelepadActivation}
@@ -76,8 +77,7 @@ import services.support.SupportActor
 import scala.collection.mutable
 
 class WorldSessionActor extends Actor
-  with MDCContextAware
-  with JammableBehavior {
+  with MDCContextAware {
   import WorldSessionActor._
 
   private[this] val log = org.log4s.getLogger
@@ -166,8 +166,6 @@ class WorldSessionActor extends Actor
   // PTS v3
   var timeDL : Long = 0
   var timeSurge : Long = 0
-
-  var skipStaminaRegenForTurns : Int = 0
   lazy val unsignedIntMaxValue : Long = Int.MaxValue.toLong * 2L + 1L
   var serverTime : Long = 0
 
@@ -335,7 +333,23 @@ class WorldSessionActor extends Actor
       context.stop(self)
   }
 
-  def Started : Receive = jammableBehavior.orElse {
+  def ValidObject(id : Int) : Option[PlanetSideGameObject] = ValidObject(Some(PlanetSideGUID(id)))
+
+  def ValidObject(id : PlanetSideGUID) : Option[PlanetSideGameObject] = ValidObject(Some(id))
+
+  def ValidObject(id : Option[PlanetSideGUID]) : Option[PlanetSideGameObject] = continent.GUID(id) match {
+    case out @ Some(obj) if obj.HasGUID =>
+      out
+    case None if id.nonEmpty =>
+      //delete stale entity reference from client
+      log.warn(s"Player ${player.Name} has an invalid reference to GUID ${id.get} in zone ${continent.Id}. Delete object on client.")
+      //sendResponse(ObjectDeleteMessage(id.get, 0))
+      None
+    case _ =>
+      None
+  }
+
+  def Started : Receive = {
     case ServiceManager.LookupResult("accountIntermediary", endpoint) =>
       accountIntermediary = endpoint
       log.info("ID: " + sessionId + " Got account intermediary service " + endpoint)
@@ -886,7 +900,7 @@ class WorldSessionActor extends Actor
 
     case Zone.Lattice.SpawnPoint(zone_id, spawn_tube) =>
       var (pos, ori) = spawn_tube.SpecificPoint(continent.GUID(player.VehicleSeated) match {
-        case Some(obj : Vehicle) if obj.Health > 0 =>
+        case Some(obj : Vehicle) if !obj.IsDead =>
           obj
         case _ =>
           player
@@ -1949,7 +1963,7 @@ class WorldSessionActor extends Actor
       player = tplayer
       //LoadMapMessage causes the client to send BeginZoningMessage, eventually leading to SetCurrentAvatar
       if (continent.Map.Name == "map11" || continent.Map.Name == "map12" || continent.Map.Name == "map13") {
-        sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, false, continent.Map.Checksum))
+        sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, continent.Map.Checksum)) // PTS v3 false, temp true for Nick's tests
       } else sendResponse(LoadMapMessage(continent.Map.Name, continent.Id, 40100, 25, true, continent.Map.Checksum))
       // PTS v3
       Thread.sleep(5)
@@ -2155,90 +2169,16 @@ class WorldSessionActor extends Actor
           continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(target, 0, player.Health))
           damageLog.info(s"${player.Name}-infantry: BEFORE=$originalHealth/$armor/$capacitor, AFTER=${player.Health}/$armor/$capacitor, CHANGE=$amount/0/0")
           if(player.Health == 0 && player.isAlive) {
-            KillPlayer(player)
+            player.Actor ! Player.Die()
           }
         }
 
-      case AvatarResponse.DamageResolution(target, resolution_function) =>
-        if(player.isAlive) {
-          val originalHealth = player.Health
-          val originalArmor = player.Armor
-          val originalCapacitor = player.Capacitor.toInt
-          val cause = resolution_function(target)
-          val health = player.Health
-          val armor = player.Armor
-          val capacitor = player.Capacitor.toInt
-          val damageToHealth = originalHealth - health
-          val damageToArmor = originalArmor - armor
-          val damageToCapacitor = originalCapacitor - capacitor
-          if(damageToHealth != 0 || damageToArmor != 0 || damageToCapacitor != 0) {
-            damageLog.info(s"${player.Name}-infantry: BEFORE=$originalHealth/$originalArmor/$originalCapacitor, AFTER=$health/$armor/$capacitor, CHANGE=$damageToHealth/$damageToArmor/$damageToCapacitor")
-            val playerGUID = player.GUID
-            if(damageToHealth > 0) {
-              sendResponse(PlanetsideAttributeMessage(playerGUID, 0, health))
-              continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 0, health))
-            }
-            if(damageToArmor > 0) {
-              sendResponse(PlanetsideAttributeMessage(playerGUID, 4, armor))
-              continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 4, armor))
-            }
-            if(damageToCapacitor > 0) {
-              sendResponse(PlanetsideAttributeMessage(playerGUID, 7, capacitor))
-            }
-            sendResponse(PlanetsideAttributeMessage(playerGUID, 0, health))
-            sendResponse(PlanetsideAttributeMessage(playerGUID, 4, armor))
-            continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 0, health))
-            continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 4, armor))
-            if(health == 0 && player.isAlive) {
-              if (spectator) { // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                player.Health = 100 // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                sendResponse(PlanetsideAttributeMessage(playerGUID, 0, player.Health)) // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(playerGUID, 0, player.Health)) // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                target.History.find(p => p.isInstanceOf[DamagingActivity]) match { // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                  case Some(data: DamageFromProjectile) => // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                    val owner = data.data.projectile.owner // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                    owner match { // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                      case pSource: PlayerSource => // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                        continent.LivePlayers.find(_.Name == pSource.Name) match { // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                          case Some(tplayer) => // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                            tplayer.death_by = -1 // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                          case None => ; // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                        } // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                      case _ => ; // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                    } // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                  case _ => ; // PTS v3 temp fix for auto kick with one shot kill on a spectator
-                } // PTS v3 temp fix for auto kick with one shot kill on a spectator
-              } // PTS v3 temp fix for auto kick with one shot kill on a spectator
-              else {
-                KillPlayer(player)
-              }
-
-            }
-            else {
-              //damage cause -> recent damage source -> killing blow?
-              cause match {
-                case data : ResolvedProjectile =>
-                  val owner = data.projectile.owner
-                  owner match {
-                    case pSource : PlayerSource =>
-                      continent.LivePlayers.find(_.Name == pSource.Name) match {
-                        case Some(tplayer) =>
-                          if(spectator) tplayer.death_by = -1 // PTS v3
-                          sendResponse(HitHint(tplayer.GUID, player.GUID))
-                        case None => ;
-                      }
-                    case vSource : SourceEntry =>
-                      sendResponse(DamageWithPositionMessage(damageToHealth + damageToArmor, vSource.Position))
-                    case _ => ;
-                  }
-                  continent.Activity ! Zone.HotSpot.Activity(owner, data.target, target.Position)
-                case _ => ;
-              }
-            }
-          }
-          if(target.isAlive && cause.projectile.profile.JammerProjectile) {
-            self ! JammableUnit.Jammered(cause)
-          }
+      case AvatarResponse.DeactivateImplantSlot(slot) =>
+        //temporary solution until implants are finalized
+        slot match {
+          case 1 => DeactivateImplantDarkLight()
+          case 2 => DeactivateImplantSurge()
+          case _ => ;
         }
 
       case AvatarResponse.Destroy(victim, killer, weapon, pos) =>
@@ -2268,33 +2208,25 @@ class WorldSessionActor extends Actor
           sendResponse(HitHint(source_guid, guid))
         }
 
-      case AvatarResponse.KilledWhileInVehicle() =>
-        if(player.isAlive && player.VehicleSeated.nonEmpty) {
-          (continent.GUID(player.VehicleSeated) match {
-            case Some(obj : Vehicle) =>
-              if(obj.Health == 0) Some(obj)
-              else None
-            case Some(obj : TurretDeployable) =>
-              if(obj.Health == 0) Some(obj)
-              else None
-            case Some(obj : FacilityTurret) =>
-              if(obj.Health == 1) Some(obj) //TODO proper turret death at 0 health
-              else None
-            case _ =>
-              None
-          }) match {
-            case Some(obj : PlanetSideGameObject with Vitality) =>
-              obj.LastShot match {
-                case Some(cause) =>
-                  player.History(cause)
-                  KillPlayer(player)
-                case None => ;
-              }
-            case _ =>
-              log.warn(s"${player.Name} was seated in a vehicle and should have been killed, but was not; suicidal fallback")
-              Suicide(player)
-          }
+      case AvatarResponse.Killed() =>
+        val respawnTimer = 300000 //milliseconds
+        ToggleMaxSpecialState(enable = false)
+        deadState = DeadState.Dead
+        timeDL = 0
+        timeSurge = 0
+        continent.GUID(player.VehicleSeated) match {
+          case Some(obj : Vehicle) =>
+            TotalDriverVehicleControl(obj)
+            UnAccessContents(obj)
+          case _ => ;
         }
+        PlayerActionsToCancel()
+        if(shotsWhileDead > 0) {
+          log.warn(s"KillPlayer/SHOTS_WHILE_DEAD: client of ${avatar.name} fired $shotsWhileDead rounds while character was dead on server")
+          shotsWhileDead = 0
+        }
+        import scala.concurrent.ExecutionContext.Implicits.global
+        reviveTimer = context.system.scheduler.scheduleOnce(respawnTimer milliseconds, cluster, Zone.Lattice.RequestSpawnPoint(Zones.SanctuaryZoneNumber(player.Faction), player, 7))
 
       case AvatarResponse.LoadPlayer(pkt) =>
         if(tplayer_guid != guid) {
@@ -4018,8 +3950,7 @@ class WorldSessionActor extends Actor
 
       if(!target.HasGUID) {
         // Target is gone, cancel the hack.
-        // Note: I couldn't find any examples of an object that no longer has a GUID in packet captures, but sending the hacking player's GUID as the target to cancel the hack seems to work
-        sendResponse(HackMessage(progressType, player.GUID, player.GUID, 0, 0L, HackState.Cancelled, 8L))
+        sendResponse(HackMessage(progressType, target.GUID, player.GUID, 0, 0L, HackState.Cancelled, 8L))
       }
       else if(vis == HackState.Cancelled) {
         // Object moved. Cancel the hack (e.g. vehicle drove away)
@@ -4059,7 +3990,7 @@ class WorldSessionActor extends Actor
     sendResponse(ChatMsg(ChatMessageType.CMT_EXPANSIONS, true, "", "1 on", None)) //CC on //TODO once per respawn?
     sendResponse(PlayerStateShiftMessage(ShiftState(1, shiftPosition.getOrElse(tplayer.Position), tplayer.Orientation.z)))
     shiftPosition = None
-    if(spectator) {
+    if(player.spectator) {
       sendResponse(ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, false, "", "on", None))
     }
     (0 until DetailedCharacterData.numberOfImplantSlots(tplayer.BEP)).foreach(slot => {
@@ -4510,7 +4441,7 @@ class WorldSessionActor extends Actor
               whenUsedLastMAXName(1) = faction+"hev_antiaircraft"
 
               (0 until 4).foreach( index => {
-                if (player.Slot(index).Equipment.isDefined) player.Slot(index).Equipment = None
+                player.Slot(index).Equipment = None
               })
               player.Inventory.Clear()
               player.ExoSuit = ExoSuitType.Standard
@@ -4889,14 +4820,14 @@ class WorldSessionActor extends Actor
             }
           }
         }
-        if(skipStaminaRegenForTurns > 0) {
+        if(player.skipStaminaRegenForTurns > 0) {
           //do not renew stamina for a while
-          skipStaminaRegenForTurns -= 1
+          player.skipStaminaRegenForTurns -= 1
           player.Stamina > 0
         }
         else if(player.Stamina == 0 && hadStaminaBefore) {
           //if the player lost all stamina this turn (had stamina at the start), do not renew stamina for a while
-          skipStaminaRegenForTurns = 4
+          player.skipStaminaRegenForTurns = 4
           player.Stamina > 0
         }
         else if(isMovingPlus || player.Stamina == player.MaxStamina) {
@@ -4962,7 +4893,7 @@ class WorldSessionActor extends Actor
         case Some(item) => item.Definition == GlobalDefinitions.bolt_driver
         case None => false
       }
-      continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlayerState(avatar_guid, player.Position, player.Velocity, yaw, pitch, yaw_upper, seq_time, is_crouching, is_jumping, jump_thrust, is_cloaking, spectator, wepInHand))
+      continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlayerState(avatar_guid, player.Position, player.Velocity, yaw, pitch, yaw_upper, seq_time, is_crouching, is_jumping, jump_thrust, is_cloaking, player.spectator, wepInHand))
       if (System.currentTimeMillis() - whenUpdatedSquad > 1000 ) {
         whenUpdatedSquad = System.currentTimeMillis()
         updateSquad()
@@ -5130,11 +5061,11 @@ class WorldSessionActor extends Actor
       }
       else if(messagetype == ChatMessageType.CMT_TOGGLESPECTATORMODE && movieMaker) {
         makeReply = false
-        if(!spectator) {
-          spectator = true
+        if(!player.spectator) {
+          player.spectator = true
           sendResponse(ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, msg.wideContents, msg.recipient, "on", msg.note))
         } else {
-          spectator = false
+          player.spectator = false
           sendResponse(ChatMsg(ChatMessageType.CMT_TOGGLESPECTATORMODE, msg.wideContents, msg.recipient, "off", msg.note))
         }
       }
@@ -5732,7 +5663,7 @@ class WorldSessionActor extends Actor
 
     case msg @ DropItemMessage(item_guid) =>
       log.info(s"DropItem: $msg")
-      continent.GUID(item_guid) match {
+      ValidObject(item_guid) match {
         case Some(anItem : Equipment) =>
           player.FreeHand.Equipment match {
             case Some(item) =>
@@ -5751,7 +5682,7 @@ class WorldSessionActor extends Actor
 
     case msg @ PickupItemMessage(item_guid, player_guid, unk1, unk2) =>
       log.info(s"PickupItem: $msg")
-      continent.GUID(item_guid) match {
+      ValidObject(item_guid) match {
         case Some(item : Equipment) =>
           player.Fit(item) match {
             case Some(_) =>
@@ -5851,30 +5782,42 @@ class WorldSessionActor extends Actor
       //log.info("AvatarJump: " + msg)
       // PTS v3
       player.Stamina = player.Stamina - 10
-      skipStaminaRegenForTurns = 5
+      player.skipStaminaRegenForTurns = math.max(player.skipStaminaRegenForTurns, 5)
       sendResponse(PlanetsideAttributeMessage(player.GUID, 2, player.Stamina))
 
-    case msg @ ZipLineMessage(player_guid,origin_side,action,id,pos) =>
+    case msg @ ZipLineMessage(player_guid,forwards,action,path_id,pos) =>
       log.info("ZipLineMessage: " + msg)
-      if (!origin_side && action == 0) {
-        //doing this lets you use the zip line in one direction, cant come back
-        sendResponse(ZipLineMessage(player_guid, origin_side, action, id, pos))
+
+      val (isTeleporter : Boolean, path: Option[ZipLinePath]) = continent.ZipLinePaths.find(x => x.PathId == path_id) match {
+        case Some(x) => (x.IsTeleporter, Some(x))
+        case _ =>
+          log.warn(s"Couldn't find zipline path ${path_id} in zone ${continent.Number} / ${continent.Id}")
+          (false, None)
       }
-      else if (!origin_side && action == 1) {
-        //disembark from zipline at destination !
-        sendResponse(ZipLineMessage(player_guid, origin_side, action, 0, pos))
-      }
-      else if (!origin_side && action == 2) {
-        //get off by force
-        sendResponse(ZipLineMessage(player_guid, origin_side, action, 0, pos))
-      }
-      else if (origin_side && action == 0) {
-        // for teleporters & the other zipline direction
+
+      if(isTeleporter) {
+        val endPoint = path.get.ZipLinePoints.last
+        sendResponse(ZipLineMessage(PlanetSideGUID(0), forwards, 0, path_id, pos)) // todo: send to zone to show teleport animation to all clients
+        sendResponse(PlayerStateShiftMessage(ShiftState(0, endPoint, player.Orientation.z, None)))
+      } else {
+        action match {
+          case 0 =>
+            // Travel along the zipline in the direction specified
+            sendResponse(ZipLineMessage(player_guid, forwards, action, path_id, pos))
+          case 1 =>
+            //disembark from zipline at destination !
+            sendResponse(ZipLineMessage(player_guid, forwards, action, 0, pos))
+          case 2 =>
+            //get off by force
+            sendResponse(ZipLineMessage(player_guid, forwards, action, 0, pos))
+          case _ =>
+            log.warn(s"Tried to do something with a zipline but can't handle it. forwards: ${forwards} action: ${action} path_id: ${path_id} zone: ${continent.Number} / ${continent.Id}")
+        }
       }
 
     case msg @ RequestDestroyMessage(object_guid) =>
       // TODO: Make sure this is the correct response for all cases
-      continent.GUID(object_guid) match {
+      ValidObject(object_guid) match {
         case Some(vehicle : Vehicle) =>
           if((player.VehicleOwned.contains(object_guid) && vehicle.Owner.contains(player.GUID))
             || (player.Faction == vehicle.Faction
@@ -6017,7 +5960,7 @@ class WorldSessionActor extends Actor
 
     case msg @ LootItemMessage(item_guid, target_guid) =>
       log.info(s"LootItem: $msg")
-      (continent.GUID(item_guid), continent.GUID(target_guid)) match {
+      (ValidObject(item_guid), ValidObject(target_guid)) match {
         case (Some(item : Equipment), Some(target : Container)) =>
           //figure out the source
           (
@@ -6081,7 +6024,7 @@ class WorldSessionActor extends Actor
       //log.info("UseItem: " + msg)
       // TODO: Not all fields in the response are identical to source in real packet logs (but seems to be ok)
       // TODO: Not all incoming UseItemMessage's respond with another UseItemMessage (i.e. doors only send out GenericObjectStateMsg)
-      continent.GUID(object_guid) match {
+      ValidObject(object_guid) match {
         case Some(door : Door) =>
           if(player.Faction == door.Faction || (continent.Map.DoorToLock.get(object_guid.guid) match {
             case Some(lock_guid) =>
@@ -6155,7 +6098,7 @@ class WorldSessionActor extends Actor
             accessedContainer = Some(obj)
           }
           else if(!unk3 && player.isAlive) { //potential kit use
-            continent.GUID(item_used_guid) match {
+            ValidObject(item_used_guid) match {
               case Some(kit : Kit) =>
                 player.Find(kit) match {
                   case Some(index) =>
@@ -6270,7 +6213,7 @@ class WorldSessionActor extends Actor
             FindWeapon match {
               case Some(tool: Tool) =>
                 if (tool.Definition == GlobalDefinitions.bank) {
-                  continent.GUID(object_guid) match {
+                  ValidObject(object_guid) match {
                     case Some(tplayer: Player) =>
                       if (player.GUID != tplayer.GUID && Vector3.Distance(player.Position, tplayer.Position) < 5 && player.Faction == tplayer.Faction && !player.isMoving && tplayer.MaxArmor > 0 && tplayer.Armor < tplayer.MaxArmor) {
                         tplayer.Armor += 15
@@ -6444,9 +6387,8 @@ class WorldSessionActor extends Actor
             else if(equipment.isDefined) {
               equipment.get.Definition match {
                 case GlobalDefinitions.nano_dispenser =>
-                  //TODO repairing behavior
                   if (!player.isMoving && Vector3.Distance(player.Position, obj.Position) < 5) {
-                    if (obj.Health < obj.MaxHealth) {
+                    if (obj.Health < obj.MaxHealth && !obj.IsDead) {
                       obj.Health += 48
                       //                sendResponse(QuantityUpdateMessage(PlanetSideGUID(8214),ammo_quantity_left))
                       val RepairPercent: Int = obj.Health * 100 / obj.MaxHealth
@@ -6536,7 +6478,7 @@ class WorldSessionActor extends Actor
                 log.warn(s"Terminal - isHacked ${terminal.HackedBy.isDefined} ownerIsHacked ${ownerIsHacked}")
               }
             }
-            else if (terminal.HackedBy.isDefined) {
+            else if (terminal.HackedBy.isDefined || terminal.Owner.GUID == PlanetSideGUID(0)) {
               sendResponse(UseItemMessage(avatar_guid, item_used_guid, object_guid, unk2, unk3, unk4, unk5, unk6, unk7, unk8, itemType))
             } else {
               log.warn("Tried to use a terminal that doesn't belong to this faction and isn't hacked")
@@ -6598,7 +6540,7 @@ class WorldSessionActor extends Actor
     case msg @ UnuseItemMessage(player_guid, object_guid) =>
       log.info(s"UnuseItem: $msg")
       //TODO check for existing accessedContainer value?
-      continent.GUID(object_guid) match {
+      ValidObject(object_guid) match {
         case Some(obj : Vehicle) =>
           if(obj.AccessingTrunk.contains(player.GUID)) {
             obj.AccessingTrunk = None
@@ -6829,15 +6771,6 @@ class WorldSessionActor extends Actor
         case _ => ;
       }
 
-    case msg @ WeaponJammedMessage(weapon_guid) =>
-      FindWeapon match {
-        case Some(tool : Tool) =>
-          log.info(s"WeaponJammed: ${tool.Definition.Name}@${weapon_guid.guid}")
-          //TODO
-        case _ =>
-          log.info(s"WeaponJammed: ${weapon_guid.guid}")
-      }
-
     case msg @ WeaponFireMessage(seq_time, weapon_guid, projectile_guid, shot_origin, unk1, unk2, unk3, unk4, unk5, unk6, unk7) =>
       log.info(s"WeaponFire: $msg")
       if(player.isShielded) {
@@ -6929,7 +6862,7 @@ class WorldSessionActor extends Actor
       log.info(s"Hit: $msg")
       (hit_info match {
         case Some(hitInfo) =>
-          continent.GUID(hitInfo.hitobject_guid) match {
+          ValidObject(hitInfo.hitobject_guid) match {
             case Some(target : PlanetSideGameObject with FactionAffinity with Vitality) =>
               Some((target, hitInfo.shot_origin, hitInfo.hit_pos))
             case _ =>
@@ -6954,7 +6887,7 @@ class WorldSessionActor extends Actor
           projectile.Position = explosion_pos
           projectile.Velocity = projectile_vel
           //direct_victim_uid
-          continent.GUID(direct_victim_uid) match {
+          ValidObject(direct_victim_uid) match {
             case Some(target : PlanetSideGameObject with FactionAffinity with Vitality) =>
               ResolveProjectileEntry(projectile, ProjectileResolution.Splash, target, target.Position) match {
                 case Some(projectile) =>
@@ -6965,7 +6898,7 @@ class WorldSessionActor extends Actor
           }
           //other victims
           targets.foreach(elem => {
-            continent.GUID(elem.uid) match {
+            ValidObject(elem.uid) match {
               case Some(target : PlanetSideGameObject with FactionAffinity with Vitality) =>
                 ResolveProjectileEntry(projectile, ProjectileResolution.Splash, target, explosion_pos) match {
                   case Some(projectile) =>
@@ -6990,7 +6923,7 @@ class WorldSessionActor extends Actor
 
     case msg @ LashMessage(seq_time, killer_guid, victim_guid, projectile_guid, pos, unk1) =>
       log.info(s"Lash: $msg")
-      continent.GUID(victim_guid) match {
+      ValidObject(victim_guid) match {
         case Some(target : PlanetSideGameObject with FactionAffinity with Vitality) =>
           ResolveProjectileEntry(projectile_guid, ProjectileResolution.Lash, target, pos) match {
             case Some(projectile) =>
@@ -7030,7 +6963,7 @@ class WorldSessionActor extends Actor
 
     case msg @ MountVehicleMsg(player_guid, mountable_guid, entry_point) =>
       log.info("MountVehicleMsg: "+msg)
-      continent.GUID(mountable_guid) match {
+      ValidObject(mountable_guid) match {
         case Some(obj : Mountable) =>
           obj.GetSeatFromMountPoint(entry_point) match {
             case Some(seat_num) =>
@@ -7090,7 +7023,7 @@ class WorldSessionActor extends Actor
         //kicking someone else out of a seat; need to own that seat/mountable
         player.VehicleOwned match {
           case Some(obj_guid) =>
-            (continent.GUID(obj_guid), continent.GUID(player_guid)) match {
+            (ValidObject(obj_guid), ValidObject(player_guid)) match {
               case (Some(obj : Mountable), Some(tplayer : Player)) =>
                 obj.PassengerInSeat(tplayer) match {
                   case Some(seat_num : Int) =>
@@ -7177,7 +7110,7 @@ class WorldSessionActor extends Actor
           sendResponse(PlanetsideAttributeMessage(player.GUID, 4, player.Armor))
           continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
           continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
-          if (player.Health == 0) KillPlayer(player)
+          if (player.Health == 0) player.Die
         case _ =>
           log.info("Dunno who/what is p : " + p)
       }
@@ -7190,7 +7123,7 @@ class WorldSessionActor extends Actor
 
     case msg @ PlanetsideAttributeMessage(object_guid, attribute_type, attribute_value) =>
       log.info("PlanetsideAttributeMessage: "+msg)
-      continent.GUID(object_guid) match {
+      ValidObject(object_guid) match {
         case Some(vehicle : Vehicle) =>
           if(player.VehicleOwned.contains(vehicle.GUID)) {
             if(9 < attribute_type && attribute_type < 14) {
@@ -7251,7 +7184,7 @@ class WorldSessionActor extends Actor
         case Some(vehicleGUID) =>
           continent.GUID(vehicleGUID) match {
             case Some(obj : Vehicle) =>
-              if(obj.Health > 0) { //vehicle will try to charge even if destroyed
+              if(!obj.IsDead) { //vehicle will try to charge even if destroyed
                 obj.Actor ! Vehicle.ChargeShields(15)
               }
             case _ =>
@@ -9226,80 +9159,7 @@ class WorldSessionActor extends Actor
     */
   def Suicide(tplayer : Player) : Unit = {
     tplayer.History(PlayerSuicide(PlayerSource(tplayer)))
-    KillPlayer(tplayer)
-  }
-
-  /**
-    * The player has lost all his vitality and must be killed.<br>
-    * <br>
-    * Shift directly into a state of being dead on the client by setting health to zero points,
-    * whereupon the player will perform a dramatic death animation.
-    * Stamina is also set to zero points.
-    * If the player was in a vehicle at the time of demise, special conditions apply and
-    * the model must be manipulated so it behaves correctly.
-    * Do not move or completely destroy the `Player` object as its coordinates of death will be important.<br>
-    * <br>
-    * A maximum revive waiting timer is started.
-    * When this timer reaches zero, the avatar will attempt to spawn back on its faction-specific sanctuary continent.
-    * @param tplayer the player to be killed
-    */
-  def KillPlayer(tplayer : Player) : Unit = {
-    val player_guid = tplayer.GUID
-    val pos = tplayer.Position
-    val respawnTimer = 300000 //milliseconds
-    ToggleMaxSpecialState(enable = false)
-    tplayer.Die
-    deadState = DeadState.Dead
-    timeDL = 0
-    timeSurge = 0
-    sendResponse(PlanetsideAttributeMessage(player_guid, 0, 0))
-    sendResponse(PlanetsideAttributeMessage(player_guid, 2, 0))
-    continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player_guid, 0, 0))
-    sendResponse(DestroyMessage(player_guid, player_guid, PlanetSideGUID(0), pos)) //how many players get this message?
-    sendResponse(AvatarDeadStateMessage(DeadState.Dead, respawnTimer, respawnTimer, pos, player.Faction, true))
-    if(tplayer.VehicleSeated.nonEmpty) {
-      continent.GUID(tplayer.VehicleSeated.get) match {
-        case Some(obj : Vehicle) =>
-          TotalDriverVehicleControl(obj)
-          UnAccessContents(obj)
-        case _ => ;
-      }
-      //make player invisible (if not, the cadaver sticks out the side in a seated position)
-      sendResponse(PlanetsideAttributeMessage(player_guid, 29, 1))
-      continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player_guid, 29, 1))
-    }
-    PlayerActionsToCancel()
-    //TODO other methods of death?
-    val pentry = PlayerSource(tplayer)
-    (tplayer.History.find({p => p.isInstanceOf[PlayerSuicide]}) match {
-      case Some(PlayerSuicide(_)) =>
-        None
-      case _ =>
-        tplayer.LastShot match {
-          case Some(shot) =>
-            if(System.nanoTime - shot.hit_time < (10 seconds).toNanos) {
-              Some(shot)
-            }
-            else {
-              None //suicide
-            }
-          case None =>
-            None //suicide
-        }
-    }) match {
-      case Some(shot) =>
-        continent.Activity ! Zone.HotSpot.Activity(pentry, shot.projectile.owner, shot.hit_pos)
-        continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.DestroyDisplay(shot.projectile.owner, pentry, shot.projectile.attribute_to))
-      case None =>
-        continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.DestroyDisplay(pentry, pentry, 0))
-    }
-    if(shotsWhileDead > 0) {
-      log.warn(s"KillPlayer/SHOTS_WHILE_DEAD: client of ${avatar.name} fired $shotsWhileDead rounds while character was dead on server")
-      shotsWhileDead = 0
-    }
-
-    import scala.concurrent.ExecutionContext.Implicits.global
-    reviveTimer = context.system.scheduler.scheduleOnce(respawnTimer milliseconds, cluster, Zone.Lattice.RequestSpawnPoint(Zones.SanctuaryZoneNumber(tplayer.Faction), tplayer, 7))
+    tplayer.Actor ! Player.Die()
   }
 
   /**
@@ -9313,12 +9173,10 @@ class WorldSessionActor extends Actor
     * This is not a complete list but, for the purpose of enforcement, some pointers will be documented here.
     */
   def PlayerActionsToCancel() : Unit = {
-    CancelJammeredSound(player)
-    CancelJammeredStatus(player)
     progressBarUpdate.cancel
     progressBarValue = None
     lastTerminalOrderFulfillment = true
-    skipStaminaRegenForTurns = 0
+    player.skipStaminaRegenForTurns = 0
     accessedContainer match {
       case Some(obj : Vehicle) =>
         if(obj.AccessingTrunk.contains(player.GUID)) {
@@ -9734,7 +9592,7 @@ class WorldSessionActor extends Actor
     }
     else {
       continent.GUID(player.VehicleSeated) match {
-        case Some(obj : Vehicle) if obj.Health > 0 =>
+        case Some(obj : Vehicle) if !obj.IsDead =>
           cluster ! Zone.Lattice.RequestSpawnPoint(sanctNumber, tplayer, 12) //warp gates for functioning vehicles
         case None =>
           cluster ! Zone.Lattice.RequestSpawnPoint(sanctNumber, tplayer, 7) //player character spawns
@@ -10106,6 +9964,8 @@ class WorldSessionActor extends Actor
     * using the information reconstructed from a `Resolvedprojectile`
     * and affect the `target` in a synchronized manner.
     * The active `target` and the target of the `ResolvedProjectile` do not have be the same.
+    * While the "tell" for being able to sustain damage is an entity of type `Vitality`,
+    * only specific `Vitality` entity types are being screened for sustaining damage.
     * @see `DamageResistanceModel`<br>
     *       `Vitality`
     * @param target a valid game object that is known to the server
@@ -10114,15 +9974,18 @@ class WorldSessionActor extends Actor
   def HandleDealingDamage(target : PlanetSideGameObject with Vitality, data : ResolvedProjectile) : Unit = {
     val func = data.damage_model.Calculate(data)
     target match {
-      case obj : Player =>
-        //damage is synchronized on the target player's `WSA` (results distributed from there)
-        continent.AvatarEvents ! AvatarServiceMessage(obj.Name, AvatarAction.Damage(player.GUID, obj, func))
+      case obj : Player if obj.Health > 0 =>
+        if(obj.spectator) {
+          player.death_by = -1
+        }
+        else {
+          obj.Actor ! Vitality.Damage(func)
+        }
+      case obj : Vehicle if obj.Health > 0 => obj.Actor ! Vitality.Damage(func)
+      case obj : FacilityTurret if obj.Health > 0 => obj.Actor ! Vitality.Damage(func)
+      case obj : ComplexDeployable if obj.Health > 0 => obj.Actor ! Vitality.Damage(func)
 
-      case obj : Vehicle => obj.Actor ! Vitality.Damage(func)
-      case obj : FacilityTurret => obj.Actor ! Vitality.Damage(func)
-      case obj : ComplexDeployable => obj.Actor ! Vitality.Damage(func)
-
-      case obj : SimpleDeployable =>
+      case obj : SimpleDeployable if obj.Health > 0 =>
         //damage is synchronized on `LSA` (results returned to and distributed from this `WSA`)
         continent.LocalEvents ! Vitality.DamageOn(obj, func)
       case _ => ;
@@ -12330,7 +12193,7 @@ class WorldSessionActor extends Actor
     */
   def FindDetectedProjectileTargets(targets : Iterable[PlanetSideGUID]) : Iterable[String] = {
     targets
-      .map { continent.GUID }
+      .map { ValidObject }
       .flatMap {
         case Some(obj : Vehicle) if !obj.Cloaked =>
           //TODO hint: vehicleService ! VehicleServiceMessage(s"${obj.Actor}", VehicleAction.ProjectileAutoLockAwareness(mode))
@@ -12399,7 +12262,7 @@ class WorldSessionActor extends Actor
     * This method is intended to support only the current Live server implants.
     */
   def DeactivateImplantDarkLight() : Unit = {
-    if(avatar.Implants(0).Active) {
+    if(avatar.Implants(0).Active && avatar.Implants(0).Implant == ImplantType.DarklightVision) {
       avatar.Implants(0).Active = false
       continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 28, avatar.Implant(0).id * 2))
       sendResponse(AvatarImplantMessage(PlanetSideGUID(player.GUID.guid), ImplantAction.Activation, 0, 0))
@@ -12412,59 +12275,12 @@ class WorldSessionActor extends Actor
     * This method is intended to support only the current Live server implants.
     */
   def DeactivateImplantSurge() : Unit = {
-    if(avatar.Implants(1).Active) {
+    if(avatar.Implants(1).Active && avatar.Implants(0).Implant == ImplantType.Surge) {
       avatar.Implants(1).Active = false
       continent.AvatarEvents  ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(player.GUID, 28, avatar.Implant(1).id * 2))
       sendResponse(AvatarImplantMessage(PlanetSideGUID(player.GUID.guid), ImplantAction.Activation, 1, 0))
       timeSurge = 0
     }
-  }
-
-  /**
-    * Start the jammered buzzing.
-    * Although, as a rule, the jammering sound effect should last as long as the jammering status,
-    * Infantry seem to hear the sound for a bit longer than the effect.
-    * @see `JammableHevaior.StartJammeredSound`
-    * @param target an object that can be affected by the jammered status
-    * @param dur the duration of the timer, in milliseconds;
-    *            by default, 30000
-    */
-  override def StartJammeredSound(target : Any, dur : Int) : Unit = target match {
-    case obj : Player if !jammedSound =>
-      sendResponse(PlanetsideAttributeMessage(obj.GUID, 27, 1))
-      continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(obj.GUID, 27, 1))
-      super.StartJammeredSound(obj, 3000)
-    case _ => ;
-  }
-
-  /**
-    * Perform a variety of tasks to indicate being jammered.
-    * Deactivate implants (should also uninitialize them),
-    * delay stamina regeneration for a certain number of turns,
-    * and set the jammered status on specific holstered equipment.
-    * @see `JammableHevaior.StartJammeredStatus`
-    * @param target an object that can be affected by the jammered status
-    * @param dur the duration of the timer, in milliseconds
-    */
-  override def StartJammeredStatus(target : Any, dur : Int) : Unit = target match {
-    case obj : Player =>
-      DeactivateImplants()
-      skipStaminaRegenForTurns = 10
-      super.StartJammeredStatus(target, dur)
-    case _ => ;
-  }
-
-  /**
-    * Stop the jammered buzzing.
-    * @see `JammableHevaior.CancelJammeredSound`
-    * @param target an object that can be affected by the jammered status
-    */
-  override def CancelJammeredSound(target : Any) : Unit = target match {
-    case obj : Player if jammedSound =>
-      sendResponse(PlanetsideAttributeMessage(obj.GUID, 27, 0))
-      continent.AvatarEvents ! AvatarServiceMessage(continent.Id, AvatarAction.PlanetsideAttribute(obj.GUID, 27, 0))
-      super.CancelJammeredSound(obj)
-    case _ => ;
   }
 
   def failWithError(error : String) = {

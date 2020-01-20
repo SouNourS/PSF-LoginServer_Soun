@@ -17,6 +17,7 @@ import net.psforever.objects.serverobject.painbox.{Painbox, PainboxDefinition}
 import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
 import net.psforever.objects.serverobject.structures.{Amenity, Building, WarpGate}
 import net.psforever.objects.serverobject.turret.FacilityTurret
+import net.psforever.objects.serverobject.zipline.ZipLinePath
 import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID, Vector3}
 import services.avatar.AvatarService
 import services.local.LocalService
@@ -83,6 +84,8 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
 
   private var lattice : Graph[Building, UnDiEdge] = Graph()
 
+  private var zipLinePaths : List[ZipLinePath] = List()
+
   /** key - spawn zone id, value - buildings belonging to spawn zone */
   private var spawnGroups : Map[Building, List[SpawnPoint]] = PairMap[Building, List[SpawnPoint]]()
   /** */
@@ -139,6 +142,8 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
       MakeLattice()
       AssignAmenities()
       CreateSpawnGroups()
+
+      zipLinePaths = Map.ZipLinePaths
     }
   }
 
@@ -352,8 +357,19 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
     lattice
   }
 
+  def ZipLinePaths : List[ZipLinePath] = {
+    zipLinePaths
+  }
+
   private def BuildLocalObjects(implicit context : ActorContext, guid : NumberPoolHub) : Unit = {
-    Map.LocalObjects.foreach({ builderObject => builderObject.Build })
+    Map.LocalObjects.foreach({ builderObject =>
+      builderObject.Build
+
+      val obj = guid(builderObject.Id)
+      obj collect {
+        case el : ZoneAware => el.Zone = this
+      }
+    })
   }
 
   private def BuildSupportObjects() : Unit = {
@@ -390,7 +406,12 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
 
   private def MakeBuildings(implicit context : ActorContext) : PairMap[Int, Building] = {
     val buildingList = Map.LocalBuildings
-    buildings = buildingList.map({case((name, building_guid, map_id), constructor) => building_guid -> constructor.Build(name, building_guid, map_id, this) })
+    buildings = buildingList.map({
+      case((name, building_guid, map_id), constructor) =>
+        val building = constructor.Build(name, building_guid, map_id, this)
+        guid.register(building, building_guid)
+        building_guid -> building
+    })
     buildings
   }
 
