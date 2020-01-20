@@ -1928,12 +1928,12 @@ class WorldSessionActor extends Actor
 //      cluster ! InterstellarCluster.GetWorld("z7")
 //      cluster ! InterstellarCluster.GetWorld("z8")
 //      cluster ! InterstellarCluster.GetWorld("z9")
-      cluster ! InterstellarCluster.GetWorld("z10")
+//      cluster ! InterstellarCluster.GetWorld("z10")
 //      cluster ! InterstellarCluster.GetWorld("i1")
 //      cluster ! InterstellarCluster.GetWorld("i2")
 //      cluster ! InterstellarCluster.GetWorld("i3")
 //      cluster ! InterstellarCluster.GetWorld("i4")
-//      cluster ! InterstellarCluster.GetWorld("c1")
+      cluster ! InterstellarCluster.GetWorld("c1")
 //      cluster ! InterstellarCluster.GetWorld("c2")
 //      cluster ! InterstellarCluster.GetWorld("c3")
 //      cluster ! InterstellarCluster.GetWorld("c4")
@@ -9256,7 +9256,7 @@ class WorldSessionActor extends Actor
 
       {
         //        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
-        val buildingTypeSet = Set(StructureType.Facility, StructureType.Building)
+        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
         continent.SpawnGroups()
           .filter({ case ((building, _)) =>
             building.Faction == player.Faction &&

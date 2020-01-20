@@ -804,6 +804,13 @@ object Zones {
       super.Init(context)
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+
+      BuildingByMapId(10425).get.Faction = PlanetSideEmpire.VS
+      BuildingByMapId(10175).get.Faction = PlanetSideEmpire.NC
+      BuildingByMapId(10883).get.Faction = PlanetSideEmpire.TR
+      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.VS
+      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NC
+      BuildingByMapId(10314).get.Faction = PlanetSideEmpire.TR
     }
   }
 
