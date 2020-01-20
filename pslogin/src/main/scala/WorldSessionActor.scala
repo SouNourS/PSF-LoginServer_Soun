@@ -5035,8 +5035,8 @@ class WorldSessionActor extends Actor
       val trimContents = contents.trim
       val trimRecipient = recipient.trim
       //TODO messy on/off strings may work
-      if(messagetype == ChatMessageType.CMT_FLY && (admin || movieMaker || player.Continent == "c1" || player.Continent == "c2" ||
-        player.Continent == "c3" || player.Continent == "c4" || player.Continent == "c5" || player.Continent == "c6")) {
+      //  || player.Continent == "c1" || player.Continent == "c2" || player.Continent == "c3" || player.Continent == "c4" || player.Continent == "c5" || player.Continent == "c6"
+      if(messagetype == ChatMessageType.CMT_FLY && (admin || movieMaker)) {
         makeReply = false
         if(!flying) {
           flying = true
@@ -5100,8 +5100,8 @@ class WorldSessionActor extends Actor
 
       CSRWarp.read(traveler, msg) match {
         case (true, pos) =>
-          if (player.isAlive && (admin || movieMaker || continent.Id == "z8" || continent.Id == "c1" || continent.Id == "c2" || continent.Id == "c3" || continent.Id == "c4" || continent.Id == "c5" ||
-            continent.Id == "c6" ||
+          // continent.Id == "c1" || continent.Id == "c2" || continent.Id == "c3" || continent.Id == "c4" || continent.Id == "c5" || continent.Id == "c6" ||
+          if (player.isAlive && (admin || movieMaker || continent.Id == "z8" ||
             continent.Id == "tzshtr" || continent.Id == "tzcotr" || continent.Id == "tzdrtr" ||
             continent.Id == "tzshnc" || continent.Id == "tzconc" || continent.Id == "tzdrnc" ||
             continent.Id == "tzshvs" || continent.Id == "tzcovs" || continent.Id == "tzdrvs")) {
