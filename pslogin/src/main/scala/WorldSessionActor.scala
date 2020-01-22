@@ -5443,42 +5443,47 @@ class WorldSessionActor extends Actor
         var hackFaction = PlanetSideEmpire.NEUTRAL
         val args = trimContents.split(" ")
         if (args.length == 3) {
-          var badFaction : Boolean = false
-          var badBuilding : Boolean = false
-          continent.Buildings.foreach({
-            case (id, building) =>
-              if(args(2).equalsIgnoreCase("tr")) hackFaction = PlanetSideEmpire.TR
-              else if(args(2).equalsIgnoreCase("nc")) hackFaction = PlanetSideEmpire.NC
-              else if(args(2).equalsIgnoreCase("vs")) hackFaction = PlanetSideEmpire.VS
-              else if(args(2).equalsIgnoreCase("bo")) hackFaction = PlanetSideEmpire.NEUTRAL
-              else badFaction = true
-              if(!building.Name.isEmpty && args(1).equalsIgnoreCase(building.Name) && !badFaction) {
-                log.info(s"Hack Base Name : ${args(1)} to empire : ${args(2)}")
-                building.Faction = hackFaction
-                building.Actor ! Building.TriggerZoneMapUpdate(continent.Number)
-                continent.LocalEvents ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(building.GUID, hackFaction))
-              } else if(!building.Name.isEmpty && !args(1).equalsIgnoreCase(building.Name)) {
-                badBuilding = true
-              }
-          })
-          if(badBuilding || badFaction) sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
+          var bad : Boolean = false
+          if(args(2).equalsIgnoreCase("tr")) hackFaction = PlanetSideEmpire.TR
+          else if(args(2).equalsIgnoreCase("nc")) hackFaction = PlanetSideEmpire.NC
+          else if(args(2).equalsIgnoreCase("vs")) hackFaction = PlanetSideEmpire.VS
+          else if(args(2).equalsIgnoreCase("bo")) hackFaction = PlanetSideEmpire.NEUTRAL
+          else bad = true
+          if(bad) {
+            sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
+          }
+          else {
+            continent.Buildings.foreach({
+              case (id, building) =>
+                if(!building.Name.isEmpty && args(1).equalsIgnoreCase(building.Name)) {
+                  log.info(s"Hack Base Name : ${args(1)} to empire : ${args(2)}")
+                  building.Faction = hackFaction
+                  building.Actor ! Building.TriggerZoneMapUpdate(continent.Number)
+                  continent.LocalEvents ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(building.GUID, hackFaction))
+                }
+            })
+          }
         } else if (args.length == 2) {
           var bad : Boolean = false
-          continent.Buildings.foreach({
-            case (id, building) =>
-              if(args(1).equalsIgnoreCase("tr")) hackFaction = PlanetSideEmpire.TR
-              else if(args(1).equalsIgnoreCase("nc")) hackFaction = PlanetSideEmpire.NC
-              else if(args(1).equalsIgnoreCase("vs")) hackFaction = PlanetSideEmpire.VS
-              else if(args(1).equalsIgnoreCase("bo")) hackFaction = PlanetSideEmpire.NEUTRAL
-              else bad = true
-              if(!building.Name.isEmpty && !bad) {
-                log.info(s"Hack Bases to empire : ${args(1)}")
-                building.Faction = hackFaction
-                building.Actor ! Building.TriggerZoneMapUpdate(continent.Number)
-                continent.LocalEvents ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(building.GUID, hackFaction))
-              }
-          })
-          if(bad) sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
+          if(args(1).equalsIgnoreCase("tr")) hackFaction = PlanetSideEmpire.TR
+          else if(args(1).equalsIgnoreCase("nc")) hackFaction = PlanetSideEmpire.NC
+          else if(args(1).equalsIgnoreCase("vs")) hackFaction = PlanetSideEmpire.VS
+          else if(args(1).equalsIgnoreCase("bo")) hackFaction = PlanetSideEmpire.NEUTRAL
+          else bad = true
+          if(bad) {
+            sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
+          }
+          else {
+            continent.Buildings.foreach({
+              case (id, building) =>
+                if (!building.Name.isEmpty && !bad && building.BuildingType.id != 6) {
+                  log.info(s"Hack Bases to empire : ${args(1)}")
+                  building.Faction = hackFaction
+                  building.Actor ! Building.TriggerZoneMapUpdate(continent.Number)
+                  continent.LocalEvents ! LocalServiceMessage(continent.Id, LocalAction.SetEmpire(building.GUID, hackFaction))
+                }
+            })
+          }
         } else sendResponse(ChatMsg(ChatMessageType.UNK_229, true, "", "USE !hack tr|vs|nc|bo OR !hack BaseName tr|vs|nc|bo", None))
       }
       // TODO: Depending on messagetype, may need to prepend sender's name to contents with proper spacing
