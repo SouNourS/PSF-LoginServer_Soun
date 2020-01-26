@@ -78,7 +78,7 @@ class Building(private val name: String,
 
 
   def CaptureConsoleIsHacked : Boolean = {
-    Amenities.find(x => x.Definition == GlobalDefinitions.capture_terminal).asInstanceOf[Option[CaptureTerminal]] match {
+    Amenities.find(x => x.isInstanceOf[CaptureTerminal]).asInstanceOf[Option[CaptureTerminal]] match {
       case Some(obj: CaptureTerminal) =>
         obj.HackedBy.isDefined
       case None => false
@@ -179,7 +179,7 @@ class Building(private val name: String,
 //    val latticeBenefit : Int = if(BuildingType.id == 3){18} else {0}
     val cavernBenefit : Int = if(BuildingType.id == 3){48} else {0}
     //if we have a capture terminal, get the hack status & time (in milliseconds) from control console if it exists
-    val (hacking, hackingFaction, hackTime) : (Boolean, PlanetSideEmpire.Value, Long) = Amenities.find(x => x.Definition == GlobalDefinitions.capture_terminal || x.Definition == GlobalDefinitions.vanu_control_console) match {
+    val (hacking, hackingFaction, hackTime) : (Boolean, PlanetSideEmpire.Value, Long) = Amenities.find(x => x.isInstanceOf[CaptureTerminal]) match {
       case Some(obj: CaptureTerminal with Hackable) =>
         obj.HackedBy match {
           case Some(Hackable.HackInfo(_, _, hfaction, _, start, length)) =>
