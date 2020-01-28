@@ -1921,7 +1921,7 @@ class WorldSessionActor extends Actor
       squadService ! Service.Join(s"${avatar.CharId}") //channel will be player.CharId (in order to work with packets)
 //      cluster ! InterstellarCluster.GetWorld("z1")
 //      cluster ! InterstellarCluster.GetWorld("z2")
-//      cluster ! InterstellarCluster.GetWorld("z3")
+      cluster ! InterstellarCluster.GetWorld("z3")
 //      cluster ! InterstellarCluster.GetWorld("z4")
 //      cluster ! InterstellarCluster.GetWorld("z5")
 //      cluster ! InterstellarCluster.GetWorld("z6")
@@ -1933,7 +1933,7 @@ class WorldSessionActor extends Actor
 //      cluster ! InterstellarCluster.GetWorld("i2")
 //      cluster ! InterstellarCluster.GetWorld("i3")
 //      cluster ! InterstellarCluster.GetWorld("i4")
-      cluster ! InterstellarCluster.GetWorld("c1")
+//      cluster ! InterstellarCluster.GetWorld("c1")
 //      cluster ! InterstellarCluster.GetWorld("c2")
 //      cluster ! InterstellarCluster.GetWorld("c3")
 //      cluster ! InterstellarCluster.GetWorld("c4")
@@ -4774,7 +4774,7 @@ class WorldSessionActor extends Actor
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The default zone is set to Supai if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
+        "  \\#6The default zone is set to Cyssor if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
