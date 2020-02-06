@@ -33,6 +33,10 @@ object Maps {
   val map97f = Future { Map97.ZoneMap }
   val map98f = Future { Map98.ZoneMap }
   val map99f = Future { Map99.ZoneMap }
+  val black_ops_hqf = Future { Black_ops_hq.ZoneMap }
+  val station1f = Future { Station1.ZoneMap }
+  val station2f = Future { Station2.ZoneMap }
+  val station3f = Future { Station3.ZoneMap }
 
   val map1 = Await.result(map1f, 30 seconds)
   val map2 = Await.result(map2f, 30 seconds)
@@ -98,6 +102,16 @@ object Maps {
   Projectiles(map97)
   Projectiles(map98)
   Projectiles(map99)
+
+  val black_ops_hq = Await.result(black_ops_hqf, 30 seconds)
+  Projectiles(black_ops_hq)
+
+  val station1 = Await.result(station1f, 30 seconds)
+  val station2 = Await.result(station2f, 30 seconds)
+  val station3 = Await.result(station3f, 30 seconds)
+  Projectiles(station1)
+  Projectiles(station2)
+  Projectiles(station3)
 
   def Projectiles(zmap: ZoneMap): Unit = {
     (Projectile.BaseUID until Projectile.RangeUID) foreach {

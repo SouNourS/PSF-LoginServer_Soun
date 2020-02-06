@@ -1002,6 +1002,39 @@ object Zones {
     }
   }
 
+  val homebo = new Zone("homebo", Maps.black_ops_hq, 33) {
+    override def Init(implicit context: ActorContext): Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
+
+  val station1 = new Zone("station1", Maps.station1, 34) {
+    override def Init(implicit context: ActorContext): Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
+
+  val station2 = new Zone("station2", Maps.station2, 35) {
+    override def Init(implicit context: ActorContext): Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
+
+  val station3 = new Zone("station3", Maps.station3, 36) {
+    override def Init(implicit context: ActorContext): Unit = {
+      super.Init(context)
+      HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
+      HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+    }
+  }
+
+
   /**
     * Get the zone identifier name for the sanctuary continent of a given empire.
     *

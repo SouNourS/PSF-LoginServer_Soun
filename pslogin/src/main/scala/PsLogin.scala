@@ -310,7 +310,8 @@ object PsLogin {
       home2, tzshnc, tzdrnc, tzconc,
       home3, tzshvs, tzdrvs, tzcovs,
       c1, c2, c3, c4, c5, c6,
-      i1, i2, i3, i4
+      i1, i2, i3, i4, homebo,
+      station1, station2, station3
     )
   }
 

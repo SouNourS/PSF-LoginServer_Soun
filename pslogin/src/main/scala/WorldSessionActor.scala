@@ -1919,6 +1919,19 @@ class WorldSessionActor extends Actor
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
       squadService ! Service.Join(s"${avatar.faction}") //channel will be player.Faction
       squadService ! Service.Join(s"${avatar.CharId}") //channel will be player.CharId (in order to work with packets)
+      if(player.Faction == PlanetSideEmpire.NC) {
+        cluster ! InterstellarCluster.GetWorld("home1")
+      }
+      else if(player.Faction == PlanetSideEmpire.TR) {
+        cluster ! InterstellarCluster.GetWorld("home2")
+      }
+      else if(player.Faction == PlanetSideEmpire.VS) {
+        cluster ! InterstellarCluster.GetWorld("home3")
+      }
+//      cluster ! InterstellarCluster.GetWorld("homebo")
+//      cluster ! InterstellarCluster.GetWorld("station1")
+//      cluster ! InterstellarCluster.GetWorld("station2")
+//      cluster ! InterstellarCluster.GetWorld("station3")
 //      cluster ! InterstellarCluster.GetWorld("z1")
 //      cluster ! InterstellarCluster.GetWorld("z2")
 //      cluster ! InterstellarCluster.GetWorld("z3")
@@ -1937,7 +1950,7 @@ class WorldSessionActor extends Actor
 //      cluster ! InterstellarCluster.GetWorld("c2")
 //      cluster ! InterstellarCluster.GetWorld("c3")
 //      cluster ! InterstellarCluster.GetWorld("c4")
-      cluster ! InterstellarCluster.GetWorld("c5")
+//      cluster ! InterstellarCluster.GetWorld("c5")
 //      cluster ! InterstellarCluster.GetWorld("c6")
 
 
@@ -4773,8 +4786,10 @@ class WorldSessionActor extends Actor
       // Welcome messages by Nick
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#6Welcome to PSForever! Join us on Discord at http://chat.psforever.net", None))
+//      sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
+//        "  \\#6The default zone is set to Annwn if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
-        "  \\#6The default zone is set to Annwn if you control a Facility there. Sanc is the backup default. You can also travel to any continent using WarpGates.", None))
+        "  \\#6The default zone is set to Sanctuaries. You can travel to any continent using WarpGates.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
         "  \\#3Local chat (/l)\\#6 can be seen by members of your faction within 25 meters.", None))
       sendResponse(ChatMsg(ChatMessageType.CMT_GMBROADCAST, true, "",
@@ -9284,7 +9299,8 @@ class WorldSessionActor extends Actor
 
       {
         //        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
-        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+        var buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+        if (continent.Id == "home1" | continent.Id == "home2" | continent.Id == "home3") buildingTypeSet = Set(StructureType.Facility, StructureType.Building)
         continent.SpawnGroups()
           .filter({ case ((building, _)) =>
             building.Faction == player.Faction &&
