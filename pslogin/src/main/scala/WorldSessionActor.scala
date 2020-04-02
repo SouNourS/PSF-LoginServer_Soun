@@ -2129,6 +2129,9 @@ class WorldSessionActor extends Actor
       AwardBattleExperiencePoints(avatar, 20000000L)
       avatar.CEP = 600000
 
+      avatar.Implants(0).Implant = sample
+      avatar.Implants(1).Implant = sample2
+
       player = new Player(avatar)
       //xy-coordinates indicate sanctuary spawn bias:
       player.Position = math.abs(scala.util.Random.nextInt() % avatar.name.hashCode % 4) match {
