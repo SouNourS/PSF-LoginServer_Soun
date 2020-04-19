@@ -6,7 +6,7 @@ import base.ActorTest
 import net.psforever.objects._
 import net.psforever.objects.serverobject.terminals.Terminal
 import net.psforever.objects.vehicles._
-import net.psforever.packet.game.PlanetSideGUID
+import net.psforever.types.PlanetSideGUID
 import org.specs2.mutable._
 
 import scala.concurrent.duration.Duration
@@ -143,7 +143,7 @@ class UtilityTerminalATest extends ActorTest {
       assert(obj().Actor == ActorRef.noSender)
 
       system.actorOf(Props(classOf[UtilityTest.SetupControl], obj), "test") ! ""
-      receiveOne(Duration.create(100, "ms")) //consume and discard
+      receiveOne(Duration.create(500, "ms")) //consume and discard
       assert(obj().Actor != ActorRef.noSender)
     }
   }
@@ -157,7 +157,7 @@ class UtilityTerminalBTest extends ActorTest {
       assert(obj().Actor == ActorRef.noSender)
 
       system.actorOf(Props(classOf[UtilityTest.SetupControl], obj), "test") ! ""
-      receiveOne(Duration.create(100, "ms")) //consume and discard
+      receiveOne(Duration.create(500, "ms")) //consume and discard
       assert(obj().Actor != ActorRef.noSender)
     }
   }
@@ -171,7 +171,7 @@ class UtilityTerminalCTest extends ActorTest {
       assert(obj().Actor == ActorRef.noSender)
 
       system.actorOf(Props(classOf[UtilityTest.SetupControl], obj), "test") ! ""
-      receiveOne(Duration.create(100, "ms")) //consume and discard
+      receiveOne(Duration.create(500, "ms")) //consume and discard
       assert(obj().Actor != ActorRef.noSender)
     }
   }
@@ -185,7 +185,7 @@ class UtilityRespawnTubeTest extends ActorTest {
       assert(obj().Actor == ActorRef.noSender)
 
       system.actorOf(Props(classOf[UtilityTest.SetupControl], obj), "test") ! ""
-      receiveOne(Duration.create(100, "ms")) //consume and discard
+      receiveOne(Duration.create(500, "ms")) //consume and discard
       assert(obj().Actor != ActorRef.noSender)
     }
   }
@@ -199,7 +199,7 @@ class UtilityTelepadTerminalTest extends ActorTest {
       assert(obj().Actor == ActorRef.noSender)
 
       system.actorOf(Props(classOf[UtilityTest.SetupControl], obj), "test") ! ""
-      receiveOne(Duration.create(100, "ms")) //consume and discard
+      receiveOne(Duration.create(500, "ms")) //consume and discard
       assert(obj().Actor != ActorRef.noSender)
     }
   }
@@ -216,8 +216,8 @@ class UtilityInternalTelepadTest extends ActorTest {
       assert(obj().asInstanceOf[Utility.InternalTelepad].Router.contains(veh.GUID))
 
       system.actorOf(Props(classOf[UtilityTest.SetupControl], obj), "test") ! ""
-      receiveOne(Duration.create(100, "ms")) //consume and discard
-      assert(obj().Actor == ActorRef.noSender)
+      receiveOne(Duration.create(500, "ms")) //consume and discard
+      assert(obj().Actor != ActorRef.noSender)
       assert(obj().asInstanceOf[Utility.InternalTelepad].Router.contains(veh.GUID))
     }
   }

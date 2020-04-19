@@ -2,7 +2,7 @@
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
-import net.psforever.types.Vector3
+import net.psforever.types.{PlanetSideGUID, Vector3}
 import scodec.Codec
 import scodec.codecs._
 
@@ -30,6 +30,19 @@ import scodec.codecs._
   * @param unk8         na;
   *                     0 when door 1 when use rek (252 then equipment term)
   * @param object_id    the object id `object_guid`'s object
+  */
+
+  /*
+    BETA CLIENT DEBUG INFO:
+      User GUID
+      UsedItem GUID
+      Target GUID
+      Old SlotIndex
+      Weapon Fire Use
+      RayTrace Start Position (3 fields - Vector3)
+      RayTrace Intersection Position (3 fields - Vector3)
+      Orientation (3 fields - Vector3)
+      Client Target ClassID
   */
 final case class UseItemMessage(avatar_guid : PlanetSideGUID,
                                 item_used_guid : PlanetSideGUID,

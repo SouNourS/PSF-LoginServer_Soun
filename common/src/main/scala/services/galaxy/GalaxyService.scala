@@ -1,9 +1,9 @@
 // Copyright (c) 2017 PSForever
 package services.galaxy
 
-import akka.actor.{Actor, Props}
+import akka.actor.Actor
+import net.psforever.objects.zones.Zone
 import net.psforever.packet.game.BuildingInfoUpdateMessage
-import services.local.support.{DoorCloseActor, HackClearActor}
 import services.{GenericEventBus, Service}
 
 class GalaxyService extends Actor {
@@ -15,34 +15,56 @@ class GalaxyService extends Actor {
 
   val GalaxyEvents = new GenericEventBus[GalaxyServiceResponse]
 
-  def receive = {
-    // Service.Join requires a channel to be passed in normally but GalaxyService is an exception in that messages go to ALL connected players
-    case Service.Join(_) =>
+  def receive : Receive = {
+    case Service.Join(faction) if "TRNCVS".containsSlice(faction) =>
+      val path = s"/$faction/Galaxy"
+      val who = sender()
+      log.trace(s"$who has joined $path")
+      GalaxyEvents.subscribe(who, path)
+
+    case Service.Join("galaxy") =>
       val path = s"/Galaxy"
       val who = sender()
-      log.info(s"$who has joined $path")
+      log.trace(s"$who has joined $path")
+      GalaxyEvents.subscribe(who, path)
+
+    case Service.Join(channel) =>
+      val path = s"/$channel/Galaxy"
+      val who = sender()
+      log.trace(s"$who has joined $path")
       GalaxyEvents.subscribe(who, path)
 
     case Service.Leave(None) =>
       GalaxyEvents.unsubscribe(sender())
 
-    case Service.Leave(_) =>
-      val path = s"/Galaxy"
+    case Service.Leave(Some(channel)) =>
+      val path = s"/$channel/Galaxy"
       val who = sender()
-      log.info(s"$who has left $path")
-      GalaxyEvents.unsubscribe(who, path)
+      log.trace(s"$who has left $path")
+      GalaxyEvents.unsubscribe(sender(), path)
 
     case Service.LeaveAll() =>
       GalaxyEvents.unsubscribe(sender())
 
-    case GalaxyServiceMessage(action) =>
+    case GalaxyServiceMessage(forChannel, action) =>
       action match {
         case GalaxyAction.MapUpdate(msg: BuildingInfoUpdateMessage) =>
           GalaxyEvents.publish(
             GalaxyServiceResponse(s"/Galaxy", GalaxyResponse.MapUpdate(msg))
           )
+
+        case GalaxyAction.TransferPassenger(player_guid, temp_channel, vehicle, vehicle_to_delete, manifest) =>
+          GalaxyEvents.publish(
+            GalaxyServiceResponse(s"/$forChannel/Galaxy", GalaxyResponse.TransferPassenger(temp_channel, vehicle, vehicle_to_delete, manifest))
+          )
         case _ => ;
       }
+
+    case Zone.HotSpot.Update(faction, zone_num, priority, info) =>
+      GalaxyEvents.publish(
+        GalaxyServiceResponse(s"/$faction/Galaxy", GalaxyResponse.HotSpotUpdate(zone_num, priority, info))
+      )
+
     case msg =>
       log.info(s"Unhandled message $msg from $sender")
   }

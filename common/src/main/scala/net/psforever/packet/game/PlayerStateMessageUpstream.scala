@@ -2,7 +2,7 @@
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
-import net.psforever.types.{Angular, Vector3}
+import net.psforever.types.{Angular, PlanetSideGUID, Vector3}
 import scodec.Codec
 import scodec.codecs._
 
@@ -16,11 +16,15 @@ import scodec.codecs._
   * @param pos where the player is in the world
   * @param vel how the player is moving
   * @param facingYaw a "yaw" angle
-  * @param facingPitch a "pitch" angle
+  * @param facingPitch a "pitch" angle;
+  *                    0 for forward-facing;
+  *                    75.9375 for the up-facing limit;
+  *                    -73.125 for the down-facing limit
   * @param facingYawUpper a "yaw" angle that represents the angle of the avatar's upper body with respect to its forward-facing direction;
-  *                       this number is normally 0 for forward facing;
-  *                       the range is limited between approximately 61 degrees of center turned to left or right
-  * @param seq_time na
+  *                       0 for forward-facing;
+  *                       +/-61.875 for the clockwise/counterclockwise turn limits, respectively
+  * @param seq_time the "time frame" according to the server;
+  *                 starts at 0; max value is 1023 before resetting
   * @param unk1 na
   * @param is_crouching avatar is crouching
   * @param is_jumping avatar is jumping;
@@ -45,6 +49,8 @@ final case class PlayerStateMessageUpstream(avatar_guid : PlanetSideGUID,
                                             unk2 : Int,
                                             unk3 : Int)
   extends PlanetSideGamePacket {
+  assert(seq_time > -1 && seq_time < 1024)
+
   type Packet = PlayerStateMessageUpstream
   def opcode = GamePacketOpcode.PlayerStateMessageUpstream
   def encode = PlayerStateMessageUpstream.encode(this)
@@ -56,8 +62,8 @@ object PlayerStateMessageUpstream extends Marshallable[PlayerStateMessageUpstrea
       ("pos" | Vector3.codec_pos) ::
       ("vel" | optional(bool, Vector3.codec_vel)) ::
       ("facingYaw" | Angular.codec_yaw()) ::
-      ("facingPitch" | Angular.codec_pitch) ::
-      ("facingYawUpper" | Angular.codec_yaw(0f)) ::
+      ("facingPitch" | Angular.codec_zero_centered) ::
+      ("facingYawUpper" | Angular.codec_zero_centered) ::
       ("seq_time" | uintL(10)) ::
       ("unk1" | uintL(3)) ::
       ("is_crouching" | bool) ::

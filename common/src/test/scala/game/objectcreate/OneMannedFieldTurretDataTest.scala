@@ -2,9 +2,9 @@
 package game.objectcreate
 
 import net.psforever.packet.PacketCoding
-import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID}
+import net.psforever.packet.game.ObjectCreateMessage
 import net.psforever.packet.game.objectcreate._
-import net.psforever.types.{PlanetSideEmpire, Vector3}
+import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID, Vector3}
 import org.specs2.mutable._
 import scodec.bits._
 
@@ -28,7 +28,7 @@ class OneMannedFieldTurretDataTest extends Specification {
               deploy.alternate mustEqual false
               deploy.v1 mustEqual true
               deploy.v2.isEmpty mustEqual true
-              deploy.v3 mustEqual false
+              deploy.jammered mustEqual false
               deploy.v4.contains(false) mustEqual true
               deploy.v5.isEmpty mustEqual true
               deploy.guid mustEqual PlanetSideGUID(2502)

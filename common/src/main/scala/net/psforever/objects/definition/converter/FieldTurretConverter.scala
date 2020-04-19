@@ -4,8 +4,8 @@ package net.psforever.objects.definition.converter
 import net.psforever.objects.equipment.Equipment
 import net.psforever.objects.serverobject.turret.WeaponTurret
 import net.psforever.objects.TurretDeployable
-import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.packet.game.objectcreate._
+import net.psforever.types.PlanetSideGUID
 
 import scala.util.{Failure, Success, Try}
 
@@ -23,7 +23,7 @@ class FieldTurretConverter extends ObjectCreateConverter[TurretDeployable]() {
               alternate = false,
               true,
               None,
-              false,
+              jammered = obj.Jammed,
               Some(false),
               None,
               obj.Owner match {

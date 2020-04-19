@@ -9,8 +9,7 @@ import net.psforever.objects.serverobject.mount.Mountable
 import net.psforever.objects.serverobject.structures.{Building, StructureType}
 import net.psforever.objects.serverobject.turret._
 import net.psforever.objects.zones.Zone
-import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.{CharacterGender, CharacterVoice, PlanetSideEmpire}
+import net.psforever.types.{CharacterGender, CharacterVoice, PlanetSideEmpire, PlanetSideGUID}
 import org.specs2.mutable.Specification
 
 import scala.collection.mutable
@@ -19,7 +18,7 @@ import scala.concurrent.duration._
 class FacilityTurretTest extends Specification {
   "FacilityTurretTest" should {
     "define" in {
-      val obj = new TurretDefinition(480)
+      val obj = new FacilityTurretDefinition(480)
       obj.Weapons mustEqual mutable.HashMap.empty[TurretUpgrade.Value, ToolDefinition]
       obj.ReserveAmmunition mustEqual false
       obj.FactionLocked mustEqual true
@@ -102,7 +101,7 @@ class FacilityTurretControl2Test extends ActorTest {
   val obj = FacilityTurret(GlobalDefinitions.manned_turret)
   obj.GUID = PlanetSideGUID(1)
   obj.Actor = system.actorOf(Props(classOf[FacilityTurretControl], obj), "turret-control")
-  val bldg = Building(guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building)
+  val bldg = Building("Building", guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building)
   bldg.Amenities = obj
   bldg.Faction = PlanetSideEmpire.TR
 
@@ -129,7 +128,7 @@ class FacilityTurretControl3Test extends ActorTest {
   val obj = FacilityTurret(GlobalDefinitions.manned_turret)
   obj.GUID = PlanetSideGUID(1)
   obj.Actor = system.actorOf(Props(classOf[FacilityTurretControl], obj), "turret-control")
-  val bldg = Building(guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building)
+  val bldg = Building("Building", guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building)
   bldg.Amenities = obj
 
   "FacilityTurretControl" should {
@@ -152,12 +151,12 @@ class FacilityTurretControl3Test extends ActorTest {
 
 class FacilityTurretControl4Test extends ActorTest {
   val player = Player(Avatar("", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
-  val objDef = new TurretDefinition(480)
+  val objDef = new FacilityTurretDefinition(480)
   objDef.FactionLocked = false
   val obj = FacilityTurret(objDef)
   obj.GUID = PlanetSideGUID(1)
   obj.Actor = system.actorOf(Props(classOf[FacilityTurretControl], obj), "turret-control")
-  val bldg = Building(guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building)
+  val bldg = Building("Building", guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building)
   bldg.Amenities = obj
 
   "FacilityTurretControl" should {

@@ -2,6 +2,7 @@
 package net.psforever.objects.zones
 
 import net.psforever.objects.serverobject.structures.FoundationBuilder
+import net.psforever.objects.serverobject.zipline.ZipLinePath
 import net.psforever.objects.serverobject.{PlanetSideServerObject, ServerObjectBuilder}
 
 /**
@@ -25,15 +26,33 @@ import net.psforever.objects.serverobject.{PlanetSideServerObject, ServerObjectB
   *      `LoadMapMessage`
   */
 class ZoneMap(private val name : String) {
+  private var scale : MapScale = MapScale.Dim8192
   private var localObjects : List[ServerObjectBuilder[_]] = List()
   private var linkTurretWeapon : Map[Int, Int] = Map()
   private var linkTerminalPad : Map[Int, Int] = Map()
   private var linkTerminalInterface : Map[Int, Int] = Map()
   private var linkDoorLock : Map[Int, Int] = Map()
   private var linkObjectBase : Map[Int, Int] = Map()
-  private var buildings : Map[(Int, Int), FoundationBuilder] = Map()
+  private var buildings : Map[(String, Int, Int), FoundationBuilder] = Map()
+  private var lattice: Set[(String, String)] = Set()
+  private var checksum : Long = 0
+  private var zipLinePaths : List[ZipLinePath] = List()
 
   def Name : String = name
+
+  def Scale : MapScale = scale
+
+  def Scale_=(dim : MapScale) : MapScale = {
+    scale = dim
+    Scale
+  }
+
+  def Checksum : Long = checksum
+
+  def Checksum_=(value : Long) : Long = {
+    checksum = value
+    Checksum
+  }
 
   /**
     * The list of all server object builder wrappers that have been assigned to this `ZoneMap`.
@@ -71,11 +90,18 @@ class ZoneMap(private val name : String) {
     localObjects.size
   }
 
-  def LocalBuildings : Map[(Int, Int), FoundationBuilder] = buildings
+  def ZipLinePaths : List[ZipLinePath] = zipLinePaths
 
-  def LocalBuilding(building_guid : Int, map_id : Int, constructor : FoundationBuilder) : Int = {
+  def ZipLinePaths(path: ZipLinePath): Int = {
+    zipLinePaths = zipLinePaths :+ path
+    zipLinePaths.size
+  }
+
+  def LocalBuildings : Map[(String, Int, Int), FoundationBuilder] = buildings
+
+  def LocalBuilding(name : String, building_guid : Int, map_id : Int, constructor : FoundationBuilder) : Int = {
     if(building_guid > 0) {
-      buildings = buildings ++ Map((building_guid, map_id) -> constructor)
+      buildings = buildings ++ Map((name, building_guid, map_id) -> constructor)
     }
     buildings.size
   }
@@ -108,5 +134,11 @@ class ZoneMap(private val name : String) {
 
   def TurretToWeapon(turret_guid : Int, weapon_guid : Int) : Unit = {
     linkTurretWeapon = linkTurretWeapon ++ Map(turret_guid -> weapon_guid)
+  }
+
+  def LatticeLink : Set[(String, String)] = lattice
+
+  def LatticeLink(source : String, target: String) : Unit = {
+    lattice = lattice ++ Set((source, target))
   }
 }

@@ -5,7 +5,7 @@ import net.psforever.objects.serverobject.structures.{Building, StructureType}
 import net.psforever.objects.serverobject.terminals.Terminal
 import net.psforever.objects.zones.Zone
 import net.psforever.objects._
-import net.psforever.packet.game.{ItemTransactionMessage, PlanetSideGUID}
+import net.psforever.packet.game.ItemTransactionMessage
 import net.psforever.types._
 import org.specs2.mutable.Specification
 
@@ -13,7 +13,7 @@ class OrderTerminalTest extends Specification {
   val avatar = Avatar("test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)
   val player = Player(avatar)
 
-  val building = new Building(building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)
+  val building = new Building("Building", building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)
   building.Faction = PlanetSideEmpire.TR
   val infantryTerminal = Terminal(GlobalDefinitions.order_terminal)
   infantryTerminal.Owner = building
@@ -87,7 +87,7 @@ class OrderTerminalTest extends Specification {
       player.ExoSuit = ExoSuitType.Agile
       player.Slot(0).Equipment = Tool(GlobalDefinitions.beamer)
       player.Slot(6).Equipment = Tool(GlobalDefinitions.beamer)
-      avatar.SaveLoadout(player, "test", 0)
+      avatar.EquipmentLoadouts.SaveLoadout(player, "test", 0)
 
       val msg = infantryTerminal.Request(player, ItemTransactionMessage(PlanetSideGUID(10), TransactionType.Loadout, 4, "", 0, PlanetSideGUID(0)))
       msg.isInstanceOf[Terminal.InfantryLoadout] mustEqual true
@@ -137,7 +137,7 @@ class OrderTerminalTest extends Specification {
     "player can retrieve a vehicle loadout" in {
       val fury = Vehicle(GlobalDefinitions.fury)
       fury.Slot(30).Equipment = AmmoBox(GlobalDefinitions.hellfire_ammo)
-      avatar.SaveLoadout(fury, "test", 10)
+      avatar.EquipmentLoadouts.SaveLoadout(fury, "test", 10)
 
       val msg = ItemTransactionMessage(PlanetSideGUID(1), TransactionType.Loadout, 4, "test", 0, PlanetSideGUID(0))
       terminal.Request(player, msg) match {

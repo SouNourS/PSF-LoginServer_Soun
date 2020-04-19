@@ -3,7 +3,7 @@ package net.psforever.packet.game
 
 import net.psforever.newcodecs.newcodecs
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
-import net.psforever.types.{Angular, Vector3}
+import net.psforever.types.{Angular, PlanetSideGUID, Vector3}
 import scodec.Codec
 import scodec.codecs._
 import shapeless.{::, HNil}
@@ -38,7 +38,7 @@ import shapeless.{::, HNil}
   * @param facingYawUpper a "yaw" angle that represents the angle of the avatar's upper body with respect to its forward-facing direction;
   *                       this number is normally 0 for forward facing;
   *                       the range is limited between approximately 61 degrees of center turned to left or right
-  * @param unk1 na
+  * @param timestamp A sequential counter
   * @param is_crouching avatar is crouching
   * @param is_jumping avatar is jumping;
   *                   must remain flagged for jump to maintain animation
@@ -51,7 +51,7 @@ final case class PlayerStateMessage(guid : PlanetSideGUID,
                                     facingYaw : Float,
                                     facingPitch : Float,
                                     facingYawUpper : Float,
-                                    unk1 : Int,
+                                    timestamp : Int,
                                     is_crouching : Boolean = false,
                                     is_jumping : Boolean = false,
                                     jump_thrust : Boolean = false,
@@ -94,8 +94,8 @@ object PlayerStateMessage extends Marshallable[PlayerStateMessage] {
       ("pos" | Vector3.codec_pos) ::
       optional(bool, "vel" | Vector3.codec_vel) ::
       ("facingYaw" | Angular.codec_yaw()) ::
-      ("facingPitch" | Angular.codec_pitch) ::
-      ("facingYawUpper" | Angular.codec_yaw(0f)) ::
+      ("facingPitch" | Angular.codec_zero_centered) ::
+      ("facingYawUpper" | Angular.codec_zero_centered) ::
       ("unk1" | uintL(10)) ::
       (bool >>:~ { fourBools =>
         newcodecs.binary_choice(!fourBools, booleanCodec, defaultCodec)

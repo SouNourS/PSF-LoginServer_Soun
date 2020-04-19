@@ -1,9 +1,8 @@
 // Copyright (c) 2017 PSForever
 package net.psforever.packet.game.objectcreate
 
-import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.packet.{Marshallable, PacketHelpers}
-import net.psforever.types._
+import net.psforever.types.{PlanetSideGUID, _}
 import scodec.{Attempt, Codec, Err}
 import scodec.codecs._
 import shapeless.{::, HNil}
@@ -23,12 +22,13 @@ import shapeless.{::, HNil}
   *                  -player_guid - does nothing?
   * @param exosuit   the type of exo-suit the avatar will be depicted in;
   *                  for Black OPs, the agile exo-suit and the reinforced exo-suit are replaced with the Black OPs exo-suits
+  * @param char_id   a unique character reference identification number
   */
 final case class CharacterAppearanceA(app : BasicCharacterData,
                                       data : CommonFieldData,
                                       exosuit : ExoSuitType.Value,
                                       unk5 : Int,
-                                      unk6 : Long,
+                                      char_id : Long,
                                       unk7 : Int,
                                       unk8 : Int,
                                       unk9 : Int,
@@ -326,7 +326,7 @@ object CharacterAppearanceData extends Marshallable[CharacterAppearanceData] {
         }
         else if(data.faction == PlanetSideEmpire.NEUTRAL) {
           Attempt.successful(
-            CommonFieldData(faction, data.bops, data.alternate, data.v1, data.v2, data.v3, None, data.v5, PlanetSideGUID(0)) ::
+            CommonFieldData(faction, data.bops, data.alternate, data.v1, data.v2, data.jammered, None, data.v5, PlanetSideGUID(0)) ::
               name :: suit :: u5 :: sex :: head :: v1 :: u6 :: u7 :: u8 :: u9 :: uA :: HNil
           )
         }
@@ -356,8 +356,8 @@ object CharacterAppearanceData extends Marshallable[CharacterAppearanceData] {
       ("unk2" | bool) :: //requires alt_model flag (does NOT require health == 0)
       ("unk3" | bool) :: //stream misalignment when set
       ("unk4" | bool) :: //unknown
-      ("facingPitch" | Angular.codec_pitch) ::
-      ("facingYawUpper" | Angular.codec_yaw(0f)) ::
+      ("facingPitch" | Angular.codec_zero_centered) ::
+      ("facingYawUpper" | Angular.codec_zero_centered) ::
       ("lfs" | uint2) ::
       ("grenade_state" | GrenadeState.codec_2u) :: //note: bin10 and bin11 are neutral (bin00 is not defined)
       ("is_cloaking" | bool) ::

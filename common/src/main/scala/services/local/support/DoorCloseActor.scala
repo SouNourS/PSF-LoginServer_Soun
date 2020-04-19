@@ -5,8 +5,7 @@ import akka.actor.{Actor, Cancellable}
 import net.psforever.objects.DefaultCancellable
 import net.psforever.objects.serverobject.doors.Door
 import net.psforever.objects.zones.Zone
-import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.Vector3
+import net.psforever.types.{PlanetSideGUID, Vector3}
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._
@@ -38,8 +37,11 @@ class DoorCloseActor() extends Actor {
       val (doorsToClose2, doorsLeftOpen2) = doorsToClose1.partition(entry => {
         entry.door.Open match {
           case Some(player) =>
-            Vector3.MagnitudeSquared(entry.door.Position - player.Position) > 15
+            // If the player that opened the door is far enough away, or they're dead / backpacked, close the door
+            var playerIsBackpackInZone = entry.zone.Corpses.contains(player)
+            Vector3.MagnitudeSquared(entry.door.Position - player.Position) > 25.5 || playerIsBackpackInZone
           case None =>
+            // Door should not be open. Mark it to be closed.
             true
         }
       })

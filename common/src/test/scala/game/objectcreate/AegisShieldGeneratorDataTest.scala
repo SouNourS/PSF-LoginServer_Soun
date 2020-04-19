@@ -2,9 +2,9 @@
 package game.objectcreate
 
 import net.psforever.packet.PacketCoding
-import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID}
+import net.psforever.packet.game.ObjectCreateMessage
 import net.psforever.packet.game.objectcreate._
-import net.psforever.types.{PlanetSideEmpire, Vector3}
+import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID, Vector3}
 import org.specs2.mutable._
 import scodec.bits._
 
@@ -29,7 +29,7 @@ class AegisShieldGeneratorDataTest extends Specification {
               basic.data.alternate mustEqual false
               basic.data.v1 mustEqual true
               basic.data.v2.isDefined mustEqual false
-              basic.data.v3 mustEqual false
+              basic.data.jammered mustEqual false
               basic.data.v5.isDefined mustEqual false
               basic.data.guid mustEqual PlanetSideGUID(2366)
 

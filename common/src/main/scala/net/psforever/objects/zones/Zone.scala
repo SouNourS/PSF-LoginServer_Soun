@@ -3,7 +3,7 @@ package net.psforever.objects.zones
 
 import akka.actor.{ActorContext, ActorRef, Props}
 import akka.routing.RandomPool
-import net.psforever.objects.ballistics.Projectile
+import net.psforever.objects.ballistics.{Projectile, SourceEntry}
 import net.psforever.objects._
 import net.psforever.objects.ce.Deployable
 import net.psforever.objects.entity.IdentifiableEntity
@@ -13,18 +13,23 @@ import net.psforever.objects.guid.actor.UniqueNumberSystem
 import net.psforever.objects.guid.selector.RandomSelector
 import net.psforever.objects.guid.source.LimitedNumberSource
 import net.psforever.objects.inventory.Container
-import net.psforever.objects.serverobject.PlanetSideServerObject
+import net.psforever.objects.serverobject.painbox.{Painbox, PainboxDefinition}
 import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
 import net.psforever.objects.serverobject.structures.{Amenity, Building, WarpGate}
-import net.psforever.objects.serverobject.terminals.ProximityUnit
 import net.psforever.objects.serverobject.turret.FacilityTurret
-import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.Vector3
-import services.Service
+import net.psforever.objects.serverobject.zipline.ZipLinePath
+import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID, Vector3}
+import services.avatar.AvatarService
+import services.local.LocalService
+import services.vehicle.VehicleService
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.immutable.{Map => PairMap}
+import scala.concurrent.duration._
+import scalax.collection.Graph
+import scalax.collection.GraphPredef._
+import scalax.collection.GraphEdge._
 
 /**
   * A server object representing the one-landmass planets as well as the individual subterranean caverns.<br>
@@ -48,6 +53,9 @@ import scala.collection.immutable.{Map => PairMap}
 class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
   /** Governs general synchronized external requests. */
   private var actor = ActorRef.noSender
+
+  /** Actor that handles SOI related functionality, for example if a player is in a SOI **/
+  private var soi = ActorRef.noSender
 
   /** Used by the globally unique identifier system to coordinate requests. */
   private var accessor : ActorRef = ActorRef.noSender
@@ -73,8 +81,25 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
   private var population : ActorRef = ActorRef.noSender
 
   private var buildings : PairMap[Int, Building] = PairMap.empty[Int, Building]
+
+  private var lattice : Graph[Building, UnDiEdge] = Graph()
+
+  private var zipLinePaths : List[ZipLinePath] = List()
+
   /** key - spawn zone id, value - buildings belonging to spawn zone */
   private var spawnGroups : Map[Building, List[SpawnPoint]] = PairMap[Building, List[SpawnPoint]]()
+  /** */
+  private var projector : ActorRef = ActorRef.noSender
+  /** */
+  private var hotspots : ListBuffer[HotSpotInfo] = ListBuffer[HotSpotInfo]()
+  /** calculate a approximated coordinate from a raw input coordinate */
+  private var hotspotCoordinateFunc : Vector3=>Vector3 = Zone.HotSpot.Rules.OneToOne
+  /** calculate a duration from a given interaction's participants */
+  private var hotspotTimeFunc : (SourceEntry, SourceEntry)=>FiniteDuration = Zone.HotSpot.Rules.NoTime
+  /** */
+  private var avatarEvents : ActorRef = ActorRef.noSender
+  /** */
+  private var localEvents : ActorRef = ActorRef.noSender
   /** */
   private var vehicleEvents : ActorRef = ActorRef.noSender
 
@@ -97,19 +122,28 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
     */
   def Init(implicit context : ActorContext) : Unit = {
     if(accessor == ActorRef.noSender) {
-      implicit val guid : NumberPoolHub = this.guid //passed into builderObject.Build implicitly
       SetupNumberPools()
-      accessor = context.actorOf(RandomPool(25).props(Props(classOf[UniqueNumberSystem], guid, UniqueNumberSystem.AllocateNumberPoolActors(guid))), s"$Id-uns")
+      accessor = context.actorOf(RandomPool(25).props(Props(classOf[UniqueNumberSystem], this.guid, UniqueNumberSystem.AllocateNumberPoolActors(this.guid))), s"$Id-uns")
       ground = context.actorOf(Props(classOf[ZoneGroundActor], this, equipmentOnGround), s"$Id-ground")
       deployables = context.actorOf(Props(classOf[ZoneDeployableActor], this, constructions), s"$Id-deployables")
       transport = context.actorOf(Props(classOf[ZoneVehicleActor], this, vehicles), s"$Id-vehicles")
       population = context.actorOf(Props(classOf[ZonePopulationActor], this, players, corpses), s"$Id-players")
+      projector = context.actorOf(Props(classOf[ZoneHotSpotProjector], this), s"$Id-hotpots")
+      soi = context.actorOf(Props(classOf[SphereOfInfluenceActor], this), s"$Id-soi")
 
+      avatarEvents = context.actorOf(Props(classOf[AvatarService], this), s"$Id-avatar-events")
+      localEvents = context.actorOf(Props(classOf[LocalService], this), s"$Id-local-events")
+      vehicleEvents = context.actorOf(Props(classOf[VehicleService], this), s"$Id-vehicle-events")
+
+      implicit val guid : NumberPoolHub = this.guid //passed into builderObject.Build implicitly
       BuildLocalObjects(context, guid)
       BuildSupportObjects()
       MakeBuildings(context)
+      MakeLattice()
       AssignAmenities()
       CreateSpawnGroups()
+
+      zipLinePaths = Map.ZipLinePaths
     }
   }
 
@@ -311,12 +345,31 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
     buildings.get(id)
   }
 
+  def Building(name : String) : Option[Building] = {
+    buildings.values.find(_.Name == name)
+  }
+
   def BuildingByMapId(map_id : Int) : Option[Building] = {
     buildings.values.find(_.MapId == map_id)
   }
 
+  def Lattice : Graph[Building, UnDiEdge] = {
+    lattice
+  }
+
+  def ZipLinePaths : List[ZipLinePath] = {
+    zipLinePaths
+  }
+
   private def BuildLocalObjects(implicit context : ActorContext, guid : NumberPoolHub) : Unit = {
-    Map.LocalObjects.foreach({ builderObject => builderObject.Build })
+    Map.LocalObjects.foreach({ builderObject =>
+      builderObject.Build
+
+      val obj = guid(builderObject.Id)
+      obj collect {
+        case el : ZoneAware => el.Zone = this
+      }
+    })
   }
 
   private def BuildSupportObjects() : Unit = {
@@ -353,7 +406,16 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
 
   private def MakeBuildings(implicit context : ActorContext) : PairMap[Int, Building] = {
     val buildingList = Map.LocalBuildings
-    buildings = buildingList.map({case((building_guid, map_id), constructor) => building_guid -> constructor.Build(building_guid, map_id, this) })
+    val registrationKeys = buildingList.map {
+      case ((_, building_guid, _), _) =>
+        building_guid -> guid.register(building_guid)
+    }
+    buildings = buildingList.map({
+      case((name, building_guid, map_id), constructor) if registrationKeys(building_guid).isSuccess =>
+        val building = constructor.Build(name, building_guid, map_id, this)
+        registrationKeys(building_guid).get.Object = building
+        building_guid -> building
+    })
     buildings
   }
 
@@ -372,13 +434,31 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
         case silo : ResourceSilo =>
           silo.Actor ! "startup"
       }
-    //proximity terminals need to startup
+    //some painfields need to look for their closest door
     buildings.values
-      .flatMap(_.Amenities.filter(_.isInstanceOf[ProximityUnit]))
+      .flatMap(_.Amenities.filter(_.Definition.isInstanceOf[PainboxDefinition]))
       .collect {
-        case o : PlanetSideServerObject =>
-          o.Actor ! Service.Startup()
+        case painbox : Painbox =>
+          painbox.Actor ! "startup"
       }
+    //allocate soi information
+    soi ! SOI.Build()
+  }
+
+  private def MakeLattice(): Unit = {
+    Map.LatticeLink.foreach({ case(source, target) =>
+      val sourceBuilding = Building(source) match {
+        case Some(building) => building
+        case _ => throw new NoSuchElementException(s"Can't create lattice link between $source $target. Source is missing")
+      }
+
+      val targetBuilding = Building(target) match {
+        case Some(building) => building
+        case _ => throw new NoSuchElementException(s"Can't create lattice link between $source $target. Target is missing")
+      }
+
+      lattice += sourceBuilding~targetBuilding
+    })
   }
 
   private def CreateSpawnGroups() : Unit = {
@@ -414,6 +494,53 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
     entry
   }
 
+  def StartPlayerManagementSystems() : Unit = {
+    soi ! SOI.Start()
+  }
+
+  def StopPlayerManagementSystems() : Unit = {
+    soi ! SOI.Stop()
+  }
+
+  def Activity : ActorRef = projector
+
+  def HotSpots : List[HotSpotInfo] = hotspots toList
+
+  def HotSpots_=(spots : Seq[HotSpotInfo]) : List[HotSpotInfo] = {
+    hotspots.clear
+    hotspots ++= spots
+    HotSpots
+  }
+
+  def TryHotSpot(displayLoc : Vector3) : HotSpotInfo = {
+    hotspots.find(spot => spot.DisplayLocation == displayLoc) match {
+      case Some(spot) =>
+        //hotspot already exists
+        spot
+      case None =>
+        //insert new hotspot
+        val spot = new HotSpotInfo(displayLoc)
+        hotspots += spot
+        spot
+    }
+  }
+
+  def HotSpotCoordinateFunction : Vector3=>Vector3 = hotspotCoordinateFunc
+
+  def HotSpotCoordinateFunction_=(func : Vector3=>Vector3) : Vector3=>Vector3 = {
+    hotspotCoordinateFunc = func
+    Activity ! ZoneHotSpotProjector.UpdateMappingFunction()
+    HotSpotCoordinateFunction
+  }
+
+  def HotSpotTimeFunction : (SourceEntry, SourceEntry)=>FiniteDuration = hotspotTimeFunc
+
+  def HotSpotTimeFunction_=(func : (SourceEntry, SourceEntry)=>FiniteDuration) : (SourceEntry, SourceEntry)=>FiniteDuration = {
+    hotspotTimeFunc = func
+    Activity ! ZoneHotSpotProjector.UpdateDurationFunction()
+    HotSpotTimeFunction
+  }
+
   /**
     * Provide bulk correspondence on all map entities that can be composed into packet messages and reported to a client.
     * These messages are sent in this fashion at the time of joining the server:<br>
@@ -432,12 +559,24 @@ class Zone(private val zoneId : String, zoneMap : ZoneMap, zoneNumber : Int) {
     */
   def ClientInitialization() : Zone = this
 
+  def AvatarEvents : ActorRef = avatarEvents
+
+  def AvatarEvents_=(bus : ActorRef) : ActorRef = {
+    avatarEvents = bus
+    AvatarEvents
+  }
+
+  def LocalEvents : ActorRef = localEvents
+
+  def LocalEvents_=(bus : ActorRef) : ActorRef = {
+    localEvents = bus
+    LocalEvents
+  }
+
   def VehicleEvents : ActorRef = vehicleEvents
 
   def VehicleEvents_=(bus : ActorRef) : ActorRef = {
-    if(vehicleEvents == ActorRef.noSender) {
-      vehicleEvents = bus
-    }
+    vehicleEvents = bus
     VehicleEvents
   }
 }
@@ -583,6 +722,38 @@ object Zone {
     final case class CanNotSpawn(zone : Zone, vehicle : Vehicle, reason : String)
 
     final case class CanNotDespawn(zone : Zone, vehicle : Vehicle, reason : String)
+  }
+
+  object HotSpot {
+    final case class Activity(defender : SourceEntry, attacker : SourceEntry, location : Vector3)
+
+    final case class Cleanup()
+
+    final case class ClearAll()
+
+    final case class Update(faction : PlanetSideEmpire.Value, zone_num : Int, priority : Int, info : List[HotSpotInfo])
+
+    final case class UpdateNow()
+
+    object Rules {
+      /**
+        * Produce hotspot coordinates based on map coordinates.
+        * Return the same coordinate as output that was input.
+        * The default function.
+        * @param pos the absolute position of the activity reported
+        * @return the position for a hotspot
+        */
+      def OneToOne(pos : Vector3) : Vector3 = pos
+
+      /**
+        * Determine a duration for which the hotspot will be displayed on the zone map.
+        * The default function.
+        * @param defender the defending party
+        * @param attacker the attacking party
+        * @return the duration
+        */
+      def NoTime(defender : SourceEntry, attacker : SourceEntry) : FiniteDuration = 0 seconds
+    }
   }
 
   /**

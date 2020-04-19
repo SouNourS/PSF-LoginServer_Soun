@@ -70,6 +70,16 @@ class ZoneActor(zone : Zone) extends Actor {
     case msg @ Zone.Vehicle.Despawn =>
       zone.Transport forward msg
 
+      //frwd to Projector actor
+    case msg @ Zone.HotSpot.Activity =>
+      zone.Activity forward msg
+
+    case msg @ Zone.HotSpot.UpdateNow =>
+      zone.Activity forward msg
+
+    case msg @ Zone.HotSpot.ClearAll =>
+      zone.Activity forward msg
+
     //own
     case Zone.Lattice.RequestSpawnPoint(zone_number, player, spawn_group) =>
       if(zone_number == zone.Number) {
@@ -204,12 +214,17 @@ class ZoneActor(zone : Zone) extends Actor {
     val validateObject : (Int, PlanetSideGameObject=>Boolean, String) => Boolean = ValidateObject(guid, slog, errors)
 
     //check bases
-    map.ObjectToBuilding.values.toSet[Int].foreach(building_id =>
-      if(zone.Building(building_id).isEmpty) {
+    map.ObjectToBuilding.values.toSet[Int].foreach(building_id => {
+      val target = zone.Building(building_id)
+      if(target.isEmpty) {
         slog.error(s"expected a building for id #$building_id")
         errors.incrementAndGet()
       }
-    )
+      else if(!target.get.HasGUID) {
+        slog.error(s"building #$building_id was not registered")
+        errors.incrementAndGet()
+      }
+    })
 
     //check base to object associations
     map.ObjectToBuilding.keys.foreach(object_guid =>

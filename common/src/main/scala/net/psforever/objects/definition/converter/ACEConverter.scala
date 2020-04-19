@@ -2,8 +2,8 @@
 package net.psforever.objects.definition.converter
 
 import net.psforever.objects.ConstructionItem
-import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.packet.game.objectcreate.{CommonFieldData, DetailedConstructionToolData, HandheldData}
+import net.psforever.types.PlanetSideGUID
 
 import scala.util.{Success, Try}
 
@@ -21,7 +21,8 @@ class ACEConverter extends ObjectCreateConverter[ConstructionItem]() {
           None,
           None,
           PlanetSideGUID(0)
-        )
+        ),
+        obj.FireModeIndex
       )
     )
   }
@@ -39,7 +40,8 @@ class ACEConverter extends ObjectCreateConverter[ConstructionItem]() {
           None,
           None,
           PlanetSideGUID(0)
-        )
+        ),
+        obj.FireModeIndex
       )
     )
   }

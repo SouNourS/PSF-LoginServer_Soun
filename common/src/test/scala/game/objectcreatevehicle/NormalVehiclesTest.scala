@@ -3,7 +3,7 @@ package game.objectcreatevehicle
 
 import net.psforever.packet._
 import net.psforever.packet.game.objectcreate._
-import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID}
+import net.psforever.packet.game.ObjectCreateMessage
 import net.psforever.types._
 import org.specs2.mutable._
 import scodec.bits._
@@ -173,7 +173,7 @@ class NormalVehiclesTest extends Specification {
               vdata.faction mustEqual PlanetSideEmpire.NC
               vdata.alternate mustEqual false
               vdata.v1 mustEqual true
-              vdata.v3 mustEqual false
+              vdata.jammered mustEqual false
               vdata.v5.isEmpty mustEqual true
               vdata.guid mustEqual PlanetSideGUID(0)
 

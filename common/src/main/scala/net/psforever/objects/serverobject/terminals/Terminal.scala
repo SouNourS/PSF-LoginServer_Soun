@@ -6,6 +6,7 @@ import net.psforever.objects.definition.VehicleDefinition
 import net.psforever.objects.serverobject.hackable.Hackable
 import net.psforever.objects.serverobject.structures.Amenity
 import net.psforever.packet.game.{ItemTransactionMessage, TriggeredSound}
+import net.psforever.types.{PlanetSideGUID, Vector3}
 
 /**
   * A server object that can be accessed for services and other amenities.
@@ -36,7 +37,10 @@ class Terminal(tdef : TerminalDefinition) extends Amenity with Hackable {
 
   /**
     * Process a message (a "request") dispatched by the user.
-    * To be accessible, the terminal must be owned by the same faction by the user or must be compromised.
+    * To be accessible, the terminal must be:
+    *   owned by the same faction by the user
+    *   or must be compromised
+    *   or must be a zone owned object (GUID == 0, e.g. non-facility buildings in caves)
     * @see `FactionAffinity`
     * @see `PlanetSideEmpire`
     * @param player the player
@@ -44,7 +48,7 @@ class Terminal(tdef : TerminalDefinition) extends Amenity with Hackable {
     * @return an actionable message that explains what resulted from interacting with this `Terminal`
     */
   def Request(player : Player, msg : Any) : Terminal.Exchange = {
-    if(Faction == player.Faction || HackedBy.isDefined) {
+    if(Faction == player.Faction || HackedBy.isDefined || Owner.GUID == PlanetSideGUID(0)) {
       tdef.Request(player, msg)
     }
     else {
@@ -180,15 +184,17 @@ object Terminal {
   import akka.actor.ActorContext
   /**
     * Instantiate an configure a `Terminal` object
+    * @param pos The location of the object
     * @param tdef the `ObjectDefinition` that constructs this object and maintains some of its immutable fields
     * @param id the unique id that will be assigned to this entity
     * @param context a context to allow the object to properly set up `ActorSystem` functionality
     * @return the `Terminal` object
     */
-  def Constructor(tdef : TerminalDefinition)(id : Int, context : ActorContext) : Terminal = {
+  def Constructor(pos: Vector3, tdef : TerminalDefinition)(id : Int, context : ActorContext) : Terminal = {
     import akka.actor.Props
 
     val obj = Terminal(tdef)
+    obj.Position = pos
     obj.Actor = context.actorOf(Props(classOf[TerminalControl], obj), s"${tdef.Name}_$id")
     obj
   }

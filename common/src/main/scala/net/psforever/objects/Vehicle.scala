@@ -3,17 +3,16 @@ package net.psforever.objects
 
 import akka.actor.ActorRef
 import net.psforever.objects.definition.VehicleDefinition
-import net.psforever.objects.equipment.{Equipment, EquipmentSize, EquipmentSlot}
+import net.psforever.objects.equipment.{Equipment, EquipmentSize, EquipmentSlot, JammableUnit}
 import net.psforever.objects.inventory.{Container, GridInventory, InventoryTile}
 import net.psforever.objects.serverobject.mount.Mountable
 import net.psforever.objects.serverobject.PlanetSideServerObject
 import net.psforever.objects.serverobject.affinity.FactionAffinity
 import net.psforever.objects.serverobject.deploy.Deployment
+import net.psforever.objects.serverobject.structures.AmenityOwner
 import net.psforever.objects.vehicles._
 import net.psforever.objects.vital.{DamageResistanceModel, StandardResistanceProfile, Vitality}
-import net.psforever.objects.zones.ZoneAware
-import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.PlanetSideEmpire
+import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID}
 
 import scala.annotation.tailrec
 
@@ -65,27 +64,27 @@ import scala.annotation.tailrec
   *                   stores and unloads pertinent information about the `Vehicle`'s configuration;
   *                   used in the initialization process (`loadVehicleDefinition`)
   */
-class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServerObject
+class Vehicle(private val vehicleDef : VehicleDefinition) extends AmenityOwner
   with FactionAffinity
-  with ZoneAware
   with Mountable
   with MountedWeapons
   with Deployment
   with Vitality
+  with OwnableByPlayer
   with StandardResistanceProfile
+  with JammableUnit
   with Container {
   private var faction : PlanetSideEmpire.Value = PlanetSideEmpire.TR
-  private var owner : Option[PlanetSideGUID] = None
   private var health : Int = 1
   private var shields : Int = 0
+  private var isDead : Boolean = false
   private var decal : Int = 0
   private var trunkAccess : Option[PlanetSideGUID] = None
   private var jammered : Boolean = false
   private var cloaked : Boolean = false
   private var flying : Boolean = false
+  private var ntuCapacitor : Int = 0
   private var capacitor : Int = 0
-  private var continent : String = "home2" //the zone id
-
   /**
     * Permissions control who gets to access different parts of the vehicle;
     * the groups are Driver (seat), Gunner (seats), Passenger (seats), and the Trunk
@@ -102,6 +101,9 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
     * DismountVehicleCargoMsg only passes the player_guid and this vehicle's guid
     */
   private var mountedIn : Option[PlanetSideGUID] = None
+
+  private var vehicleGatingManifest : Option[VehicleManifest] = None
+  private var previousVehicleGatingManifest : Option[VehicleManifest] = None
 
   //init
   LoadDefinition()
@@ -123,6 +125,9 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
     faction
   }
 
+  /** How long it takes to jack the vehicle in seconds, based on the hacker's certification level */
+  def JackingDuration: Array[Int] = Definition.JackingDuration
+
   def MountedIn : Option[PlanetSideGUID] = {
     this.mountedIn
   }
@@ -139,24 +144,8 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
     MountedIn
   }
 
-  def Owner : Option[PlanetSideGUID] = {
-    this.owner
-  }
-
-  def Owner_=(owner : PlanetSideGUID) : Option[PlanetSideGUID] = Owner_=(Some(owner))
-
-  def Owner_=(owner : Player) : Option[PlanetSideGUID] = Owner_=(Some(owner.GUID))
-
-  def Owner_=(owner : Option[PlanetSideGUID]) : Option[PlanetSideGUID] = {
-    owner match {
-      case Some(_) =>
-        if(Definition.CanBeOwned) {
-          this.owner = owner
-        }
-      case None =>
-        this.owner = None
-    }
-    Owner
+  def IsDead : Boolean = {
+    isDead
   }
 
   def Health : Int = {
@@ -164,7 +153,14 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
   }
 
   def Health_=(assignHealth : Int) : Int = {
-    health = math.min(math.max(0, assignHealth), MaxHealth)
+    if(!isDead) {
+      health = math.min(math.max(0, assignHealth), MaxHealth)
+    }
+
+    if(health == 0) {
+      isDead = true
+    }
+
     health
   }
 
@@ -215,11 +211,24 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
     Flying
   }
 
+  def NtuCapacitor : Int = ntuCapacitor
+
+  def NtuCapacitor_=(value: Int) : Int = {
+    if(value > Definition.MaxNtuCapacitor) {
+      ntuCapacitor = Definition.MaxNtuCapacitor
+    } else if (value < 0) {
+      ntuCapacitor = 0
+    } else {
+      ntuCapacitor = value
+    }
+    NtuCapacitor
+  }
+
   def Capacitor : Int = capacitor
 
   def Capacitor_=(value: Int) : Int = {
-    if(value > Definition.MaximumCapacitor) {
-      capacitor = Definition.MaximumCapacitor
+    if(value > Definition.MaxCapacitor) {
+      capacitor = Definition.MaxCapacitor
     } else if (value < 0) {
       capacitor = 0
     } else {
@@ -499,7 +508,7 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
     if(trunkAccess.isEmpty || trunkAccess.contains(player.GUID)) {
       groupPermissions(3) match {
         case VehicleLockState.Locked => //only the owner
-          owner.isEmpty || (owner.isDefined && player.GUID == owner.get)
+          Owner.isEmpty || (Owner.isDefined && player.GUID == Owner.get)
         case VehicleLockState.Group => //anyone in the owner's squad or platoon
           faction == player.Faction //TODO this is not correct
         case VehicleLockState.Empire => //anyone of the owner's faction
@@ -517,6 +526,23 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
     */
   def TrunkLockState :  VehicleLockState.Value = groupPermissions(3)
 
+  def PrepareGatingManifest() : VehicleManifest = {
+    val manifest = VehicleManifest(this)
+    seats.collect { case (index, seat) if index > 0 => seat.Occupant = None }
+    vehicleGatingManifest = Some(manifest)
+    previousVehicleGatingManifest = None
+    manifest
+  }
+
+  def PublishGatingManifest() : Option[VehicleManifest] = {
+    val out = vehicleGatingManifest
+    previousVehicleGatingManifest = vehicleGatingManifest
+    vehicleGatingManifest = None
+    out
+  }
+
+  def PreviousGatingManifest() : Option[VehicleManifest] = previousVehicleGatingManifest
+
   def DamageModel = Definition.asInstanceOf[DamageResistanceModel]
 
   /**
@@ -524,13 +550,6 @@ class Vehicle(private val vehicleDef : VehicleDefinition) extends PlanetSideServ
     * @return the vehicle's definition entry
     */
   def Definition : VehicleDefinition = vehicleDef
-
-  override def Continent : String = continent
-
-  override def Continent_=(zoneId : String) : String = {
-    continent = zoneId
-    Continent
-  }
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Vehicle]
 
@@ -641,7 +660,9 @@ object Vehicle {
     vehicle.utilities = vdef.Utilities.map({
       case(num, util) =>
         val obj = Utility(util, vehicle)
-        obj().LocationOffset = vdef.UtilityOffset.get(num)
+        val utilObj = obj()
+        vehicle.Amenities = utilObj
+        utilObj.LocationOffset = vdef.UtilityOffset.get(num)
         num -> obj
     }).toMap
     //trunk

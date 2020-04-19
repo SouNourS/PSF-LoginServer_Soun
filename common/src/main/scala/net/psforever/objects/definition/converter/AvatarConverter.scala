@@ -3,9 +3,8 @@ package net.psforever.objects.definition.converter
 
 import net.psforever.objects.Player
 import net.psforever.objects.equipment.{Equipment, EquipmentSlot}
-import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.packet.game.objectcreate._
-import net.psforever.types.{ExoSuitType, GrenadeState, ImplantType}
+import net.psforever.types.{ExoSuitType, GrenadeState, ImplantType, PlanetSideGUID}
 
 import scala.annotation.tailrec
 import scala.util.{Success, Try}
@@ -51,7 +50,7 @@ class AvatarConverter extends ObjectCreateConverter[Player]() {
           MakeAppearanceData(obj),
           MakeDetailedCharacterData(obj),
           MakeDetailedInventoryData(obj),
-          DrawnSlot.None
+          GetDrawnSlot(obj)
         )
       }
     )
@@ -74,14 +73,14 @@ object AvatarConverter {
         alt_model_flag,
         false,
         None,
-        false,
+        obj.Jammed,
         None,
         v5 = None,
         PlanetSideGUID(0)
       ),
       obj.ExoSuit,
       0,
-      0L,
+      obj.CharId,
       0,
       0,
       0,
@@ -98,7 +97,7 @@ object AvatarConverter {
       false,
       facingPitch = obj.Orientation.y,
       facingYawUpper = obj.FacingYawUpper,
-      lfs = true,
+      obj.LFS,
       GrenadeState.None,
       obj.Cloaked,
       false,
@@ -243,17 +242,10 @@ object AvatarConverter {
     */
   private def MakeImplantEffectList(implants : Seq[(ImplantType.Value, Long, Boolean)]) : List[ImplantEffects.Value] = {
     implants.collect {
-      case (implant,_,true) =>
-        implant match {
-          case ImplantType.AdvancedRegen =>
-            ImplantEffects.RegenEffects
-          case ImplantType.DarklightVision =>
-            ImplantEffects.DarklightEffects
-          case ImplantType.PersonalShield =>
-            ImplantEffects.PersonalShieldEffects
-          case ImplantType.Surge =>
-            ImplantEffects.SurgeEffects
-        }
+      case (ImplantType.AdvancedRegen,_,true) => ImplantEffects.RegenEffects
+      case (ImplantType.DarklightVision,_,true) => ImplantEffects.DarklightEffects
+      case (ImplantType.PersonalShield,_,true) => ImplantEffects.PersonalShieldEffects
+      case (ImplantType.Surge,_,true) => ImplantEffects.SurgeEffects
     }.toList
   }
 
@@ -372,6 +364,9 @@ object AvatarConverter {
     * @return the holster's Enumeration value
     */
   def GetDrawnSlot(obj : Player) : DrawnSlot.Value = {
-    try { DrawnSlot(obj.DrawnSlot) } catch { case _ : Exception => DrawnSlot.None }
+    obj.DrawnSlot match {
+      case Player.HandsDownSlot | Player.FreeHandSlot => DrawnSlot.None
+      case n => DrawnSlot(n)
+    }
   }
 }

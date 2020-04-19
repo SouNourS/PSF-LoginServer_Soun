@@ -12,8 +12,7 @@ import net.psforever.objects.guid.source.LimitedNumberSource
 import net.psforever.objects.serverobject.terminals.Terminal
 import net.psforever.objects.serverobject.tube.SpawnTube
 import net.psforever.objects._
-import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.{CharacterGender, CharacterVoice, PlanetSideEmpire, Vector3}
+import net.psforever.types._
 import net.psforever.objects.serverobject.structures.{Building, FoundationBuilder, StructureType}
 import net.psforever.objects.zones.{Zone, ZoneActor, ZoneMap}
 import net.psforever.objects.Vehicle
@@ -22,7 +21,7 @@ import org.specs2.mutable.Specification
 import scala.concurrent.duration._
 
 class ZoneTest extends Specification {
-  def test(a: Int, b: Int, c : Zone, d : ActorContext) : Building = { Building.NoBuilding }
+  def test(a: String, b: Int, c: Int, d : Zone, e : ActorContext) : Building = { Building.NoBuilding }
 
   "ZoneMap" should {
     "construct" in {
@@ -33,11 +32,11 @@ class ZoneTest extends Specification {
     "references bases by a positive building id (defaults to 0)" in {
       val map = new ZoneMap("map13")
       map.LocalBuildings mustEqual Map.empty
-      map.LocalBuilding(building_guid = 10, map_id = 0, FoundationBuilder(test))
-      map.LocalBuildings.keySet.contains((10, 0)) mustEqual true
-      map.LocalBuilding(building_guid = -1, map_id = 0, FoundationBuilder(test))
-      map.LocalBuildings.keySet.contains((10, 0)) mustEqual true
-      map.LocalBuildings.keySet.contains((-1, 0)) mustEqual false
+      map.LocalBuilding("Building", building_guid = 10, map_id = 0, FoundationBuilder(test))
+      map.LocalBuildings.keySet.contains(("Building", 10, 0)) mustEqual true
+      map.LocalBuilding("Building", building_guid = -1, map_id = 0, FoundationBuilder(test))
+      map.LocalBuildings.keySet.contains(("Building", 10, 0)) mustEqual true
+      map.LocalBuildings.keySet.contains(("Building", -1, 0)) mustEqual false
     }
 
     "associates objects to bases (doesn't check numbers)" in {
@@ -87,7 +86,7 @@ class ZoneTest extends Specification {
   }
 
   val map13 = new ZoneMap("map13")
-  map13.LocalBuilding(building_guid = 0, map_id = 10, FoundationBuilder(test))
+  map13.LocalBuilding("Building", building_guid = 0, map_id = 10, FoundationBuilder(test))
   class TestObject extends IdentifiableEntity
 
   "Zone" should {
@@ -112,7 +111,7 @@ class ZoneTest extends Specification {
 
       val obj = new TestObject()
       guid1.register(obj, "pool2").isSuccess mustEqual true
-      guid1.WhichPool(obj) mustEqual Some("pool2")
+      guid1.WhichPool(obj).contains("pool2") mustEqual true
 
       zone.GUID(new NumberPoolHub(new LimitedNumberSource(150))) mustEqual false
     }
@@ -172,30 +171,30 @@ class ZoneActorTest extends ActorTest {
 
     "set up spawn groups based on buildings" in {
       val map6 = new ZoneMap("map6") {
-        LocalBuilding(building_guid = 1, map_id = 1, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(1,1,1))))
-        LocalObject(1, SpawnTube.Constructor(Vector3.Zero, Vector3.Zero))
-        LocalObject(2, Terminal.Constructor(GlobalDefinitions.dropship_vehicle_terminal))
-        LocalObject(3, SpawnTube.Constructor(Vector3.Zero, Vector3.Zero))
-        ObjectToBuilding(1, 1)
+        LocalBuilding("Building", building_guid = 1, map_id = 1, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(1,1,1))))
+        LocalObject(2, SpawnTube.Constructor(Vector3(1,0,0), Vector3.Zero))
+        LocalObject(3, Terminal.Constructor(Vector3.Zero, GlobalDefinitions.dropship_vehicle_terminal))
+        LocalObject(4, SpawnTube.Constructor(Vector3(1,0,0), Vector3.Zero))
         ObjectToBuilding(2, 1)
         ObjectToBuilding(3, 1)
+        ObjectToBuilding(4, 1)
 
-        LocalBuilding(building_guid = 2, map_id = 2, FoundationBuilder(Building.Structure(StructureType.Building)))
-        LocalObject(7, SpawnTube.Constructor(Vector3.Zero, Vector3.Zero))
-        ObjectToBuilding(7, 2)
+        LocalBuilding("Building", building_guid = 5, map_id = 2, FoundationBuilder(Building.Structure(StructureType.Building)))
+        LocalObject(6, SpawnTube.Constructor(Vector3.Zero, Vector3.Zero))
+        ObjectToBuilding(6, 5)
 
-        LocalBuilding(building_guid = 3, map_id = 3, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(1,1,1))))
-        LocalObject(4, Terminal.Constructor(GlobalDefinitions.dropship_vehicle_terminal))
-        LocalObject(5, SpawnTube.Constructor(Vector3.Zero, Vector3.Zero))
-        LocalObject(6, Terminal.Constructor(GlobalDefinitions.dropship_vehicle_terminal))
-        ObjectToBuilding(4, 3)
-        ObjectToBuilding(5, 3)
-        ObjectToBuilding(6, 3)
+        LocalBuilding("Building", building_guid = 7, map_id = 3, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(1,1,1))))
+        LocalObject(8, Terminal.Constructor(Vector3.Zero, GlobalDefinitions.dropship_vehicle_terminal))
+        LocalObject(9, SpawnTube.Constructor(Vector3(1,0,0), Vector3.Zero))
+        LocalObject(10, Terminal.Constructor(Vector3.Zero, GlobalDefinitions.dropship_vehicle_terminal))
+        ObjectToBuilding(8, 7)
+        ObjectToBuilding(9, 7)
+        ObjectToBuilding(10, 7)
       }
       val zone = new Zone("test", map6, 1) { override def SetupNumberPools() = { } }
       zone.Actor = system.actorOf(Props(classOf[ZoneActor], zone), "test-init")
       zone.Actor ! Zone.Init()
-      expectNoMsg(Duration.create(300, "ms"))
+      expectNoMsg(Duration.create(1, "seconds"))
 
       val groups = zone.SpawnGroups()
       assert(groups.size == 2)
@@ -204,15 +203,15 @@ class ZoneActorTest extends ActorTest {
           val building1 = zone.SpawnGroups(building)
           assert(tubes.length == 2)
           assert(tubes.head == building1.head)
-          assert(tubes.head.GUID == PlanetSideGUID(1))
+          assert(tubes.head.GUID == PlanetSideGUID(2))
           assert(tubes(1) == building1(1))
-          assert(tubes(1).GUID == PlanetSideGUID(3))
+          assert(tubes(1).GUID == PlanetSideGUID(4))
         }
         else if(building.MapId == 3) {
           val building2 = zone.SpawnGroups(building)
           assert(tubes.length == 1)
           assert(tubes.head == building2.head)
-          assert(tubes.head.GUID == PlanetSideGUID(5))
+          assert(tubes.head.GUID == PlanetSideGUID(9))
         }
         else {
           assert(false)
@@ -222,18 +221,18 @@ class ZoneActorTest extends ActorTest {
 
     "select spawn points based on the position of the player in reference to buildings" in {
       val map6 = new ZoneMap("map6") {
-        LocalBuilding(building_guid = 1, map_id = 1, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(1,1,1))))
-        LocalObject(1, SpawnTube.Constructor(Vector3.Zero, Vector3.Zero))
-        ObjectToBuilding(1, 1)
+        LocalBuilding("Building", building_guid = 1, map_id = 1, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(1,1,1))))
+        LocalObject(2, SpawnTube.Constructor(Vector3(1,0,0), Vector3.Zero))
+        ObjectToBuilding(2, 1)
 
-        LocalBuilding(building_guid = 3, map_id = 3, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(4,4,4))))
-        LocalObject(5, SpawnTube.Constructor(Vector3.Zero, Vector3.Zero))
-        ObjectToBuilding(5, 3)
+        LocalBuilding("Building", building_guid = 3, map_id = 3, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(4,4,4))))
+        LocalObject(4, SpawnTube.Constructor(Vector3(1,0,0), Vector3.Zero))
+        ObjectToBuilding(4, 3)
       }
       val zone = new Zone("test", map6, 1) { override def SetupNumberPools() = { } }
       zone.Actor = system.actorOf(Props(classOf[ZoneActor], zone), "test-spawn")
       zone.Actor ! Zone.Init()
-      expectNoMsg(Duration.create(300, "ms"))
+      expectNoMsg(Duration.create(1, "seconds"))
       val player = Player(Avatar("Chord", PlanetSideEmpire.NEUTRAL, CharacterGender.Male, 0, CharacterVoice.Voice5))
 
       val bldg1 = zone.Building(1).get
@@ -255,9 +254,9 @@ class ZoneActorTest extends ActorTest {
 
     "will report if no spawn points have been found in a zone" in {
       val map6 = new ZoneMap("map6") {
-        LocalBuilding(building_guid = 1, map_id = 1, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(1,1,1))))
+        LocalBuilding("Building", building_guid = 1, map_id = 1, FoundationBuilder(Building.Structure(StructureType.Building, Vector3(1,1,1))))
 
-        LocalBuilding(building_guid = 3, map_id = 3, FoundationBuilder(Building.Structure(StructureType.Tower, Vector3(4,4,4))))
+        LocalBuilding("Building", building_guid = 3, map_id = 3, FoundationBuilder(Building.Structure(StructureType.Tower, Vector3(4,4,4))))
         LocalObject(5, SpawnTube.Constructor(Vector3.Zero, Vector3.Zero))
         ObjectToBuilding(5, 3)
       }
@@ -358,6 +357,7 @@ class ZonePopulationTest extends ActorTest {
       val zone = new Zone("test", new ZoneMap(""), 0) { override def SetupNumberPools() = { } }
       val avatar = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
       val player = Player(avatar)
+      player.GUID = PlanetSideGUID(1)
       zone.Actor = system.actorOf(Props(classOf[ZoneActor], zone), ZoneTest.TestName)
       zone.Actor ! Zone.Init()
       expectNoMsg(200 milliseconds)
@@ -371,7 +371,7 @@ class ZonePopulationTest extends ActorTest {
       assert(zone.LivePlayers.size == 1)
       assert(zone.LivePlayers.head == player)
       zone.Population ! Zone.Population.Leave(avatar)
-      val reply = receiveOne(Duration.create(100, "ms"))
+      val reply = receiveOne(Duration.create(500, "ms"))
       assert(zone.Players.isEmpty)
       assert(zone.LivePlayers.isEmpty)
       assert(reply.isInstanceOf[Zone.Population.PlayerHasLeft])

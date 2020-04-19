@@ -2,6 +2,7 @@
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
+import net.psforever.types.PlanetSideGUID
 import scodec.codecs._
 import scodec.{Attempt, Codec, Err}
 import shapeless.{::, HNil}
@@ -11,10 +12,19 @@ import shapeless.{::, HNil}
   * @param player_guid1 the player
   * @param player_guid2 the player(?);
   *                     often matches with `player_guid1`
-  * @param unk na
+  * @param unk na;
+  *            commonly, zero
   * @param list list of detected objects;
   *             normally contains at least one element
   */
+
+  /*
+    BETA CLIENT DEBUG INFO:
+      Detector
+      Sender
+      Object Count (not really)
+      Detected Object[]
+   */
 final case class ObjectDetectedMessage(player_guid1 : PlanetSideGUID,
                                        player_guid2 : PlanetSideGUID,
                                        unk : Int,

@@ -3,48 +3,39 @@ package services.local
 
 import akka.actor.{Actor, ActorRef, Props}
 import net.psforever.objects.ce.Deployable
-import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
-import net.psforever.objects.serverobject.structures.Building
-import net.psforever.objects.serverobject.terminals.{CaptureTerminal, ProximityUnit, Terminal}
-import net.psforever.objects.zones.{InterstellarCluster, Zone}
+import net.psforever.objects.serverobject.structures.{Amenity, Building}
+import net.psforever.objects.serverobject.terminals.{CaptureTerminal, Terminal}
+import net.psforever.objects.zones.Zone
 import net.psforever.objects._
-import net.psforever.packet.game.{PlanetSideGUID, TriggeredEffect, TriggeredEffectLocation}
+import net.psforever.packet.game.{TriggeredEffect, TriggeredEffectLocation}
 import net.psforever.objects.vital.Vitality
-import net.psforever.types.Vector3
+import net.psforever.types.{PlanetSideGUID, Vector3}
 import services.local.support._
 import services.vehicle.{VehicleAction, VehicleServiceMessage}
-import services.{GenericEventBus, RemoverActor, Service, ServiceManager}
+import services.{GenericEventBus, RemoverActor, Service}
 
-import scala.util.Success
 import scala.concurrent.duration._
-import akka.pattern.ask
+import net.psforever.objects.serverobject.hackable.Hackable
 import net.psforever.objects.vehicles.{Utility, UtilityType}
-import services.ServiceManager.Lookup
 import services.support.SupportActor
 
 import scala.concurrent.duration.Duration
 
-class LocalService extends Actor {
-  private val doorCloser = context.actorOf(Props[DoorCloseActor], "local-door-closer")
-  private val hackClearer = context.actorOf(Props[HackClearActor], "local-hack-clearer")
-  private val hackCapturer = context.actorOf(Props[HackCaptureActor], "local-hack-capturer")
-  private val engineer = context.actorOf(Props[DeployableRemover], "deployable-remover-agent")
-  private val teleportDeployment : ActorRef = context.actorOf(Props[RouterTelepadActivation], "telepad-activate-agent")
+class LocalService(zone : Zone) extends Actor {
+  private val doorCloser = context.actorOf(Props[DoorCloseActor], s"${zone.Id}-local-door-closer")
+  private val hackClearer = context.actorOf(Props[HackClearActor], s"${zone.Id}-local-hack-clearer")
+  private val hackCapturer = context.actorOf(Props[HackCaptureActor], s"${zone.Id}-local-hack-capturer")
+  private val engineer = context.actorOf(Props[DeployableRemover], s"${zone.Id}-deployable-remover-agent")
+  private val teleportDeployment : ActorRef = context.actorOf(Props[RouterTelepadActivation], s"${zone.Id}-telepad-activate-agent")
   private [this] val log = org.log4s.getLogger
-  var cluster : ActorRef = Actor.noSender
 
   override def preStart = {
-    log.info("Starting...")
-    ServiceManager.serviceManager ! Lookup("cluster")
+    log.trace(s"Awaiting ${zone.Id} local events ...")
   }
 
   val LocalEvents = new GenericEventBus[LocalServiceResponse]
 
-  def receive = {
-    case ServiceManager.LookupResult("cluster", endpoint) =>
-      cluster = endpoint
-      log.trace("LocalService got cluster service " + endpoint)
-
+  def receive : Receive = {
     case Service.Join(channel) =>
       val path = s"/$channel/Local"
       val who = sender()
@@ -73,7 +64,11 @@ class LocalService extends Actor {
           LocalEvents.publish(
             LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.DeployableMapIcon(behavior, deployInfo))
           )
-        case LocalAction.DoorOpens(player_guid, zone, door) =>
+        case LocalAction.Detonate(guid, obj) =>
+          LocalEvents.publish(
+            LocalServiceResponse(s"/$forChannel/Local", Service.defaultPlayerGUID, LocalResponse.Detonate(guid, obj))
+          )
+        case LocalAction.DoorOpens(player_guid, _, door) =>
           doorCloser ! DoorCloseActor.DoorIsOpen(door, zone)
           LocalEvents.publish(
             LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.DoorOpens(door.GUID))
@@ -86,14 +81,20 @@ class LocalService extends Actor {
           LocalEvents.publish(
             LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.HackClear(target.GUID, unk1, unk2))
           )
-        case LocalAction.HackTemporarily(player_guid, zone, target, unk1, duration, unk2) =>
+        case LocalAction.HackTemporarily(player_guid, _, target, unk1, duration, unk2) =>
           hackClearer ! HackClearActor.ObjectIsHacked(target, zone, unk1, unk2, duration)
           LocalEvents.publish(
             LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.HackObject(target.GUID, unk1, unk2))
           )
         case LocalAction.ClearTemporaryHack(_, target) =>
           hackClearer ! HackClearActor.ObjectIsResecured(target)
-        case LocalAction.HackCaptureTerminal(player_guid, zone, target, unk1, unk2, isResecured) =>
+        case LocalAction.HackCaptureTerminal(player_guid, _, target, unk1, unk2, isResecured) =>
+          // When a CC is hacked (or resecured) all amenities for the base should be unhacked
+          val building = target.Owner.asInstanceOf[Building]
+          val hackableAmenities = building.Amenities.filter(x => x.isInstanceOf[Hackable]).map(x => x.asInstanceOf[Amenity with Hackable])
+          hackableAmenities.foreach(amenity =>
+            if(amenity.HackedBy.isDefined) { hackClearer ! HackClearActor.ObjectIsResecured(amenity) }
+          )
 
           if(isResecured){
             hackCapturer ! HackCaptureActor.ClearHack(target, zone)
@@ -105,12 +106,20 @@ class LocalService extends Actor {
               case GlobalDefinitions.secondary_capture =>
                 // Tower CC
                 hackCapturer ! HackCaptureActor.ObjectIsHacked(target, zone, unk1, unk2, duration = 1 nanosecond)
+              case GlobalDefinitions.vanu_control_console =>
+                hackCapturer ! HackCaptureActor.ObjectIsHacked(target, zone, unk1, unk2, duration = 10 minutes)
             }
           }
 
           LocalEvents.publish(
             LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.HackCaptureTerminal(target.GUID, unk1, unk2, isResecured))
           )
+
+          // If the owner of this capture terminal is on the lattice trigger a zone wide map update to update lattice benefits
+          zone.Lattice find building match {
+            case Some(_) => building.TriggerZoneMapUpdate()
+            case None => ;
+          }
         case LocalAction.RouterTelepadTransport(player_guid, passenger_guid, src_guid, dest_guid) =>
           LocalEvents.publish(
             LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.RouterTelepadTransport(passenger_guid, src_guid, dest_guid))
@@ -139,77 +148,65 @@ class LocalService extends Actor {
           LocalEvents.publish(
             LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.TriggerSound(sound, pos, unk, volume))
           )
+        case LocalAction.UpdateForceDomeStatus(player_guid, building_guid, activated) => {
+          LocalEvents.publish(
+            LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.UpdateForceDomeStatus(building_guid, activated))
+          )
+        }
+        case LocalAction.RechargeVehicleWeapon(player_guid, vehicle_guid, weapon_guid) =>
+          LocalEvents.publish(
+            LocalServiceResponse(s"/$forChannel/Local", player_guid, LocalResponse.RechargeVehicleWeapon(vehicle_guid, weapon_guid))
+          )
         case _ => ;
       }
 
     //response from DoorCloseActor
-    case DoorCloseActor.CloseTheDoor(door_guid, zone_id) =>
+    case DoorCloseActor.CloseTheDoor(door_guid, _) =>
       LocalEvents.publish(
-        LocalServiceResponse(s"/$zone_id/Local", Service.defaultPlayerGUID, LocalResponse.DoorCloses(door_guid))
+        LocalServiceResponse(s"/${zone.Id}/Local", Service.defaultPlayerGUID, LocalResponse.DoorCloses(door_guid))
       )
 
     //response from HackClearActor
-    case HackClearActor.ClearTheHack(target_guid, zone_id, unk1, unk2) =>
+    case HackClearActor.ClearTheHack(target_guid, _, unk1, unk2) =>
       log.warn(s"Clearing hack for $target_guid")
       LocalEvents.publish(
-        LocalServiceResponse(s"/$zone_id/Local", Service.defaultPlayerGUID, LocalResponse.HackClear(target_guid, unk1, unk2))
+        LocalServiceResponse(s"/${zone.Id}/Local", Service.defaultPlayerGUID, LocalResponse.HackClear(target_guid, unk1, unk2))
       )
 
     //message from ProximityTerminalControl
     case Terminal.StartProximityEffect(terminal) =>
       LocalEvents.publish(
-        LocalServiceResponse(s"/${terminal.Owner.Continent}/Local", PlanetSideGUID(0), LocalResponse.ProximityTerminalEffect(terminal.GUID, true))
+        LocalServiceResponse(s"/${zone.Id}/Local", PlanetSideGUID(0), LocalResponse.ProximityTerminalEffect(terminal.GUID, true))
       )
     case Terminal.StopProximityEffect(terminal) =>
       LocalEvents.publish(
-        LocalServiceResponse(s"/${terminal.Owner.Continent}/Local", PlanetSideGUID(0), LocalResponse.ProximityTerminalEffect(terminal.GUID, false))
+        LocalServiceResponse(s"/${zone.Id}/Local", PlanetSideGUID(0), LocalResponse.ProximityTerminalEffect(terminal.GUID, false))
       )
 
-    case HackCaptureActor.HackTimeoutReached(capture_terminal_guid, zone_id, _, _, hackedByFaction) =>
-      import scala.concurrent.ExecutionContext.Implicits.global
-      ask(cluster, InterstellarCluster.GetWorld(zone_id))(1 seconds).onComplete {
-          case Success(InterstellarCluster.GiveWorld(_, zone)) =>
-            val terminal = zone.asInstanceOf[Zone].GUID(capture_terminal_guid).get.asInstanceOf[CaptureTerminal]
-            val building = terminal.Owner.asInstanceOf[Building]
+    case HackCaptureActor.HackTimeoutReached(capture_terminal_guid, _, _, _, hackedByFaction) =>
+      val terminal = zone.GUID(capture_terminal_guid).get.asInstanceOf[CaptureTerminal]
+      val building = terminal.Owner.asInstanceOf[Building]
 
-            // todo: Move this to a function for Building
-            var ntuLevel = 0
-            building.Amenities.find(_.Definition == GlobalDefinitions.resource_silo).asInstanceOf[Option[ResourceSilo]] match {
-              case Some(obj: ResourceSilo) =>
-                ntuLevel = obj.CapacitorDisplay.toInt
-              case _ =>
-                // Base has no NTU silo - likely a tower / cavern CC
-                ntuLevel = 1
-            }
+      if(building.NtuLevel > 0) {
+        log.info(s"Setting base ${building.GUID} / MapId: ${building.MapId} as owned by $hackedByFaction")
 
-            if(ntuLevel > 0) {
-              log.info(s"Setting base ${building.GUID} / MapId: ${building.MapId} as owned by $hackedByFaction")
-
-              building.Faction = hackedByFaction
-              self ! LocalServiceMessage(zone.Id, LocalAction.SetEmpire(building.GUID, hackedByFaction))
-            } else {
-              log.info("Base hack completed, but base was out of NTU.")
-            }
-
-            // Reset CC back to normal operation
-            self ! LocalServiceMessage(zone.Id, LocalAction.HackCaptureTerminal(PlanetSideGUID(-1), zone, terminal, 0, 8L, isResecured = true))
-            //todo: this appears to be the way to reset the base warning lights after the hack finishes but it doesn't seem to work. The attribute above is a workaround
-            self ! HackClearActor.ClearTheHack(building.GUID, zone.Id, 3212836864L, 8L)
-          case Success(_) =>
-            log.warn("Got success from InterstellarCluster.GetWorld but didn't know how to handle it")
-
-        case scala.util.Failure(_) => log.warn(s"LocalService Failed to get zone when hack timeout was reached")
+        building.Faction = hackedByFaction
+        self ! LocalServiceMessage(zone.Id, LocalAction.SetEmpire(building.GUID, hackedByFaction))
+      } else {
+        log.info("Base hack completed, but base was out of NTU.")
       }
 
-    case HackCaptureActor.GetHackTimeRemainingNanos(capture_console_guid) =>
-      hackCapturer forward HackCaptureActor.GetHackTimeRemainingNanos(capture_console_guid)
+      // Reset CC back to normal operation
+      self ! LocalServiceMessage(zone.Id, LocalAction.HackCaptureTerminal(PlanetSideGUID(-1), zone, terminal, 0, 8L, isResecured = true))
+      //todo: this appears to be the way to reset the base warning lights after the hack finishes but it doesn't seem to work. The attribute above is a workaround
+      self ! HackClearActor.ClearTheHack(building.GUID, zone.Id, 3212836864L, 8L)
 
     //message to Engineer
     case LocalServiceMessage.Deployables(msg) =>
       engineer forward msg
 
     //message(s) from Engineer
-    case msg @ DeployableRemover.EliminateDeployable(obj : TurretDeployable, guid, pos, zone) =>
+    case msg @ DeployableRemover.EliminateDeployable(obj : TurretDeployable, guid, pos, _) =>
       val seats = obj.Seats.values
       if(seats.count(_.isOccupied) > 0) {
         val wasKickedByDriver = false //TODO yeah, I don't know
@@ -226,27 +223,27 @@ class LocalService extends Actor {
         context.system.scheduler.scheduleOnce(Duration.create(2, "seconds"), self, msg)
       }
       else {
-        EliminateDeployable(obj, guid, pos, zone.Id)
+        EliminateDeployable(obj, guid, pos)
       }
 
-    case DeployableRemover.EliminateDeployable(obj : BoomerDeployable, guid, pos, zone) =>
-      EliminateDeployable(obj, guid, pos, zone.Id)
+    case DeployableRemover.EliminateDeployable(obj : BoomerDeployable, guid, pos, _) =>
+      EliminateDeployable(obj, guid, pos)
       obj.Trigger match {
         case Some(trigger) =>
           log.warn(s"LocalService: deconstructing boomer in ${zone.Id}, but trigger@${trigger.GUID.guid} still exists")
         case _ => ;
       }
 
-    case DeployableRemover.EliminateDeployable(obj : TelepadDeployable, guid, pos, zone) =>
+    case DeployableRemover.EliminateDeployable(obj : TelepadDeployable, guid, pos, _) =>
       obj.Active = false
       //ClearSpecific will also remove objects that do not have GUID's; we may not have a GUID at this time
       teleportDeployment ! SupportActor.ClearSpecific(List(obj), zone)
-      EliminateDeployable(obj, guid, pos, zone.Id)
+      EliminateDeployable(obj, guid, pos)
 
-    case DeployableRemover.EliminateDeployable(obj, guid, pos, zone) =>
-      EliminateDeployable(obj, guid, pos, zone.Id)
+    case DeployableRemover.EliminateDeployable(obj, guid, pos, _) =>
+      EliminateDeployable(obj, guid, pos)
 
-    case DeployableRemover.DeleteTrigger(trigger_guid, zone) =>
+    case DeployableRemover.DeleteTrigger(trigger_guid, _) =>
       LocalEvents.publish(
         LocalServiceResponse(s"/${zone.Id}/Local", Service.defaultPlayerGUID, LocalResponse.ObjectDelete(trigger_guid, 0))
       )
@@ -256,7 +253,7 @@ class LocalService extends Actor {
       teleportDeployment forward msg
 
     //from RouterTelepadActivation
-    case RouterTelepadActivation.ActivateTeleportSystem(telepad, zone) =>
+    case RouterTelepadActivation.ActivateTeleportSystem(telepad, _) =>
       val remoteTelepad = telepad.asInstanceOf[TelepadDeployable]
       remoteTelepad.Active = true
       zone.GUID(remoteTelepad.Router) match {
@@ -290,19 +287,19 @@ class LocalService extends Actor {
               }
             case _ =>
               log.error(s"ActivateTeleportSystem: vehicle@${router.GUID.guid} in ${zone.Id} is not a router?")
-              RouterTelepadError(remoteTelepad, zone, "@Telepad_NoDeploy_RouterLost")
+              RouterTelepadError(remoteTelepad, "@Telepad_NoDeploy_RouterLost")
           }
         case Some(o) =>
           log.error(s"ActivateTeleportSystem: ${o.Definition.Name}@${o.GUID.guid} in ${zone.Id} is not a router")
-          RouterTelepadError(remoteTelepad, zone, "@Telepad_NoDeploy_RouterLost")
+          RouterTelepadError(remoteTelepad, "@Telepad_NoDeploy_RouterLost")
         case None =>
-          RouterTelepadError(remoteTelepad, zone, "@Telepad_NoDeploy_RouterLost")
+          RouterTelepadError(remoteTelepad, "@Telepad_NoDeploy_RouterLost")
       }
 
     //synchronized damage calculations
-    case Vitality.DamageOn(target : Deployable, func) =>
-      func(target)
-      sender ! Vitality.DamageResolution(target)
+    case Vitality.DamageOn(target : Deployable, damage_func) =>
+      val cause = damage_func(target)
+      sender ! Vitality.DamageResolution(target, cause)
 
     case msg =>
       log.warn(s"Unhandled message $msg from $sender")
@@ -311,10 +308,9 @@ class LocalService extends Actor {
   /**
     * na
     * @param telepad na
-    * @param zone na
     * @param msg na
     */
-  def RouterTelepadError(telepad : TelepadDeployable, zone : Zone, msg : String) : Unit = {
+  def RouterTelepadError(telepad : TelepadDeployable, msg : String) : Unit = {
     telepad.OwnerName match {
       case Some(name) =>
         LocalEvents.publish(
@@ -340,11 +336,10 @@ class LocalService extends Actor {
     * @param guid the deployable objects globally unique identifier;
     *             may be a former identifier
     * @param position the deployable's position
-    * @param zoneId the zone where the deployable is currently placed
     */
-  def EliminateDeployable(obj : PlanetSideGameObject with Deployable, guid : PlanetSideGUID, position : Vector3, zoneId : String) : Unit = {
+  def EliminateDeployable(obj : PlanetSideGameObject with Deployable, guid : PlanetSideGUID, position : Vector3) : Unit = {
     LocalEvents.publish(
-      LocalServiceResponse(s"/$zoneId/Local", Service.defaultPlayerGUID, LocalResponse.EliminateDeployable(obj, guid, position))
+      LocalServiceResponse(s"/${zone.Id}/Local", Service.defaultPlayerGUID, LocalResponse.EliminateDeployable(obj, guid, position))
     )
     obj.OwnerName match {
       case Some(name) =>

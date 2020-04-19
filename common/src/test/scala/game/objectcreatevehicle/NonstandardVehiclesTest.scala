@@ -3,7 +3,7 @@ package game.objectcreatevehicle
 
 import net.psforever.packet._
 import net.psforever.packet.game.objectcreate._
-import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID}
+import net.psforever.packet.game.ObjectCreateMessage
 import net.psforever.types._
 import org.specs2.mutable._
 import scodec.bits._
@@ -22,7 +22,7 @@ class NonstandardVehiclesTest extends Specification {
           guid mustEqual PlanetSideGUID(3595)
           parent.isDefined mustEqual false
           data match {
-            case DroppodData(basic, burn, health) =>
+            case DroppodData(basic, health, burn, unk) =>
               basic.pos.coord mustEqual Vector3(5108.0f, 6164.0f, 1023.9844f)
               basic.pos.orient mustEqual Vector3.z(90.0f)
 
@@ -31,7 +31,7 @@ class NonstandardVehiclesTest extends Specification {
               basic.data.alternate mustEqual false
               basic.data.v1 mustEqual true
               basic.data.v2.isDefined mustEqual false
-              basic.data.v3 mustEqual false
+              basic.data.jammered mustEqual false
               basic.data.v5.isDefined mustEqual false
               basic.data.guid mustEqual PlanetSideGUID(0)
 

@@ -8,8 +8,7 @@ import net.psforever.objects.{Avatar, GlobalDefinitions, Player}
 import net.psforever.objects.serverobject.locks.{IFFLock, IFFLockControl}
 import net.psforever.objects.serverobject.structures.{Building, StructureType}
 import net.psforever.objects.zones.Zone
-import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.{CharacterGender, CharacterVoice, PlanetSideEmpire, Vector3}
+import net.psforever.types._
 import org.specs2.mutable.Specification
 
 class IFFLockTest extends Specification {
@@ -70,7 +69,7 @@ class IFFLockControl2Test extends ActorTest {
 
 class IFFLockControl3Test extends ActorTest {
   "IFFLockControl" should {
-    "can hack" in {
+    "can clear hack" in {
       val (player, lock) = IFFLockControlTest.SetUpAgents(PlanetSideEmpire.TR)
       player.GUID = PlanetSideGUID(1)
       assert(lock.HackedBy.isEmpty)
@@ -89,7 +88,7 @@ object IFFLockControlTest {
   def SetUpAgents(faction : PlanetSideEmpire.Value)(implicit system : ActorSystem) : (Player, IFFLock) = {
     val lock = IFFLock(GlobalDefinitions.lock_external)
     lock.Actor = system.actorOf(Props(classOf[IFFLockControl], lock), "lock-control")
-    lock.Owner = new Building(building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)
+    lock.Owner = new Building("Building", building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)
     lock.Owner.Faction = faction
     (Player(Avatar("test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), lock)
   }

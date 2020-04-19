@@ -2,6 +2,7 @@
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PlanetSideGamePacket}
+import net.psforever.types.PlanetSideGUID
 import scodec.Codec
 import scodec.codecs._
 
@@ -19,6 +20,14 @@ import scodec.codecs._
   * @param unk2 na;
   *             usually 5L
   */
+
+  /*
+    BETA CLIENT DEBUG INFO:
+    Message type:   %d (%s)\n        length: %d\n
+        Environment Type: %u (%s)\n
+        Guid: %d\n
+        Damage Amount: %u\n
+   */
 final case class TriggerEnvironmentalDamageMessage(unk1 : Int,
                                                    target_guid : PlanetSideGUID,
                                                    unk2 : Long)

@@ -1,32 +1,39 @@
 // Copyright (c) 2017 PSForever
 package net.psforever.objects
 
+import net.psforever.objects.avatar.LoadoutManager
 import net.psforever.objects.definition.{AvatarDefinition, ExoSuitDefinition, SpecialExoSuitDefinition}
-import net.psforever.objects.equipment.{Equipment, EquipmentSize, EquipmentSlot}
+import net.psforever.objects.equipment.{Equipment, EquipmentSize, EquipmentSlot, JammableUnit}
 import net.psforever.objects.inventory.{Container, GridInventory, InventoryItem}
-import net.psforever.objects.loadouts.Loadout
+import net.psforever.objects.serverobject.PlanetSideServerObject
 import net.psforever.objects.serverobject.affinity.FactionAffinity
 import net.psforever.objects.vital.resistance.ResistanceProfile
 import net.psforever.objects.vital.{DamageResistanceModel, Vitality}
 import net.psforever.objects.zones.ZoneAware
-import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.packet.game.objectcreate.{Cosmetics, DetailedCharacterData, PersonalStyle}
-import net.psforever.types._
+import net.psforever.types.{PlanetSideGUID, _}
 
 import scala.annotation.tailrec
 import scala.util.{Success, Try}
 
-class Player(private val core : Avatar) extends PlanetSideGameObject
+class Player(private val core : Avatar) extends PlanetSideServerObject
   with FactionAffinity
   with Vitality
   with ResistanceProfile
   with Container
+  with JammableUnit
   with ZoneAware {
   private var alive : Boolean = false
   private var backpack : Boolean = false
   private var health : Int = 0
   private var stamina : Int = 0
   private var armor : Int = 0
+
+  private var capacitor : Float = 0f
+  private var capacitorState : CapacitorStateType.Value = CapacitorStateType.Idle
+  private var capacitorLastUsedMillis : Long = 0
+  private var capacitorLastChargedMillis : Long = 0
+
   private var maxHealth : Int = 100 //TODO affected by empire benefits, territory benefits, and bops
   private var maxStamina : Int = 100 //does anything affect this?
 
@@ -44,19 +51,26 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
   private var cloaked : Boolean = false
 
   private var vehicleSeated : Option[PlanetSideGUID] = None
-  private var vehicleOwned : Option[PlanetSideGUID] = None
 
-  private var continent : String = "home2" //the zone id
+  Continent = "home2" //the zone id
 
-  //SouNourS things
-  /** Last medkituse. */
-  var lastMedkit : Long = 0
+  var silenced : Boolean = false
+  var firstLoad : Boolean = false
+  def FirstLoad : Boolean = firstLoad
+  def FirstLoad_=(status : Boolean) : Boolean = {
+    firstLoad = status
+    FirstLoad
+  }
+  var death_by : Int = 0
   var lastSeenStreamMessage : Array[Long] = Array.fill[Long](65535)(0L)
   var lastShotSeq_time : Int = -1
   /** From PlanetsideAttributeMessage */
   var PlanetsideAttribute : Array[Long] = Array.ofDim(120)
+  var skipStaminaRegenForTurns : Int = 0
 
   Player.SuitSetup(this, exosuit)
+
+  def CharId : Long = core.CharId
 
   def Name : String = core.name
 
@@ -68,6 +82,8 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
 
   def Voice : CharacterVoice.Value = core.voice
 
+  def LFS : Boolean = core.LFS
+
   def isAlive : Boolean = alive
 
   def isBackpack : Boolean = backpack
@@ -78,6 +94,7 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
       Health = MaxHealth
       Stamina = MaxStamina
       Armor = MaxArmor
+      Capacitor = 0
       ResetAllImplants()
     }
     isAlive
@@ -88,6 +105,11 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
     Health = 0
     Stamina = 0
     false
+  }
+
+  def Revive : Boolean = {
+    alive = true
+    true
   }
 
   def Release : Boolean = {
@@ -103,7 +125,7 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
   def Health : Int = health
 
   def Health_=(assignHealth : Int) : Int = {
-    health = if(isAlive) { math.min(math.max(0, assignHealth), MaxHealth) } else { 0 }
+    health = math.min(math.max(0, assignHealth), MaxHealth)
     Health
   }
 
@@ -131,11 +153,49 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
   def Armor : Int = armor
 
   def Armor_=(assignArmor : Int) : Int = {
-    armor = if(isAlive) { math.min(math.max(0, assignArmor), MaxArmor) } else { 0 }
+    armor = math.min(math.max(0, assignArmor), MaxArmor)
     Armor
   }
 
   def MaxArmor : Int = exosuit.MaxArmor
+
+  def Capacitor : Float = capacitor
+
+  def Capacitor_=(value : Float) : Float = {
+    val newValue = math.min(math.max(0, value), ExoSuitDef.MaxCapacitor)
+
+    if(newValue < capacitor) {
+      capacitorLastUsedMillis = System.currentTimeMillis()
+      capacitorLastChargedMillis = 0
+    }
+    else if(newValue > capacitor && newValue < ExoSuitDef.MaxCapacitor) {
+      capacitorLastChargedMillis = System.currentTimeMillis()
+      capacitorLastUsedMillis = 0
+    }
+    else if(newValue > capacitor && newValue == ExoSuitDef.MaxCapacitor) {
+      capacitorLastChargedMillis = 0
+      capacitorLastUsedMillis = 0
+      capacitorState = CapacitorStateType.Idle
+    }
+
+    capacitor = newValue
+    capacitor
+  }
+
+  def CapacitorState : CapacitorStateType.Value = capacitorState
+  def CapacitorState_=(value : CapacitorStateType.Value) : CapacitorStateType.Value = {
+    value match {
+      case CapacitorStateType.Charging => capacitorLastChargedMillis = System.currentTimeMillis()
+      case CapacitorStateType.Discharging => capacitorLastUsedMillis = System.currentTimeMillis()
+      case _ => ;
+    }
+
+    capacitorState = value
+    capacitorState
+  }
+
+  def CapacitorLastUsedMillis = capacitorLastUsedMillis
+  def CapacitorLastChargedMillis = capacitorLastChargedMillis
 
   def VisibleSlots : Set[Int] = if(exosuit.SuitType == ExoSuitType.MAX) {
     Set(0)
@@ -276,9 +336,10 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
   def LastDrawnSlot : Int = lastDrawnSlot
 
   def ExoSuit : ExoSuitType.Value = exosuit.SuitType
+  def ExoSuitDef : ExoSuitDefinition = exosuit
 
   def ExoSuit_=(suit : ExoSuitType.Value) : Unit = {
-    val eSuit = ExoSuitDefinition.Select(suit)
+    val eSuit = ExoSuitDefinition.Select(suit, Faction)
     exosuit = eSuit
     Player.SuitSetup(this, eSuit)
     ChangeSpecialAbility()
@@ -294,7 +355,9 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
 
   def RadiationShielding = exosuit.RadiationShielding
 
-  def LoadLoadout(line : Int) : Option[Loadout] = core.LoadLoadout(line)
+  def EquipmentLoadouts : LoadoutManager = core.EquipmentLoadouts
+
+  def SquadLoadouts : LoadoutManager = core.SquadLoadouts
 
   def BEP : Long = core.BEP
 
@@ -341,7 +404,7 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
     Jumping
   }
 
-  def Cloaked : Boolean = jumping
+  def Cloaked : Boolean = cloaked
 
   def Cloaked_=(isCloaked : Boolean) : Boolean = {
     cloaked = isCloaked
@@ -493,9 +556,9 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
       SpecialExoSuitDefinition.Mode.Normal
   }
 
-  def isAnchored : Boolean = ExoSuit == ExoSuitType.MAX && Faction == PlanetSideEmpire.NC && UsingSpecial == SpecialExoSuitDefinition.Mode.Anchored
+  def isAnchored : Boolean = ExoSuit == ExoSuitType.MAX && Faction == PlanetSideEmpire.TR && UsingSpecial == SpecialExoSuitDefinition.Mode.Anchored
 
-  def isOverdrived : Boolean = ExoSuit == ExoSuitType.MAX && Faction == PlanetSideEmpire.NC && UsingSpecial == SpecialExoSuitDefinition.Mode.Overdrive
+  def isOverdrived : Boolean = ExoSuit == ExoSuitType.MAX && Faction == PlanetSideEmpire.TR && UsingSpecial == SpecialExoSuitDefinition.Mode.Overdrive
 
   def isShielded : Boolean = ExoSuit == ExoSuitType.MAX && Faction == PlanetSideEmpire.NC && UsingSpecial == SpecialExoSuitDefinition.Mode.Shielded
 
@@ -541,21 +604,11 @@ class Player(private val core : Avatar) extends PlanetSideGameObject
     VehicleSeated
   }
 
-  def VehicleOwned : Option[PlanetSideGUID] = vehicleOwned
+  def VehicleOwned : Option[PlanetSideGUID] = core.VehicleOwned
 
-  def VehicleOwned_=(guid : PlanetSideGUID) : Option[PlanetSideGUID] = VehicleOwned_=(Some(guid))
+  def VehicleOwned_=(guid : PlanetSideGUID) : Option[PlanetSideGUID] = core.VehicleOwned_=(Some(guid))
 
-  def VehicleOwned_=(guid : Option[PlanetSideGUID]) : Option[PlanetSideGUID] = {
-    vehicleOwned = guid
-    VehicleOwned
-  }
-
-  def Continent : String = continent
-
-  def Continent_=(zoneId : String) : String = {
-    continent = zoneId
-    Continent
-  }
+  def VehicleOwned_=(guid : Option[PlanetSideGUID]) : Option[PlanetSideGUID] = core.VehicleOwned_=(guid)
 
   def DamageModel = exosuit.asInstanceOf[DamageResistanceModel]
 
@@ -583,6 +636,8 @@ object Player {
   final val FreeHandSlot : Int = 250
   final val HandsDownSlot : Int = 255
 
+  final case class Die()
+
   def apply(core : Avatar) : Player = {
     new Player(core)
   }
@@ -599,7 +654,6 @@ object Player {
   def Respawn(player : Player) : Player = {
     if(player.Release) {
       val obj = new Player(player.core)
-      obj.VehicleOwned = player.VehicleOwned
       obj.Continent = player.Continent
       obj
     }

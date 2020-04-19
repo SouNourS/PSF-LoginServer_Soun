@@ -3,6 +3,7 @@ package net.psforever.objects.serverobject.structures
 
 import akka.actor.{Actor, ActorRef}
 import net.psforever.objects.serverobject.affinity.{FactionAffinity, FactionAffinityBehavior}
+import net.psforever.objects.zones.InterstellarCluster
 import net.psforever.packet.game.BuildingInfoUpdateMessage
 import services.ServiceManager
 import services.ServiceManager.Lookup
@@ -11,33 +12,35 @@ import services.galaxy.{GalaxyAction, GalaxyResponse, GalaxyServiceMessage, Gala
 class BuildingControl(building : Building) extends Actor with FactionAffinityBehavior.Check {
   def FactionObject : FactionAffinity = building
   var galaxyService : ActorRef = Actor.noSender
-  var localService : ActorRef = Actor.noSender
+  var interstellarCluster : ActorRef = Actor.noSender
   private[this] val log = org.log4s.getLogger
 
   override def preStart = {
-    log.info(s"Starting BuildingControl for ${building.GUID} / ${building.MapId}")
+    log.trace(s"Starting BuildingControl for ${building.GUID} / ${building.MapId}")
     ServiceManager.serviceManager ! Lookup("galaxy")
-    ServiceManager.serviceManager ! Lookup("local")
+    ServiceManager.serviceManager ! Lookup("cluster")
   }
 
   def receive : Receive = checkBehavior.orElse {
     case ServiceManager.LookupResult("galaxy", endpoint) =>
       galaxyService = endpoint
-      log.info("BuildingControl: Building " + building.GUID + " Got galaxy service " + endpoint)
-    case ServiceManager.LookupResult("local", endpoint) =>
-      localService = endpoint
-      log.info("BuildingControl: Building " + building.GUID + " Got local service " + endpoint)
+      log.trace("BuildingControl: Building " + building.GUID + " Got galaxy service " + endpoint)
+    case ServiceManager.LookupResult("cluster", endpoint) =>
+      interstellarCluster = endpoint
+      log.trace("BuildingControl: Building " + building.GUID + " Got interstellar cluster service " + endpoint)
+
     case FactionAffinity.ConvertFactionAffinity(faction) =>
       val originalAffinity = building.Faction
       if(originalAffinity != (building.Faction = faction)) {
         building.Amenities.foreach(_.Actor forward FactionAffinity.ConfirmFactionAffinity())
       }
       sender ! FactionAffinity.AssertFactionAffinity(building, faction)
-
+    case Building.TriggerZoneMapUpdate(zone_num: Int) =>
+      if(interstellarCluster != ActorRef.noSender) interstellarCluster ! InterstellarCluster.ZoneMapUpdate(zone_num)
     case Building.SendMapUpdate(all_clients: Boolean) =>
       val zoneNumber = building.Zone.Number
       val buildingNumber = building.MapId
-      log.info(s"sending BuildingInfoUpdateMessage update - zone=$zoneNumber, building=$buildingNumber")
+      log.trace(s"sending BuildingInfoUpdateMessage update - zone=$zoneNumber, building=$buildingNumber")
       val (
         ntuLevel,
         isHacked, empireHack, hackTimeRemaining, controllingEmpire,
@@ -62,7 +65,7 @@ class BuildingControl(building : Building) extends Actor with FactionAffinityBeh
       )
 
       if(all_clients) {
-        galaxyService ! GalaxyServiceMessage(GalaxyAction.MapUpdate(msg))
+        if(galaxyService != ActorRef.noSender) galaxyService ! GalaxyServiceMessage(GalaxyAction.MapUpdate(msg))
       } else {
         // Fake a GalaxyServiceResponse response back to just the sender
         sender ! GalaxyServiceResponse("", GalaxyResponse.MapUpdate(msg))

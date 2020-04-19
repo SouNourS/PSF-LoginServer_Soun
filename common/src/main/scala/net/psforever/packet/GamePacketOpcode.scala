@@ -18,14 +18,14 @@ object GamePacketOpcode extends Enumeration {
   type Type = Value
   val
   // OPCODES 0x00-0f
-  Unknown0,
+  Unknown0, // PPT_NULL in beta client
   LoginMessage,
   LoginRespMessage,
   ConnectToWorldRequestMessage, // found by searching for 83 F8 03 89 in IDA
   ConnectToWorldMessage,
   VNLWorldStatusMessage,
-  UnknownMessage6,
-  UnknownMessage7,
+  UnknownMessage6, // PPT_TRANSFERTOWORLDREQUEST
+  UnknownMessage7, // PPT_TRANSFERTOWORLDRESPONSE
   // 0x08
   PlayerStateMessage,
   HitMessage,
@@ -42,11 +42,11 @@ object GamePacketOpcode extends Enumeration {
   ChatMsg,
   CharacterNoRecordMessage,
   CharacterInfoMessage,
-  UnknownMessage21,
+  UnknownMessage21, // PPT_DISCONNECT
   BindPlayerMessage,
-  ObjectCreateMessage_Duplicate,
+  ObjectCreateMessage_Duplicate, // PPT_OBJECTCREATE
   // 0x18
-  ObjectCreateMessage,
+  ObjectCreateMessage, // PPT_OBJECTCREATEDETAILED
   ObjectDeleteMessage,
   PingMsg,
   VehicleStateMessage,
@@ -56,7 +56,7 @@ object GamePacketOpcode extends Enumeration {
   ActionResultMessage,
 
   // OPCODES 0x20-2f
-  UnknownMessage32,
+  UnknownMessage32, // PPT_ACTIONBEGIN
   ActionProgressMessage,
   ActionCancelMessage,
   ActionCancelAcknowledgeMessage,
@@ -68,10 +68,10 @@ object GamePacketOpcode extends Enumeration {
   CreateShortcutMessage,
   ChangeShortcutBankMessage,
   ObjectAttachMessage,
-  UnknownMessage43,
+  UnknownMessage43, // PPT_OBJECTEMPTY
   PlanetsideAttributeMessage,
   RequestDestroyMessage,
-  UnknownMessage46,
+  UnknownMessage46, // PPT_EQUIPITEM
   CharacterCreateRequestMessage,
 
   // OPCODES 0x30-3f
@@ -104,10 +104,10 @@ object GamePacketOpcode extends Enumeration {
   ChangeAmmoMessage,
   // 0x48
   TimeOfDayMessage,
-  UnknownMessage73,
+  UnknownMessage73, // PPT_PROJECTILE_EVENT_BLOCK
   SpawnRequestMessage,
   DeployRequestMessage,
-  UnknownMessage76,
+  UnknownMessage76, // PPT_BUILDINGSTATECHANGED
   RepairMessage,
   ServerVehicleOverrideMsg,
   LashMessage,
@@ -123,7 +123,7 @@ object GamePacketOpcode extends Enumeration {
   AvatarVehicleTimerMessage,
   // 0x58
   AvatarImplantMessage,
-  UnknownMessage89,
+  UnknownMessage89, // PPT_SEARCHMESSAGE
   DelayedPathMountMsg,
   OrbitalShuttleTimeMsg,
   AIDamage,
@@ -165,8 +165,8 @@ object GamePacketOpcode extends Enumeration {
   UnknownMessage122,
   DamageFeedbackMessage,
   DismountBuildingMsg,
-  UnknownMessage125,
-  UnknownMessage126,
+  UnknownMessage125, // PPT_MOUNTBUILDING
+  UnknownMessage126, // PPT_INTENDEDDROPZONE
   AvatarStatisticsMessage,
 
   // OPCODES 0x80-8f
@@ -329,7 +329,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x08 => game.PlayerStateMessage.decode
     case 0x09 => game.HitMessage.decode
     case 0x0a => game.HitHint.decode
-    case 0x0b => noDecoder(DamageMessage)
+    case 0x0b => game.DamageMessage.decode
     case 0x0c => game.DestroyMessage.decode
     case 0x0d => game.ReloadMessage.decode
     case 0x0e => game.MountVehicleMsg.decode
@@ -446,23 +446,23 @@ object GamePacketOpcode extends Enumeration {
     case 0x6b => game.TriggerSoundMessage.decode
     case 0x6c => game.LootItemMessage.decode
     case 0x6d => game.VehicleSubStateMessage.decode
-    case 0x6e => noDecoder(SquadMembershipRequest)
-    case 0x6f => noDecoder(SquadMembershipResponse)
+    case 0x6e => game.SquadMembershipRequest.decode
+    case 0x6f => game.SquadMembershipResponse.decode
 
     // OPCODES 0x70-7f
-    case 0x70 => noDecoder(SquadMemberEvent)
+    case 0x70 => game.SquadMemberEvent.decode
     case 0x71 => noDecoder(PlatoonEvent)
     case 0x72 => game.FriendsRequest.decode
     case 0x73 => game.FriendsResponse.decode
     case 0x74 => game.TriggerEnvironmentalDamageMessage.decode
     case 0x75 => game.TrainingZoneMessage.decode
     case 0x76 => game.DeployableObjectsInfoMessage.decode
-    case 0x77 => noDecoder(SquadState)
+    case 0x77 => game.SquadState.decode
     // 0x78
     case 0x78 => game.OxygenStateMessage.decode
     case 0x79 => noDecoder(TradeMessage)
     case 0x7a => noDecoder(UnknownMessage122)
-    case 0x7b => noDecoder(DamageFeedbackMessage)
+    case 0x7b => game.DamageFeedbackMessage.decode
     case 0x7c => game.DismountBuildingMsg.decode
     case 0x7d => noDecoder(UnknownMessage125)
     case 0x7e => noDecoder(UnknownMessage126)
@@ -472,7 +472,7 @@ object GamePacketOpcode extends Enumeration {
     case 0x80 => noDecoder(GenericObjectAction2Message)
     case 0x81 => game.DestroyDisplayMessage.decode
     case 0x82 => noDecoder(TriggerBotAction)
-    case 0x83 => noDecoder(SquadWaypointRequest)
+    case 0x83 => game.SquadWaypointRequest.decode
     case 0x84 => game.SquadWaypointEvent.decode
     case 0x85 => noDecoder(OffshoreVehicleMessage)
     case 0x86 => game.ObjectDeployedMessage.decode
@@ -592,11 +592,11 @@ object GamePacketOpcode extends Enumeration {
     case 0xe6 => game.ReplicationStreamMessage.decode
     case 0xe7 => game.SquadDefinitionActionMessage.decode
     // 0xe8
-    case 0xe8 => noDecoder(SquadDetailDefinitionUpdateMessage)
+    case 0xe8 => game.SquadDetailDefinitionUpdateMessage.decode
     case 0xe9 => noDecoder(TacticsMessage)
     case 0xea => noDecoder(RabbitUpdateMessage)
-    case 0xeb => noDecoder(SquadInvitationRequestMessage)
-    case 0xec => noDecoder(CharacterKnowledgeMessage)
+    case 0xeb => game.SquadInvitationRequestMessage.decode
+    case 0xec => game.CharacterKnowledgeMessage.decode
     case 0xed => noDecoder(GameScoreUpdateMessage)
     case 0xee => noDecoder(UnknownMessage238)
     case 0xef => noDecoder(OrderTerminalBugMessage)

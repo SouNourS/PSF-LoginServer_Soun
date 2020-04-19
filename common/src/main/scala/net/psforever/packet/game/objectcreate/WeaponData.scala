@@ -2,8 +2,7 @@
 package net.psforever.packet.game.objectcreate
 
 import net.psforever.packet.Marshallable
-import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.PlanetSideEmpire
+import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID}
 import scodec.{Attempt, Codec, Err}
 import scodec.codecs._
 import shapeless.{::, HNil}
@@ -143,7 +142,9 @@ object WeaponData extends Marshallable[WeaponData] {
         else {
           Attempt.successful(WeaponData(data, fmode, ammo, unk))
         }
-
+      case data :: fmode :: false :: None :: unk :: HNil =>
+        //rare pass condition, usually found in LockerContainer objects or temporarily existing as a dropped item
+        Attempt.successful(WeaponData(data, fmode, Nil, unk))
       case data =>
         Attempt.failure(Err(s"invalid weapon data format - $data"))
     },
@@ -159,7 +160,6 @@ object WeaponData extends Marshallable[WeaponData] {
         else {
           Attempt.successful(data :: fmode :: false :: Some(InventoryData(ammo)) :: unk :: HNil)
         }
-
       case _ =>
         Attempt.failure(Err("invalid weapon data format"))
     }

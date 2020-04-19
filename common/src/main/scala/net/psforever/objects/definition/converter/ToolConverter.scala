@@ -2,8 +2,8 @@
 package net.psforever.objects.definition.converter
 
 import net.psforever.objects.Tool
-import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.packet.game.objectcreate.{CommonFieldData, DetailedWeaponData, InternalSlot, WeaponData}
+import net.psforever.types.PlanetSideGUID
 
 import scala.util.{Success, Try}
 
@@ -21,7 +21,7 @@ class ToolConverter extends ObjectCreateConverter[Tool]() {
           alternate = false,
           true,
           None,
-          false,
+          obj.Jammed,
           None,
           None,
           PlanetSideGUID(0)
@@ -45,7 +45,7 @@ class ToolConverter extends ObjectCreateConverter[Tool]() {
           alternate = false,
           true,
           None,
-          false,
+          obj.Jammed,
           None,
           None,
           PlanetSideGUID(0)

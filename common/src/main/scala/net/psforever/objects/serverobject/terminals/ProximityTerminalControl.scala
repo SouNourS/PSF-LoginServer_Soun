@@ -6,7 +6,6 @@ import net.psforever.objects._
 import net.psforever.objects.serverobject.CommonMessages
 import net.psforever.objects.serverobject.affinity.{FactionAffinity, FactionAffinityBehavior}
 import net.psforever.objects.serverobject.hackable.HackableBehavior
-import services.{Service, ServiceManager}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -18,7 +17,6 @@ import scala.concurrent.duration._
   * @param term the proximity unit (terminal)
   */
 class ProximityTerminalControl(term : Terminal with ProximityUnit) extends Actor with FactionAffinityBehavior.Check with HackableBehavior.GenericHackable {
-  var service : ActorRef = ActorRef.noSender
   var terminalAction : Cancellable = DefaultCancellable.obj
   val callbacks : mutable.ListBuffer[ActorRef] = new mutable.ListBuffer[ActorRef]()
   val log = org.log4s.getLogger
@@ -28,32 +26,17 @@ class ProximityTerminalControl(term : Terminal with ProximityUnit) extends Actor
 
   def TerminalObject : Terminal with ProximityUnit = term
 
-  def receive : Receive = Start
-
-  def Start : Receive = checkBehavior
-    .orElse {
-    case Service.Startup() =>
-      ServiceManager.serviceManager ! ServiceManager.Lookup("local")
-
-    case ServiceManager.LookupResult("local", ref) =>
-      service = ref
-      context.become(Run)
-
-    case _ => ;
-  }
-
-  def Run : Receive = checkBehavior
+  def receive : Receive = checkBehavior
       .orElse(hackableBehavior)
       .orElse {
-      case CommonMessages.Use(_, Some(target : PlanetSideGameObject)) =>
-        if(term.Definition.asInstanceOf[ProximityDefinition].Validations.exists(p => p(target))) {
-          Use(target, term.Continent, sender)
-        }
-
-      case CommonMessages.Use(_, Some((target : PlanetSideGameObject, callback : ActorRef))) =>
-        if(term.Definition.asInstanceOf[ProximityDefinition].Validations.exists(p => p(target))) {
-          Use(target, term.Continent, callback)
-        }
+        case CommonMessages.Use(_, Some(target : PlanetSideGameObject)) =>
+          if(term.Definition.asInstanceOf[ProximityDefinition].Validations.exists(p => p(target))) {
+            Use(target, term.Continent, sender)
+          }
+        case CommonMessages.Use(_, Some((target : PlanetSideGameObject, callback : ActorRef))) =>
+          if(term.Definition.asInstanceOf[ProximityDefinition].Validations.exists(p => p(target))) {
+            Use(target, term.Continent, callback)
+          }
 
       case CommonMessages.Use(_, _) =>
         log.warn(s"unexpected format for CommonMessages.Use in this context")
@@ -68,7 +51,7 @@ class ProximityTerminalControl(term : Terminal with ProximityUnit) extends Actor
         val proxDef = term.Definition.asInstanceOf[ProximityDefinition]
         val validateFunc : PlanetSideGameObject=>Boolean = term.Validate(proxDef.UseRadius * proxDef.UseRadius, proxDef.Validations)
         val callbackList = callbacks.toList
-        term.Targets.zipWithIndex.foreach({ case((target, index)) =>
+        term.Targets.zipWithIndex.foreach({ case(target, index) =>
           if(validateFunc(target)) {
             callbackList.lift(index) match {
               case Some(cback) =>
@@ -92,7 +75,7 @@ class ProximityTerminalControl(term : Terminal with ProximityUnit) extends Actor
   def Use(target : PlanetSideGameObject, zone : String, callback : ActorRef) : Unit = {
     val hadNoUsers = term.NumberUsers == 0
     if(term.AddUser(target)) {
-      log.info(s"ProximityTerminal.Use: unit ${term.Definition.Name}@${term.GUID.guid} will act on $target")
+      log.trace(s"ProximityTerminal.Use: unit ${term.Definition.Name}@${term.GUID.guid} will act on $target")
       //add callback
       callbacks += callback
       //activation
@@ -101,7 +84,7 @@ class ProximityTerminalControl(term : Terminal with ProximityUnit) extends Actor
         import scala.concurrent.ExecutionContext.Implicits.global
         terminalAction.cancel
         terminalAction = context.system.scheduler.schedule(500 milliseconds, medDef.Interval, self, ProximityTerminalControl.TerminalAction())
-        service ! Terminal.StartProximityEffect(term)
+        TerminalObject.Zone.LocalEvents ! Terminal.StartProximityEffect(term)
       }
     }
     else {
@@ -114,13 +97,13 @@ class ProximityTerminalControl(term : Terminal with ProximityUnit) extends Actor
     val previousUsers = term.NumberUsers
     val hadUsers = previousUsers > 0
     if(whereTarget > -1 && term.RemoveUser(target)) {
-      log.info(s"ProximityTerminal.Unuse: unit ${term.Definition.Name}@${term.GUID.guid} will cease operation on $target")
+      log.trace(s"ProximityTerminal.Unuse: unit ${term.Definition.Name}@${term.GUID.guid} will cease operation on $target")
       //remove callback
       callbacks.remove(whereTarget)
       //de-activation (global / local)
       if(term.NumberUsers == 0 && hadUsers) {
         terminalAction.cancel
-        service ! Terminal.StopProximityEffect(term)
+        TerminalObject.Zone.LocalEvents ! Terminal.StopProximityEffect(term)
       }
     }
     else {
@@ -132,35 +115,5 @@ class ProximityTerminalControl(term : Terminal with ProximityUnit) extends Actor
 }
 
 object ProximityTerminalControl {
-  object Validation {
-    def Medical(target : PlanetSideGameObject) : Boolean = target match {
-      case p : Player =>
-        p.Health > 0 && (p.Health < p.MaxHealth || p.Armor < p.MaxArmor)
-      case _ =>
-        false
-    }
-
-    def HealthCrystal(target : PlanetSideGameObject) : Boolean = target match {
-      case p : Player =>
-        p.Health > 0 && p.Health < p.MaxHealth
-      case _ =>
-        false
-    }
-
-    def RepairSilo(target : PlanetSideGameObject) : Boolean = target match {
-      case v : Vehicle =>
-        !GlobalDefinitions.isFlightVehicle(v.Definition) && v.Health > 0 && v.Health < v.MaxHealth
-      case _ =>
-        false
-    }
-
-    def PadLanding(target : PlanetSideGameObject) : Boolean = target match {
-      case v : Vehicle =>
-        GlobalDefinitions.isFlightVehicle(v.Definition) && v.Health > 0 && v.Health < v.MaxHealth
-      case _ =>
-        false
-    }
-  }
-
   private case class TerminalAction()
 }

@@ -24,8 +24,8 @@ import scala.util.{Failure, Success, Try}
   *                    in essence, should match the type of object container to which these resistances belong;
   *                    never has to be defined explicitly, but will be checked upon object definition
   */
-abstract class ResistanceCalculations[TargetType](validate : (ResolvedProjectile)=>Try[TargetType],
-                                                  extractor : (TargetType)=>Int) extends ProjectileCalculations {
+abstract class ResistanceCalculations[TargetType](validate : ResolvedProjectile=>Try[TargetType],
+                                                  extractor : TargetType=>Int) extends ProjectileCalculations {
   /**
     * Get resistance valuess.
     * @param data the historical `ResolvedProjectile` information
@@ -106,13 +106,13 @@ object ResistanceCalculations {
   //extractors
   def NoResistExtractor(target : SourceEntry) : Int = 0
 
-  def ExoSuitDirectExtractor(target : PlayerSource) : Int = ExoSuitDefinition.Select(target.ExoSuit).ResistanceDirectHit
+  def ExoSuitDirectExtractor(target : PlayerSource) : Int = ExoSuitDefinition.Select(target.ExoSuit, target.Faction).ResistanceDirectHit
 
-  def ExoSuitSplashExtractor(target : PlayerSource) : Int = ExoSuitDefinition.Select(target.ExoSuit).ResistanceSplash
+  def ExoSuitSplashExtractor(target : PlayerSource) : Int = ExoSuitDefinition.Select(target.ExoSuit, target.Faction).ResistanceSplash
 
-  def ExoSuitAggravatedExtractor(target : PlayerSource) : Int = ExoSuitDefinition.Select(target.ExoSuit).ResistanceAggravated
+  def ExoSuitAggravatedExtractor(target : PlayerSource) : Int = ExoSuitDefinition.Select(target.ExoSuit, target.Faction).ResistanceAggravated
 
-  def ExoSuitRadiationExtractor(target : PlayerSource) : Float = ExoSuitDefinition.Select(target.ExoSuit).RadiationShielding
+  def ExoSuitRadiationExtractor(target : PlayerSource) : Float = ExoSuitDefinition.Select(target.ExoSuit, target.Faction).RadiationShielding
 
   def VehicleDirectExtractor(target : VehicleSource) : Int = target.Definition.ResistanceDirectHit
 
@@ -121,4 +121,6 @@ object ResistanceCalculations {
   def VehicleAggravatedExtractor(target : VehicleSource) : Int = target.Definition.ResistanceAggravated
 
   def VehicleRadiationExtractor(target : VehicleSource) : Float = target.Definition.RadiationShielding
+
+  def MaximumResistance(target : SourceEntry) : Int = Integer.MAX_VALUE
 }

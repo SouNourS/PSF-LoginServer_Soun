@@ -4,7 +4,9 @@ package net.psforever.objects.vital
 import net.psforever.objects.PlanetSideGameObject
 import net.psforever.objects.ballistics.{PlayerSource, ResolvedProjectile, SourceEntry, VehicleSource}
 import net.psforever.objects.definition.KitDefinition
+import net.psforever.objects.serverobject.painbox.Painbox
 import net.psforever.objects.serverobject.terminals.TerminalDefinition
+import net.psforever.objects.vital.resolution.ResolutionCalculations
 import net.psforever.types.{ExoSuitType, ImplantType}
 
 abstract class VitalsActivity(target : SourceEntry) {
@@ -26,11 +28,15 @@ final case class HealFromImplant(target : PlayerSource, amount : Int, implant : 
 
 final case class HealFromExoSuitChange(target : PlayerSource, exosuit : ExoSuitType.Value) extends HealingActivity(target)
 
+final case class RepairFromKit(target : PlayerSource, amount : Int, kit_def : KitDefinition) extends HealingActivity(target)
+
 final case class RepairFromTerm(target : VehicleSource, amount : Int, term_def : TerminalDefinition) extends HealingActivity(target)
 
 final case class VehicleShieldCharge(target : VehicleSource, amount : Int) extends HealingActivity(target) //TODO facility
 
 final case class DamageFromProjectile(data : ResolvedProjectile) extends DamagingActivity(data.target)
+
+final case class DamageFromPainbox(target : PlayerSource, painbox : Painbox, damage : Int) extends DamagingActivity(target)
 
 final case class PlayerSuicide(target : PlayerSource) extends DamagingActivity(target)
 
@@ -100,13 +106,13 @@ object Vitality {
     * upon a given vital object.
     * @param func a function literal
     */
-  final case class Damage(func : (Any)=>Unit)
+  final case class Damage(func : ResolutionCalculations.Output)
 
-  final case class DamageOn(obj : Vitality, func : (Any)=>Unit)
+  final case class DamageOn(obj : Vitality, func : ResolutionCalculations.Output)
 
   /**
     * Report that a vitals object must be updated due to damage.
     * @param obj the vital object
     */
-  final case class DamageResolution(obj : Vitality)
+  final case class DamageResolution(obj : Vitality, cause : ResolvedProjectile)
 }

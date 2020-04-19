@@ -2,27 +2,29 @@
 package services.vehicle
 
 import akka.actor.{Actor, ActorRef, Props}
-import net.psforever.objects.Vehicle
+import net.psforever.objects.{GlobalDefinitions, TelepadDeployable, Vehicle}
 import net.psforever.objects.ballistics.VehicleSource
 import net.psforever.objects.serverobject.pad.VehicleSpawnPad
 import net.psforever.objects.serverobject.terminals.{MedicalTerminalDefinition, ProximityUnit}
+import net.psforever.objects.vehicles.{Utility, UtilityType}
 import net.psforever.objects.vital.RepairFromTerm
 import net.psforever.objects.zones.Zone
-import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID}
+import net.psforever.packet.game.ObjectCreateMessage
 import net.psforever.packet.game.objectcreate.ObjectCreateMessageParent
 import services.vehicle.support.{TurretUpgrader, VehicleRemover}
-import net.psforever.types.DriveState
+import net.psforever.types.{DriveState, PlanetSideGUID}
+import services.local.LocalServiceMessage
 import services.{GenericEventBus, RemoverActor, Service}
 
 import scala.concurrent.duration._
 
-class VehicleService extends Actor {
-  private val vehicleDecon : ActorRef = context.actorOf(Props[VehicleRemover], "vehicle-decon-agent")
-  private val turretUpgrade : ActorRef = context.actorOf(Props[TurretUpgrader], "turret-upgrade-agent")
+class VehicleService(zone : Zone) extends Actor {
+  private val vehicleDecon : ActorRef = context.actorOf(Props[VehicleRemover], s"${zone.Id}-vehicle-decon-agent")
+  private val turretUpgrade : ActorRef = context.actorOf(Props[TurretUpgrader], s"${zone.Id}-turret-upgrade-agent")
   private [this] val log = org.log4s.getLogger
 
   override def preStart = {
-    log.info("Starting...")
+    log.trace(s"Awaiting ${zone.Id} vehicle events ...")
   }
 
   val VehicleEvents = new GenericEventBus[VehicleServiceResponse]
@@ -131,18 +133,18 @@ class VehicleService extends Actor {
         case VehicleAction.UpdateAmsSpawnPoint(zone : Zone) =>
           sender ! VehicleServiceResponse(s"/$forChannel/Vehicle", Service.defaultPlayerGUID, VehicleResponse.UpdateAmsSpawnPoint(AmsSpawnPoints(zone)))
 
-        case VehicleAction.TransferPassengerChannel(player_guid, old_channel, temp_channel, vehicle) =>
+        case VehicleAction.TransferPassengerChannel(player_guid, old_channel, temp_channel, vehicle, vehicle_to_delete) =>
           VehicleEvents.publish(
-            VehicleServiceResponse(s"/$forChannel/Vehicle", player_guid, VehicleResponse.TransferPassengerChannel(old_channel, temp_channel, vehicle))
-          )
-        case VehicleAction.TransferPassenger(player_guid, temp_channel, vehicle, vehicle_to_delete) =>
-          VehicleEvents.publish(
-            VehicleServiceResponse(s"/$forChannel/Vehicle", player_guid, VehicleResponse.TransferPassenger(temp_channel, vehicle, vehicle_to_delete))
+            VehicleServiceResponse(s"/$forChannel/Vehicle", player_guid, VehicleResponse.TransferPassengerChannel(old_channel, temp_channel, vehicle, vehicle_to_delete))
           )
 
-        case VehicleAction.KickCargo(player_guid, cargo, speed) =>
+        case VehicleAction.ForceDismountVehicleCargo(player_guid, vehicle_guid, bailed, requestedByPassenger, kicked) =>
           VehicleEvents.publish(
-            VehicleServiceResponse(s"/$forChannel/Vehicle", player_guid, VehicleResponse.KickCargo(cargo, speed))
+            VehicleServiceResponse(s"/$forChannel/Vehicle", player_guid, VehicleResponse.ForceDismountVehicleCargo(vehicle_guid, bailed, requestedByPassenger, kicked))
+          )
+        case VehicleAction.KickCargo(player_guid, cargo, speed, delay) =>
+          VehicleEvents.publish(
+            VehicleServiceResponse(s"/$forChannel/Vehicle", player_guid, VehicleResponse.KickCargo(cargo, speed, delay))
           )
         case _ => ;
     }
@@ -155,37 +157,57 @@ class VehicleService extends Actor {
     case VehicleServiceMessage.TurretUpgrade(msg) =>
       turretUpgrade forward msg
 
-    //from VehicleSpawnControl
-    case VehicleSpawnPad.ConcealPlayer(player_guid, zone_id) =>
+    //from VehicleSpawnControl, etc.
+    case VehicleSpawnPad.ConcealPlayer(player_guid) =>
       VehicleEvents.publish(
-        VehicleServiceResponse(s"/$zone_id/Vehicle", Service.defaultPlayerGUID, VehicleResponse.ConcealPlayer(player_guid))
+        VehicleServiceResponse(s"/${zone.Id}/Vehicle", Service.defaultPlayerGUID, VehicleResponse.ConcealPlayer(player_guid))
       )
 
-    //from VehicleSpawnControl
-    case VehicleSpawnPad.AttachToRails(vehicle, pad, zone_id) =>
+    case VehicleSpawnPad.AttachToRails(vehicle, pad) =>
       VehicleEvents.publish(
-        VehicleServiceResponse(s"/$zone_id/Vehicle", Service.defaultPlayerGUID, VehicleResponse.AttachToRails(vehicle.GUID, pad.GUID))
+        VehicleServiceResponse(s"/${zone.Id}/Vehicle", Service.defaultPlayerGUID, VehicleResponse.AttachToRails(vehicle.GUID, pad.GUID))
       )
 
-    //from VehicleSpawnControl
-    case VehicleSpawnPad.DetachFromRails(vehicle, pad, zone_id) =>
+    case VehicleSpawnPad.StartPlayerSeatedInVehicle(driver_name, vehicle, pad) =>
       VehicleEvents.publish(
-        VehicleServiceResponse(s"/$zone_id/Vehicle", Service.defaultPlayerGUID, VehicleResponse.DetachFromRails(vehicle.GUID, pad.GUID, pad.Position, pad.Orientation.z))
+        VehicleServiceResponse(s"/$driver_name/Vehicle", Service.defaultPlayerGUID, VehicleResponse.StartPlayerSeatedInVehicle(vehicle, pad))
       )
 
-    //from VehicleSpawnControl
-    case VehicleSpawnPad.ResetSpawnPad(pad, zone_id) =>
+    case VehicleSpawnPad.PlayerSeatedInVehicle(driver_name, vehicle, pad) =>
       VehicleEvents.publish(
-        VehicleServiceResponse(s"/$zone_id/Vehicle", Service.defaultPlayerGUID, VehicleResponse.ResetSpawnPad(pad.GUID))
+        VehicleServiceResponse(s"/$driver_name/Vehicle", Service.defaultPlayerGUID, VehicleResponse.PlayerSeatedInVehicle(vehicle, pad))
       )
 
-    case VehicleSpawnPad.RevealPlayer(player_guid, zone_id) =>
+    case VehicleSpawnPad.ServerVehicleOverrideStart(driver_name, vehicle, pad) =>
       VehicleEvents.publish(
-        VehicleServiceResponse(s"/$zone_id/Vehicle", Service.defaultPlayerGUID, VehicleResponse.RevealPlayer(player_guid))
+        VehicleServiceResponse(s"/$driver_name/Vehicle", Service.defaultPlayerGUID, VehicleResponse.ServerVehicleOverrideStart(vehicle, pad))
       )
 
-    //from VehicleSpawnControl
-    case VehicleSpawnPad.LoadVehicle(vehicle, zone) =>
+    case VehicleSpawnPad.ServerVehicleOverrideEnd(driver_name, vehicle, pad) =>
+      VehicleEvents.publish(
+        VehicleServiceResponse(s"/$driver_name/Vehicle", Service.defaultPlayerGUID, VehicleResponse.ServerVehicleOverrideEnd(vehicle, pad))
+      )
+
+    case VehicleSpawnPad.DetachFromRails(vehicle, pad) =>
+      VehicleEvents.publish(
+        VehicleServiceResponse(s"/${zone.Id}/Vehicle", Service.defaultPlayerGUID, VehicleResponse.DetachFromRails(vehicle.GUID, pad.GUID, pad.Position, pad.Orientation.z))
+      )
+    case VehicleSpawnPad.ResetSpawnPad(pad) =>
+      VehicleEvents.publish(
+        VehicleServiceResponse(s"/${zone.Id}/Vehicle", Service.defaultPlayerGUID, VehicleResponse.ResetSpawnPad(pad.GUID))
+      )
+
+    case VehicleSpawnPad.RevealPlayer(player_guid) =>
+      VehicleEvents.publish(
+        VehicleServiceResponse(s"/${zone.Id}/Vehicle", Service.defaultPlayerGUID, VehicleResponse.RevealPlayer(player_guid))
+      )
+
+    case VehicleSpawnPad.PeriodicReminder(to, reason, data) =>
+      VehicleEvents.publish(
+        VehicleServiceResponse(s"/$to/Vehicle", Service.defaultPlayerGUID, VehicleResponse.PeriodicReminder(reason, data))
+      )
+
+    case VehicleSpawnPad.LoadVehicle(vehicle) =>
       val definition = vehicle.Definition
       val vtype = definition.ObjectId
       val vguid = vehicle.GUID
@@ -197,12 +219,12 @@ class VehicleService extends Actor {
       //avoid unattended vehicle spawning blocking the pad; user should mount (and does so normally) to reset decon timer
       vehicleDecon forward RemoverActor.AddTask(vehicle, zone, Some(30 seconds))
 
-    //from VehicleSpawnControl
-    case VehicleSpawnPad.DisposeVehicle(vehicle, zone) =>
+    case VehicleSpawnPad.DisposeVehicle(vehicle) =>
+      vehicleDecon forward RemoverActor.AddTask(vehicle, zone, Some(0 seconds))
       vehicleDecon forward RemoverActor.HurrySpecific(List(vehicle), zone)
 
     //correspondence from WorldSessionActor
-    case VehicleServiceMessage.AMSDeploymentChange(zone) =>
+    case VehicleServiceMessage.AMSDeploymentChange(_) =>
       VehicleEvents.publish(
         VehicleServiceResponse(s"/${zone.Id}/Vehicle", Service.defaultPlayerGUID, VehicleResponse.UpdateAmsSpawnPoint(AmsSpawnPoints(zone)))
       )
@@ -231,5 +253,38 @@ class VehicleService extends Actor {
       .filter(veh => veh.Health > 0 && veh.Definition == GlobalDefinitions.ams && veh.DeploymentState == DriveState.Deployed)
       .flatMap(veh => veh.Utilities.values.filter(util => util.UtilType == UtilityType.ams_respawn_tube) )
       .map(util => util().asInstanceOf[SpawnTube])
+  }
+}
+
+object VehicleService {
+  /**
+    * Before a vehicle is removed from the game world, the following actions must be performed.
+    * @param vehicle the vehicle
+    */
+  def BeforeUnloadVehicle(vehicle : Vehicle, zone : Zone) : Unit = {
+    vehicle.Definition match {
+      case GlobalDefinitions.ams =>
+        zone.VehicleEvents ! VehicleServiceMessage.AMSDeploymentChange(zone)
+      case GlobalDefinitions.router =>
+        RemoveTelepads(vehicle, zone)
+      case _ => ;
+    }
+  }
+
+  def RemoveTelepads(vehicle: Vehicle, zone : Zone) : Unit = {
+    (vehicle.Utility(UtilityType.internal_router_telepad_deployable) match {
+      case Some(util : Utility.InternalTelepad) =>
+        val telepad = util.Telepad
+        util.Telepad = None
+        zone.GUID(telepad)
+      case _ =>
+        None
+    }) match {
+      case Some(telepad : TelepadDeployable) =>
+        telepad.Active = false
+        zone.LocalEvents ! LocalServiceMessage.Deployables(RemoverActor.ClearSpecific(List(telepad), zone))
+        zone.LocalEvents ! LocalServiceMessage.Deployables(RemoverActor.AddTask(telepad, zone, Some(0 seconds)))
+      case _ => ;
+    }
   }
 }

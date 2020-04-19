@@ -3,7 +3,7 @@ package game.objectcreatevehicle
 
 import net.psforever.packet._
 import net.psforever.packet.game.objectcreate._
-import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID}
+import net.psforever.packet.game.ObjectCreateMessage
 import net.psforever.types._
 import org.specs2.mutable._
 import scodec.bits._
@@ -32,7 +32,7 @@ class MountedVehiclesTest extends Specification {
             vdata.data.bops mustEqual false
             vdata.data.alternate mustEqual false
             vdata.data.v1 mustEqual false
-            vdata.data.v3 mustEqual false
+            vdata.data.jammered mustEqual false
             vdata.data.v5.isEmpty mustEqual true
             vdata.data.guid mustEqual PlanetSideGUID(3776)
             vdata.health mustEqual 255
@@ -57,12 +57,12 @@ class MountedVehiclesTest extends Specification {
                         a.data.bops mustEqual false
                         a.data.v1 mustEqual false
                         a.data.v2.isEmpty mustEqual true
-                        a.data.v3 mustEqual false
+                        a.data.jammered mustEqual false
                         a.data.v4.isEmpty mustEqual true
                         a.data.v5.isEmpty mustEqual true
                         a.exosuit mustEqual ExoSuitType.Agile
                         a.unk5 mustEqual 0
-                        a.unk6 mustEqual 30777081L
+                        a.char_id mustEqual 30777081L
                         a.unk7 mustEqual 1
                         a.unk8 mustEqual 4
                         a.unk9 mustEqual 0
@@ -71,7 +71,7 @@ class MountedVehiclesTest extends Specification {
                         b.outfit_name mustEqual "Black Beret Armoured Corps"
                         b.outfit_logo mustEqual 23
                         b.backpack mustEqual false
-                        b.facingPitch mustEqual 348.75f
+                        b.facingPitch mustEqual -11.25f
                         b.facingYawUpper mustEqual 0
                         b.lfs mustEqual false
                         b.grenade_state mustEqual GrenadeState.None
@@ -167,7 +167,7 @@ class MountedVehiclesTest extends Specification {
       false,
       false,
       false,
-      348.75f, 0,
+      -11.25f, 0,
       false,
       GrenadeState.None,
       false,

@@ -5,7 +5,7 @@ import net.psforever.objects.entity.{IdentifiableEntity, NoGUIDException}
 import net.psforever.objects.guid.key.LoanedKey
 import net.psforever.objects.guid.pool.{ExclusivePool, GenericPool, NumberPool}
 import net.psforever.objects.guid.source.NumberSource
-import net.psforever.packet.game.PlanetSideGUID
+import net.psforever.types.PlanetSideGUID
 
 import scala.util.{Failure, Success, Try}
 
@@ -285,7 +285,7 @@ class NumberPoolHub(private val source : NumberSource) {
       case Success(key) =>
         Success(key)
       case Failure(_) =>
-        throw NoGUIDException(s"a pool gave us a number $number that is actually unavailable") //stop the show; this is terrible!
+        throw new NoGUIDException(s"a pool gave us a number $number that is actually unavailable") //stop the show; this is terrible!
     }
   }
 

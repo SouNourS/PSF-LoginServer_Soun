@@ -1,7 +1,8 @@
 // Copyright (c) 2017 PSForever
 package net.psforever.objects.zones
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorRef, Props}
+import net.psforever.objects.avatar.PlayerControl
 import net.psforever.objects.{Avatar, Player}
 
 import scala.annotation.tailrec
@@ -22,20 +23,32 @@ class ZonePopulationActor(zone : Zone, playerMap : TrieMap[Avatar, Option[Player
 
   def receive : Receive = {
     case Zone.Population.Join(avatar) =>
-      PopulationJoin(avatar, playerMap)
+      if(PopulationJoin(avatar, playerMap) && playerMap.size == 1) {
+        zone.StartPlayerManagementSystems()
+      }
 
     case Zone.Population.Leave(avatar) =>
       PopulationLeave(avatar, playerMap) match {
         case None => ;
-        case player @ Some(_) =>
+        case player @ Some(tplayer) =>
+          tplayer.Zone = Zone.Nowhere
+          PlayerLeave(tplayer)
           sender ! Zone.Population.PlayerHasLeft(zone, player)
+          if(playerMap.isEmpty) {
+            zone.StopPlayerManagementSystems()
+          }
       }
 
     case Zone.Population.Spawn(avatar, player) =>
       PopulationSpawn(avatar, player, playerMap) match {
-        case Some(tplayer) =>
+        case Some((tplayer, newToZone)) =>
+          tplayer.Zone = zone
           if(tplayer ne player) {
             sender ! Zone.Population.PlayerAlreadySpawned(zone, player)
+          }
+          else if(newToZone) {
+            player.Actor = context.actorOf(Props(classOf[PlayerControl], player),  s"${player.CharId}_${player.GUID.guid}_${System.currentTimeMillis}")
+            player.Zone = zone
           }
         case None =>
           sender ! Zone.Population.PlayerCanNotSpawn(zone, player)
@@ -43,7 +56,8 @@ class ZonePopulationActor(zone : Zone, playerMap : TrieMap[Avatar, Option[Player
 
     case Zone.Population.Release(avatar) =>
       PopulationRelease(avatar, playerMap) match {
-        case Some(_) => ;
+        case Some(tplayer) =>
+          PlayerLeave(tplayer)
         case None =>
           sender ! Zone.Population.PlayerHasLeft(zone, None)
       }
@@ -97,19 +111,21 @@ object ZonePopulationActor {
     * @param avatar an `Avatar` object
     * @param player a `Player` object
     * @param playerMap the mapping of `Avatar` objects to `Player` objects
-    * @return the `Player` object that is associated with the `Avatar` key
+    * @return a `Tuple` object of the `Player` object that is associated with the `Avatar` key
+    *         and whether that player was added to the zone for the first time;
+    *         `None`, if the player should not be introduced to this zone at this time
     */
-  def PopulationSpawn(avatar : Avatar, player : Player, playerMap : TrieMap[Avatar, Option[Player]]) : Option[Player] = {
+  def PopulationSpawn(avatar : Avatar, player : Player, playerMap : TrieMap[Avatar, Option[Player]]) : Option[(Player, Boolean)] = {
     playerMap.get(avatar) match {
       case None =>
         None
       case Some(tplayer) =>
         tplayer match {
           case Some(aplayer) =>
-            Some(aplayer)
+            Some(aplayer, false)
           case None =>
             playerMap(avatar) = Some(player)
-            Some(player)
+            Some(player, true)
         }
     }
   }
@@ -158,6 +174,11 @@ object ZonePopulationActor {
       case Some(index) =>
         corpseList.remove(index)
     }
+  }
+
+  def PlayerLeave(player : Player) : Unit = {
+    player.Actor ! akka.actor.PoisonPill
+    player.Actor = ActorRef.noSender
   }
 
   /**

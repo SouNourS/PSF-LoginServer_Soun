@@ -2,8 +2,8 @@
 package net.psforever.objects.definition.converter
 
 import net.psforever.objects.ShieldGeneratorDeployable
-import net.psforever.packet.game.PlanetSideGUID
 import net.psforever.packet.game.objectcreate._
+import net.psforever.types.PlanetSideGUID
 
 import scala.util.{Failure, Success, Try}
 
@@ -21,7 +21,7 @@ class ShieldGeneratorConverter extends ObjectCreateConverter[ShieldGeneratorDepl
               alternate = false,
               v1 = false,
               v2 = None,
-              v3 = false,
+              jammered = obj.Jammed,
               None,
               None,
               obj.Owner match {
@@ -45,7 +45,7 @@ class ShieldGeneratorConverter extends ObjectCreateConverter[ShieldGeneratorDepl
               alternate = true,
               v1 = false,
               v2 = None,
-              v3 = false,
+              jammered = obj.Jammed,
               None,
               None,
               PlanetSideGUID(0)

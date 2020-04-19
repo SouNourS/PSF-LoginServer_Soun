@@ -2,7 +2,7 @@
 package game.objectcreate
 
 import net.psforever.packet.PacketCoding
-import net.psforever.packet.game.{ObjectCreateMessage, PlanetSideGUID}
+import net.psforever.packet.game.ObjectCreateMessage
 import net.psforever.packet.game.objectcreate._
 import net.psforever.types._
 import org.specs2.mutable._
@@ -43,12 +43,12 @@ class CharacterDataTest extends Specification {
                   a.data.bops mustEqual false
                   a.data.v1 mustEqual false
                   a.data.v2.isEmpty mustEqual true
-                  a.data.v3 mustEqual false
+                  a.data.jammered mustEqual false
                   a.data.v4.isEmpty mustEqual true
                   a.data.v5.isEmpty mustEqual true
                   a.exosuit mustEqual ExoSuitType.Reinforced
                   a.unk5 mustEqual 0
-                  a.unk6 mustEqual 30777081L
+                  a.char_id mustEqual 30777081L
                   a.unk7 mustEqual 1
                   a.unk8 mustEqual 4
                   a.unk9 mustEqual 0
@@ -57,7 +57,7 @@ class CharacterDataTest extends Specification {
                   b.outfit_name mustEqual "Black Beret Armoured Corps"
                   b.outfit_logo mustEqual 23
                   b.backpack mustEqual false
-                  b.facingPitch mustEqual 320.625f
+                  b.facingPitch mustEqual -39.375f
                   b.facingYawUpper mustEqual 0
                   b.lfs mustEqual false
                   b.grenade_state mustEqual GrenadeState.None
@@ -162,12 +162,12 @@ class CharacterDataTest extends Specification {
                   a.data.bops mustEqual false
                   a.data.v1 mustEqual false
                   a.data.v2.isEmpty mustEqual true
-                  a.data.v3 mustEqual false
+                  a.data.jammered mustEqual false
                   a.data.v4.isEmpty mustEqual true
                   a.data.v5.isEmpty mustEqual true
                   a.exosuit mustEqual ExoSuitType.Reinforced
                   a.unk5 mustEqual 0
-                  a.unk6 mustEqual 192L
+                  a.char_id mustEqual 192L
                   a.unk7 mustEqual 0
                   a.unk8 mustEqual 0
                   a.unk9 mustEqual 0
@@ -176,7 +176,7 @@ class CharacterDataTest extends Specification {
                   b.outfit_name mustEqual "Black Beret Armoured Corps"
                   b.outfit_logo mustEqual 23
                   b.backpack mustEqual false
-                  b.facingPitch mustEqual 320.625f
+                  b.facingPitch mustEqual -39.375f
                   b.facingYawUpper mustEqual 0
                   b.lfs mustEqual false
                   b.grenade_state mustEqual GrenadeState.None
@@ -231,12 +231,12 @@ class CharacterDataTest extends Specification {
                   a.data.bops mustEqual false
                   a.data.v1 mustEqual false
                   a.data.v2.isEmpty mustEqual true
-                  a.data.v3 mustEqual false
+                  a.data.jammered mustEqual false
                   a.data.v4.isEmpty mustEqual true
                   a.data.v5.isEmpty mustEqual true
                   a.exosuit mustEqual ExoSuitType.MAX
                   a.unk5 mustEqual 1
-                  a.unk6 mustEqual 0L
+                  a.char_id mustEqual 0L
                   a.unk7 mustEqual 0
                   a.unk8 mustEqual 0
                   a.unk9 mustEqual 0
@@ -245,7 +245,7 @@ class CharacterDataTest extends Specification {
                   b.outfit_name mustEqual "Original District"
                   b.outfit_logo mustEqual 23
                   b.backpack mustEqual true
-                  b.facingPitch mustEqual 351.5625f
+                  b.facingPitch mustEqual -8.4375f
                   b.facingYawUpper mustEqual 0
                   b.lfs mustEqual false
                   b.grenade_state mustEqual GrenadeState.None
@@ -334,7 +334,7 @@ class CharacterDataTest extends Specification {
         false,
         false,
         false,
-        320.625f, 0f,
+        -39.375f, 0f,
         false,
         GrenadeState.None,
         false,
@@ -414,7 +414,7 @@ class CharacterDataTest extends Specification {
         false,
         false,
         false,
-        320.625f, 0f,
+        -39.375f, 0f,
         false,
         GrenadeState.None,
         false,
@@ -497,7 +497,7 @@ class CharacterDataTest extends Specification {
         false, //unk2
         false, //unk3
         false, //unk4
-        351.5625f, 0f,
+        351.5625f, 0f, //also: -8.4375f, 0f
         false, //lfs
         GrenadeState.None,
         false, //is_cloaking

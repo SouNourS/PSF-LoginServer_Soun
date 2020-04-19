@@ -2,6 +2,7 @@
 package net.psforever.packet.game
 
 import net.psforever.packet.{GamePacketOpcode, Marshallable, PacketHelpers, PlanetSideGamePacket}
+import net.psforever.types.PlanetSideGUID
 import scodec.Codec
 import scodec.codecs._
 
@@ -21,7 +22,7 @@ object HackState extends Enumeration {
   val
   Unknown0,
   Start,
-  Unknown2,
+  Cancelled,
   Ongoing,
   Finished,
   Unknown5,

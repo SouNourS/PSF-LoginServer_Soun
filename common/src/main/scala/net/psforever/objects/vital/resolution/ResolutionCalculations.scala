@@ -3,7 +3,7 @@ package net.psforever.objects.vital.resolution
 
 import net.psforever.objects.{Player, TurretDeployable, Vehicle}
 import net.psforever.objects.ballistics.{PlayerSource, ResolvedProjectile}
-import net.psforever.objects.ce.{ComplexDeployable, SimpleDeployable}
+import net.psforever.objects.ce.{ComplexDeployable, Deployable}
 import net.psforever.objects.serverobject.turret.FacilityTurret
 import net.psforever.objects.vital.projectile.ProjectileCalculations
 
@@ -22,7 +22,7 @@ trait ResolutionCalculations {
 }
 
 object ResolutionCalculations {
-  type Output = (Any)=>Unit
+  type Output = Any=>ResolvedProjectile
   type Form = (ProjectileCalculations.Form, ProjectileCalculations.Form, ResolvedProjectile)=>Output
 
   def NoDamage(data : ResolvedProjectile)(a : Int, b : Int) : Int = 0
@@ -107,31 +107,60 @@ object ResolutionCalculations {
     }
   }
 
-  def NoApplication(damageValue : Int, data : ResolvedProjectile)(target : Any) : Unit = { }
+  def NoApplication(damageValue : Int, data : ResolvedProjectile)(target : Any) : ResolvedProjectile = data
+
+  def SubtractWithRemainder(current : Int, damage : Int) : (Int, Int) = {
+    val a = Math.max(0, current - damage)
+    val remainingDamage = Math.abs(current - damage - a)
+
+    (a, remainingDamage)
+  }
 
   /**
     * The expanded `(Any)=>Unit` function for infantry.
-    * Apply the damage values to the health field and personal armor field for an infantry target.
+    * Apply the damage values to the capacitor (if shielded NC max), health field and personal armor field for an infantry target.
     * @param damageValues a tuple containing damage values for: health, personal armor
     * @param data the historical `ResolvedProjectile` information
     * @param target the `Player` object to be affected by these damage values (at some point)
     */
-  def InfantryApplication(damageValues : (Int, Int), data : ResolvedProjectile)(target : Any) : Unit = target match {
-    case player : Player =>
-      val (a, b) = damageValues
-      //TODO Personal Shield implant test should go here and modify the values a and b
-      if(player.isAlive && !(a == 0 && b == 0)) {
-        player.History(data)
-        if(player.Armor - b < 0) {
-          player.Health = player.Health - a - (b - player.Armor)
-          player.Armor = 0
+  def InfantryApplication(damageValues : (Int, Int), data : ResolvedProjectile)(target : Any) : ResolvedProjectile = {
+    target match {
+      case player : Player =>
+        var (a, b) = damageValues
+        var result = (0, 0)
+        //TODO Personal Shield implant test should go here and modify the values a and b
+        if(player.isAlive && !(a == 0 && b == 0)) {
+          player.History(data)
+          if(player.Capacitor.toInt > 0 && player.isShielded) {
+            // Subtract armour damage from capacitor
+            result = SubtractWithRemainder(player.Capacitor.toInt, b)
+            player.Capacitor = result._1
+            b = result._2
+
+            // Then follow up with health damage if any capacitor is left
+            result = SubtractWithRemainder(player.Capacitor.toInt, a)
+            player.Capacitor = result._1
+            a = result._2
+          }
+
+          // Subtract any remaining armour damage from armour
+          result = SubtractWithRemainder(player.Armor, b)
+          player.Armor = result._1
+          b = result._2
+
+          // Then bleed through to health if armour ran out
+          result = SubtractWithRemainder(player.Health, b)
+          player.Health = result._1
+          b = result._2
+
+          // Finally, apply health damage to health
+          result = SubtractWithRemainder(player.Health, a)
+          player.Health = result._1
+          a = result._2
         }
-        else {
-          player.Armor = player.Armor - b
-          player.Health = player.Health - a
-        }
-      }
-    case _ =>
+      case _ =>
+    }
+    data
   }
 
   /**
@@ -141,9 +170,9 @@ object ResolutionCalculations {
     * @param data the historical `ResolvedProjectile` information
     * @param target the `Vehicle` object to be affected by these damage values (at some point)
     */
-  def VehicleApplication(damage : Int, data : ResolvedProjectile)(target : Any) : Unit = target match {
-    case vehicle : Vehicle =>
-      if(vehicle.Health > 0) {
+  def VehicleApplication(damage : Int, data : ResolvedProjectile)(target : Any) : ResolvedProjectile = {
+    target match {
+      case vehicle : Vehicle if vehicle.Health > 0 && damage > 0 =>
         vehicle.History(data)
         val shields = vehicle.Shields
         if(shields > damage) {
@@ -156,57 +185,58 @@ object ResolutionCalculations {
         else {
           vehicle.Health = vehicle.Health - damage
         }
-      }
-    case _ => ;
+      case _ => ;
+    }
+    data
   }
 
-  def SimpleApplication(damage : Int, data : ResolvedProjectile)(target : Any) : Unit = target match {
-    case ce : SimpleDeployable =>
-      if(ce.Health > 0) {
-        ce.Health -= damage
-        ce.History(data)
-      }
-    case turret : FacilityTurret =>
-      if(turret.Health > 0) {
+  def SimpleApplication(damage : Int, data : ResolvedProjectile)(target : Any) : ResolvedProjectile = {
+    target match {
+      case obj : Deployable if obj.Health > 0 =>
+        obj.Health -= damage
+        obj.History(data)
+      case turret : FacilityTurret if turret.Health > 0 =>
         turret.Health -= damage
         turret.History(data)
-      }
-    case _ =>
+      case _ => ;
+    }
+    data
   }
 
-  def ComplexDeployableApplication(damage : Int, data : ResolvedProjectile)(target : Any) : Unit = target match {
-    case ce : ComplexDeployable =>
-      if(ce.Shields > 0) {
-        if(damage > ce.Shields) {
-          ce.Health -= (damage - ce.Shields)
-          ce.Shields = 0
+  def ComplexDeployableApplication(damage : Int, data : ResolvedProjectile)(target : Any) : ResolvedProjectile = {
+    target match {
+      case ce : ComplexDeployable if ce.Health > 0 && damage > 0 =>
+        ce.History(data)
+        if(ce.Shields > 0) {
+          if(damage > ce.Shields) {
+            ce.Health -= (damage - ce.Shields)
+            ce.Shields = 0
+          }
+          else {
+            ce.Shields -= damage
+          }
         }
         else {
-          ce.Shields -= damage
+          ce.Health -= damage
         }
-        ce.History(data)
-      }
-      else if(ce.Health > 0) {
-        ce.Health -= damage
-        ce.History(data)
-      }
 
-    case ce : TurretDeployable =>
-      if(ce.Shields > 0) {
-        if(damage > ce.Shields) {
-          ce.Health -= (damage - ce.Shields)
-          ce.Shields = 0
+      case ce : TurretDeployable if ce.Health > 0 && damage > 0 =>
+        ce.History(data)
+        if(ce.Shields > 0) {
+          if(damage > ce.Shields) {
+            ce.Health -= (damage - ce.Shields)
+            ce.Shields = 0
+          }
+          else {
+            ce.Shields -= damage
+          }
         }
         else {
-          ce.Shields -= damage
+          ce.Health -= damage
         }
-        ce.History(data)
-      }
-      else if(ce.Health > 0) {
-        ce.Health -= damage
-        ce.History(data)
-      }
 
-    case _ => ;
+      case _ => ;
+    }
+    data
   }
 }

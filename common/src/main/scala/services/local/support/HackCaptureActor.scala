@@ -7,8 +7,7 @@ import net.psforever.objects.serverobject.structures.Building
 import net.psforever.objects.serverobject.terminals.CaptureTerminal
 import net.psforever.objects.serverobject.{CommonMessages, PlanetSideServerObject}
 import net.psforever.objects.zones.Zone
-import net.psforever.packet.game.PlanetSideGUID
-import net.psforever.types.PlanetSideEmpire
+import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID}
 
 import scala.concurrent.duration.{FiniteDuration, _}
 
@@ -43,7 +42,7 @@ class HackCaptureActor extends Actor {
       // Restart the timer, in case this is the first object in the hacked objects list or the object was removed and re-added
       RestartTimer()
 
-      target.Owner.Actor ! Building.SendMapUpdate(all_clients = true)
+      if(target.isInstanceOf[CaptureTerminal]) { target.Owner.asInstanceOf[Building].TriggerZoneMapUpdate() }
 
     case HackCaptureActor.ProcessCompleteHacks() =>
       log.trace("Processing complete hacks")
@@ -66,20 +65,11 @@ class HackCaptureActor extends Actor {
 
     case HackCaptureActor.ClearHack(target, _) =>
       hackedObjects = hackedObjects.filterNot(x => x.target == target)
-      target.Owner.Actor ! Building.SendMapUpdate(all_clients = true)
+
+      if(target.isInstanceOf[CaptureTerminal]) { target.Owner.asInstanceOf[Building].TriggerZoneMapUpdate() }
 
       // Restart the timer in case the object we just removed was the next one scheduled
       RestartTimer()
-
-    case HackCaptureActor.GetHackTimeRemainingNanos(capture_console_guid) =>
-      hackedObjects.find(_.target.GUID == capture_console_guid) match {
-        case Some(obj: HackCaptureActor.HackEntry) =>
-          val time_left: Long = obj.duration.toNanos - (System.nanoTime - obj.hack_timestamp)
-          sender ! time_left
-        case _ =>
-          log.warn(s"Couldn't find capture terminal guid $capture_console_guid in hackedObjects list")
-          sender ! 0L
-      }
     case _ => ;
   }
 
@@ -108,9 +98,6 @@ object HackCaptureActor {
   final case class HackTimeoutReached(capture_terminal_guid : PlanetSideGUID, zone_id : String, unk1 : Long, unk2 : Long, hackedByFaction : PlanetSideEmpire.Value)
 
   final case class ClearHack(target : CaptureTerminal, zone : Zone)
-
-  final case class GetHackTimeRemainingNanos(capture_console_guid: PlanetSideGUID)
-
 
   private final case class ProcessCompleteHacks()
 

@@ -4,7 +4,7 @@ package game.objectcreatedetailed
 import net.psforever.packet._
 import net.psforever.packet.game._
 import net.psforever.packet.game.objectcreate._
-import net.psforever.types.PlanetSideEmpire
+import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID}
 import org.specs2.mutable._
 import scodec.bits._
 
@@ -25,13 +25,13 @@ class DetailedConstructionToolDataTest extends Specification {
           parent.get.guid mustEqual PlanetSideGUID(3104)
           parent.get.slot mustEqual 0
           data match {
-            case DetailedConstructionToolData(cdata) =>
+            case DetailedConstructionToolData(cdata, mode) =>
               cdata.faction mustEqual PlanetSideEmpire.VS
               cdata.bops mustEqual false
               cdata.alternate mustEqual false
               cdata.v1 mustEqual true
               cdata.v2.isEmpty mustEqual true
-              cdata.v3 mustEqual false
+              cdata.jammered mustEqual false
               cdata.v4.isEmpty mustEqual true
               cdata.v5.isEmpty mustEqual true
               cdata.guid mustEqual PlanetSideGUID(0)
@@ -65,13 +65,13 @@ class DetailedConstructionToolDataTest extends Specification {
           parent.get.guid mustEqual PlanetSideGUID(2502)
           parent.get.slot mustEqual 0
           data match {
-            case DetailedConstructionToolData(cdata) =>
+            case DetailedConstructionToolData(cdata, mode) =>
               cdata.faction mustEqual PlanetSideEmpire.NEUTRAL
               cdata.bops mustEqual false
               cdata.alternate mustEqual false
               cdata.v1 mustEqual true
               cdata.v2.isEmpty mustEqual true
-              cdata.v3 mustEqual false
+              cdata.jammered mustEqual false
               cdata.v4.isEmpty mustEqual true
               cdata.v5.isEmpty mustEqual true
               cdata.guid mustEqual PlanetSideGUID(0)
@@ -105,13 +105,13 @@ class DetailedConstructionToolDataTest extends Specification {
           parent.get.guid mustEqual PlanetSideGUID(414)
           parent.get.slot mustEqual 0
           data match {
-            case DetailedConstructionToolData(cdata) =>
+            case DetailedConstructionToolData(cdata, mode) =>
               cdata.faction mustEqual PlanetSideEmpire.NC
               cdata.bops mustEqual false
               cdata.alternate mustEqual false
               cdata.v1 mustEqual true
               cdata.v2.isEmpty mustEqual true
-              cdata.v3 mustEqual false
+              cdata.jammered mustEqual false
               cdata.v4.isEmpty mustEqual true
               cdata.v5.contains(564) mustEqual true
               cdata.guid mustEqual PlanetSideGUID(0)
@@ -133,13 +133,13 @@ class DetailedConstructionToolDataTest extends Specification {
           parent.get.guid mustEqual PlanetSideGUID(340)
           parent.get.slot mustEqual 9
           data match {
-            case DetailedConstructionToolData(cdata) =>
+            case DetailedConstructionToolData(cdata, mode) =>
               cdata.faction mustEqual PlanetSideEmpire.VS
               cdata.bops mustEqual false
               cdata.alternate mustEqual false
               cdata.v1 mustEqual false
               cdata.v2.isEmpty mustEqual true
-              cdata.v3 mustEqual false
+              cdata.jammered mustEqual false
               cdata.v4.isEmpty mustEqual true
               cdata.v5.isEmpty mustEqual true
               cdata.guid mustEqual PlanetSideGUID(0)

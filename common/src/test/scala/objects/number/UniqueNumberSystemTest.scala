@@ -8,6 +8,7 @@ import net.psforever.objects.guid.NumberPoolHub
 import net.psforever.objects.guid.actor.{NumberPoolActor, Register, UniqueNumberSystem, Unregister}
 import net.psforever.objects.guid.selector.RandomSelector
 import net.psforever.objects.guid.source.LimitedNumberSource
+import net.psforever.types.PlanetSideGUID
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
@@ -186,14 +187,14 @@ class UniqueNumberSystemTest5 extends ActorTest() {
       assert(src.CountUsed == 0)
 
       uns ! Register(testObj, "pool2")
-      val msg1 = receiveOne(Duration.create(500, "ms"))
+      val msg1 = receiveOne(Duration.create(2000, "ms"))
       assert(msg1.isInstanceOf[Success[_]])
       assert(testObj.HasGUID)
       assert(pool2.contains(testObj.GUID.guid))
       assert(src.CountUsed == 1)
 
       uns ! Unregister(testObj)
-      val msg2 = receiveOne(Duration.create(500, "ms"))
+      val msg2 = receiveOne(Duration.create(2000, "ms"))
       assert(msg2.isInstanceOf[Success[_]])
       assert(!testObj.HasGUID)
       assert(src.CountUsed == 0)
@@ -237,7 +238,7 @@ class UniqueNumberSystemTest7 extends ActorTest() {
       guid.AddPool("pool3", (5001 to 6000).toList).Selector = new RandomSelector
       val uns = system.actorOf(Props(classOf[UniqueNumberSystem], guid, UniqueNumberSystemTest.AllocateNumberPoolActors(guid)), "uns")
       val testObj = new EntityTestClass()
-      testObj.GUID = net.psforever.packet.game.PlanetSideGUID(6001) //fake registering; number too high
+      testObj.GUID =PlanetSideGUID(6001) //fake registering; number too high
       assert(testObj.HasGUID)
       assert(src.CountUsed == 0)
 
@@ -262,7 +263,7 @@ class UniqueNumberSystemTest8 extends ActorTest() {
       guid.AddPool("pool3", (5001 to 6000).toList).Selector = new RandomSelector
       val uns = system.actorOf(Props(classOf[UniqueNumberSystem], guid, UniqueNumberSystemTest.AllocateNumberPoolActors(guid)), "uns")
       val testObj = new EntityTestClass()
-      testObj.GUID = net.psforever.packet.game.PlanetSideGUID(3500) //fake registering
+      testObj.GUID = PlanetSideGUID(3500) //fake registering
       assert(testObj.HasGUID)
       assert(src.CountUsed == 0)
 
@@ -341,7 +342,7 @@ object UniqueNumberSystemTest {
     * @see `UniqueNumberSystem.AllocateNumberPoolActors(NumberPoolHub)(implicit ActorContext)`
     */
   def AllocateNumberPoolActors(poolSource : NumberPoolHub)(implicit system : ActorSystem) : Map[String, ActorRef] = {
-    poolSource.Pools.map({ case ((pname, pool)) =>
+    poolSource.Pools.map({ case (pname, pool) =>
       pname -> system.actorOf(Props(classOf[NumberPoolActor], pool), pname)
     }).toMap
   }
