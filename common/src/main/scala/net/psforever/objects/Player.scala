@@ -1,6 +1,7 @@
 // Copyright (c) 2017 PSForever
 package net.psforever.objects
 
+import akka.actor.ActorRef
 import net.psforever.objects.avatar.LoadoutManager
 import net.psforever.objects.definition.{AvatarDefinition, ExoSuitDefinition, SpecialExoSuitDefinition}
 import net.psforever.objects.equipment.{Equipment, EquipmentSize, EquipmentSlot, JammableUnit}
@@ -23,9 +24,9 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
   with Container
   with JammableUnit
   with ZoneAware {
-  private var alive : Boolean = false
+  Health = 0 //player health is artificially managed as a part of their lifecycle; start entity as dead
+  Destroyed = true //see isAlive
   private var backpack : Boolean = false
-  private var health : Int = 0
   private var stamina : Int = 0
   private var armor : Int = 0
 
@@ -34,7 +35,6 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
   private var capacitorLastUsedMillis : Long = 0
   private var capacitorLastChargedMillis : Long = 0
 
-  private var maxHealth : Int = 100 //TODO affected by empire benefits, territory benefits, and bops
   private var maxStamina : Int = 100 //does anything affect this?
 
   private var exosuit : ExoSuitDefinition = GlobalDefinitions.Standard
@@ -49,6 +49,7 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
   private var crouching : Boolean  = false
   private var jumping : Boolean = false
   private var cloaked : Boolean = false
+  private var fatigued : Boolean = false // If stamina drops to 0, player is fatigued until regenerating at least 20 stamina
 
   private var vehicleSeated : Option[PlanetSideGUID] = None
 
@@ -84,14 +85,14 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
 
   def LFS : Boolean = core.LFS
 
-  def isAlive : Boolean = alive
+  def isAlive : Boolean = !Destroyed
 
   def isBackpack : Boolean = backpack
 
   def Spawn : Boolean = {
     if(!isAlive && !isBackpack) {
-      alive = true
-      Health = MaxHealth
+      Destroyed = false
+      Health = Definition.DefaultHealth
       Stamina = MaxStamina
       Armor = MaxArmor
       Capacitor = 0
@@ -101,14 +102,15 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
   }
 
   def Die : Boolean = {
-    alive = false
+    Destroyed = true
     Health = 0
     Stamina = 0
     false
   }
 
   def Revive : Boolean = {
-    alive = true
+    Destroyed = false
+    Health = Definition.DefaultHealth
     true
   }
 
@@ -122,24 +124,15 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
     }
   }
 
-  def Health : Int = health
-
-  def Health_=(assignHealth : Int) : Int = {
-    health = math.min(math.max(0, assignHealth), MaxHealth)
-    Health
-  }
-
-  def MaxHealth : Int = maxHealth
-
-  def MaxHealth_=(max : Int) : Int = {
-    maxHealth = math.min(math.max(0, max), 65535)
-    MaxHealth
-  }
-
   def Stamina : Int = stamina
 
-  def Stamina_=(assignEnergy : Int) : Int = {
-    stamina = if(isAlive) { math.min(math.max(0, assignEnergy), MaxStamina) } else { 0 }
+  def Stamina_=(assignStamina : Int) : Int = {
+    stamina = if(isAlive) { math.min(math.max(0, assignStamina), MaxStamina) } else { 0 }
+
+    if(Actor != ActorRef.noSender) {
+      Actor ! Player.StaminaChanged(Stamina)
+    }
+
     Stamina
   }
 
@@ -373,6 +366,8 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
     */
   def Implant(slot : Int) : ImplantType.Value = core.Implant(slot)
 
+  def ImplantSlot(slot: Int) : ImplantSlot = core.Implants(slot)
+
   /**
     * A read-only `Array` of tuples representing important information about all unlocked implant slots.
     * @return a maximum of three implant types, initialization times, and active flags
@@ -409,6 +404,12 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
   def Cloaked_=(isCloaked : Boolean) : Boolean = {
     cloaked = isCloaked
     Cloaked
+  }
+
+  def Fatigued : Boolean = fatigued
+  def Fatigued_=(isFatigued : Boolean) : Boolean = {
+    fatigued = isFatigued
+    Fatigued
   }
 
   def PersonalStyleFeatures : Option[Cosmetics] = core.PersonalStyleFeatures
@@ -637,6 +638,12 @@ object Player {
   final val HandsDownSlot : Int = 255
 
   final case class Die()
+  final case class ImplantActivation(slot : Int, status : Int)
+  final case class ImplantInitializationStart(slot : Int)
+  final case class UninitializeImplant(slot : Int)
+  final case class ImplantInitializationComplete(slot : Int)
+  final case class DrainStamina(amount : Int)
+  final case class StaminaChanged(currentStamina : Int)
 
   def apply(core : Avatar) : Player = {
     new Player(core)
@@ -659,6 +666,21 @@ object Player {
     }
     else {
       player
+    }
+  }
+
+  def GetHackLevel(player : Player): Int = {
+    if(player.Certifications.contains(CertificationType.ExpertHacking) || player.Certifications.contains(CertificationType.ElectronicsExpert)) {
+      3
+    }
+    else if(player.Certifications.contains(CertificationType.AdvancedHacking)) {
+      2
+    }
+    else if (player.Certifications.contains(CertificationType.Hacking)) {
+      1
+    }
+    else {
+      0
     }
   }
 

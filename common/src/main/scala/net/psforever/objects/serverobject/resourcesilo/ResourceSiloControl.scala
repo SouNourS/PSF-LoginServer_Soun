@@ -22,7 +22,7 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
   def receive : Receive = {
     case "startup" =>
       // todo: This is just a temporary solution to drain NTU over time. When base object destruction is properly implemented NTU should be deducted when base objects repair themselves
-      context.system.scheduler.schedule(5 second, 5 second, self, ResourceSilo.UpdateChargeLevel(-1))
+//      context.system.scheduler.schedule(5 second, 5 second, self, ResourceSilo.UpdateChargeLevel(-1))
       context.become(Processing)
 
     case _ => ;
@@ -30,7 +30,14 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
 
   def Processing : Receive = checkBehavior.orElse {
     case ResourceSilo.Use(player, msg) =>
-      sender ! ResourceSilo.ResourceSiloMessage(player, msg, resourceSilo.Use(player, msg))
+      if(resourceSilo.Faction == PlanetSideEmpire.NEUTRAL || player.Faction == resourceSilo.Faction) {
+        resourceSilo.Zone.Vehicles.find(v => v.PassengerInSeat(player).contains(0)) match {
+          case Some(vehicle) =>
+            sender ! ResourceSilo.ResourceSiloMessage(player, msg, resourceSilo.Use(player, msg))
+          case _ =>
+        }
+      }
+
     case ResourceSilo.LowNtuWarning(enabled: Boolean) =>
       resourceSilo.LowNtuWarningOn = enabled
       log.trace(s"LowNtuWarning: Silo ${resourceSilo.GUID} low ntu warning set to $enabled")
@@ -43,6 +50,7 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
 
     case ResourceSilo.UpdateChargeLevel(amount: Int) =>
       val siloChargeBeforeChange = resourceSilo.ChargeLevel
+      val siloDisplayBeforeChange = resourceSilo.CapacitorDisplay
       val building = resourceSilo.Owner.asInstanceOf[Building]
       val zone = building.Zone
 
@@ -52,11 +60,9 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
         log.trace(s"UpdateChargeLevel: Silo ${resourceSilo.GUID} set to ${resourceSilo.ChargeLevel}")
       }
 
-      val ntuBarLevel = scala.math.ceil((resourceSilo.ChargeLevel.toFloat / resourceSilo.MaximumCharge.toFloat) * 10).toInt
       // Only send updated capacitor display value to all clients if it has actually changed
-      if(resourceSilo.CapacitorDisplay != ntuBarLevel) {
-        log.trace(s"Silo ${resourceSilo.GUID} NTU bar level has changed from ${resourceSilo.CapacitorDisplay} to $ntuBarLevel")
-        resourceSilo.CapacitorDisplay = ntuBarLevel
+      if(resourceSilo.CapacitorDisplay != siloDisplayBeforeChange) {
+        log.trace(s"Silo ${resourceSilo.GUID} NTU bar level has changed from $siloDisplayBeforeChange to ${resourceSilo.CapacitorDisplay}")
         resourceSilo.Owner.Actor ! Building.SendMapUpdate(all_clients = true)
         zone.AvatarEvents ! AvatarServiceMessage(
           zone.Id,
