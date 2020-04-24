@@ -14,70 +14,71 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-//      BuildingByMapId(5).get.Name = Some("Seth")
-//      BuildingByMapId(6).get.Name = Some("Bastet")
-//      BuildingByMapId(7).get.Name = Some("Aton")
-//      BuildingByMapId(8).get.Name = Some("Hapi")
-//      BuildingByMapId(9).get.Name = Some("Thoth")
-//      BuildingByMapId(10).get.Name = Some("Mont")
-//      BuildingByMapId(11).get.Name = Some("Amun")
-//      BuildingByMapId(12).get.Name = Some("Horus")
-//      BuildingByMapId(13).get.Name = Some("Sobek")
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
 //
-//      BuildingByMapId(20).get.Name = Some("twr1")
-//      BuildingByMapId(21).get.Name = Some("twr2")
-//      BuildingByMapId(14).get.Name = Some("twr3")
-//      BuildingByMapId(32).get.Name = Some("twr4")
-//      BuildingByMapId(38).get.Name = Some("twr5")
-//      BuildingByMapId(17).get.Name = Some("twr6")
-//      BuildingByMapId(36).get.Name = Some("twr7")
-//      BuildingByMapId(24).get.Name = Some("twr8")
-//      BuildingByMapId(25).get.Name = Some("twr9")
-//      BuildingByMapId(22).get.Name = Some("twr10")
-//      BuildingByMapId(37).get.Name = Some("twr11")
-//      BuildingByMapId(41).get.Name = Some("twr12")
-//      BuildingByMapId(18).get.Name = Some("twr13")
-//      BuildingByMapId(15).get.Name = Some("twr14")
-//      BuildingByMapId(39).get.Name = Some("twr15")
-//      BuildingByMapId(23).get.Name = Some("twr16")
-//      BuildingByMapId(42).get.Name = Some("twr17")
-//      BuildingByMapId(19).get.Name = Some("twr18")
-//      BuildingByMapId(16).get.Name = Some("twr19")
-//      BuildingByMapId(40).get.Name = Some("twr20")
-
-      import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NEUTRAL
-      }
-
-      BuildingByMapId(13).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(10).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS
-
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(19998).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(19999).get.Faction = PlanetSideEmpire.NEUTRAL
-      //    BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
-      //    BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
-      //    BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
-      //    BuildingByMapId(4).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(19998).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(19999).get.asInstanceOf[WarpGate].Active = false
+////      BuildingByMapId(5).get.Name = Some("Seth")
+////      BuildingByMapId(6).get.Name = Some("Bastet")
+////      BuildingByMapId(7).get.Name = Some("Aton")
+////      BuildingByMapId(8).get.Name = Some("Hapi")
+////      BuildingByMapId(9).get.Name = Some("Thoth")
+////      BuildingByMapId(10).get.Name = Some("Mont")
+////      BuildingByMapId(11).get.Name = Some("Amun")
+////      BuildingByMapId(12).get.Name = Some("Horus")
+////      BuildingByMapId(13).get.Name = Some("Sobek")
+////
+////      BuildingByMapId(20).get.Name = Some("twr1")
+////      BuildingByMapId(21).get.Name = Some("twr2")
+////      BuildingByMapId(14).get.Name = Some("twr3")
+////      BuildingByMapId(32).get.Name = Some("twr4")
+////      BuildingByMapId(38).get.Name = Some("twr5")
+////      BuildingByMapId(17).get.Name = Some("twr6")
+////      BuildingByMapId(36).get.Name = Some("twr7")
+////      BuildingByMapId(24).get.Name = Some("twr8")
+////      BuildingByMapId(25).get.Name = Some("twr9")
+////      BuildingByMapId(22).get.Name = Some("twr10")
+////      BuildingByMapId(37).get.Name = Some("twr11")
+////      BuildingByMapId(41).get.Name = Some("twr12")
+////      BuildingByMapId(18).get.Name = Some("twr13")
+////      BuildingByMapId(15).get.Name = Some("twr14")
+////      BuildingByMapId(39).get.Name = Some("twr15")
+////      BuildingByMapId(23).get.Name = Some("twr16")
+////      BuildingByMapId(42).get.Name = Some("twr17")
+////      BuildingByMapId(19).get.Name = Some("twr18")
+////      BuildingByMapId(16).get.Name = Some("twr19")
+////      BuildingByMapId(40).get.Name = Some("twr20")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NEUTRAL
+//      }
+//
+//      BuildingByMapId(13).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(10).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS
+//
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(19998).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(19999).get.Faction = PlanetSideEmpire.NEUTRAL
+//      //    BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//      //    BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//      //    BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//      //    BuildingByMapId(4).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(19998).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(19999).get.asInstanceOf[WarpGate].Active = false
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -87,72 +88,73 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-//      BuildingByMapId(5).get.Name = Some("Voltan")
-//      BuildingByMapId(6).get.Name = Some("Naum")
-//      BuildingByMapId(7).get.Name = Some("Zotz")
-//      BuildingByMapId(8).get.Name = Some("Acan")
-//      BuildingByMapId(9).get.Name = Some("Bitol")
-//      BuildingByMapId(10).get.Name = Some("Chac")
-//      BuildingByMapId(11).get.Name = Some("Ghanon")
-//      BuildingByMapId(12).get.Name = Some("Ixtab")
-//      BuildingByMapId(13).get.Name = Some("Kisin")
-//      BuildingByMapId(14).get.Name = Some("Mulac")
-//      BuildingByMapId(48).get.Name = Some("Hurakan")
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
 //
-//      BuildingByMapId(15).get.Name = Some("twr1")
-//      BuildingByMapId(17).get.Name = Some("twr2")
-//      BuildingByMapId(28).get.Name = Some("twr3")
-//      BuildingByMapId(49).get.Name = Some("twr4")
-//      BuildingByMapId(32).get.Name = Some("twr5")
-//      BuildingByMapId(50).get.Name = Some("twr6")
-//      BuildingByMapId(23).get.Name = Some("twr7")
-//      BuildingByMapId(52).get.Name = Some("twr8")
-//      BuildingByMapId(31).get.Name = Some("twr9")
-//      BuildingByMapId(30).get.Name = Some("twr10")
-//      BuildingByMapId(16).get.Name = Some("twr11")
-//      BuildingByMapId(19).get.Name = Some("twr12")
-//      BuildingByMapId(22).get.Name = Some("twr13")
-//      BuildingByMapId(42).get.Name = Some("twr14")
-//      BuildingByMapId(24).get.Name = Some("twr15")
-//      BuildingByMapId(33).get.Name = Some("twr16")
-//      BuildingByMapId(29).get.Name = Some("twr17")
-//      BuildingByMapId(18).get.Name = Some("twr18")
-//      BuildingByMapId(27).get.Name = Some("twr19")
-//      BuildingByMapId(20).get.Name = Some("twr20")
-//      BuildingByMapId(21).get.Name = Some("twr21")
-//      BuildingByMapId(26).get.Name = Some("twr22")
-//      BuildingByMapId(25).get.Name = Some("twr23")
-//      BuildingByMapId(51).get.Name = Some("twr24")
-
-      import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NEUTRAL
-      }
-
-      BuildingByMapId(6).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(14).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(7).get.Faction = PlanetSideEmpire.VS
-
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(18907).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(18908).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(18907).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(18908).get.asInstanceOf[WarpGate].Active = false
+////      BuildingByMapId(5).get.Name = Some("Voltan")
+////      BuildingByMapId(6).get.Name = Some("Naum")
+////      BuildingByMapId(7).get.Name = Some("Zotz")
+////      BuildingByMapId(8).get.Name = Some("Acan")
+////      BuildingByMapId(9).get.Name = Some("Bitol")
+////      BuildingByMapId(10).get.Name = Some("Chac")
+////      BuildingByMapId(11).get.Name = Some("Ghanon")
+////      BuildingByMapId(12).get.Name = Some("Ixtab")
+////      BuildingByMapId(13).get.Name = Some("Kisin")
+////      BuildingByMapId(14).get.Name = Some("Mulac")
+////      BuildingByMapId(48).get.Name = Some("Hurakan")
+////
+////      BuildingByMapId(15).get.Name = Some("twr1")
+////      BuildingByMapId(17).get.Name = Some("twr2")
+////      BuildingByMapId(28).get.Name = Some("twr3")
+////      BuildingByMapId(49).get.Name = Some("twr4")
+////      BuildingByMapId(32).get.Name = Some("twr5")
+////      BuildingByMapId(50).get.Name = Some("twr6")
+////      BuildingByMapId(23).get.Name = Some("twr7")
+////      BuildingByMapId(52).get.Name = Some("twr8")
+////      BuildingByMapId(31).get.Name = Some("twr9")
+////      BuildingByMapId(30).get.Name = Some("twr10")
+////      BuildingByMapId(16).get.Name = Some("twr11")
+////      BuildingByMapId(19).get.Name = Some("twr12")
+////      BuildingByMapId(22).get.Name = Some("twr13")
+////      BuildingByMapId(42).get.Name = Some("twr14")
+////      BuildingByMapId(24).get.Name = Some("twr15")
+////      BuildingByMapId(33).get.Name = Some("twr16")
+////      BuildingByMapId(29).get.Name = Some("twr17")
+////      BuildingByMapId(18).get.Name = Some("twr18")
+////      BuildingByMapId(27).get.Name = Some("twr19")
+////      BuildingByMapId(20).get.Name = Some("twr20")
+////      BuildingByMapId(21).get.Name = Some("twr21")
+////      BuildingByMapId(26).get.Name = Some("twr22")
+////      BuildingByMapId(25).get.Name = Some("twr23")
+////      BuildingByMapId(51).get.Name = Some("twr24")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NEUTRAL
+//      }
+//
+//      BuildingByMapId(6).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(14).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(7).get.Faction = PlanetSideEmpire.VS
+//
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(18907).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(18908).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(18907).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(18908).get.asInstanceOf[WarpGate].Active = false
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -162,94 +164,95 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-//      BuildingByMapId(1).get.Name = Some("Aja")
-//      BuildingByMapId(2).get.Name = Some("Bomazi")
-//      BuildingByMapId(4).get.Name = Some("Chuku")
-//      BuildingByMapId(5).get.Name = Some("Ekera")
-//      BuildingByMapId(6).get.Name = Some("Faro")
-//      BuildingByMapId(7).get.Name = Some("Wele")
-//      BuildingByMapId(8).get.Name = Some("Itan")
-//      BuildingByMapId(10).get.Name = Some("Leza")
-//      BuildingByMapId(11).get.Name = Some("Tore")
-//      BuildingByMapId(12).get.Name = Some("Nzame")
-//      BuildingByMapId(14).get.Name = Some("Orisha")
-//      BuildingByMapId(15).get.Name = Some("Pamba")
-//      BuildingByMapId(16).get.Name = Some("Shango")
-//      BuildingByMapId(18).get.Name = Some("Gunuku")
-//      BuildingByMapId(19).get.Name = Some("Honsi")
-//      BuildingByMapId(20).get.Name = Some("Kaang")
-//      BuildingByMapId(21).get.Name = Some("Mukuru")
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
 //
-//      BuildingByMapId(22).get.Name = Some("twr1")
-//      BuildingByMapId(61).get.Name = Some("twr2")
-//      BuildingByMapId(62).get.Name = Some("twr3")
-//      BuildingByMapId(27).get.Name = Some("twr4")
-//      BuildingByMapId(26).get.Name = Some("twr5")
-//      BuildingByMapId(36).get.Name = Some("twr6")
-//      BuildingByMapId(64).get.Name = Some("twr7")
-//      BuildingByMapId(35).get.Name = Some("twr8")
-//      BuildingByMapId(67).get.Name = Some("twr9")
-//      BuildingByMapId(33).get.Name = Some("twr10")
-//      BuildingByMapId(38).get.Name = Some("twr11")
-//      BuildingByMapId(31).get.Name = Some("twr12")
-//      BuildingByMapId(43).get.Name = Some("twr13")
-//      BuildingByMapId(41).get.Name = Some("twr14")
-//      BuildingByMapId(65).get.Name = Some("twr15")
-//      BuildingByMapId(23).get.Name = Some("twr16")
-//      BuildingByMapId(63).get.Name = Some("twr17")
-//      BuildingByMapId(28).get.Name = Some("twr18")
-//      BuildingByMapId(30).get.Name = Some("twr19")
-//      BuildingByMapId(68).get.Name = Some("twr20")
-//      BuildingByMapId(45).get.Name = Some("twr21")
-//      BuildingByMapId(32).get.Name = Some("twr22")
-//      BuildingByMapId(34).get.Name = Some("twr23")
-//      BuildingByMapId(42).get.Name = Some("twr24")
-//      BuildingByMapId(40).get.Name = Some("twr25")
-//      BuildingByMapId(66).get.Name = Some("twr26")
-//      BuildingByMapId(25).get.Name = Some("twr27")
-//      BuildingByMapId(24).get.Name = Some("twr28")
-//      BuildingByMapId(69).get.Name = Some("twr29")
-//      BuildingByMapId(29).get.Name = Some("twr30")
-//      BuildingByMapId(37).get.Name = Some("twr31")
-//      BuildingByMapId(39).get.Name = Some("twr32")
-//      BuildingByMapId(44).get.Name = Some("twr33")
+////      BuildingByMapId(1).get.Name = Some("Aja")
+////      BuildingByMapId(2).get.Name = Some("Bomazi")
+////      BuildingByMapId(4).get.Name = Some("Chuku")
+////      BuildingByMapId(5).get.Name = Some("Ekera")
+////      BuildingByMapId(6).get.Name = Some("Faro")
+////      BuildingByMapId(7).get.Name = Some("Wele")
+////      BuildingByMapId(8).get.Name = Some("Itan")
+////      BuildingByMapId(10).get.Name = Some("Leza")
+////      BuildingByMapId(11).get.Name = Some("Tore")
+////      BuildingByMapId(12).get.Name = Some("Nzame")
+////      BuildingByMapId(14).get.Name = Some("Orisha")
+////      BuildingByMapId(15).get.Name = Some("Pamba")
+////      BuildingByMapId(16).get.Name = Some("Shango")
+////      BuildingByMapId(18).get.Name = Some("Gunuku")
+////      BuildingByMapId(19).get.Name = Some("Honsi")
+////      BuildingByMapId(20).get.Name = Some("Kaang")
+////      BuildingByMapId(21).get.Name = Some("Mukuru")
+////
+////      BuildingByMapId(22).get.Name = Some("twr1")
+////      BuildingByMapId(61).get.Name = Some("twr2")
+////      BuildingByMapId(62).get.Name = Some("twr3")
+////      BuildingByMapId(27).get.Name = Some("twr4")
+////      BuildingByMapId(26).get.Name = Some("twr5")
+////      BuildingByMapId(36).get.Name = Some("twr6")
+////      BuildingByMapId(64).get.Name = Some("twr7")
+////      BuildingByMapId(35).get.Name = Some("twr8")
+////      BuildingByMapId(67).get.Name = Some("twr9")
+////      BuildingByMapId(33).get.Name = Some("twr10")
+////      BuildingByMapId(38).get.Name = Some("twr11")
+////      BuildingByMapId(31).get.Name = Some("twr12")
+////      BuildingByMapId(43).get.Name = Some("twr13")
+////      BuildingByMapId(41).get.Name = Some("twr14")
+////      BuildingByMapId(65).get.Name = Some("twr15")
+////      BuildingByMapId(23).get.Name = Some("twr16")
+////      BuildingByMapId(63).get.Name = Some("twr17")
+////      BuildingByMapId(28).get.Name = Some("twr18")
+////      BuildingByMapId(30).get.Name = Some("twr19")
+////      BuildingByMapId(68).get.Name = Some("twr20")
+////      BuildingByMapId(45).get.Name = Some("twr21")
+////      BuildingByMapId(32).get.Name = Some("twr22")
+////      BuildingByMapId(34).get.Name = Some("twr23")
+////      BuildingByMapId(42).get.Name = Some("twr24")
+////      BuildingByMapId(40).get.Name = Some("twr25")
+////      BuildingByMapId(66).get.Name = Some("twr26")
+////      BuildingByMapId(25).get.Name = Some("twr27")
+////      BuildingByMapId(24).get.Name = Some("twr28")
+////      BuildingByMapId(69).get.Name = Some("twr29")
+////      BuildingByMapId(29).get.Name = Some("twr30")
+////      BuildingByMapId(37).get.Name = Some("twr31")
+////      BuildingByMapId(39).get.Name = Some("twr32")
+////      BuildingByMapId(44).get.Name = Some("twr33")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NEUTRAL
+//      }
+//
+//      BuildingByMapId(18).get.Faction = PlanetSideEmpire.TR // Gunuku
+//      BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(20).get.Faction = PlanetSideEmpire.VS
+//
+//      BuildingByMapId(32).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(33).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(43).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(44).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(45).get.Faction = PlanetSideEmpire.NC
+//
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(9).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(17).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(25936).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(25937).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(9).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(13).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(17).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(25936).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(25937).get.asInstanceOf[WarpGate].Active = false
 
-      import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NEUTRAL
-      }
-
-      BuildingByMapId(18).get.Faction = PlanetSideEmpire.TR // Gunuku
-      BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(20).get.Faction = PlanetSideEmpire.VS
-
-      BuildingByMapId(32).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(33).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(43).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(44).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(45).get.Faction = PlanetSideEmpire.NC
-
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(9).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(17).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(25936).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(25937).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(9).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(13).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(17).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(25936).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(25937).get.asInstanceOf[WarpGate].Active = false
-
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -259,86 +262,149 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-      import net.psforever.types.PlanetSideEmpire
-
-      // PTS v3
-//      BuildingByMapId(5).get.Name = Some("Akkan")
-//      BuildingByMapId(6).get.Name = Some("Baal")
-//      BuildingByMapId(7).get.Name = Some("Dagon")
-//      BuildingByMapId(8).get.Name = Some("Enkidu")
-//      BuildingByMapId(9).get.Name = Some("Girru")
-//      BuildingByMapId(10).get.Name = Some("Hanish")
-//      BuildingByMapId(11).get.Name = Some("Irkalla")
-//      BuildingByMapId(12).get.Name = Some("Kusag")
-//      BuildingByMapId(13).get.Name = Some("Lahar")
-//      BuildingByMapId(14).get.Name = Some("Marduk")
-//      BuildingByMapId(15).get.Name = Some("Neti")
-//      BuildingByMapId(16).get.Name = Some("Zaqar")
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
 //
-//      BuildingByMapId(38).get.Name = Some("SEBaal")
-//      BuildingByMapId(37).get.Name = Some("NDagon")
-//      BuildingByMapId(65).get.Name = Some("WHanish")
-//      BuildingByMapId(17).get.Name = Some("SMarduk")
-//      BuildingByMapId(29).get.Name = Some("NEnkidu")
-//      BuildingByMapId(18).get.Name = Some("NENeti")
-//      BuildingByMapId(34).get.Name = Some("SEHanish")
-//      BuildingByMapId(19).get.Name = Some("SWZaqar")
-//      BuildingByMapId(33).get.Name = Some("EGirru")
-//      BuildingByMapId(26).get.Name = Some("O12")
-//      BuildingByMapId(23).get.Name = Some("SKusag")
-//      BuildingByMapId(58).get.Name = Some("SWLahar")
-//      BuildingByMapId(32).get.Name = Some("C11")
-//      BuildingByMapId(39).get.Name = Some("twr14")
-//      BuildingByMapId(31).get.Name = Some("twr15")
-//      BuildingByMapId(35).get.Name = Some("twr16")
-//      BuildingByMapId(28).get.Name = Some("twr17")
-//      BuildingByMapId(21).get.Name = Some("twr18")
-//      BuildingByMapId(27).get.Name = Some("twr19")
-//      BuildingByMapId(59).get.Name = Some("twr20")
-//      BuildingByMapId(25).get.Name = Some("twr21")
-//      BuildingByMapId(22).get.Name = Some("twr22")
-//      BuildingByMapId(24).get.Name = Some("twr23")
-//      BuildingByMapId(63).get.Name = Some("twr24")
-//      BuildingByMapId(40).get.Name = Some("twr25")
-//      BuildingByMapId(60).get.Name = Some("twr26")
-//      BuildingByMapId(30).get.Name = Some("twr27")
-//      BuildingByMapId(62).get.Name = Some("twr28")
-//      BuildingByMapId(56).get.Name = Some("twr29")
-//      BuildingByMapId(36).get.Name = Some("twr30")
-//      BuildingByMapId(61).get.Name = Some("twr31")
-//      BuildingByMapId(41).get.Name = Some("twr32")
-//      BuildingByMapId(55).get.Name = Some("twr33")
-//      BuildingByMapId(20).get.Name = Some("twr34")
-//      BuildingByMapId(57).get.Name = Some("twr35")
+//      import net.psforever.types.PlanetSideEmpire
+//
+//      // PTS v3
+////      BuildingByMapId(5).get.Name = Some("Akkan")
+////      BuildingByMapId(6).get.Name = Some("Baal")
+////      BuildingByMapId(7).get.Name = Some("Dagon")
+////      BuildingByMapId(8).get.Name = Some("Enkidu")
+////      BuildingByMapId(9).get.Name = Some("Girru")
+////      BuildingByMapId(10).get.Name = Some("Hanish")
+////      BuildingByMapId(11).get.Name = Some("Irkalla")
+////      BuildingByMapId(12).get.Name = Some("Kusag")
+////      BuildingByMapId(13).get.Name = Some("Lahar")
+////      BuildingByMapId(14).get.Name = Some("Marduk")
+////      BuildingByMapId(15).get.Name = Some("Neti")
+////      BuildingByMapId(16).get.Name = Some("Zaqar")
+////
+////      BuildingByMapId(38).get.Name = Some("SEBaal")
+////      BuildingByMapId(37).get.Name = Some("NDagon")
+////      BuildingByMapId(65).get.Name = Some("WHanish")
+////      BuildingByMapId(17).get.Name = Some("SMarduk")
+////      BuildingByMapId(29).get.Name = Some("NEnkidu")
+////      BuildingByMapId(18).get.Name = Some("NENeti")
+////      BuildingByMapId(34).get.Name = Some("SEHanish")
+////      BuildingByMapId(19).get.Name = Some("SWZaqar")
+////      BuildingByMapId(33).get.Name = Some("EGirru")
+////      BuildingByMapId(26).get.Name = Some("O12")
+////      BuildingByMapId(23).get.Name = Some("SKusag")
+////      BuildingByMapId(58).get.Name = Some("SWLahar")
+////      BuildingByMapId(32).get.Name = Some("C11")
+////      BuildingByMapId(39).get.Name = Some("twr14")
+////      BuildingByMapId(31).get.Name = Some("twr15")
+////      BuildingByMapId(35).get.Name = Some("twr16")
+////      BuildingByMapId(28).get.Name = Some("twr17")
+////      BuildingByMapId(21).get.Name = Some("twr18")
+////      BuildingByMapId(27).get.Name = Some("twr19")
+////      BuildingByMapId(59).get.Name = Some("twr20")
+////      BuildingByMapId(25).get.Name = Some("twr21")
+////      BuildingByMapId(22).get.Name = Some("twr22")
+////      BuildingByMapId(24).get.Name = Some("twr23")
+////      BuildingByMapId(63).get.Name = Some("twr24")
+////      BuildingByMapId(40).get.Name = Some("twr25")
+////      BuildingByMapId(60).get.Name = Some("twr26")
+////      BuildingByMapId(30).get.Name = Some("twr27")
+////      BuildingByMapId(62).get.Name = Some("twr28")
+////      BuildingByMapId(56).get.Name = Some("twr29")
+////      BuildingByMapId(36).get.Name = Some("twr30")
+////      BuildingByMapId(61).get.Name = Some("twr31")
+////      BuildingByMapId(41).get.Name = Some("twr32")
+////      BuildingByMapId(55).get.Name = Some("twr33")
+////      BuildingByMapId(20).get.Name = Some("twr34")
+////      BuildingByMapId(57).get.Name = Some("twr35")
+//
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NEUTRAL
+//      }
+//
+//      BuildingByMapId(11).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(9).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(10).get.Faction = PlanetSideEmpire.TR
+//
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(26620).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(26621).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(26620).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(26621).get.asInstanceOf[WarpGate].Active = false
+      InitZoneAmenities(zone = this)
 
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NEUTRAL
-      }
-
-      BuildingByMapId(11).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(9).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(10).get.Faction = PlanetSideEmpire.TR
-
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(26620).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(26621).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(26620).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(26621).get.asInstanceOf[WarpGate].Active = false
+      BuildingByMapId(5).get.Faction = PlanetSideEmpire.TR //Akkan
+      BuildingByMapId(6).get.Faction = PlanetSideEmpire.TR //Baal
+      BuildingByMapId(7).get.Faction = PlanetSideEmpire.TR //Dagon
+      BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC //Enkidu
+      BuildingByMapId(9).get.Faction = PlanetSideEmpire.VS //Girru
+      BuildingByMapId(10).get.Faction = PlanetSideEmpire.VS //Hanish
+      BuildingByMapId(11).get.Faction = PlanetSideEmpire.VS //Irkalla
+      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS //Kusag
+      BuildingByMapId(13).get.Faction = PlanetSideEmpire.VS //Lahar
+      BuildingByMapId(14).get.Faction = PlanetSideEmpire.NC //Marduk
+      BuildingByMapId(15).get.Faction = PlanetSideEmpire.NC //Neti
+      BuildingByMapId(16).get.Faction = PlanetSideEmpire.NC //Zaqar
+      BuildingByMapId(17).get.Faction = PlanetSideEmpire.NC //S_Marduk_Tower
+      BuildingByMapId(18).get.Faction = PlanetSideEmpire.NC //W_Neti_Tower
+      BuildingByMapId(19).get.Faction = PlanetSideEmpire.NC //W_Zaqar_Tower
+      BuildingByMapId(20).get.Faction = PlanetSideEmpire.NC //E_Zaqar_Tower
+      BuildingByMapId(21).get.Faction = PlanetSideEmpire.NC //NE_Neti_Tower
+      BuildingByMapId(22).get.Faction = PlanetSideEmpire.NC //SE_Ceryshen_Warpgate_Tower
+      BuildingByMapId(23).get.Faction = PlanetSideEmpire.VS //S_Kusag_Tower
+      BuildingByMapId(24).get.Faction = PlanetSideEmpire.VS //NW_Kusag_Tower
+      BuildingByMapId(25).get.Faction = PlanetSideEmpire.VS //N_Ceryshen_Warpgate_Tower
+      BuildingByMapId(26).get.Faction = PlanetSideEmpire.VS //SE_Irkalla_Tower
+      BuildingByMapId(27).get.Faction = PlanetSideEmpire.VS //S_Irkalla_Tower
+      BuildingByMapId(28).get.Faction = PlanetSideEmpire.TR //NE_Enkidu_Tower
+      BuildingByMapId(29).get.Faction = PlanetSideEmpire.NC //SE_Akkan_Tower
+      BuildingByMapId(30).get.Faction = PlanetSideEmpire.NC //SW_Enkidu_Tower
+      BuildingByMapId(31).get.Faction = PlanetSideEmpire.TR //E_Searhus_Warpgate_Tower
+      BuildingByMapId(32).get.Faction = PlanetSideEmpire.TR //N_Searhus_Warpgate_Tower
+      BuildingByMapId(33).get.Faction = PlanetSideEmpire.VS //E_Girru_Tower
+      BuildingByMapId(34).get.Faction = PlanetSideEmpire.VS //SE_Hanish_Tower
+      BuildingByMapId(35).get.Faction = PlanetSideEmpire.TR //SW_Hanish_Tower
+      BuildingByMapId(36).get.Faction = PlanetSideEmpire.VS //W_Girru_Tower
+      BuildingByMapId(37).get.Faction = PlanetSideEmpire.TR //E_Dagon_Tower
+      BuildingByMapId(38).get.Faction = PlanetSideEmpire.TR //NE_Baal_Tower
+      BuildingByMapId(39).get.Faction = PlanetSideEmpire.TR //SE_Baal_Tower
+      BuildingByMapId(40).get.Faction = PlanetSideEmpire.TR //S_Dagon_Tower
+      BuildingByMapId(41).get.Faction = PlanetSideEmpire.NC //W_Ceryshen_Warpgate_Tower
+      BuildingByMapId(42).get.Faction = PlanetSideEmpire.NEUTRAL //dagon bunker
+      BuildingByMapId(43).get.Faction = PlanetSideEmpire.NEUTRAL //Akkan North Bunker
+      BuildingByMapId(44).get.Faction = PlanetSideEmpire.NEUTRAL //Enkidu East Bunker
+      BuildingByMapId(45).get.Faction = PlanetSideEmpire.NEUTRAL //Neti bunker
+      BuildingByMapId(46).get.Faction = PlanetSideEmpire.NEUTRAL //Hanish West Bunker
+      BuildingByMapId(47).get.Faction = PlanetSideEmpire.NEUTRAL //Irkalla East Bunker
+      BuildingByMapId(48).get.Faction = PlanetSideEmpire.NEUTRAL //Zaqar bunker
+      BuildingByMapId(49).get.Faction = PlanetSideEmpire.NEUTRAL //Kusag West Bunker
+      BuildingByMapId(50).get.Faction = PlanetSideEmpire.NEUTRAL //marduk bunker
+      BuildingByMapId(51).get.Faction = PlanetSideEmpire.TR //baal bunker
+      BuildingByMapId(52).get.Faction = PlanetSideEmpire.NEUTRAL //girru bunker
+      BuildingByMapId(53).get.Faction = PlanetSideEmpire.NEUTRAL //lahar bunker
+      BuildingByMapId(54).get.Faction = PlanetSideEmpire.NEUTRAL //akkan bunker
+      BuildingByMapId(55).get.Faction = PlanetSideEmpire.VS //Irkalla_Tower
+      BuildingByMapId(56).get.Faction = PlanetSideEmpire.VS //Hanish_Tower
+      BuildingByMapId(57).get.Faction = PlanetSideEmpire.VS //E_Ceryshen_Warpgate_Tower
+      BuildingByMapId(58).get.Faction = PlanetSideEmpire.VS //Lahar_Tower
+      BuildingByMapId(59).get.Faction = PlanetSideEmpire.VS //VSSanc_Warpgate_Tower
+      BuildingByMapId(60).get.Faction = PlanetSideEmpire.TR //Akkan_Tower
+      BuildingByMapId(61).get.Faction = PlanetSideEmpire.NC //TRSanc_Warpgate_Tower
+      BuildingByMapId(62).get.Faction = PlanetSideEmpire.NC //Marduk_Tower
+      BuildingByMapId(63).get.Faction = PlanetSideEmpire.TR //NW_Dagon_Tower
+      BuildingByMapId(64).get.Faction = PlanetSideEmpire.NEUTRAL //E7 East Bunker (at north from bridge)
+      BuildingByMapId(65).get.Faction = PlanetSideEmpire.VS //W_Hanish_Tower
     }
   }
 
@@ -348,63 +414,64 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-//      BuildingByMapId(5).get.Name = Some("Ogma")
-//      BuildingByMapId(6).get.Name = Some("Neit")
-//      BuildingByMapId(7).get.Name = Some("Lugh")
-//      BuildingByMapId(8).get.Name = Some("Gwydion")
-//      BuildingByMapId(9).get.Name = Some("Dagda")
-//      BuildingByMapId(10).get.Name = Some("Pwyll")
-//      BuildingByMapId(11).get.Name = Some("Anu")
-//      BuildingByMapId(12).get.Name = Some("Bel")
-//      BuildingByMapId(13).get.Name = Some("Eadon")
-//      BuildingByMapId(36).get.Name = Some("Caer")
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
 //
-//      BuildingByMapId(14).get.Name = Some("twr1")
-//      BuildingByMapId(17).get.Name = Some("twr2")
-//      BuildingByMapId(37).get.Name = Some("twr3")
-//      BuildingByMapId(27).get.Name = Some("twr4")
-//      BuildingByMapId(25).get.Name = Some("twr5")
-//      BuildingByMapId(39).get.Name = Some("twr6")
-//      BuildingByMapId(20).get.Name = Some("twr7")
-//      BuildingByMapId(22).get.Name = Some("twr8")
-//      BuildingByMapId(15).get.Name = Some("twr9")
-//      BuildingByMapId(26).get.Name = Some("twr10")
-//      BuildingByMapId(38).get.Name = Some("twr11")
-//      BuildingByMapId(18).get.Name = Some("twr12")
-//      BuildingByMapId(21).get.Name = Some("twr13")
-//      BuildingByMapId(16).get.Name = Some("twr14")
-//      BuildingByMapId(24).get.Name = Some("twr15")
-//      BuildingByMapId(19).get.Name = Some("twr16")
-//      BuildingByMapId(23).get.Name = Some("twr17")
-
-      import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NEUTRAL
-      }
-      BuildingByMapId(7).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(8).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(9).get.Faction = PlanetSideEmpire.TR
-
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(21074).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(21078).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(21074).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(21078).get.asInstanceOf[WarpGate].Active = false
+////      BuildingByMapId(5).get.Name = Some("Ogma")
+////      BuildingByMapId(6).get.Name = Some("Neit")
+////      BuildingByMapId(7).get.Name = Some("Lugh")
+////      BuildingByMapId(8).get.Name = Some("Gwydion")
+////      BuildingByMapId(9).get.Name = Some("Dagda")
+////      BuildingByMapId(10).get.Name = Some("Pwyll")
+////      BuildingByMapId(11).get.Name = Some("Anu")
+////      BuildingByMapId(12).get.Name = Some("Bel")
+////      BuildingByMapId(13).get.Name = Some("Eadon")
+////      BuildingByMapId(36).get.Name = Some("Caer")
+////
+////      BuildingByMapId(14).get.Name = Some("twr1")
+////      BuildingByMapId(17).get.Name = Some("twr2")
+////      BuildingByMapId(37).get.Name = Some("twr3")
+////      BuildingByMapId(27).get.Name = Some("twr4")
+////      BuildingByMapId(25).get.Name = Some("twr5")
+////      BuildingByMapId(39).get.Name = Some("twr6")
+////      BuildingByMapId(20).get.Name = Some("twr7")
+////      BuildingByMapId(22).get.Name = Some("twr8")
+////      BuildingByMapId(15).get.Name = Some("twr9")
+////      BuildingByMapId(26).get.Name = Some("twr10")
+////      BuildingByMapId(38).get.Name = Some("twr11")
+////      BuildingByMapId(18).get.Name = Some("twr12")
+////      BuildingByMapId(21).get.Name = Some("twr13")
+////      BuildingByMapId(16).get.Name = Some("twr14")
+////      BuildingByMapId(24).get.Name = Some("twr15")
+////      BuildingByMapId(19).get.Name = Some("twr16")
+////      BuildingByMapId(23).get.Name = Some("twr17")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NEUTRAL
+//      }
+//      BuildingByMapId(7).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(8).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(9).get.Faction = PlanetSideEmpire.TR
+//
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(21074).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(21078).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(21074).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(21078).get.asInstanceOf[WarpGate].Active = false
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -414,84 +481,90 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-      //      GUID(2094) match {
-      //        case Some(silo : ResourceSilo) =>
-      //          silo.ChargeLevel = silo.MaximumCharge
-      //        case _ => ;
-      //      }
-
-//      BuildingByMapId(1).get.Name = Some("Akna")
-//      BuildingByMapId(2).get.Name = Some("Anguta")
-//      BuildingByMapId(3).get.Name = Some("Igaluk")
-//      BuildingByMapId(4).get.Name = Some("Keelut")
-//      BuildingByMapId(5).get.Name = Some("Nerrivik")
-//      BuildingByMapId(6).get.Name = Some("Pinga")
-//      BuildingByMapId(7).get.Name = Some("Sedna")
-//      BuildingByMapId(8).get.Name = Some("Tarqaq")
-//      BuildingByMapId(9).get.Name = Some("Tootega")
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
+//      //      GUID(2094) match {
+//      //        case Some(silo : ResourceSilo) =>
+//      //          silo.ChargeLevel = silo.MaximumCharge
+//      //        case _ => ;
+//      //      }
 //
-//      BuildingByMapId(14).get.Name = Some("twr1")
-//      BuildingByMapId(25).get.Name = Some("twr2")
-//      BuildingByMapId(32).get.Name = Some("twr3")
-//      BuildingByMapId(23).get.Name = Some("twr4")
-//      BuildingByMapId(46).get.Name = Some("twr5")
-//      BuildingByMapId(53).get.Name = Some("twr6")
-//      BuildingByMapId(50).get.Name = Some("twr7")
-//      BuildingByMapId(28).get.Name = Some("twr8")
-//      BuildingByMapId(47).get.Name = Some("twr9")
-//      BuildingByMapId(27).get.Name = Some("twr10")
-//      BuildingByMapId(22).get.Name = Some("twr11")
-//      BuildingByMapId(52).get.Name = Some("twr12")
-//      BuildingByMapId(15).get.Name = Some("twr13")
-//      BuildingByMapId(26).get.Name = Some("twr14")
-//      BuildingByMapId(48).get.Name = Some("twr15")
-//      BuildingByMapId(31).get.Name = Some("twr16")
-//      BuildingByMapId(18).get.Name = Some("twr17")
-//      BuildingByMapId(20).get.Name = Some("twr18")
-//      BuildingByMapId(29).get.Name = Some("twr19")
-//      BuildingByMapId(54).get.Name = Some("twr20")
-//      BuildingByMapId(16).get.Name = Some("twr21")
-//      BuildingByMapId(24).get.Name = Some("twr22")
-//      BuildingByMapId(30).get.Name = Some("twr23")
-//      BuildingByMapId(17).get.Name = Some("twr24")
-//      BuildingByMapId(49).get.Name = Some("twr25")
-//      BuildingByMapId(51).get.Name = Some("twr26")
-//      BuildingByMapId(19).get.Name = Some("twr27")
-//      BuildingByMapId(55).get.Name = Some("twr28")
-//      BuildingByMapId(21).get.Name = Some("twr29")
+////      BuildingByMapId(1).get.Name = Some("Akna")
+////      BuildingByMapId(2).get.Name = Some("Anguta")
+////      BuildingByMapId(3).get.Name = Some("Igaluk")
+////      BuildingByMapId(4).get.Name = Some("Keelut")
+////      BuildingByMapId(5).get.Name = Some("Nerrivik")
+////      BuildingByMapId(6).get.Name = Some("Pinga")
+////      BuildingByMapId(7).get.Name = Some("Sedna")
+////      BuildingByMapId(8).get.Name = Some("Tarqaq")
+////      BuildingByMapId(9).get.Name = Some("Tootega")
+////
+////      BuildingByMapId(14).get.Name = Some("twr1")
+////      BuildingByMapId(25).get.Name = Some("twr2")
+////      BuildingByMapId(32).get.Name = Some("twr3")
+////      BuildingByMapId(23).get.Name = Some("twr4")
+////      BuildingByMapId(46).get.Name = Some("twr5")
+////      BuildingByMapId(53).get.Name = Some("twr6")
+////      BuildingByMapId(50).get.Name = Some("twr7")
+////      BuildingByMapId(28).get.Name = Some("twr8")
+////      BuildingByMapId(47).get.Name = Some("twr9")
+////      BuildingByMapId(27).get.Name = Some("twr10")
+////      BuildingByMapId(22).get.Name = Some("twr11")
+////      BuildingByMapId(52).get.Name = Some("twr12")
+////      BuildingByMapId(15).get.Name = Some("twr13")
+////      BuildingByMapId(26).get.Name = Some("twr14")
+////      BuildingByMapId(48).get.Name = Some("twr15")
+////      BuildingByMapId(31).get.Name = Some("twr16")
+////      BuildingByMapId(18).get.Name = Some("twr17")
+////      BuildingByMapId(20).get.Name = Some("twr18")
+////      BuildingByMapId(29).get.Name = Some("twr19")
+////      BuildingByMapId(54).get.Name = Some("twr20")
+////      BuildingByMapId(16).get.Name = Some("twr21")
+////      BuildingByMapId(24).get.Name = Some("twr22")
+////      BuildingByMapId(30).get.Name = Some("twr23")
+////      BuildingByMapId(17).get.Name = Some("twr24")
+////      BuildingByMapId(49).get.Name = Some("twr25")
+////      BuildingByMapId(51).get.Name = Some("twr26")
+////      BuildingByMapId(19).get.Name = Some("twr27")
+////      BuildingByMapId(55).get.Name = Some("twr28")
+////      BuildingByMapId(21).get.Name = Some("twr29")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NEUTRAL
+//      }
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(5).get.Faction = PlanetSideEmpire.TR
+//
+//      BuildingByMapId(10).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(11).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(12).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(18657).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(18658).get.Faction = PlanetSideEmpire.NEUTRAL
+//
+//      //      BuildingByMapId(2).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(10).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(11).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(12).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(13).get.asInstanceOf[WarpGate].Broadcast = true
+//      //      BuildingByMapId(48).get.Faction = PlanetSideEmpire.VS
+//      //      BuildingByMapId(49).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(18657).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(18658).get.asInstanceOf[WarpGate].Active = false
 
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NEUTRAL
-      }
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(5).get.Faction = PlanetSideEmpire.TR
+      BuildingByMapId(2).get.Faction = PlanetSideEmpire.VS
+      BuildingByMapId(48).get.Faction = PlanetSideEmpire.VS
+      BuildingByMapId(49).get.Faction = PlanetSideEmpire.VS
 
-      BuildingByMapId(10).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(11).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(12).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(18657).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(18658).get.Faction = PlanetSideEmpire.NEUTRAL
-
-      //      BuildingByMapId(2).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(10).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(11).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(12).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(13).get.asInstanceOf[WarpGate].Broadcast = true
-      //      BuildingByMapId(48).get.Faction = PlanetSideEmpire.VS
-      //      BuildingByMapId(49).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(18657).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(18658).get.asInstanceOf[WarpGate].Active = false
-
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -501,50 +574,51 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
+//
+////      BuildingByMapId(5).get.Name = Some("Andvari")
+////      BuildingByMapId(6).get.Name = Some("Dagur")
+////      BuildingByMapId(7).get.Name = Some("Eisa")
+////      BuildingByMapId(8).get.Name = Some("Freyr")
+////      BuildingByMapId(9).get.Name = Some("Gjallar")
+////      BuildingByMapId(10).get.Name = Some("Helheim")
+////      BuildingByMapId(11).get.Name = Some("Kvasir")
+////      BuildingByMapId(12).get.Name = Some("Mani")
+////      BuildingByMapId(13).get.Name = Some("Nott")
+////      BuildingByMapId(14).get.Name = Some("Vidar")
+////      BuildingByMapId(15).get.Name = Some("Ymir")
+////      BuildingByMapId(16).get.Name = Some("Jarl")
+////      BuildingByMapId(17).get.Name = Some("Ran")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      //      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NEUTRAL
+//      }
+//
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(7).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(8).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(14).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(21321).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(21322).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(21321).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(21322).get.asInstanceOf[WarpGate].Active = false
 
-//      BuildingByMapId(5).get.Name = Some("Andvari")
-//      BuildingByMapId(6).get.Name = Some("Dagur")
-//      BuildingByMapId(7).get.Name = Some("Eisa")
-//      BuildingByMapId(8).get.Name = Some("Freyr")
-//      BuildingByMapId(9).get.Name = Some("Gjallar")
-//      BuildingByMapId(10).get.Name = Some("Helheim")
-//      BuildingByMapId(11).get.Name = Some("Kvasir")
-//      BuildingByMapId(12).get.Name = Some("Mani")
-//      BuildingByMapId(13).get.Name = Some("Nott")
-//      BuildingByMapId(14).get.Name = Some("Vidar")
-//      BuildingByMapId(15).get.Name = Some("Ymir")
-//      BuildingByMapId(16).get.Name = Some("Jarl")
-//      BuildingByMapId(17).get.Name = Some("Ran")
-
-      import net.psforever.types.PlanetSideEmpire
-      //      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NEUTRAL
-      }
-
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(7).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(8).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(14).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(21321).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(21322).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(21321).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(21322).get.asInstanceOf[WarpGate].Active = false
-
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -554,48 +628,49 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-      import net.psforever.types.PlanetSideEmpire
-
-//      BuildingByMapId(5).get.Name = Some("Atar")
-//      BuildingByMapId(6).get.Name = Some("Dahaka")
-//      BuildingByMapId(7).get.Name = Some("Hvar")
-//      BuildingByMapId(8).get.Name = Some("Izha")
-//      BuildingByMapId(9).get.Name = Some("Jamshid")
-//      BuildingByMapId(10).get.Name = Some("Mithra")
-//      BuildingByMapId(11).get.Name = Some("Rashnu")
-//      BuildingByMapId(12).get.Name = Some("Yazata")
-//      BuildingByMapId(13).get.Name = Some("Zal")
-
-      BuildingByMapId(5).get.Faction = PlanetSideEmpire.VS //Atar
-      BuildingByMapId(6).get.Faction = PlanetSideEmpire.NC //Dahaka
-      BuildingByMapId(7).get.Faction = PlanetSideEmpire.NC //Hvar
-      BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC //Izha
-      BuildingByMapId(9).get.Faction = PlanetSideEmpire.TR //Jamshid
-      BuildingByMapId(10).get.Faction = PlanetSideEmpire.TR //Mithra
-      BuildingByMapId(11).get.Faction = PlanetSideEmpire.TR //Rashnu
-      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS //Yazata
-      BuildingByMapId(13).get.Faction = PlanetSideEmpire.VS //Zal
-
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(24811).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(24815).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(24811).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(24815).get.asInstanceOf[WarpGate].Active = false
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
+//
+//      import net.psforever.types.PlanetSideEmpire
+//
+////      BuildingByMapId(5).get.Name = Some("Atar")
+////      BuildingByMapId(6).get.Name = Some("Dahaka")
+////      BuildingByMapId(7).get.Name = Some("Hvar")
+////      BuildingByMapId(8).get.Name = Some("Izha")
+////      BuildingByMapId(9).get.Name = Some("Jamshid")
+////      BuildingByMapId(10).get.Name = Some("Mithra")
+////      BuildingByMapId(11).get.Name = Some("Rashnu")
+////      BuildingByMapId(12).get.Name = Some("Yazata")
+////      BuildingByMapId(13).get.Name = Some("Zal")
+//
+//      BuildingByMapId(5).get.Faction = PlanetSideEmpire.VS //Atar
+//      BuildingByMapId(6).get.Faction = PlanetSideEmpire.NC //Dahaka
+//      BuildingByMapId(7).get.Faction = PlanetSideEmpire.NC //Hvar
+//      BuildingByMapId(8).get.Faction = PlanetSideEmpire.NC //Izha
+//      BuildingByMapId(9).get.Faction = PlanetSideEmpire.TR //Jamshid
+//      BuildingByMapId(10).get.Faction = PlanetSideEmpire.TR //Mithra
+//      BuildingByMapId(11).get.Faction = PlanetSideEmpire.TR //Rashnu
+//      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS //Yazata
+//      BuildingByMapId(13).get.Faction = PlanetSideEmpire.VS //Zal
+//
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(24811).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(24815).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(24811).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(24815).get.asInstanceOf[WarpGate].Active = false
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -605,74 +680,75 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-//      BuildingByMapId(4).get.Name = Some("Akua")
-//      BuildingByMapId(5).get.Name = Some("Drakulu")
-//      BuildingByMapId(6).get.Name = Some("Hiro")
-//      BuildingByMapId(7).get.Name = Some("Iva")
-//      BuildingByMapId(8).get.Name = Some("Karihi")
-//      BuildingByMapId(9).get.Name = Some("Laka")
-//      BuildingByMapId(10).get.Name = Some("Matagi")
-//      BuildingByMapId(11).get.Name = Some("Ngaru")
-//      BuildingByMapId(12).get.Name = Some("Oro")
-//      BuildingByMapId(13).get.Name = Some("Pele")
-//      BuildingByMapId(14).get.Name = Some("Rehua")
-//      BuildingByMapId(15).get.Name = Some("Sina")
-//      BuildingByMapId(16).get.Name = Some("Tara")
-//      BuildingByMapId(17).get.Name = Some("Wakea")
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
 //
-//      BuildingByMapId(47).get.Name = Some("twr1")
-//      BuildingByMapId(20).get.Name = Some("twr2")
-//      BuildingByMapId(18).get.Name = Some("twr3")
-//      BuildingByMapId(26).get.Name = Some("twr4")
-//      BuildingByMapId(46).get.Name = Some("twr5")
-//      BuildingByMapId(48).get.Name = Some("twr6")
-//      BuildingByMapId(51).get.Name = Some("twr7")
-//      BuildingByMapId(44).get.Name = Some("twr8")
-//      BuildingByMapId(52).get.Name = Some("twr9")
-//      BuildingByMapId(53).get.Name = Some("twr10")
-//      BuildingByMapId(45).get.Name = Some("twr11")
-//      BuildingByMapId(19).get.Name = Some("twr12")
-//      BuildingByMapId(28).get.Name = Some("twr13")
-//      BuildingByMapId(24).get.Name = Some("twr14")
-//      BuildingByMapId(49).get.Name = Some("twr15")
-//      BuildingByMapId(21).get.Name = Some("twr16")
-//      BuildingByMapId(22).get.Name = Some("twr16")
-//      BuildingByMapId(23).get.Name = Some("twr17")
-//      BuildingByMapId(25).get.Name = Some("twr18")
-//      BuildingByMapId(29).get.Name = Some("twr19")
-//      BuildingByMapId(37).get.Name = Some("twr20")
-//      BuildingByMapId(27).get.Name = Some("twr21")
-//      BuildingByMapId(50).get.Name = Some("twr22")
+////      BuildingByMapId(4).get.Name = Some("Akua")
+////      BuildingByMapId(5).get.Name = Some("Drakulu")
+////      BuildingByMapId(6).get.Name = Some("Hiro")
+////      BuildingByMapId(7).get.Name = Some("Iva")
+////      BuildingByMapId(8).get.Name = Some("Karihi")
+////      BuildingByMapId(9).get.Name = Some("Laka")
+////      BuildingByMapId(10).get.Name = Some("Matagi")
+////      BuildingByMapId(11).get.Name = Some("Ngaru")
+////      BuildingByMapId(12).get.Name = Some("Oro")
+////      BuildingByMapId(13).get.Name = Some("Pele")
+////      BuildingByMapId(14).get.Name = Some("Rehua")
+////      BuildingByMapId(15).get.Name = Some("Sina")
+////      BuildingByMapId(16).get.Name = Some("Tara")
+////      BuildingByMapId(17).get.Name = Some("Wakea")
+////
+////      BuildingByMapId(47).get.Name = Some("twr1")
+////      BuildingByMapId(20).get.Name = Some("twr2")
+////      BuildingByMapId(18).get.Name = Some("twr3")
+////      BuildingByMapId(26).get.Name = Some("twr4")
+////      BuildingByMapId(46).get.Name = Some("twr5")
+////      BuildingByMapId(48).get.Name = Some("twr6")
+////      BuildingByMapId(51).get.Name = Some("twr7")
+////      BuildingByMapId(44).get.Name = Some("twr8")
+////      BuildingByMapId(52).get.Name = Some("twr9")
+////      BuildingByMapId(53).get.Name = Some("twr10")
+////      BuildingByMapId(45).get.Name = Some("twr11")
+////      BuildingByMapId(19).get.Name = Some("twr12")
+////      BuildingByMapId(28).get.Name = Some("twr13")
+////      BuildingByMapId(24).get.Name = Some("twr14")
+////      BuildingByMapId(49).get.Name = Some("twr15")
+////      BuildingByMapId(21).get.Name = Some("twr16")
+////      BuildingByMapId(22).get.Name = Some("twr16")
+////      BuildingByMapId(23).get.Name = Some("twr17")
+////      BuildingByMapId(25).get.Name = Some("twr18")
+////      BuildingByMapId(29).get.Name = Some("twr19")
+////      BuildingByMapId(37).get.Name = Some("twr20")
+////      BuildingByMapId(27).get.Name = Some("twr21")
+////      BuildingByMapId(50).get.Name = Some("twr22")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NEUTRAL
+//      }
+//
+//      BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(11).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS
+//
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(23717).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(23718).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(23717).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(23718).get.asInstanceOf[WarpGate].Active = false
 
-      import net.psforever.types.PlanetSideEmpire
-
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NEUTRAL
-      }
-
-      BuildingByMapId(13).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(11).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(12).get.Faction = PlanetSideEmpire.VS
-
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(23717).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(23718).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(23717).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(23718).get.asInstanceOf[WarpGate].Active = false
-
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -682,49 +758,50 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
+//
+//      import net.psforever.types.PlanetSideEmpire
+//
+////      BuildingByMapId(5).get.Name = Some("Azeban")
+////      BuildingByMapId(6).get.Name = Some("Cetan")
+////      BuildingByMapId(7).get.Name = Some("Heyoka")
+////      BuildingByMapId(8).get.Name = Some("Ikanam")
+////      BuildingByMapId(9).get.Name = Some("Kyoi")
+////      BuildingByMapId(10).get.Name = Some("Mekala")
+////      BuildingByMapId(11).get.Name = Some("Onatha")
+////      BuildingByMapId(12).get.Name = Some("Qumu")
+////      BuildingByMapId(13).get.Name = Some("Sungrey")
+////      BuildingByMapId(14).get.Name = Some("Tumas")
+////      BuildingByMapId(15).get.Name = Some("Xelas")
+////      BuildingByMapId(49).get.Name = Some("Verica")
+//
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NC
+//      }
+//
+//      BuildingByMapId(5).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(11).get.Faction = PlanetSideEmpire.VS
+//
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(20900).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(20902).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(20900).get.asInstanceOf[WarpGate].Active = false
+//      BuildingByMapId(20902).get.asInstanceOf[WarpGate].Active = false
 
-      import net.psforever.types.PlanetSideEmpire
-
-//      BuildingByMapId(5).get.Name = Some("Azeban")
-//      BuildingByMapId(6).get.Name = Some("Cetan")
-//      BuildingByMapId(7).get.Name = Some("Heyoka")
-//      BuildingByMapId(8).get.Name = Some("Ikanam")
-//      BuildingByMapId(9).get.Name = Some("Kyoi")
-//      BuildingByMapId(10).get.Name = Some("Mekala")
-//      BuildingByMapId(11).get.Name = Some("Onatha")
-//      BuildingByMapId(12).get.Name = Some("Qumu")
-//      BuildingByMapId(13).get.Name = Some("Sungrey")
-//      BuildingByMapId(14).get.Name = Some("Tumas")
-//      BuildingByMapId(15).get.Name = Some("Xelas")
-//      BuildingByMapId(49).get.Name = Some("Verica")
-
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NC
-      }
-
-      BuildingByMapId(5).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(11).get.Faction = PlanetSideEmpire.VS
-
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(4).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(20900).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(20902).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(4).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(20900).get.asInstanceOf[WarpGate].Active = false
-      BuildingByMapId(20902).get.asInstanceOf[WarpGate].Active = false
-
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -733,15 +810,18 @@ object Zones {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.NC
-      }
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.NC
+//      }
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.NC
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.NC }
+
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -750,15 +830,18 @@ object Zones {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.TR
-      }
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.TR
+//      }
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.TR
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.TR }
+
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -767,17 +850,20 @@ object Zones {
       super.Init(context)
 
       import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.VS
-      }
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.VS
+//      }
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.NEUTRAL
+//
+//      BuildingByMapId(60).get.Faction = PlanetSideEmpire.NC //South Villa Gun Tower
+//      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
+//      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
+//      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
+      Buildings.values.foreach { _.Faction = PlanetSideEmpire.VS }
 
-      BuildingByMapId(60).get.Faction = PlanetSideEmpire.NC //South Villa Gun Tower
-      BuildingByMapId(1).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
-      BuildingByMapId(2).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
-      BuildingByMapId(3).get.asInstanceOf[WarpGate].BroadcastFor = PlanetSideEmpire.VS
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -805,12 +891,13 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      BuildingByMapId(10425).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(10175).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(10883).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(10314).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(10425).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(10175).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(10883).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(10314).get.Faction = PlanetSideEmpire.TR
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -819,6 +906,8 @@ object Zones {
       super.Init(context)
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -831,6 +920,7 @@ object Zones {
       //        import net.psforever.types.PlanetSideEmpire
       //        BuildingByMapId(10359).get.Faction = PlanetSideEmpire.TR //Redoubt SE
       //        BuildingByMapId(10359).ModelId = 104
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -839,6 +929,8 @@ object Zones {
       super.Init(context)
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -848,9 +940,10 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      BuildingByMapId(10209).get.Faction = PlanetSideEmpire.VS
-      BuildingByMapId(10210).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(10012).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(10209).get.Faction = PlanetSideEmpire.VS
+//      BuildingByMapId(10210).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(10012).get.Faction = PlanetSideEmpire.TR
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -859,6 +952,8 @@ object Zones {
       super.Init(context)
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -868,28 +963,29 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-//      BuildingByMapId(7).get.Name = Some("Mithra")
-//      BuildingByMapId(8).get.Name = Some("Hvar")
-//      BuildingByMapId(18).get.Name = Some("Yazata")
-
-      import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.VS
-      }
-      BuildingByMapId(10461).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10462).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10464).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10461).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(10462).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(10464).get.asInstanceOf[WarpGate].Broadcast = true
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
+//
+////      BuildingByMapId(7).get.Name = Some("Mithra")
+////      BuildingByMapId(8).get.Name = Some("Hvar")
+////      BuildingByMapId(18).get.Name = Some("Yazata")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.VS
+//      }
+//      BuildingByMapId(10461).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10462).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10464).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10461).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(10462).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(10464).get.asInstanceOf[WarpGate].Broadcast = true
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -899,28 +995,29 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-//      BuildingByMapId(7).get.Name = Some("Zal")
-//      BuildingByMapId(8).get.Name = Some("Rashnu")
-//      BuildingByMapId(39).get.Name = Some("Sraosha")
-
-      import net.psforever.types.PlanetSideEmpire
-      Buildings.values.foreach {
-        _.Faction = PlanetSideEmpire.VS
-      }
-      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10000).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(10002).get.asInstanceOf[WarpGate].Broadcast = true
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
+//      }
+//
+////      BuildingByMapId(7).get.Name = Some("Zal")
+////      BuildingByMapId(8).get.Name = Some("Rashnu")
+////      BuildingByMapId(39).get.Name = Some("Sraosha")
+//
+//      import net.psforever.types.PlanetSideEmpire
+//      Buildings.values.foreach {
+//        _.Faction = PlanetSideEmpire.VS
+//      }
+//      BuildingByMapId(10000).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10000).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(10002).get.asInstanceOf[WarpGate].Broadcast = true
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -930,40 +1027,41 @@ object Zones {
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
 
-      Buildings.values.flatMap {
-        _.Amenities.collect {
-          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
-            val silo = amenity.asInstanceOf[ResourceSilo]
-            silo.ChargeLevel = silo.MaximumCharge
-        }
-      }
-
-//      BuildingByMapId(1).get.Name = Some("Dahaka")
-//      BuildingByMapId(2).get.Name = Some("Jamshid")
-//      BuildingByMapId(3).get.Name = Some("Izha")
-//
-//      BuildingByMapId(6).get.Name = Some("twr1")
-//      BuildingByMapId(4).get.Name = Some("twr2")
-//      BuildingByMapId(5).get.Name = Some("twr3")
-//      BuildingByMapId(7).get.Name = Some("twr4")
-//      BuildingByMapId(8).get.Name = Some("twr5")
-//      BuildingByMapId(9).get.Name = Some("twr6")
-//      BuildingByMapId(10).get.Name = Some("twr7")
-
-      import net.psforever.types.PlanetSideEmpire
-//      Buildings.values.foreach {
-//        _.Faction = PlanetSideEmpire.VS
+//      Buildings.values.flatMap {
+//        _.Amenities.collect {
+//          case amenity if amenity.Definition == GlobalDefinitions.resource_silo =>
+//            val silo = amenity.asInstanceOf[ResourceSilo]
+//            silo.ChargeLevel = silo.MaximumCharge
+//        }
 //      }
-      BuildingByMapId(1).get.Faction = PlanetSideEmpire.TR
-      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NC
-      BuildingByMapId(3).get.Faction = PlanetSideEmpire.VS
-
-      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10003).get.Faction = PlanetSideEmpire.NEUTRAL
-      BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(10002).get.asInstanceOf[WarpGate].Broadcast = true
-      BuildingByMapId(10003).get.asInstanceOf[WarpGate].Broadcast = true
+//
+////      BuildingByMapId(1).get.Name = Some("Dahaka")
+////      BuildingByMapId(2).get.Name = Some("Jamshid")
+////      BuildingByMapId(3).get.Name = Some("Izha")
+////
+////      BuildingByMapId(6).get.Name = Some("twr1")
+////      BuildingByMapId(4).get.Name = Some("twr2")
+////      BuildingByMapId(5).get.Name = Some("twr3")
+////      BuildingByMapId(7).get.Name = Some("twr4")
+////      BuildingByMapId(8).get.Name = Some("twr5")
+////      BuildingByMapId(9).get.Name = Some("twr6")
+////      BuildingByMapId(10).get.Name = Some("twr7")
+//
+//      import net.psforever.types.PlanetSideEmpire
+////      Buildings.values.foreach {
+////        _.Faction = PlanetSideEmpire.VS
+////      }
+//      BuildingByMapId(1).get.Faction = PlanetSideEmpire.TR
+//      BuildingByMapId(2).get.Faction = PlanetSideEmpire.NC
+//      BuildingByMapId(3).get.Faction = PlanetSideEmpire.VS
+//
+//      BuildingByMapId(10001).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10002).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10003).get.Faction = PlanetSideEmpire.NEUTRAL
+//      BuildingByMapId(10001).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(10002).get.asInstanceOf[WarpGate].Broadcast = true
+//      BuildingByMapId(10003).get.asInstanceOf[WarpGate].Broadcast = true
+      InitZoneAmenities(zone = this)
     }
   }
 
@@ -1007,6 +1105,37 @@ object Zones {
       super.Init(context)
       HotSpotCoordinateFunction = Zones.HotSpots.StandardRemapping(Map.Scale, 80, 80)
       HotSpotTimeFunction = Zones.HotSpots.StandardTimeRules
+
+      InitZoneAmenities(zone = this)
+    }
+  }
+
+  def InitZoneAmenities(zone: Zone): Unit = {
+    InitResourceSilos(zone)
+    InitWarpGates(zone)
+
+    def InitWarpGates(zone: Zone): Unit = {
+      // todo: work out which faction owns links to this warpgate and if they should be marked as broadcast or not
+      // todo: enable geowarps to go to the correct cave
+      zone.Buildings.values.collect {
+        case wg : WarpGate if wg.Definition == GlobalDefinitions.warpgate || wg.Definition == GlobalDefinitions.warpgate_small =>
+          wg.Active = true
+          wg.Faction = PlanetSideEmpire.NEUTRAL
+          wg.Broadcast = true
+        case geowarp : WarpGate if geowarp.Definition == GlobalDefinitions.warpgate_cavern || geowarp.Definition == GlobalDefinitions.hst =>
+          geowarp.Faction = PlanetSideEmpire.NEUTRAL
+          geowarp.Active = false
+      }
+  }
+
+    def InitResourceSilos(zone: Zone): Unit = {
+      // todo: load silo charge from database
+      zone.Buildings.values.flatMap {
+        _.Amenities.collect {
+          case silo : ResourceSilo =>
+            silo.Actor ! ResourceSilo.UpdateChargeLevel(silo.MaximumCharge)
+        }
+      }
     }
   }
 

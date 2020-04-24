@@ -48,12 +48,6 @@ object PsLogin {
     println("""        http://psforever.net""")
     println
   }
-  def DBinfo() : Unit = {
-    println
-    println(ansi().fgBright(RED).a("""/!\ You have access to a FREE PUBLIC DATABASE. /!\"""))
-    println(ansi().fgBright(RED).a("""/!\ Account name 'a', password 'a' have GM rights. /!\""").reset())
-    println
-  }
 
   /** Grabs the most essential system information and returns it as a preformatted string */
   def systemInformation : String = {
@@ -163,11 +157,8 @@ object PsLogin {
 
   def run() : Unit = {
     // Early start up
-    DBinfo()
     banner()
-    DBinfo()
     println(systemInformation)
-    DBinfo()
 
     // Config directory
     // Assume a default of the current directory

@@ -64,8 +64,6 @@ class SessionRouter(role : String, pipeline : List[SessionPipeline]) extends Act
   override def supervisorStrategy = OneForOneStrategy() { case _ => Stop }
 
   override def preStart = {
-    log.info("/!\\ You have access to a FREE PUBLIC DATABASE. /!\\")
-    log.info("/!\\ Account name 'a', password 'a' have GM rights. /!\\")
     log.info(s"SessionRouter (for ${role}s) initializing ...")
   }
 

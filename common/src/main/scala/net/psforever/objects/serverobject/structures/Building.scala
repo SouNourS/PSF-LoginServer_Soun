@@ -6,14 +6,15 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{ActorContext, ActorRef}
 import net.psforever.objects.{GlobalDefinitions, Player}
 import net.psforever.objects.definition.ObjectDefinition
+import net.psforever.objects.serverobject.generator.Generator
 import net.psforever.objects.serverobject.hackable.Hackable
 import net.psforever.objects.serverobject.painbox.Painbox
 import net.psforever.objects.serverobject.resourcesilo.ResourceSilo
 import net.psforever.objects.serverobject.terminals.CaptureTerminal
 import net.psforever.objects.serverobject.tube.SpawnTube
 import net.psforever.objects.zones.Zone
-import net.psforever.packet.game._
-import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID, Vector3}
+import net.psforever.packet.game.{Additional1, Additional2, Additional3}
+import net.psforever.types.{PlanetSideEmpire, PlanetSideGUID, PlanetSideGeneratorState, Vector3}
 import scalax.collection.{Graph, GraphEdge}
 import services.Service
 import services.local.{LocalAction, LocalServiceMessage}
@@ -23,7 +24,7 @@ class Building(private val name: String,
                private val map_id : Int,
                private val zone : Zone,
                private val buildingType : StructureType.Value,
-               private val buildingDefinition : ObjectDefinition) extends AmenityOwner {
+               private val buildingDefinition : BuildingDefinition) extends AmenityOwner {
   /**
     * The map_id is the identifier number used in BuildingInfoUpdateMessage. This is the index that the building appears in the MPO file starting from index 1
     * The GUID is the identifier number used in SetEmpireMessage / Facility hacking / PlanetSideAttributeMessage.
@@ -187,17 +188,17 @@ class Building(private val name: String,
       case _ =>
         (false, PlanetSideEmpire.NEUTRAL, 0L)
     }
-    //TODO if we have a generator, get the current repair state
-    val (generatorState, boostGeneratorPain) = (PlanetSideGeneratorState.Normal, false) // todo: poll pain field strength
+    //if we have no generator, assume the state is "Normal"
+    val (generatorState, boostGeneratorPain) = Amenities.find(x => x.isInstanceOf[Generator]) match {
+      case Some(obj : Generator) =>
+        (obj.Condition, false) // todo: poll pain field strength
+      case _ =>
+        (PlanetSideGeneratorState.Normal, false)
+    }
     //if we have spawn tubes, determine if any of them are active
     val (spawnTubesNormal, boostSpawnPain) : (Boolean, Boolean) = {
-      val o = Amenities.collect({ case _ : SpawnTube => true }) ///TODO obj.Health > 0
-      if(o.nonEmpty) {
-        (o.foldLeft(false)(_ || _), false) //TODO poll pain field strength
-      }
-      else {
-        (true, false)
-      }
+      val o = Amenities.collect({ case tube : SpawnTube if !tube.Destroyed => tube })
+      (o.nonEmpty, false) //TODO poll pain field strength
     }
 
     val latticeBenefit : Int = {
@@ -272,7 +273,7 @@ class Building(private val name: String,
 
   override def Continent_=(zone : String) : String = Continent //building never leaves zone after being set in constructor
 
-  def Definition: ObjectDefinition = buildingDefinition
+  def Definition: BuildingDefinition = buildingDefinition
 }
 
 object Building {
@@ -286,7 +287,7 @@ object Building {
     new Building(name, guid, map_id, zone, buildingType, GlobalDefinitions.building)
   }
 
-  def Structure(buildingType : StructureType.Value, location : Vector3, definition: ObjectDefinition)(name : String, guid : Int, map_id : Int, zone : Zone, context : ActorContext) : Building = {
+  def Structure(buildingType : StructureType.Value, location : Vector3, definition: BuildingDefinition)(name : String, guid : Int, map_id : Int, zone : Zone, context : ActorContext) : Building = {
     import akka.actor.Props
     val obj = new Building(name, guid, map_id, zone, buildingType, definition)
     obj.Position = location
@@ -310,7 +311,7 @@ object Building {
     obj
   }
 
-  def Structure(buildingType : StructureType.Value, buildingDefinition : ObjectDefinition, location : Vector3)(name: String, guid: Int, id : Int, zone : Zone, context : ActorContext) : Building = {
+  def Structure(buildingType : StructureType.Value, buildingDefinition : BuildingDefinition, location : Vector3)(name: String, guid: Int, id : Int, zone : Zone, context : ActorContext) : Building = {
     import akka.actor.Props
     val obj = new Building(name, guid, id, zone, buildingType, buildingDefinition)
     obj.Position = location
@@ -318,6 +319,7 @@ object Building {
     obj
   }
 
+  final case class AmenityStateChange(obj : Amenity)
   final case class SendMapUpdate(all_clients: Boolean)
   final case class TriggerZoneMapUpdate(zone_num: Int)
 }

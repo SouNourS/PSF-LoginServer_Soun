@@ -2,7 +2,7 @@
 package net.psforever.objects.serverobject.resourcesilo
 
 import akka.actor.{ActorContext, Props}
-import net.psforever.objects.{GlobalDefinitions, Player, Vehicle}
+import net.psforever.objects.{GlobalDefinitions, Player}
 import net.psforever.objects.serverobject.structures.Amenity
 import net.psforever.packet.game.UseItemMessage
 
@@ -39,11 +39,7 @@ class ResourceSilo extends Amenity {
     LowNtuWarningOn
   }
 
-  def CapacitorDisplay : Long = capacitorDisplay
-  def CapacitorDisplay_=(value: Long) : Long = {
-    capacitorDisplay = value
-    CapacitorDisplay
-  }
+  def CapacitorDisplay : Long = scala.math.ceil((ChargeLevel.toFloat / MaximumCharge.toFloat) * 10).toInt
 
   def Definition : ResourceSiloDefinition = GlobalDefinitions.resource_silo
 
