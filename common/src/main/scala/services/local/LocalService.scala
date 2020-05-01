@@ -187,14 +187,14 @@ class LocalService(zone : Zone) extends Actor {
       val terminal = zone.GUID(capture_terminal_guid).get.asInstanceOf[CaptureTerminal]
       val building = terminal.Owner.asInstanceOf[Building]
 
-//      if(building.NtuLevel > 0) { // PTS v3
+      if(building.NtuLevel > 0) {
         log.info(s"Setting base ${building.GUID} / MapId: ${building.MapId} as owned by $hackedByFaction")
 
         building.Faction = hackedByFaction
         self ! LocalServiceMessage(zone.Id, LocalAction.SetEmpire(building.GUID, hackedByFaction))
-//      } else {
-//        log.info("Base hack completed, but base was out of NTU.")
-//      }
+      } else {
+        log.info("Base hack completed, but base was out of NTU.")
+      }
 
       // Reset CC back to normal operation
       self ! LocalServiceMessage(zone.Id, LocalAction.HackCaptureTerminal(PlanetSideGUID(-1), zone, terminal, 0, 8L, isResecured = true))

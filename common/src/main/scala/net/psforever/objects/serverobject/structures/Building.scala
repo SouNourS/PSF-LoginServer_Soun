@@ -29,7 +29,6 @@ class Building(private val name: String,
     * The map_id is the identifier number used in BuildingInfoUpdateMessage. This is the index that the building appears in the MPO file starting from index 1
     * The GUID is the identifier number used in SetEmpireMessage / Facility hacking / PlanetSideAttributeMessage.
   */
-//  private var name : Option[String] = None // PTS v3
   private var faction : PlanetSideEmpire.Value = PlanetSideEmpire.NEUTRAL
   private var playersInSOI : List[Player] = List.empty
   private val capitols = List("Thoth", "Voltan", "Neit", "Anguta", "Eisa", "Verica")
@@ -72,7 +71,6 @@ class Building(private val name: String,
     TriggerZoneMapUpdate()
     Faction
   }
-
 
   def CaptureConsoleIsHacked : Boolean = {
     Amenities.find(x => x.isInstanceOf[CaptureTerminal]).asInstanceOf[Option[CaptureTerminal]] match {
@@ -172,8 +170,6 @@ class Building(private val name: String,
       Boolean, Boolean
     ) = {
     val ntuLevel : Int = NtuLevel
-    // PTS v3 force some Benefits
-//    val latticeBenefit : Int = if(BuildingType.id == 3){18} else {0}
     val cavernBenefit : Int = if(BuildingType.id == 3){48} else {0}
     //if we have a capture terminal, get the hack status & time (in milliseconds) from control console if it exists
     val (hacking, hackingFaction, hackTime) : (Boolean, PlanetSideEmpire.Value, Long) = Amenities.find(x => x.isInstanceOf[CaptureTerminal]) match {
@@ -246,8 +242,7 @@ class Building(private val name: String,
       hacking,
       hackingFaction,
       hackTime,
-//      if(ntuLevel > 0) Faction else PlanetSideEmpire.NEUTRAL,
-      Faction, // PTS v3 no neutral by 0 NTU !
+      if(ntuLevel > 0) Faction else PlanetSideEmpire.NEUTRAL,
       0, //!! Field != 0 will cause malformed packet. See class def.
       None,
       generatorState,

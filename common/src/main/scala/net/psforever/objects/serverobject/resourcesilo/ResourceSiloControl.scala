@@ -82,9 +82,9 @@ class ResourceSiloControl(resourceSilo : ResourceSilo) extends Actor with Factio
 
       if(resourceSilo.ChargeLevel == 0 && siloChargeBeforeChange > 0) {
         // Oops, someone let the base run out of power. Shut it all down.
-//        zone.AvatarEvents ! AvatarServiceMessage(zone.Id, AvatarAction.PlanetsideAttribute(building.GUID, 48, 1)) // PTS v3 no inactive bases
-//        building.Faction = PlanetSideEmpire.NEUTRAL // PTS v3 no neutral bases
-//        zone.LocalEvents ! LocalServiceMessage(zone.Id, LocalAction.SetEmpire(building.GUID, PlanetSideEmpire.NEUTRAL)) // PTS v3 no neutral bases
+        zone.AvatarEvents ! AvatarServiceMessage(zone.Id, AvatarAction.PlanetsideAttribute(building.GUID, 48, 1))
+        building.Faction = PlanetSideEmpire.NEUTRAL
+        zone.LocalEvents ! LocalServiceMessage(zone.Id, LocalAction.SetEmpire(building.GUID, PlanetSideEmpire.NEUTRAL))
         building.TriggerZoneMapUpdate()
       } else if (siloChargeBeforeChange == 0 && resourceSilo.ChargeLevel > 0) {
         // Power restored. Reactor Online. Sensors Online. Weapons Online. All systems nominal.

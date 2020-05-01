@@ -1188,8 +1188,8 @@ class WorldSessionActor extends Actor
 //        GamePropertyTarget(ObjectClass.lasher, "purchase_empire" -> "all"),
 
         // Lancer for All
-        GamePropertyTarget(ObjectClass.lancer, "purchase_empire" -> "all"),
-        GamePropertyTarget(ObjectClass.lancer_cartridge, "purchase_empire" -> "all"),
+//        GamePropertyTarget(ObjectClass.lancer, "purchase_empire" -> "all"),
+//        GamePropertyTarget(ObjectClass.lancer_cartridge, "purchase_empire" -> "all"),
 
         //No Vulture requirement
         GamePropertyTarget(ObjectClass.vulture, "requirement_award0" -> "false"),
@@ -2694,7 +2694,7 @@ class WorldSessionActor extends Actor
             val r1 = 2 + r.nextInt(30)
             val r2 = 2 + r.nextInt(4000)
             (Vector3(r2, r2, r1), 0L, 0f)
-//            (Vector3(4981, 4365, 45), 0L, 0f)
+//            (Vector3(2, 2, 2), 0L, 0f)
           }
           else {
             val before = player.lastSeenStreamMessage(guid.guid)
