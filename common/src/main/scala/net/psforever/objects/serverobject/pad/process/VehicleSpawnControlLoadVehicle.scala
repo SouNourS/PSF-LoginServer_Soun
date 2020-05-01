@@ -4,6 +4,7 @@ package net.psforever.objects.serverobject.pad.process
 import akka.actor.Props
 import net.psforever.objects.GlobalDefinitions
 import net.psforever.objects.serverobject.pad.{VehicleSpawnControl, VehicleSpawnPad}
+import net.psforever.objects.zones.Zone
 import net.psforever.types.Vector3
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,7 +28,7 @@ class VehicleSpawnControlLoadVehicle(pad : VehicleSpawnPad) extends VehicleSpawn
 
   def receive : Receive = {
     case order @ VehicleSpawnControl.Order(driver, vehicle) =>
-      if(driver.Continent == pad.Continent && vehicle.Health > 0) {
+      if(driver.Continent == pad.Continent && vehicle.Health > 0 && driver.isAlive) {
         trace(s"loading the ${vehicle.Definition.Name}")
         vehicle.Position = vehicle.Position - Vector3.z(if(GlobalDefinitions.isFlightVehicle(vehicle.Definition)) 9 else 5) //appear below the trench and doors
         vehicle.Cloaked = vehicle.Definition.CanCloak && driver.Cloaked
@@ -36,7 +37,7 @@ class VehicleSpawnControlLoadVehicle(pad : VehicleSpawnPad) extends VehicleSpawn
       }
       else {
         trace("owner lost or vehicle in poor condition; abort order fulfillment")
-        VehicleSpawnControl.DisposeSpawnedVehicle(order, pad.Zone)
+        VehicleSpawnControl.DisposeVehicle(order.vehicle, pad.Zone)
         context.parent ! VehicleSpawnControl.ProcessControl.GetNewOrder
       }
 

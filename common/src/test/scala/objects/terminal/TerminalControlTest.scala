@@ -123,6 +123,6 @@ object TerminalControlTest {
     terminal.Actor = system.actorOf(Props(classOf[TerminalControl], terminal), "test-term")
     terminal.Owner = new Building("Building", building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)
     terminal.Owner.Faction = faction
-    (Player(Avatar(0L, "test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), terminal)
+    (Player(Avatar("test", faction, CharacterGender.Male, 0, CharacterVoice.Mute)), terminal)
   }
 }

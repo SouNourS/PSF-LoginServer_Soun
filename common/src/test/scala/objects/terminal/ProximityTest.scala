@@ -24,10 +24,10 @@ class ProximityTest extends Specification {
     }
 
     "keep track of users (add)" in {
-      val avatar1 = Player(Avatar(0, "TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+      val avatar1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
       avatar1.Spawn
       avatar1.Health = 50
-      val avatar2 = Player(Avatar(0, "TestCharacter2", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+      val avatar2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
       avatar2.Spawn
       avatar2.Health = 50
 
@@ -40,10 +40,10 @@ class ProximityTest extends Specification {
     }
 
     "keep track of users (remove)" in {
-      val avatar1 = Player(Avatar(0, "TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+      val avatar1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
       avatar1.Spawn
       avatar1.Health = 50
-      val avatar2 = Player(Avatar(0, "TestCharacter2", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+      val avatar2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
       avatar2.Spawn
       avatar2.Health = 50
 
@@ -61,7 +61,7 @@ class ProximityTest extends Specification {
     }
 
     "can not add a user twice" in {
-      val avatar = Player(Avatar(0, "TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+      val avatar = Player(Avatar("TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
       avatar.Spawn
       avatar.Health = 50
 
@@ -73,7 +73,7 @@ class ProximityTest extends Specification {
     }
 
     "can not remove a user that was not added" in {
-      val avatar = Player(Avatar(0, "TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+      val avatar = Player(Avatar("TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
       avatar.Spawn
       avatar.Health = 50
 
@@ -106,7 +106,7 @@ class ProximityTerminalControlStartTest extends ActorTest {
       Amenities = terminal
       Faction = PlanetSideEmpire.VS
     }
-    val avatar = Player(Avatar(0, "TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+    val avatar = Player(Avatar("TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
     avatar.Continent = "test"
     avatar.Spawn
     avatar.Health = 50
@@ -147,11 +147,11 @@ class ProximityTerminalControlTwoUsersTest extends ActorTest {
       Faction = PlanetSideEmpire.VS
     }
 
-    val avatar = Player(Avatar(0, "TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+    val avatar = Player(Avatar("TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
     avatar.Continent = "test"
     avatar.Spawn
     avatar.Health = 50
-    val avatar2 = Player(Avatar(0, "TestCharacter2", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+    val avatar2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
     avatar2.Continent = "test"
     avatar2.Spawn
     avatar2.Health = 50
@@ -198,7 +198,7 @@ class ProximityTerminalControlStopTest extends ActorTest {
       Amenities = terminal
       Faction = PlanetSideEmpire.VS
     }
-    val avatar = Player(Avatar(0, "TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+    val avatar = Player(Avatar("TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
     avatar.Continent = "test"
     avatar.Spawn
     avatar.Health = 50
@@ -242,11 +242,11 @@ class ProximityTerminalControlNotStopTest extends ActorTest {
       Faction = PlanetSideEmpire.VS
     }
 
-    val avatar = Player(Avatar(0, "TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+    val avatar = Player(Avatar("TestCharacter1", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
     avatar.Continent = "test"
     avatar.Spawn
     avatar.Health = 50
-    val avatar2 = Player(Avatar(0, "TestCharacter2", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
+    val avatar2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.VS, CharacterGender.Female, 1, CharacterVoice.Voice1))
     avatar2.Continent = "test"
     avatar2.Spawn
     avatar2.Health = 50

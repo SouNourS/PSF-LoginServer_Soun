@@ -241,8 +241,8 @@ class Avatar(private val char_id : Long, val name : String, val faction : Planet
 }
 
 object Avatar {
-  def apply(charID : Long, name : String, faction : PlanetSideEmpire.Value, sex : CharacterGender.Value, head : Int, voice : CharacterVoice.Value) : Avatar = {
-    new Avatar(charID, name, faction, sex, head, voice)
+  def apply(name : String, faction : PlanetSideEmpire.Value, sex : CharacterGender.Value, head : Int, voice : CharacterVoice.Value) : Avatar = {
+    new Avatar(0L, name, faction, sex, head, voice)
   }
 
   def toString(avatar : Avatar) : String = s"${avatar.faction} ${avatar.name}"

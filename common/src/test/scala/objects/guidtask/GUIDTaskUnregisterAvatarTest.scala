@@ -9,7 +9,7 @@ import net.psforever.types.{CharacterGender, CharacterVoice, PlanetSideEmpire}
 class GUIDTaskUnregisterAvatarTest extends ActorTest {
   "UnregisterAvatar" in {
     val (guid, uns, taskResolver, probe) = GUIDTaskTest.CommonTestSetup
-    val obj = Player(Avatar(0L, "test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
+    val obj = Player(Avatar("test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute))
     val obj_wep = Tool(GlobalDefinitions.beamer)
     obj.Slot(0).Equipment = obj_wep
     val obj_wep_ammo = AmmoBox(GlobalDefinitions.energy_cell)

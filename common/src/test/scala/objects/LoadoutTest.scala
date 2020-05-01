@@ -8,7 +8,7 @@ import net.psforever.objects.GlobalDefinitions._
 import org.specs2.mutable._
 
 class LoadoutTest extends Specification {
-  val avatar = Avatar(0L, "TestCharacter", PlanetSideEmpire.VS, CharacterGender.Female, 41, CharacterVoice.Voice1)
+  val avatar = Avatar("TestCharacter", PlanetSideEmpire.VS, CharacterGender.Female, 41, CharacterVoice.Voice1)
 
   def CreatePlayer() : Player = {
     new Player(avatar) {

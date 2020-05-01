@@ -28,12 +28,12 @@ class PlayerControlHealTest extends ActorTest {
   val avatarProbe = TestProbe()
   zone.AvatarEvents = avatarProbe.ref
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
   player1.Zone = zone
   player1.Spawn
   player1.Position = Vector3(2, 0, 0)
   player1.Actor = system.actorOf(Props(classOf[PlayerControl], player1), "player1-control")
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
   player2.Zone = zone
   player2.Spawn
   player2.Actor = system.actorOf(Props(classOf[PlayerControl], player2), "player2-control")
@@ -98,7 +98,7 @@ class PlayerControlHealSelfTest extends ActorTest {
   val avatarProbe = TestProbe()
   zone.AvatarEvents = avatarProbe.ref
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
   player1.Zone = zone
   player1.Spawn
   player1.Position = Vector3(2, 0, 0)
@@ -163,12 +163,12 @@ class PlayerControlRepairTest extends ActorTest {
   val avatarProbe = TestProbe()
   zone.AvatarEvents = avatarProbe.ref
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
   player1.Zone = zone
   player1.Spawn
   player1.Position = Vector3(2, 0, 0)
   player1.Actor = system.actorOf(Props(classOf[PlayerControl], player1), "player1-control")
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
   player2.Zone = zone
   player2.Spawn
   player2.Actor = system.actorOf(Props(classOf[PlayerControl], player2), "player2-control")
@@ -239,7 +239,7 @@ class PlayerControlRepairSelfTest extends ActorTest {
   val avatarProbe = TestProbe()
   zone.AvatarEvents = avatarProbe.ref
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
   player1.Zone = zone
   player1.Spawn
   player1.Position = Vector3(2, 0, 0)
@@ -305,12 +305,12 @@ class PlayerControlDamageTest extends ActorTest {
   val avatarProbe = TestProbe()
   zone.Activity = activityProbe.ref
   zone.AvatarEvents = avatarProbe.ref
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
   player1.Zone = zone
   player1.Spawn
   player1.Position = Vector3(2, 0, 0)
   player1.Actor = system.actorOf(Props(classOf[PlayerControl], player1), "player1-control")
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
   player2.Zone = zone
   player2.Spawn
   player2.Actor = system.actorOf(Props(classOf[PlayerControl], player2), "player2-control")
@@ -381,12 +381,12 @@ class PlayerControlDeathStandingTest extends ActorTest {
   val activityProbe = TestProbe()
   zone.Activity = activityProbe.ref
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
   player1.Zone = zone
   player1.Spawn
   player1.Position = Vector3(2,0,0)
   player1.Actor = system.actorOf(Props(classOf[PlayerControl], player1), "player1-control")
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
   player2.Zone = zone
   player2.Spawn
   player2.Actor = system.actorOf(Props(classOf[PlayerControl], player2), "player2-control")
@@ -489,12 +489,12 @@ class PlayerControlDeathSeatedTest extends ActorTest {
   val activityProbe = TestProbe()
   zone.Activity = activityProbe.ref
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=1
   player1.Zone = zone
   player1.Spawn
   player1.Position = Vector3(2,0,0)
   player1.Actor = system.actorOf(Props(classOf[PlayerControl], player1), "player1-control")
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
   player2.Zone = zone
   player2.Spawn
   player2.Actor = system.actorOf(Props(classOf[PlayerControl], player2), "player2-control")

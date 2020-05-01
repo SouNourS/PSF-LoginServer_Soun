@@ -10,7 +10,7 @@ import org.specs2.mutable._
 
 class AvatarTest extends Specification {
   def CreatePlayer() : (Player, Avatar) = {
-    val avatar = Avatar(0L, "TestCharacter", PlanetSideEmpire.VS, CharacterGender.Female, 41, CharacterVoice.Voice1)
+    val avatar = Avatar("TestCharacter", PlanetSideEmpire.VS, CharacterGender.Female, 41, CharacterVoice.Voice1)
     val
     player = Player(avatar)
     player.Slot(0).Equipment = Tool(beamer)
@@ -26,7 +26,7 @@ class AvatarTest extends Specification {
   }
 
   "construct" in {
-    val av = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val av = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     av.name mustEqual "Chord"
     av.faction mustEqual PlanetSideEmpire.TR
     av.sex mustEqual CharacterGender.Male
@@ -39,7 +39,7 @@ class AvatarTest extends Specification {
   }
 
   "can maintain cumulative battle experience point values" in {
-    val av = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val av = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     av.BEP mustEqual 0
     av.BEP = 100
     av.BEP mustEqual 100
@@ -48,14 +48,14 @@ class AvatarTest extends Specification {
   }
 
   "can maintain battle experience point values up to a maximum (Long.MaxValue)" in {
-    val av = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val av = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     av.BEP mustEqual 0
     av.BEP = 4294967295L
     av.BEP mustEqual 4294967295L
   }
 
   "can not maintain battle experience point values below zero" in {
-    val av = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val av = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     av.BEP mustEqual 0
     av.BEP = -1
     av.BEP mustEqual 0
@@ -66,7 +66,7 @@ class AvatarTest extends Specification {
   }
 
   "can maintain cumulative command experience point values" in {
-    val av = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val av = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     av.CEP mustEqual 0
     av.CEP = 100
     av.CEP mustEqual 100
@@ -75,14 +75,14 @@ class AvatarTest extends Specification {
   }
 
   "can maintain command experience point values up to a maximum (Long.MaxValue)" in {
-    val av = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val av = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     av.CEP mustEqual 0
     av.CEP = 4294967295L
     av.CEP mustEqual 4294967295L
   }
 
   "can not maintain command experience point values below zero" in {
-    val av = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val av = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     av.CEP mustEqual 0
     av.CEP = -1
     av.CEP mustEqual 0
@@ -93,28 +93,28 @@ class AvatarTest extends Specification {
   }
 
   "can tell the difference between avatars" in {
-    (Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
-      Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)) mustEqual true
+    (Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
+      Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)) mustEqual true
 
-    (Avatar(0L, "Chord1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
-      Avatar(0L, "Chord2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)) mustEqual false
+    (Avatar("Chord1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
+      Avatar("Chord2", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)) mustEqual false
 
-    (Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
-      Avatar(0L, "Chord", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Voice5)) mustEqual false
+    (Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
+      Avatar("Chord", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Voice5)) mustEqual false
 
-    (Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
-      Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Female, 0, CharacterVoice.Voice5)) mustEqual false
+    (Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
+      Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Female, 0, CharacterVoice.Voice5)) mustEqual false
 
-    (Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
-      Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 1, CharacterVoice.Voice5)) mustEqual false
+    (Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
+      Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 1, CharacterVoice.Voice5)) mustEqual false
 
-    (Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
-      Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice4)) mustEqual false
+    (Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5) ==
+      Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice4)) mustEqual false
   }
 
   //refer to ImplantTest.scala for more tests
   "maximum of three implant slots" in {
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants.length mustEqual 3
     obj.Implants(0).Unlocked mustEqual false
     obj.Implants(0).Initialized mustEqual false
@@ -140,7 +140,7 @@ class AvatarTest extends Specification {
 
   "can install an implant" in {
     val testplant : ImplantDefinition = ImplantDefinition(1)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.InstallImplant(testplant).contains(0) mustEqual true
     obj.Implants.find({p => p.Implant == ImplantType(1)}) match { //find the installed implant
@@ -155,7 +155,7 @@ class AvatarTest extends Specification {
   "can install implants in sequential slots" in {
     val testplant1 : ImplantDefinition = ImplantDefinition(1)
     val testplant2 : ImplantDefinition = ImplantDefinition(2)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.Implants(1).Unlocked = true
 
@@ -166,7 +166,7 @@ class AvatarTest extends Specification {
   "can not install the same type of implant twice" in {
     val testplant1 : ImplantDefinition = ImplantDefinition(1)
     val testplant2 : ImplantDefinition = ImplantDefinition(1)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.Implants(1).Unlocked = true
 
@@ -178,7 +178,7 @@ class AvatarTest extends Specification {
     val testplant1 : ImplantDefinition = ImplantDefinition(1)
     val testplant2 : ImplantDefinition = ImplantDefinition(2)
     val testplant3 : ImplantDefinition = ImplantDefinition(3)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.Implants(1).Unlocked = true
 
@@ -192,7 +192,7 @@ class AvatarTest extends Specification {
     val testplant2 : ImplantDefinition = ImplantDefinition(2)
     val testplant3 : ImplantDefinition = ImplantDefinition(3)
     val testplant4 : ImplantDefinition = ImplantDefinition(4)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.Implants(1).Unlocked = true
     obj.Implants(2).Unlocked = true
@@ -205,7 +205,7 @@ class AvatarTest extends Specification {
 
   "can uninstall an implant" in {
     val testplant : ImplantDefinition = ImplantDefinition(1)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.InstallImplant(testplant).contains(0) mustEqual true
     obj.Implants(0).Installed.contains(testplant) mustEqual true
@@ -218,7 +218,7 @@ class AvatarTest extends Specification {
     val testplant1 : ImplantDefinition = ImplantDefinition(1)
     val testplant2 : ImplantDefinition = ImplantDefinition(2)
     val testplant3 : ImplantDefinition = ImplantDefinition(3)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.Implants(1).Unlocked = true
     obj.Implants(2).Unlocked = true
@@ -239,7 +239,7 @@ class AvatarTest extends Specification {
     val testplant1 : ImplantDefinition = ImplantDefinition(1)
     val testplant2 : ImplantDefinition = ImplantDefinition(2)
     val testplant3 : ImplantDefinition = ImplantDefinition(3)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.Implants(1).Unlocked = true
     obj.Implants(2).Unlocked = true
@@ -261,7 +261,7 @@ class AvatarTest extends Specification {
   "can reset implants to uninitialized state" in {
     val testplant1 : ImplantDefinition = ImplantDefinition(1)
     val testplant2 : ImplantDefinition = ImplantDefinition(2)
-    val obj = Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
+    val obj = Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5)
     obj.Implants(0).Unlocked = true
     obj.Implants(1).Unlocked = true
     obj.InstallImplant(testplant1).contains(0) mustEqual true
@@ -393,6 +393,6 @@ class AvatarTest extends Specification {
   }
 
   "toString" in {
-    Avatar(0L, "Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5).toString mustEqual "TR Chord"
+    Avatar("Chord", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Voice5).toString mustEqual "TR Chord"
   }
 }

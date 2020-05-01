@@ -10,7 +10,7 @@ import net.psforever.types._
 import org.specs2.mutable.Specification
 
 class OrderTerminalTest extends Specification {
-  val avatar = Avatar(0L, "test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)
+  val avatar = Avatar("test", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)
   val player = Player(avatar)
 
   val building = new Building("Building", building_guid = 0, map_id = 0, Zone.Nowhere, StructureType.Building, GlobalDefinitions.building)

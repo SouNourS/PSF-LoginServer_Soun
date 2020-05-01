@@ -9,6 +9,7 @@ import net.psforever.objects.serverobject.structures.StructureType
 import net.psforever.objects.{Avatar, GlobalDefinitions, Player, Vehicle}
 import net.psforever.objects.zones.Zone
 import net.psforever.types.{PlanetSideGUID, _}
+import services.RemoverActor
 import services.vehicle.{VehicleAction, VehicleServiceMessage}
 
 import scala.concurrent.duration._
@@ -55,7 +56,7 @@ class VehicleSpawnControl3Test extends ActorTest {
       val (vehicle, player, pad, zone) = VehicleSpawnPadControlTest.SetUpAgents(PlanetSideEmpire.TR)
       //we can recycle the vehicle and the player for each order
       val probe = new TestProbe(system, "zone-events")
-      val player2 = Player(Avatar(0,"test2", player.Faction, CharacterGender.Male, 0, CharacterVoice.Mute))
+      val player2 = Player(Avatar("test2", player.Faction, CharacterGender.Male, 0, CharacterVoice.Mute))
       player2.GUID = PlanetSideGUID(11)
       player2.Continent = zone.Id
       player2.Spawn
@@ -107,7 +108,13 @@ class VehicleSpawnControl4Test extends ActorTest {
 
       pad.Actor ! VehicleSpawnPad.VehicleOrder(player, vehicle) //order
 
-      probe.expectMsgClass(1 minute, classOf[VehicleSpawnPad.DisposeVehicle])
+      val msg = probe.receiveOne(1 minute)
+      assert(
+        msg match {
+          case VehicleServiceMessage.Decon(RemoverActor.AddTask(v, z , _)) => (v == vehicle) && (z == zone)
+          case _ => false
+        }
+      )
       probe.expectNoMsg(5 seconds)
     }
   }
@@ -211,7 +218,7 @@ object VehicleSpawnPadControlTest {
     val vehicle = Vehicle(GlobalDefinitions.two_man_assault_buggy)
     val weapon = vehicle.WeaponControlledFromSeat(1).get.asInstanceOf[Tool]
     val guid : NumberPoolHub = new NumberPoolHub(LimitedNumberSource(5))
-    guid.AddPool("test-pool", (0 to 3).toList)
+    guid.AddPool("test-pool", (0 to 5).toList)
     guid.register(vehicle, "test-pool")
     guid.register(weapon, "test-pool")
     guid.register(weapon.AmmoSlot.Box, "test-pool")
@@ -234,7 +241,8 @@ object VehicleSpawnPadControlTest {
     pad.Owner = new Building("Building", building_guid = 0, map_id = 0, zone, StructureType.Building, GlobalDefinitions.building)
     pad.Owner.Faction = faction
     pad.Zone = zone
-    val player = Player(Avatar(0, "test", faction, CharacterGender.Male, 0, CharacterVoice.Mute))
+    guid.register(pad, "test-pool")
+    val player = Player(Avatar("test", faction, CharacterGender.Male, 0, CharacterVoice.Mute))
     guid.register(player, "test-pool")
     player.Zone = zone
     player.Spawn

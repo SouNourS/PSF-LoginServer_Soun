@@ -21,7 +21,7 @@ import net.psforever.objects.vital.Vitality
 import net.psforever.objects.zones.{Zone, ZoneMap}
 import net.psforever.packet.game.DamageWithPositionMessage
 import net.psforever.types._
-import services.{RemoverActor, Service}
+import services.Service
 import services.avatar.{AvatarAction, AvatarServiceMessage}
 import services.support.SupportActor
 import services.vehicle.support.TurretUpgrader
@@ -31,7 +31,7 @@ import org.specs2.mutable.Specification
 import scala.concurrent.duration._
 
 class DamageableTest extends Specification {
-  val player1 = Player(Avatar(0L, "TestCharacter1",PlanetSideEmpire.TR,CharacterGender.Male,0,CharacterVoice.Mute))
+  val player1 = Player(Avatar("TestCharacter1",PlanetSideEmpire.TR,CharacterGender.Male,0,CharacterVoice.Mute))
   val pSource = PlayerSource(player1)
   val weaponA = Tool(GlobalDefinitions.phoenix) //decimator
   val projectileA = weaponA.Projectile
@@ -104,7 +104,7 @@ class DamageableTest extends Specification {
     }
 
     "permit damaging friendly targets, even those not designated for friendly fire, if the target is hacked" in {
-      val player2 = Player(Avatar(0L, "TestCharacter2",PlanetSideEmpire.NC,CharacterGender.Male,0,CharacterVoice.Mute))
+      val player2 = Player(Avatar("TestCharacter2",PlanetSideEmpire.NC,CharacterGender.Male,0,CharacterVoice.Mute))
       player2.GUID = PlanetSideGUID(1)
       val target = new Terminal(new TerminalDefinition(0) {
         Damageable = true
@@ -197,7 +197,7 @@ class DamageableTest extends Specification {
     }
 
     "permit jamming friendly targets if the target is hacked" in {
-      val player2 = Player(Avatar(0L, "TestCharacter2",PlanetSideEmpire.NC,CharacterGender.Male,0,CharacterVoice.Mute))
+      val player2 = Player(Avatar("TestCharacter2",PlanetSideEmpire.NC,CharacterGender.Male,0,CharacterVoice.Mute))
       player2.GUID = PlanetSideGUID(1)
       val target = new SensorDeployable(GlobalDefinitions.motionalarmsensor)
       target.Faction = player1.Faction
@@ -235,7 +235,7 @@ class DamageableEntityDamageTest extends ActorTest {
   }
   val building = Building("test-building", 1, 1, zone, StructureType.Facility) //guid=1
   val gen = Generator(GlobalDefinitions.generator) //guid=2
-  val player1 = Player(Avatar(0L, "TestCharacter1",PlanetSideEmpire.TR,CharacterGender.Male,0,CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1",PlanetSideEmpire.TR,CharacterGender.Male,0,CharacterVoice.Mute)) //guid=3
   guid.register(building, 1)
   guid.register(gen, 2)
   guid.register(player1, 3)
@@ -301,7 +301,7 @@ class DamageableEntityDestroyedTest extends ActorTest {
   val mech = ImplantTerminalMech(GlobalDefinitions.implant_terminal_mech) //guid=2
   mech.Position = Vector3(1, 0, 0)
   mech.Actor = system.actorOf(Props(classOf[ImplantTerminalMechControl], mech), "mech-control")
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player1.Position = Vector3(14, 0, 0) //<14m from generator; dies
   player1.Spawn
   val building = Building("test-building", 1, 1, zone, StructureType.Facility) //guid=1
@@ -360,7 +360,7 @@ class DamageableEntityNotDestroyTwice extends ActorTest {
   }
   val building = Building("test-building", 1, 1, zone, StructureType.Facility) //guid=1
   val gen = Generator(GlobalDefinitions.generator) //guid=2
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player1.Spawn
   guid.register(building, 1)
   guid.register(gen, 2)
@@ -421,7 +421,7 @@ class DamageableAmenityTest extends ActorTest {
   }
   val building = Building("test-building", 1, 1, zone, StructureType.Facility) //guid=1
   val term = Terminal(GlobalDefinitions.order_terminal) //guid=2
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player1.Spawn
   guid.register(building, 1)
   guid.register(term, 2)
@@ -499,10 +499,10 @@ class DamageableMountableDamageTest extends ActorTest {
   }
   val building = Building("test-building", 1, 1, zone, StructureType.Facility) //guid=1
   val mech = ImplantTerminalMech(GlobalDefinitions.implant_terminal_mech) //guid=2
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player1.Spawn
   player1.Position = Vector3(2,2,2)
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
   player2.Spawn
   guid.register(building, 1)
   guid.register(mech, 2)
@@ -576,12 +576,12 @@ class DamageableMountableDestroyTest extends ActorTest {
   }
   val building = Building("test-building", 1, 1, zone, StructureType.Facility) //guid=1
   val mech = ImplantTerminalMech(GlobalDefinitions.implant_terminal_mech) //guid=2
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player1.Spawn
   player1.Position = Vector3(2, 2, 2)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
@@ -663,12 +663,12 @@ class DamageableWeaponTurretDamageTest extends ActorTest {
   turret.Actor = system.actorOf(Props(classOf[TurretControl], turret), "turret-control")
   turret.Zone = zone
   turret.Position = Vector3(1,0,0)
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player1.Spawn
   player1.Position = Vector3(2, 2, 2)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
@@ -744,12 +744,12 @@ class DamageableWeaponTurretJammerTest extends ActorTest {
   turret.Position = Vector3(1, 0, 0)
   val turretWeapon = turret.Weapons.values.head.Equipment.get.asInstanceOf[Tool]
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player1.Spawn
   player1.Position = Vector3(2, 2, 2)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
@@ -823,12 +823,12 @@ class DamageableWeaponTurretDestructionTest extends ActorTest {
   turret.Position = Vector3(1, 0, 0)
   val turretWeapon = turret.Weapons.values.head.Equipment.get.asInstanceOf[Tool]
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player1.Spawn
   player1.Position = Vector3(2, 2, 2)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=4
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
@@ -949,12 +949,12 @@ class DamageableVehicleDamageTest extends ActorTest {
   atv.Actor = system.actorOf(Props(classOf[VehicleControl], atv), "vehicle-control")
   atv.Position = Vector3(1,0,0)
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
   player1.Spawn
   player1.Position = Vector3(2,0,0)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
@@ -1043,16 +1043,16 @@ class DamageableVehicleDamageMountedTest extends ActorTest {
   atv.Position = Vector3(1,0,0)
   atv.Actor = system.actorOf(Props(classOf[VehicleControl], atv), "atv-control")
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
   player1.Spawn
   player1.Position = Vector3(2,0,0)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
-  val player3 = Player(Avatar(0L, "TestCharacter3", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=10
+  val player3 = Player(Avatar("TestCharacter3", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=10
   player3.Spawn
   val player3Probe = TestProbe()
   player3.Actor = player3Probe.ref
@@ -1168,16 +1168,16 @@ class DamageableVehicleJammeringMountedTest extends ActorTest {
   val lodestar = Vehicle(GlobalDefinitions.lodestar) //guid=6
   lodestar.Position = Vector3(1,0,0)
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=7
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=7
   player1.Spawn
   player1.Position = Vector3(2,0,0)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=8
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=8
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
-  val player3 = Player(Avatar(0L, "TestCharacter3", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=9
+  val player3 = Player(Avatar("TestCharacter3", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=9
   player3.Spawn
   val player3Probe = TestProbe()
   player3.Actor = player3Probe.ref
@@ -1263,12 +1263,12 @@ class DamageableVehicleDestroyTest extends ActorTest {
   atv.Position = Vector3(1,0,0)
   val atvWeapon = atv.Weapons(1).Equipment.get.asInstanceOf[Tool] //guid=4 & 5
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=2
   player1.Spawn
   player1.Position = Vector3(2,0,0)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=3
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
@@ -1307,7 +1307,6 @@ class DamageableVehicleDestroyTest extends ActorTest {
       atv.Actor ! Vitality.Damage(applyDamageTo)
       val msg124 = avatarProbe.receiveN(3, 500 milliseconds)
       val msg3 = player2Probe.receiveOne(200 milliseconds)
-      val msg567 = vehicleProbe.receiveN(2, 200 milliseconds)
       assert(
         msg124.head match {
           case AvatarServiceMessage("test", AvatarAction.PlanetsideAttributeToAll(PlanetSideGUID(1), 0, _)) => true
@@ -1329,18 +1328,6 @@ class DamageableVehicleDestroyTest extends ActorTest {
       assert(
         msg124(2) match {
           case AvatarServiceMessage("test", AvatarAction.ObjectDelete(PlanetSideGUID(0), PlanetSideGUID(4), _)) => true
-          case _ => false
-        }
-      )
-      assert(
-        msg567.head match {
-          case VehicleServiceMessage.Decon(SupportActor.ClearSpecific(List(target), _zone)) if (target eq atv) && (_zone eq zone) => true
-          case _ => false
-        }
-      )
-      assert(
-        msg567(1) match {
-          case VehicleServiceMessage.Decon(RemoverActor.AddTask(target, _zone, _)) if (target eq atv) && (_zone eq zone) => true
           case _ => false
         }
       )
@@ -1372,16 +1359,16 @@ class DamageableVehicleDestroyMountedTest extends ActorTest {
   val lodestar = Vehicle(GlobalDefinitions.lodestar) //guid=6
   lodestar.Position = Vector3(1,0,0)
 
-  val player1 = Player(Avatar(0L, "TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=7
+  val player1 = Player(Avatar("TestCharacter1", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=7
   player1.Spawn
   player1.Position = Vector3(2,0,0)
   val player1Probe = TestProbe()
   player1.Actor = player1Probe.ref
-  val player2 = Player(Avatar(0L, "TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=8
+  val player2 = Player(Avatar("TestCharacter2", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=8
   player2.Spawn
   val player2Probe = TestProbe()
   player2.Actor = player2Probe.ref
-  val player3 = Player(Avatar(0L, "TestCharacter3", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=9
+  val player3 = Player(Avatar("TestCharacter3", PlanetSideEmpire.NC, CharacterGender.Male, 0, CharacterVoice.Mute)) //guid=9
   player3.Spawn
   val player3Probe = TestProbe()
   player3.Actor = player3Probe.ref
@@ -1467,7 +1454,7 @@ class DamageableVehicleDestroyMountedTest extends ActorTest {
     player2Probe.expectNoMsg(10 milliseconds)
     val msg_player3 = player3Probe.receiveOne(200 milliseconds)
     player3Probe.expectNoMsg(10 milliseconds)
-    val msg_vehicle = vehicleProbe.receiveN(6, 200 milliseconds)
+    val msg_vehicle = vehicleProbe.receiveN(2, 200 milliseconds)
     vehicleProbe.expectNoMsg(10 milliseconds)
     assert(
       msg_avatar.exists( {
@@ -1510,30 +1497,6 @@ class DamageableVehicleDestroyMountedTest extends ActorTest {
         case Player.Die() => true
         case _ => false
       }
-    )
-    assert(
-      msg_vehicle.exists( {
-        case VehicleServiceMessage.Decon(SupportActor.ClearSpecific(List(target), _zone)) if (target eq lodestar) && (_zone eq zone) => true
-        case _ => false
-      })
-    )
-    assert(
-      msg_vehicle.exists( {
-        case VehicleServiceMessage.Decon(RemoverActor.AddTask(target, _zone, _)) if (target eq lodestar) && (_zone eq zone) => true
-        case _ => false
-      })
-    )
-    assert(
-      msg_vehicle.exists( {
-        case VehicleServiceMessage.Decon(SupportActor.ClearSpecific(List(target), _zone)) if (target eq atv) && (_zone eq zone) => true
-        case _ => false
-      })
-    )
-    assert(
-      msg_vehicle.exists( {
-        case VehicleServiceMessage.Decon(RemoverActor.AddTask(target, _zone, _)) if (target eq atv) && (_zone eq zone) => true
-        case _ => false
-      })
     )
     assert(
         msg_vehicle.exists( {

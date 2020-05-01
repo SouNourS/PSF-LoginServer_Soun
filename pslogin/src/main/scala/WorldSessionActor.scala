@@ -261,7 +261,7 @@ class WorldSessionActor extends Actor
   def ValidObject(id : Option[PlanetSideGUID]) : Option[PlanetSideGameObject] = continent.GUID(id) match {
     case out@Some(obj) if obj.HasGUID =>
       out
-    case None if id.nonEmpty =>
+    case None if id.nonEmpty && id.get != PlanetSideGUID(0) =>
       //delete stale entity reference from client
       log.warn(s"Player ${player.Name} has an invalid reference to GUID ${id.get} in zone ${continent.Id}.")
       //sendResponse(ObjectDeleteMessage(id.get, 0))
@@ -2204,14 +2204,14 @@ class WorldSessionActor extends Actor
           else {
             inZone.GUID(p.VehicleSeated) match {
               case Some(v : Vehicle) if v.Destroyed =>
-                inZone.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(v), inZone))
-                inZone.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.AddTask(v, inZone, if(v.Flying) {
+                v.Actor ! Vehicle.Deconstruct(
+                  if(v.Flying) {
                   //TODO gravity
-                  Some(0 seconds) //immediate deconstruction
+                  None //immediate deconstruction
                 }
                 else {
                   v.Definition.DeconstructionTime //normal deconstruction
-                }))
+                })
               case _ => ;
             }
           }
@@ -3101,7 +3101,6 @@ class WorldSessionActor extends Actor
           sendResponse(PlanetsideAttributeMessage(obj_guid, 113, capacitor))
         }
         if(seat_num == 0) {
-          continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(obj), continent)) //clear timer
           //simplistic vehicle ownership management
           obj.Owner match {
             case Some(owner_guid) =>
@@ -3154,8 +3153,6 @@ class WorldSessionActor extends Actor
       case Mountable.CanDismount(obj : Vehicle, seat_num) if obj.Definition == GlobalDefinitions.droppod =>
         UnAccessContents(obj)
         DismountAction(tplayer, obj, seat_num)
-        continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(obj), continent))
-        continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.AddTask(obj, continent, obj.Definition.DeconstructionTime))
 
       case Mountable.CanDismount(obj : Vehicle, seat_num) =>
         val player_guid : PlanetSideGUID = tplayer.GUID
@@ -3826,9 +3823,8 @@ class WorldSessionActor extends Actor
           )
         }
 
-      case msg@VehicleResponse.KickPassenger(seat_num, wasKickedByDriver, vehicle_guid) =>
+      case VehicleResponse.KickPassenger(seat_num, wasKickedByDriver, vehicle_guid) =>
         // seat_num seems to be correct if passenger is kicked manually by driver, but always seems to return 4 if user is kicked by seat permissions
-        log.info(s"$msg")
         sendResponse(DismountVehicleMsg(guid, BailType.Kicked, wasKickedByDriver))
         if(tplayer_guid == guid) {
           continent.GUID(vehicle_guid) match {
@@ -3919,9 +3915,6 @@ class WorldSessionActor extends Actor
           galaxyService ! Service.Join(temp_channel) //temporary vehicle-specific channel
         }
 
-      case VehicleResponse.ForceDismountVehicleCargo(cargo_guid, bailed, requestedByPassenger, kicked) =>
-        CargoBehavior.HandleVehicleCargoDismount(continent, tplayer_guid, cargo_guid, bailed, requestedByPassenger, kicked)
-
       case VehicleResponse.KickCargo(vehicle, speed, delay) =>
         if(player.VehicleSeated.nonEmpty && deadState == DeadState.Alive) {
           if(speed > 0) {
@@ -3933,7 +3926,7 @@ class WorldSessionActor extends Actor
             controlled = Some(reverseSpeed)
             sendResponse(ServerVehicleOverrideMsg(true, true, true, false, 0, strafe, reverseSpeed, Some(0)))
             import scala.concurrent.ExecutionContext.Implicits.global
-            context.system.scheduler.scheduleOnce(delay milliseconds, self, VehicleServiceResponse(toChannel, tplayer_guid, VehicleResponse.KickCargo(vehicle, 0, delay)))
+            context.system.scheduler.scheduleOnce(delay milliseconds, self, VehicleServiceResponse(toChannel, PlanetSideGUID(0), VehicleResponse.KickCargo(vehicle, 0, delay)))
           }
           else {
             controlled = None
@@ -4484,7 +4477,7 @@ class WorldSessionActor extends Actor
         case Some(cargo : Vehicle) if !requestedByPassenger =>
           continent.GUID(cargo.MountedIn) match {
             case Some(carrier : Vehicle) =>
-              CargoBehavior.HandleVehicleCargoDismount(continent, player_guid, cargo_guid, bailed, requestedByPassenger, kicked)
+              CargoBehavior.HandleVehicleCargoDismount(continent, cargo_guid, bailed, requestedByPassenger, kicked)
             case _ => ;
           }
         case _ => ;
@@ -5100,8 +5093,7 @@ class WorldSessionActor extends Actor
                 case v : Vehicle if seatNum == 0 && v.Flying =>
                   TotalDriverVehicleControl(v)
                   UnAccessContents(v)
-                  continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(obj), continent))
-                  continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.AddTask(obj, continent, Some(0 seconds)))
+                  v.Actor ! Vehicle.Deconstruct()
                 case _ => ;
               }
             case _ => ; //found no vehicle where one was expected; since we're dead, let's not dwell on it
@@ -6056,11 +6048,18 @@ class WorldSessionActor extends Actor
       // TODO: Make sure this is the correct response for all cases
       ValidObject(object_guid) match {
         case Some(vehicle : Vehicle) =>
-          if((player.VehicleOwned.contains(object_guid) && vehicle.Owner.contains(player.GUID)) ||
-            (player.Faction == vehicle.Faction &&
-              ((vehicle.Owner.isEmpty || continent.GUID(vehicle.Owner.get).isEmpty) || vehicle.Destroyed))) {
-            continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(vehicle), continent))
-            continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.AddTask(vehicle, continent, Some(0 seconds)))
+          /* line 1a: player is admin (and overrules other access requirements) */
+          /* line 1b: vehicle and player (as the owner) acknowledge each other */
+          /* line 1c: vehicle is the same faction as player and either the owner is absent or the vehicle is destroyed */
+          /* line 2: vehicle is not mounted in anything or, if it is, its seats are empty */
+          if(
+            (admin ||
+              (player.VehicleOwned.contains(object_guid) && vehicle.Owner.contains(player.GUID)) ||
+              (player.Faction == vehicle.Faction && ((vehicle.Owner.isEmpty || continent.GUID(vehicle.Owner.get).isEmpty) || vehicle.Destroyed))
+              ) &&
+              (vehicle.MountedIn.isEmpty || !vehicle.Seats.values.exists(_.isOccupied))
+          ) {
+            vehicle.Actor ! Vehicle.Deconstruct()
             log.info(s"RequestDestroy: vehicle $vehicle")
           }
           else {
@@ -6876,6 +6875,12 @@ class WorldSessionActor extends Actor
                 })
               }
               projectilesToCleanUp(projectileIndex) = false
+
+              obj match {
+                case turret : FacilityTurret if turret.Definition == GlobalDefinitions.vanu_sentry_turret =>
+                  turret.Actor ! FacilityTurret.WeaponDischarged()
+                case _ => ;
+              }
             }
             else {
               log.warn(s"WeaponFireMessage: $player's ${tool.Definition.Name} projectile is too far from owner position at time of discharge ($distanceToOwner > $acceptableDistanceToOwner); suspect")
@@ -7029,46 +7034,56 @@ class WorldSessionActor extends Actor
       }
       if(player.GUID == player_guid) {
         //normally disembarking from a seat
-        player.VehicleSeated match {
-          case Some(obj_guid) =>
-            interstellarFerry.orElse(continent.GUID(obj_guid)) match {
-              case Some(obj : Mountable) =>
-                obj.PassengerInSeat(player) match {
-                  case Some(0) if controlled.nonEmpty =>
-                    log.warn(s"DismountVehicleMsg: can not dismount from vehicle as driver while server has asserted control; please wait ...")
-                  case Some(seat_num : Int) =>
-                    obj.Actor ! Mountable.TryDismount(player, seat_num)
-                    if(interstellarFerry.isDefined) {
-                      //short-circuit the temporary channel for transferring between zones, the player is no longer doing that
-                      //see above in VehicleResponse.TransferPassenger case
-                      interstellarFerry = None
-                    }
-                    // Deconstruct the vehicle if the driver has bailed out and the vehicle is capable of flight
-                    //todo: implement auto landing procedure if the pilot bails but passengers are still present instead of deconstructing the vehicle
-                    //todo: continue flight path until aircraft crashes if no passengers present (or no passenger seats), then deconstruct.
-                    //todo: kick cargo passengers out. To be added after PR #216 is merged
-                    obj match {
-                      case v : Vehicle if bailType == BailType.Bailed && seat_num == 0 && v.Flying =>
-                        continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(obj), continent))
-                        continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.AddTask(obj, continent, Some(0 seconds))) // Immediately deconstruct vehicle
-                      case _ => ;
-                    }
-
-                  case None =>
-                    dismountWarning(s"DismountVehicleMsg: can not find where player $player_guid is seated in mountable $obj_guid")
-                }
-              case _ =>
-                dismountWarning(s"DismountVehicleMsg: can not find mountable entity $obj_guid")
-            }
-          case None =>
+        (interstellarFerry.orElse(continent.GUID(player.VehicleSeated)) match {
+          case out @ Some(obj : Vehicle) =>
+            if(obj.MountedIn.isEmpty) out else None
+          case out @ Some(_ : Mountable) =>
+            out
+          case _ =>
             dismountWarning(s"DismountVehicleMsg: player $player_guid not considered seated in a mountable entity")
+            None
+        }) match {
+          case Some(obj : Mountable) =>
+            obj.PassengerInSeat(player) match {
+              case Some(0) if controlled.nonEmpty =>
+                log.warn(s"DismountVehicleMsg: can not dismount from vehicle as driver while server has asserted control; please wait ...")
+              case Some(seat_num : Int) =>
+                obj.Actor ! Mountable.TryDismount(player, seat_num)
+                if(interstellarFerry.isDefined) {
+                  //short-circuit the temporary channel for transferring between zones, the player is no longer doing that
+                  //see above in VehicleResponse.TransferPassenger case
+                  interstellarFerry = None
+                }
+                // Deconstruct the vehicle if the driver has bailed out and the vehicle is capable of flight
+                //todo: implement auto landing procedure if the pilot bails but passengers are still present instead of deconstructing the vehicle
+                //todo: continue flight path until aircraft crashes if no passengers present (or no passenger seats), then deconstruct.
+                //todo: kick cargo passengers out. To be added after PR #216 is merged
+                obj match {
+                  case v : Vehicle if bailType == BailType.Bailed && seat_num == 0 && v.Flying =>
+                    continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(obj), continent))
+                    continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.AddTask(obj, continent, Some(0 seconds))) // Immediately deconstruct vehicle
+                  case _ => ;
+                }
+
+              case None =>
+                dismountWarning(s"DismountVehicleMsg: can not find where player $player_guid is seated in mountable ${player.VehicleSeated}")
+            }
+          case _ =>
+            dismountWarning(s"DismountVehicleMsg: can not find mountable entity ${player.VehicleSeated}")
         }
       }
       else {
         //kicking someone else out of a seat; need to own that seat/mountable
         player.VehicleOwned match {
           case Some(obj_guid) =>
-            (ValidObject(obj_guid), ValidObject(player_guid)) match {
+            ((ValidObject(obj_guid), ValidObject(player_guid)) match {
+              case (vehicle @ Some(obj : Vehicle), tplayer) =>
+                if(obj.MountedIn.isEmpty) (vehicle, tplayer) else (None, None)
+              case (mount @ Some(obj : Mountable), tplayer) =>
+                (mount, tplayer)
+              case _ =>
+                (None, None)
+            }) match {
               case (Some(obj : Mountable), Some(tplayer : Player)) =>
                 obj.PassengerInSeat(tplayer) match {
                   case Some(seat_num : Int) =>
@@ -10901,7 +10916,7 @@ class WorldSessionActor extends Actor
       case ("MISSING_DRIVER", index) =>
         val cargo = vehicle.CargoHolds(index).Occupant.get
         log.error(s"LoadZoneInVehicleAsDriver: eject cargo in hold $index; vehicle missing driver")
-        CargoBehavior.HandleVehicleCargoDismount(pguid, cargo.GUID, cargo, vehicle.GUID, vehicle, false, false, true)
+        CargoBehavior.HandleVehicleCargoDismount(cargo.GUID, cargo, vehicle.GUID, vehicle, false, false, true)
       case (name, index) =>
         val cargo = vehicle.CargoHolds(index).Occupant.get
         continent.VehicleEvents ! VehicleServiceMessage(name, VehicleAction.TransferPassengerChannel(pguid, s"${cargo.Actor}", toChannel, cargo, topLevel))
@@ -11193,8 +11208,6 @@ class WorldSessionActor extends Actor
       sendResponse(PlayerStateShiftMessage(ShiftState(0, dest.Position, player.Orientation.z)))
       UseRouterTelepadEffect(pguid, sguid, dguid)
       StopBundlingPackets()
-      //      continent.VehicleEvents ! VehicleServiceMessage.Decon(RemoverActor.ClearSpecific(List(router), continent))
-      //      continent.VehicleEvents p! VehicleServiceMessage.Decon(RemoverActor.AddTask(router, continent, router.Definition.DeconstructionTime))
       continent.LocalEvents ! LocalServiceMessage(continent.Id, LocalAction.RouterTelepadTransport(pguid, pguid, sguid, dguid))
     }
     else {
@@ -11368,7 +11381,7 @@ class WorldSessionActor extends Actor
             queryResult match {
               case result: QueryResult =>
                 if (result.rows.nonEmpty) {
-                  val doll = new Player(Avatar(0, "doll", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //play dress up
+                  val doll = new Player(Avatar("doll", PlanetSideEmpire.TR, CharacterGender.Male, 0, CharacterVoice.Mute)) //play dress up
                   log.debug(s"LoadDataBaseLoadouts: ${result.rows.size} saved loadout(s) for character with id ${owner.CharId}")
                   result.rows foreach{ row  =>
                     row.zipWithIndex.foreach{ case (value,i) =>
@@ -11507,7 +11520,7 @@ class WorldSessionActor extends Actor
     val rocket = AmmoBox(GlobalDefinitions.rocket)
     val shotgunAmmo = AmmoBox(GlobalDefinitions.shotgun_shell)
     //
-    val doll = new Player(Avatar(0, "doll", faction, CharacterGender.Male, 0, CharacterVoice.Mute)) //play dress up
+    val doll = new Player(Avatar("doll", faction, CharacterGender.Male, 0, CharacterVoice.Mute)) //play dress up
     doll.Slot(4).Equipment = Tool(GlobalDefinitions.StandardMelee(faction)) //will not be cleared
     // 1
     doll.ExoSuit = ExoSuitType.Agile
