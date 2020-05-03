@@ -110,7 +110,7 @@ class SquadService extends Actor {
   }
 
   override def preStart : Unit = {
-    log.trace("Starting...")
+    log.info("Starting...")
   }
 
   override def postStop() : Unit = {

@@ -159,7 +159,6 @@ class AvatarService(zone : Zone) extends Actor {
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", guid, AvatarResponse.PlanetsideAttributeToAll(attribute_type, attribute_value))
           )
-        // PTS v3
         case AvatarAction.PlanetsideAttributeSelf(guid, attribute_type, attribute_value) =>
           AvatarEvents.publish(
             AvatarServiceResponse(s"/$forChannel/Avatar", guid, AvatarResponse.PlanetsideAttributeSelf(attribute_type, attribute_value))

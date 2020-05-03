@@ -26,7 +26,7 @@ import scala.util.Random
 class InterstellarCluster(zones : List[Zone]) extends Actor {
   private[this] val log = org.log4s.getLogger
   val recallRandom = new Random()
-  log.trace("Starting interplanetary cluster ...")
+  log.info("Starting interplanetary cluster ...")
 
   /**
     * Create a `ZoneActor` for each `Zone`.
@@ -36,7 +36,7 @@ class InterstellarCluster(zones : List[Zone]) extends Actor {
   override def preStart() : Unit = {
     super.preStart()
     for(zone <- zones) {
-      // log.info(s"Built continent ${zone.Id}") // PTS v3 stop spam
+       log.info(s"Built continent ${zone.Id}")
       zone.Actor = context.actorOf(Props(classOf[ZoneActor], zone), s"${zone.Id}-actor")
       zone.Actor ! Zone.Init()
     }

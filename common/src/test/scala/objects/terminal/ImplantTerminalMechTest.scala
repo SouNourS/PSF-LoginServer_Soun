@@ -159,7 +159,6 @@ class ImplantTerminalMechControl5Test extends ActorTest {
 
 object ImplantTerminalMechTest {
   def SetUpAgents(faction : PlanetSideEmpire.Value)(implicit system : ActorSystem) : (Player, ImplantTerminalMech) = {
-
     val guid = new NumberPoolHub(new LimitedNumberSource(10))
     val map = new ZoneMap("test")
     val zone = new Zone("test", map, 0) {

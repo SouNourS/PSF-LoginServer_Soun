@@ -162,7 +162,6 @@ class WorldSessionActor extends Actor
   var squadSetup : () => Unit = FirstTimeSquadSetup
   var squadUpdateCounter : Int = 0
   val queuedSquadActions : Seq[() => Unit] = Seq(SquadUpdates, NoSquadUpdates, NoSquadUpdates, NoSquadUpdates)
-
   /** Keeps track of the number of PlayerStateMessageUpstream messages received by the client
     * As they should arrive roughly every 250 milliseconds this allows for a very crude method of scheduling tasks up to four times per second */
   private var playerStateMessageUpstreamCount = 0
@@ -1879,40 +1878,6 @@ class WorldSessionActor extends Actor
       galaxyService ! Service.Join(s"${avatar.faction}") //for hotspots
       squadService ! Service.Join(s"${avatar.faction}") //channel will be player.Faction
       squadService ! Service.Join(s"${avatar.CharId}") //channel will be player.CharId (in order to work with packets)
-//      if(player.Faction == PlanetSideEmpire.NC) {
-//        cluster ! InterstellarCluster.GetWorld("home1")
-//      }
-//      else if(player.Faction == PlanetSideEmpire.TR) {
-//        cluster ! InterstellarCluster.GetWorld("home2")
-//      }
-//      else if(player.Faction == PlanetSideEmpire.VS) {
-//        cluster ! InterstellarCluster.GetWorld("home3")
-//      }
-//      cluster ! InterstellarCluster.GetWorld("homebo")
-//      cluster ! InterstellarCluster.GetWorld("station1")
-//      cluster ! InterstellarCluster.GetWorld("station2")
-//      cluster ! InterstellarCluster.GetWorld("station3")
-//      cluster ! InterstellarCluster.GetWorld("z1")
-//      cluster ! InterstellarCluster.GetWorld("z2")
-//      cluster ! InterstellarCluster.GetWorld("z3")
-//      cluster ! InterstellarCluster.GetWorld("z4")
-//      cluster ! InterstellarCluster.GetWorld("z5")
-//      cluster ! InterstellarCluster.GetWorld("z6")
-//      cluster ! InterstellarCluster.GetWorld("z7")
-//      cluster ! InterstellarCluster.GetWorld("z8")
-//      cluster ! InterstellarCluster.GetWorld("z9")
-//      cluster ! InterstellarCluster.GetWorld("z10")
-//      cluster ! InterstellarCluster.GetWorld("i1")
-//      cluster ! InterstellarCluster.GetWorld("i2")
-//      cluster ! InterstellarCluster.GetWorld("i3")
-//      cluster ! InterstellarCluster.GetWorld("i4")
-//      cluster ! InterstellarCluster.GetWorld("c1")
-//      cluster ! InterstellarCluster.GetWorld("c2")
-//      cluster ! InterstellarCluster.GetWorld("c3")
-//      cluster ! InterstellarCluster.GetWorld("c4")
-//      cluster ! InterstellarCluster.GetWorld("c5")
-//      cluster ! InterstellarCluster.GetWorld("c6")
-
       player.Zone match {
         case Zone.Nowhere =>
           RequestSanctuaryZoneSpawn(player, currentZone = 0)
@@ -2052,7 +2017,6 @@ class WorldSessionActor extends Actor
       this.account = account
       admin = account.GM
       if (admin) movieMaker = true
-
       Database.getConnection.connect.onComplete {
         case scala.util.Success(connection) =>
           Database.query(connection.sendPreparedStatement(
@@ -2680,7 +2644,6 @@ class WorldSessionActor extends Actor
       case AvatarResponse.PlanetsideAttributeToAll(attribute_type, attribute_value) =>
         sendResponse(PlanetsideAttributeMessage(guid, attribute_type, attribute_value))
 
-      // PTS v3
       case AvatarResponse.PlanetsideAttributeSelf(attribute_type, attribute_value) =>
         if(tplayer_guid == guid) {
           sendResponse(PlanetsideAttributeMessage(guid, attribute_type, attribute_value))
@@ -3060,7 +3023,6 @@ class WorldSessionActor extends Actor
               if (player.Faction == avatar_faction) {
                 sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
               }
-            // PTS v3
             case ChatMessageType.CMT_VOICE =>
               if(Vector3.Distance(player.Position, avatar_pos) < 25 && player.Continent == cont.Id) {
                 sendResponse(ChatMsg(reply.messageType, reply.wideContents, reply.recipient, reply.contents, reply.note))
@@ -4239,7 +4201,6 @@ class WorldSessionActor extends Actor
     //MapObjectStateBlockMessage and ObjectCreateMessage?
     //TacticsMessage?
     //change the owner on our deployables (re-draw the icons for our deployables too)
-
     val name = tplayer.Name
     val faction = tplayer.Faction
     continent.DeployableList
@@ -4556,7 +4517,6 @@ class WorldSessionActor extends Actor
                       val lGender : CharacterGender.Value = CharacterGender(row(3).asInstanceOf[Int])
                       val lHead : Int = row(4).asInstanceOf[Int]
                       val lVoice : CharacterVoice.Value = CharacterVoice(row(5).asInstanceOf[Int])
-
                       log.info(s"CharacterRequest/Select: character $lName found in records")
                       avatar = new Avatar(charId, lName, lFaction, lGender, lHead, lVoice)
                       var faction : String = lFaction.toString.toLowerCase
@@ -5328,7 +5288,7 @@ class WorldSessionActor extends Actor
         StopBundlingPackets()
       }
       else if (trimContents.contains("!list") && admin) {
-//        StartBundlingPackets()
+        //        StartBundlingPackets()
         val localString : String = contents.drop(contents.indexOf(" ") + 1)
 
         if(localString.equalsIgnoreCase("!list")) {
@@ -5491,7 +5451,7 @@ class WorldSessionActor extends Actor
               "\\#7" + char.Name + " (" + char.Faction + ") [" + char.CharId + "] in " + char.Continent + " at " + char.Position.x.toInt + " " + char.Position.y.toInt + " " + char.Position.z.toInt, note_contents))
           })
         }
-//        StopBundlingPackets()
+        //        StopBundlingPackets()
       }
       else if (trimContents.contains("!kick") && admin) {
         val CharIDorName : String = contents.drop(contents.indexOf(" ") + 1)
@@ -5964,7 +5924,6 @@ class WorldSessionActor extends Actor
 
     case msg@AvatarJumpMessage(state) =>
       //log.info("AvatarJump: " + msg)
-      // PTS v3
       player.Stamina = player.Stamina - 10
       player.skipStaminaRegenForTurns = math.max(player.skipStaminaRegenForTurns, 5)
 
@@ -6789,7 +6748,6 @@ class WorldSessionActor extends Actor
             shotsWhileDead += 1
           }
           else { //shooting
-            // PTS v3
             if (tool.FireModeIndex == 1 && (tool.Definition.Name == "anniversary_guna" || tool.Definition.Name == "anniversary_gun" || tool.Definition.Name == "anniversary_gunb")) {
               player.Stamina = 0
             }
@@ -7091,32 +7049,32 @@ class WorldSessionActor extends Actor
 
     case msg @ GenericCollisionMsg(u1, p, t, php, thp, pv, tv, ppos, tpos, u2, u3, u4) =>
       log.info("Ouch! " + msg)
-      // PTS v3
+      // PTS v3 temp comment for vehicles until debug for spaming Alt+G message
       continent.GUID(p) match {
-        case Some(vehicle: Vehicle) =>
-          if (vehicle.Health >= 50) vehicle.Health -= 50
-          else vehicle.Health = 0
-          if (vehicle.Health == 0) {
-            vehicle.Health = 0
-            sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "Server", "Your vehicle is dead by Collision(s), Press Alt+G please", None))
-          }
-          continent.VehicleEvents ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(Service.defaultPlayerGUID, p, 0, vehicle.Health))
-          continent.GUID(t) match {
-            case Some(vehicle: Vehicle) =>
-              if (vehicle.Health > 40) vehicle.Health -= 40
-              continent.VehicleEvents ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(Service.defaultPlayerGUID, t, 0, vehicle.Health))
-            case Some(player: Player) =>
-              log.info("Something to do for the victim (player) : " + player.Name)
-              if (player.Armor == 0 && player.Health > 4) player.Health -= 4
-              if (player.Armor >= 4) player.Armor -= 4
-              else player.Armor = 0
-              continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
-              continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
-              continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttributeSelf(player.GUID, 0, player.Health))
-              continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttributeSelf(player.GUID, 4, player.Armor))
-            case _ =>
-              log.info("Dunno who/what is t : " + t)
-          }
+//        case Some(vehicle: Vehicle) =>
+//          if (vehicle.Health >= 50) vehicle.Health -= 50
+//          else vehicle.Health = 0
+//          if (vehicle.Health == 0) {
+//            vehicle.Health = 0
+//            sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "Server", "Your vehicle is dead by Collision(s), Press Alt+G please", None))
+//          }
+//          continent.VehicleEvents ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(Service.defaultPlayerGUID, p, 0, vehicle.Health))
+//          continent.GUID(t) match {
+//            case Some(vehicle: Vehicle) =>
+//              if (vehicle.Health > 40) vehicle.Health -= 40
+//              continent.VehicleEvents ! VehicleServiceMessage(player.Continent, VehicleAction.PlanetsideAttribute(Service.defaultPlayerGUID, t, 0, vehicle.Health))
+//            case Some(player: Player) =>
+//              log.info("Something to do for the victim (player) : " + player.Name)
+//              if (player.Armor == 0 && player.Health > 4) player.Health -= 4
+//              if (player.Armor >= 4) player.Armor -= 4
+//              else player.Armor = 0
+//              continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 0, player.Health))
+//              continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttribute(player.GUID, 4, player.Armor))
+//              continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttributeSelf(player.GUID, 0, player.Health))
+//              continent.AvatarEvents ! AvatarServiceMessage(player.Continent, AvatarAction.PlanetsideAttributeSelf(player.GUID, 4, player.Armor))
+//            case _ =>
+//              log.info("Dunno who/what is t : " + t)
+//          }
         case Some(player: Player) =>
           log.info("Something to do for player : " + player.Name)
           if (player.Armor == 0 && player.Health >= 5 && !flying && speed == 1) player.Health -= 5
@@ -9194,86 +9152,85 @@ class WorldSessionActor extends Actor
     * @see `Vehicles.ReloadAccessPermissions`
     */
   def AvatarCreate() : Unit = {
-    if (player.FirstLoad) {
-      var posXTemp : Float = -1
-      var posYTemp : Float = -1
-      continent.LivePlayers
-        .filter(tplayer => { tplayer.Faction == player.Faction })
-        .foreach(char => {
-          if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
-          else posXTemp = char.Position.x
-          if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
-          else posYTemp = char.Position.y
-        })
-      if(posXTemp == -1) {
-        continent.LivePlayers
-          .filter(tplayer => { tplayer.Faction != player.Faction })
-          .foreach(char => {
-            if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
-            else posXTemp = char.Position.x
-            if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
-            else posYTemp = char.Position.y
-          })
-      }
-      if(posXTemp != -1) player.Position = Vector3(posXTemp, posYTemp, 0f)
-
-      {
-        //        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
-        var buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
-        if (continent.Id == "home1" | continent.Id == "home2" | continent.Id == "home3") buildingTypeSet = Set(StructureType.Facility, StructureType.Building)
-        continent.SpawnGroups()
-          .filter({ case ((building, _)) =>
-            building.Faction == player.Faction &&
-              buildingTypeSet.contains(building.BuildingType)
-          })
-          .toSeq
-          .sortBy({ case ((building, _)) =>
-            Vector3.DistanceSquared(player.Position, building.Position.xy)
-          })
-          .headOption match {
-          case None | Some((_, Nil)) =>
-            None
-          case Some((_, tubes)) =>
-            Some(tubes)
-        }
-      } match {
-        case Some(List(tube)) =>
-          player.Position = tube.Position + Vector3(0, 0, 1.5f)
-          player.Orientation = tube.Orientation + Vector3(0, 0, 90f)
-
-        case Some(tubes) =>
-          player.Position = tubes.head.Position + Vector3(0, 0, 1.5f)
-          player.Orientation = tubes.head.Orientation + Vector3(0, 0, 90f)
-
-        case None =>
-          log.info("WTF?!")
-          noSpawnPointHere = true
-        //z4
-        //          if (player.Faction == PlanetSideEmpire.TR) {
-        //            player.Position = Vector3(903f, 5508f, 88f)
-        //            player.Orientation = Vector3(0f, 354.375f, 157.5f)
-        //          } else if (player.Faction == PlanetSideEmpire.NC) {
-        //            player.Position = Vector3(3091f, 2222f, 86f)
-        //            player.Orientation = Vector3(0f, 0f, 129.375f)
-        //          } else if (player.Faction == PlanetSideEmpire.VS) {
-        //            player.Position = Vector3(6579f, 4616f, 61f)
-        //            player.Orientation = Vector3(0f, 354.375f, 264.375f)
-        //          }
-        //z8
-        //          if (player.Faction == PlanetSideEmpire.TR) {
-        //            player.Position = Vector3(2285f, 3403f, 68f)
-        //            player.Orientation = Vector3(0f, 357.375f, 50.5f)
-        //          } else if (player.Faction == PlanetSideEmpire.NC) {
-        //            player.Position = Vector3(4719f, 5413f, 69f)
-        //            player.Orientation = Vector3(0f, 357f, 177.375f)
-        //          } else if (player.Faction == PlanetSideEmpire.VS) {
-        //            player.Position = Vector3(3989f, 2241f, 72f)
-        //            player.Orientation = Vector3(0f, 348.375f, 101.375f)
-        //          }
-      }
-      player.FirstLoad = false
-    }
-
+//    if (player.FirstLoad) {
+//      var posXTemp : Float = -1
+//      var posYTemp : Float = -1
+//      continent.LivePlayers
+//        .filter(tplayer => { tplayer.Faction == player.Faction })
+//        .foreach(char => {
+//          if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
+//          else posXTemp = char.Position.x
+//          if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
+//          else posYTemp = char.Position.y
+//        })
+//      if(posXTemp == -1) {
+//        continent.LivePlayers
+//          .filter(tplayer => { tplayer.Faction != player.Faction })
+//          .foreach(char => {
+//            if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
+//            else posXTemp = char.Position.x
+//            if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
+//            else posYTemp = char.Position.y
+//          })
+//      }
+//      if(posXTemp != -1) player.Position = Vector3(posXTemp, posYTemp, 0f)
+//
+//      {
+//        //        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+//        var buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
+//        if (continent.Id == "home1" | continent.Id == "home2" | continent.Id == "home3") buildingTypeSet = Set(StructureType.Facility, StructureType.Building)
+//        continent.SpawnGroups()
+//          .filter({ case ((building, _)) =>
+//            building.Faction == player.Faction &&
+//              buildingTypeSet.contains(building.BuildingType)
+//          })
+//          .toSeq
+//          .sortBy({ case ((building, _)) =>
+//            Vector3.DistanceSquared(player.Position, building.Position.xy)
+//          })
+//          .headOption match {
+//          case None | Some((_, Nil)) =>
+//            None
+//          case Some((_, tubes)) =>
+//            Some(tubes)
+//        }
+//      } match {
+//        case Some(List(tube)) =>
+//          player.Position = tube.Position + Vector3(0, 0, 1.5f)
+//          player.Orientation = tube.Orientation + Vector3(0, 0, 90f)
+//
+//        case Some(tubes) =>
+//          player.Position = tubes.head.Position + Vector3(0, 0, 1.5f)
+//          player.Orientation = tubes.head.Orientation + Vector3(0, 0, 90f)
+//
+//        case None =>
+//          log.info("WTF?!")
+//          noSpawnPointHere = true
+//        //z4
+//        //          if (player.Faction == PlanetSideEmpire.TR) {
+//        //            player.Position = Vector3(903f, 5508f, 88f)
+//        //            player.Orientation = Vector3(0f, 354.375f, 157.5f)
+//        //          } else if (player.Faction == PlanetSideEmpire.NC) {
+//        //            player.Position = Vector3(3091f, 2222f, 86f)
+//        //            player.Orientation = Vector3(0f, 0f, 129.375f)
+//        //          } else if (player.Faction == PlanetSideEmpire.VS) {
+//        //            player.Position = Vector3(6579f, 4616f, 61f)
+//        //            player.Orientation = Vector3(0f, 354.375f, 264.375f)
+//        //          }
+//        //z8
+//        //          if (player.Faction == PlanetSideEmpire.TR) {
+//        //            player.Position = Vector3(2285f, 3403f, 68f)
+//        //            player.Orientation = Vector3(0f, 357.375f, 50.5f)
+//        //          } else if (player.Faction == PlanetSideEmpire.NC) {
+//        //            player.Position = Vector3(4719f, 5413f, 69f)
+//        //            player.Orientation = Vector3(0f, 357f, 177.375f)
+//        //          } else if (player.Faction == PlanetSideEmpire.VS) {
+//        //            player.Position = Vector3(3989f, 2241f, 72f)
+//        //            player.Orientation = Vector3(0f, 348.375f, 101.375f)
+//        //          }
+//      }
+//      player.FirstLoad = false
+//    }
     val health = player.Health
     val armor = player.Armor
     val stamina = player.Stamina
@@ -10112,7 +10069,7 @@ class WorldSessionActor extends Actor
     target match {
       case obj : Player if obj.CanDamage =>
         if(obj.spectator) {
-          player.death_by = -1
+          player.death_by = -1 // little thing for auto kick
         }
         else {
           obj.Actor ! Vitality.Damage(func)
@@ -10705,15 +10662,16 @@ class WorldSessionActor extends Actor
     */
   def LoadZonePhysicalSpawnPoint(zone_id : String, pos : Vector3, ori : Vector3, respawnTime : Long) : Unit = {
     log.info(s"Load in zone $zone_id at position $pos in $respawnTime seconds")
-    var localRespawnTime = respawnTime
+//    var localRespawnTime = respawnTime
     respawnTimer.cancel
     reviveTimer.cancel
-    if (noSpawnPointHere) { // PTS v3
-      localRespawnTime = 2
-      noSpawnPointHere = false
-    }
+//    if (noSpawnPointHere) { // PTS v3
+//      localRespawnTime = 2
+//      noSpawnPointHere = false
+//    }
     val backpack = player.isBackpack
-    val respawnTimeMillis = localRespawnTime * 1000 //ms
+//    val respawnTimeMillis = localRespawnTime * 1000 //ms
+    val respawnTimeMillis = respawnTime * 1000 //ms
     deadState = DeadState.RespawnTime
     sendResponse(AvatarDeadStateMessage(DeadState.RespawnTime, respawnTimeMillis, respawnTimeMillis, Vector3.Zero, player.Faction, true))
     shiftPosition = Some(pos)
@@ -10745,7 +10703,8 @@ class WorldSessionActor extends Actor
       }
     }
     import scala.concurrent.ExecutionContext.Implicits.global
-    respawnTimer = context.system.scheduler.scheduleOnce(localRespawnTime seconds, target, msg)
+//    respawnTimer = context.system.scheduler.scheduleOnce(localRespawnTime seconds, target, msg)
+    respawnTimer = context.system.scheduler.scheduleOnce(respawnTime seconds, target, msg)
   }
 
   /**

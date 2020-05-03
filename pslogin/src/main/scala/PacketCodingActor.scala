@@ -92,9 +92,9 @@ class PacketCodingActor extends Actor with MDCContextAware {
 
   def Established : Receive = {
     case PacketCodingActor.SubslotResend() => {
-      log.info(s"Subslot resend timeout reached, session: ${sessionId}")
+      log.trace(s"Subslot resend timeout reached, session: ${sessionId}")
       relatedABufferTimeout.cancel()
-      log.info(s"Client indicated successful subslots ${relatedALog.sortBy(x => x).mkString(" ")}")
+      log.trace(s"Client indicated successful subslots ${relatedALog.sortBy(x => x).mkString(" ")}")
 
       // If a non-contiguous range of RelatedA packets were received we may need to send multiple missing packets, thus split the array into contiguous ranges
       val sorted_log = relatedALog.sortBy(x => x)

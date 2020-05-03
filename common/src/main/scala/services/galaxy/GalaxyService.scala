@@ -10,7 +10,7 @@ class GalaxyService extends Actor {
   private [this] val log = org.log4s.getLogger
 
   override def preStart = {
-    log.trace("Starting...")
+    log.info("Starting...")
   }
 
   val GalaxyEvents = new GenericEventBus[GalaxyServiceResponse]

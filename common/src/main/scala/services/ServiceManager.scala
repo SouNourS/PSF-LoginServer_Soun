@@ -26,12 +26,12 @@ class ServiceManager extends Actor {
   val lookups : mutable.LongMap[RequestEntry] = mutable.LongMap()
 
   override def preStart = {
-    log.trace("Starting...")
+    log.info("Starting...")
   }
 
   def receive = {
     case Register(props, name) =>
-      log.trace(s"Registered $name service")
+      log.info(s"Registered $name service")
       context.actorOf(props, name)
     case Lookup(name) =>
       context.actorSelection(name) ! Identify(nextLookupId)

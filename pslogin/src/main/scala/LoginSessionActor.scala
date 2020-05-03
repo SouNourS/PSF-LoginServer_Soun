@@ -168,7 +168,6 @@ class LoginSessionActor extends Actor with MDCContextAware {
     }
   }
 
-
   def startAccountAuthentication : Receive = {
     case StartAccountAuthentication(connection, username, password, newToken, queryResult) =>
       queryResult match {

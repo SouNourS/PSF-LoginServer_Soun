@@ -31,8 +31,6 @@ import scalax.collection.Graph
 import scalax.collection.GraphPredef._
 import scalax.collection.GraphEdge._
 
-import scala.util.Success
-
 /**
   * A server object representing the one-landmass planets as well as the individual subterranean caverns.<br>
   * <br>

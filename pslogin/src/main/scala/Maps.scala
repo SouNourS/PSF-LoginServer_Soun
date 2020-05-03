@@ -66,7 +66,6 @@ object Maps {
   Projectiles(map12)
   Projectiles(map13)
 
-
   val map14 = new ZoneMap("map14") {
     Projectiles(this)
   }

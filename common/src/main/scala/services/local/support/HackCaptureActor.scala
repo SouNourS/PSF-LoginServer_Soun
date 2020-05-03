@@ -70,7 +70,6 @@ class HackCaptureActor extends Actor {
 
       // Restart the timer in case the object we just removed was the next one scheduled
       RestartTimer()
-
     case _ => ;
   }
 

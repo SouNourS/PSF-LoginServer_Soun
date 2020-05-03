@@ -4,7 +4,6 @@ package services.chat
 import net.psforever.types.{ChatMessageType, PlanetSideGUID}
 
 object ChatResponse {
-
   sealed trait Response
 
   final case class Local(sender : String, messageType : ChatMessageType.Value, wideContents : Boolean, recipient : String, contents : String, note : Option[String]) extends Response
