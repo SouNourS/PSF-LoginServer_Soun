@@ -2130,7 +2130,6 @@ class WorldSessionActor extends Actor
         case 2 => Vector3(0, 0, 0) //SW
         case 3 => Vector3(0, 8192, 0) //NW
       }
-      player.FirstLoad = true
       LoadClassicDefault(player)
       LoadDataBaseLoadouts(player).onComplete {
         case _ =>
@@ -9151,85 +9150,6 @@ class WorldSessionActor extends Actor
     * @see `Vehicles.ReloadAccessPermissions`
     */
   def AvatarCreate() : Unit = {
-//    if (player.FirstLoad) {
-//      var posXTemp : Float = -1
-//      var posYTemp : Float = -1
-//      continent.LivePlayers
-//        .filter(tplayer => { tplayer.Faction == player.Faction })
-//        .foreach(char => {
-//          if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
-//          else posXTemp = char.Position.x
-//          if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
-//          else posYTemp = char.Position.y
-//        })
-//      if(posXTemp == -1) {
-//        continent.LivePlayers
-//          .filter(tplayer => { tplayer.Faction != player.Faction })
-//          .foreach(char => {
-//            if(posXTemp != -1)  posXTemp = (posXTemp + char.Position.x) / 2
-//            else posXTemp = char.Position.x
-//            if(posYTemp != -1)  posYTemp = (posYTemp + char.Position.y) / 2
-//            else posYTemp = char.Position.y
-//          })
-//      }
-//      if(posXTemp != -1) player.Position = Vector3(posXTemp, posYTemp, 0f)
-//
-//      {
-//        //        val buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
-//        var buildingTypeSet = Set(StructureType.Facility, StructureType.Tower, StructureType.Building)
-//        if (continent.Id == "home1" | continent.Id == "home2" | continent.Id == "home3") buildingTypeSet = Set(StructureType.Facility, StructureType.Building)
-//        continent.SpawnGroups()
-//          .filter({ case ((building, _)) =>
-//            building.Faction == player.Faction &&
-//              buildingTypeSet.contains(building.BuildingType)
-//          })
-//          .toSeq
-//          .sortBy({ case ((building, _)) =>
-//            Vector3.DistanceSquared(player.Position, building.Position.xy)
-//          })
-//          .headOption match {
-//          case None | Some((_, Nil)) =>
-//            None
-//          case Some((_, tubes)) =>
-//            Some(tubes)
-//        }
-//      } match {
-//        case Some(List(tube)) =>
-//          player.Position = tube.Position + Vector3(0, 0, 1.5f)
-//          player.Orientation = tube.Orientation + Vector3(0, 0, 90f)
-//
-//        case Some(tubes) =>
-//          player.Position = tubes.head.Position + Vector3(0, 0, 1.5f)
-//          player.Orientation = tubes.head.Orientation + Vector3(0, 0, 90f)
-//
-//        case None =>
-//          log.info("WTF?!")
-//          noSpawnPointHere = true
-//        //z4
-//        //          if (player.Faction == PlanetSideEmpire.TR) {
-//        //            player.Position = Vector3(903f, 5508f, 88f)
-//        //            player.Orientation = Vector3(0f, 354.375f, 157.5f)
-//        //          } else if (player.Faction == PlanetSideEmpire.NC) {
-//        //            player.Position = Vector3(3091f, 2222f, 86f)
-//        //            player.Orientation = Vector3(0f, 0f, 129.375f)
-//        //          } else if (player.Faction == PlanetSideEmpire.VS) {
-//        //            player.Position = Vector3(6579f, 4616f, 61f)
-//        //            player.Orientation = Vector3(0f, 354.375f, 264.375f)
-//        //          }
-//        //z8
-//        //          if (player.Faction == PlanetSideEmpire.TR) {
-//        //            player.Position = Vector3(2285f, 3403f, 68f)
-//        //            player.Orientation = Vector3(0f, 357.375f, 50.5f)
-//        //          } else if (player.Faction == PlanetSideEmpire.NC) {
-//        //            player.Position = Vector3(4719f, 5413f, 69f)
-//        //            player.Orientation = Vector3(0f, 357f, 177.375f)
-//        //          } else if (player.Faction == PlanetSideEmpire.VS) {
-//        //            player.Position = Vector3(3989f, 2241f, 72f)
-//        //            player.Orientation = Vector3(0f, 348.375f, 101.375f)
-//        //          }
-//      }
-//      player.FirstLoad = false
-//    }
     val health = player.Health
     val armor = player.Armor
     val stamina = player.Stamina
