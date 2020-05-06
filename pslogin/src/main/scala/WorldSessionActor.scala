@@ -1078,6 +1078,7 @@ class WorldSessionActor extends Actor
               obj.Router = routerGUID //necessary; forwards link to the router
               DeployableBuildActivity(obj)
               CommonDestroyConstructionItem(tool, index)
+              StopBundlingPackets()
               //it takes 60s for the telepad to become properly active
               continent.LocalEvents ! LocalServiceMessage.Telepads(RouterTelepadActivation.AddTask(obj, continent))
             }
