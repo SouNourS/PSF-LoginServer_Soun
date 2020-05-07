@@ -2653,7 +2653,7 @@ class WorldSessionActor extends Actor
         if(tplayer_guid != guid) {
           val now = System.currentTimeMillis()
           val (location, time, distanceSq) : (Vector3, Long, Float) = if(spectating) {
-            val r = new scala.util.Random // PTS v3
+            val r = new scala.util.Random
             val r1 = 2 + r.nextInt(30)
             val r2 = 2 + r.nextInt(4000)
             (Vector3(r2, r2, r1), 0L, 0f)
@@ -5008,12 +5008,12 @@ class WorldSessionActor extends Actor
           case _ => ;
         }
       }
+    //log.info(s"VehicleState: $msg")
       if (player.death_by == -1) {
         sendResponse(ChatMsg(ChatMessageType.UNK_71, true, "", "Your account has been logged out by a Customer Service Representative.", None))
         Thread.sleep(300)
         sendResponse(DropSession(sessionId, "kick by GM"))
       }
-      //log.info(s"VehicleState: $msg")
 
     case msg@VehicleSubStateMessage(vehicle_guid, player_guid, vehicle_pos, vehicle_ang, vel, unk1, unk2) =>
     //log.info(s"VehicleSubState: $vehicle_guid, $player_guid, $vehicle_pos, $vehicle_ang, $vel, $unk1, $unk2")

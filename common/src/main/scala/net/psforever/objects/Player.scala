@@ -55,7 +55,6 @@ class Player(private val core : Avatar) extends PlanetSideServerObject
 
   Continent = "home2" //the zone id
 
-  // PTS v3
   var spectator : Boolean = false
   var silenced : Boolean = false
   var death_by : Int = 0
