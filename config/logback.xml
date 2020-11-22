@@ -26,17 +26,24 @@
       <pattern>%date{ISO8601} [%thread] %5level "%X" %logger{35} - %msg%n</pattern>
     </encoder>
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-      <level>OFF</level>
-      <!--<level>TRACE</level>-->
+        <level>OFF</level>
+        <!--<level>TRACE</level>-->
+    </filter>
+  </appender>
+
+  <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
     </filter>
   </appender>
 
   <root level="TRACE">
-    <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILE-TRACE" />
-    <appender-ref ref="FILE-DEBUG" />
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE-TRACE"/>
+    <appender-ref ref="FILE-DEBUG"/>
+    <appender-ref ref="Sentry"/>
   </root>
 
   <!-- Logger specific overrides -->
-  <logger name="com.github.mauricio.async" level="OFF"/>
+  <logger name="oshi" level="OFF"/>
 </configuration>

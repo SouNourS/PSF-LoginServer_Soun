@@ -8,9 +8,14 @@ out/
 *.iws
 *.ipr
 *.iml
+.bloop
+.metals
+project/metals.sbt
+/docs
+.vscode
 
 # User configs
-config/worldserver.ini
+config/psforever.conf
 
 # Log files
 *.log
